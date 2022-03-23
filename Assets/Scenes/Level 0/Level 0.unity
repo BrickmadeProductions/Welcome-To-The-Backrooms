@@ -151,9 +151,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2020864274
+--- !u!1 &1687548990
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -161,64 +161,55 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2020864276}
-  - component: {fileID: 2020864275}
+  - component: {fileID: 1687548992}
+  - component: {fileID: 1687548991}
   m_Layer: 0
-  m_Name: Generator
+  m_Name: MapGen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
+  m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2020864275
+--- !u!114 &1687548991
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2020864274}
+  m_GameObject: {fileID: 1687548990}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7ed2d6bd42df37647905eb449fbfc749, type: 3}
+  m_Script: {fileID: 11500000, guid: ac2cf0a5bb282784d85a1505c42a66e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gen_enabled: 1
-  entities: []
-  isLoadingChunks: 0
-  currentRoomNumber: 0
-  currentChunkNumber: 0
-  chunks: []
-  chunkDimensions: 5
-  viewDistance: 4
-  roomSize: 3.5
-  roomHeight: 5
-  oldPlayerChunkLocation: {x: 0, y: 0}
-  wall: {fileID: 6542349369525237753, guid: a10625d36d7b1e049ae10c3f715b1de5, type: 3}
-  floor: {fileID: 2959565249353865977, guid: 9a42a5e595b2a9d4ab165bf92bf7cf1d, type: 3}
-  ceilings:
-  - {fileID: 4172094681314513827, guid: 0d0f4d67897cd474fbe416e3e4557f41, type: 3}
-  - {fileID: 216508584417294522, guid: 9934aba765a894346ab7cdd7360da36c, type: 3}
-  - {fileID: 3379445275204148831, guid: 83179440feee54942b207b8db1eca085, type: 3}
-  exit: {fileID: 7361993401778087727, guid: eda69e3b3b78c2f45aa30a5984ea05ae, type: 3}
-  extraWalls:
-  - {fileID: 4140087585826680394, guid: bf7fccb46ccbe3b44b1a723507f4947b, type: 3}
-  - {fileID: 4612319930834085839, guid: 07e6f5f3c7a5eb24a8c71f5a32517bae, type: 3}
-  - {fileID: 1150824116968180064, guid: 22fc03ad6ae965e4e99b6fcef70a692d, type: 3}
-  - {fileID: 4529826254639836436, guid: dfea3f8d4fc76e544b7f90971af972aa, type: 3}
-  props:
-  - {fileID: 241230107268624177, guid: a6d82421082750949b31f75449e3460d, type: 3}
-  - {fileID: 8858197199751230024, guid: b95df38760cc2404ab6833f6a42b6266, type: 3}
---- !u!4 &2020864276
+  RenderPoint: {fileID: 6386412001995166109, guid: 92e30b2a1295f514b8e45a8d42dc3bbe, type: 3}
+  seed: 3512
+  prefab_North: {fileID: 8200912594904982171, guid: ceec923753edb414aa09a2facda71e41, type: 3}
+  prefab_South: {fileID: 592779262607433856, guid: e52212ca8db524942b16bcee87ec0c85, type: 3}
+  prefab_East: {fileID: 8209230494130185599, guid: 53cc790fa15f0ba44a8a286ff24b1b3e, type: 3}
+  prefab_West: {fileID: 7437542324044909286, guid: fd7e58e6fe22bb14b8c995719eea06f4, type: 3}
+  prefab_None: {fileID: 1925617705699131216, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
+  prefab_North_Small: {fileID: 3538774736414512545, guid: 1b2293206e14f2e4a9242e568af4a310, type: 3}
+  prefab_South_Small: {fileID: 7208132867317714789, guid: 32ef2ea7779220d4f8343f31c0d02b11, type: 3}
+  prefab_East_Small: {fileID: 8260620524050597874, guid: f3f6da2b9ae67a74c93993586f346bac, type: 3}
+  prefab_West_Small: {fileID: 3932920042542064116, guid: 09a3cc5c0463b434f8d446c1ea0f136d, type: 3}
+  map_width: 32
+  map_height: 32
+  magnification: 1.1
+  size: 5.5
+  x_offset: -16
+  y_offset: -16
+--- !u!4 &1687548992
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2020864274}
+  m_GameObject: {fileID: 1687548990}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 4, z: 0}
+  m_LocalScale: {x: 50, y: 50, z: 50}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
