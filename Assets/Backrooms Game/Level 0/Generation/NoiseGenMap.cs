@@ -13,22 +13,8 @@ public class NoiseGenMap : MonoBehaviour
     //tile types
     Dictionary<int, GameObject> tileset;
     Dictionary<int, GameObject> tile_groups;
-    public GameObject prefab_North;
-    public GameObject prefab_South;
-    public GameObject prefab_East;
-    public GameObject prefab_West;
-    public GameObject prefab_None;
-    public GameObject prefab_North_Small;
-    public GameObject prefab_South_Small;
-    public GameObject prefab_East_Small;
-    public GameObject prefab_West_Small;
 
-    public GameObject prefab_Item_Chair;
-    public GameObject prefab_Item_Water;
-    public GameObject prefab_Item_Box;
-
-    public GameObject prefab_EntitySpawn;
-
+    public List<GameObject> Tiles;
 
     public int map_width;
     public int map_height;
@@ -44,6 +30,10 @@ public class NoiseGenMap : MonoBehaviour
 
     public int x_offset; // <- +>
     public int y_offset; // v- +^
+
+
+
+    private int RoomId;
 
     void Start()
     {
@@ -64,6 +54,8 @@ public class NoiseGenMap : MonoBehaviour
 
         tileset = new Dictionary<int, GameObject>();
         //Repeat tiles to spawn more
+
+        /**
         tileset.Add(0, prefab_None);
         tileset.Add(1, prefab_None);
         tileset.Add(2, prefab_None);
@@ -81,6 +73,18 @@ public class NoiseGenMap : MonoBehaviour
         tileset.Add(14, prefab_Item_Water);
         tileset.Add(15, prefab_Item_Box);
         tileset.Add(16, prefab_EntitySpawn);
+        **/
+
+
+
+
+        for (int Id = 0; Id < Tiles.Count;  Id++)
+        {
+            tileset.Add(Id, Tiles[Id]);
+        }
+
+
+
     }
 
     void CreateTileGroups()
@@ -151,4 +155,5 @@ public class NoiseGenMap : MonoBehaviour
 
         tile_grid[x].Add(tile);
     }
+
 }
