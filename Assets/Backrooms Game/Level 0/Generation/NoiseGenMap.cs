@@ -8,7 +8,7 @@ public class NoiseGenMap : MonoBehaviour
     public GameObject RenderPoint;
 
     //perlin seed
-    public float seed;
+    public int seed;
 
     //tile types
     Dictionary<int, GameObject> tileset;
@@ -22,6 +22,12 @@ public class NoiseGenMap : MonoBehaviour
     public GameObject prefab_South_Small;
     public GameObject prefab_East_Small;
     public GameObject prefab_West_Small;
+
+    public GameObject prefab_Item_Chair;
+    public GameObject prefab_Item_Water;
+    public GameObject prefab_Item_Box;
+
+    public GameObject prefab_EntitySpawn;
 
 
     public int map_width;
@@ -46,6 +52,11 @@ public class NoiseGenMap : MonoBehaviour
         GenerateMap();
     }
 
+    void Update()
+    {
+
+    }
+
     void CreateTileset()
     {
         /** Collect and assign ID codes to the tile prefabs, for ease of access.
@@ -54,14 +65,22 @@ public class NoiseGenMap : MonoBehaviour
         tileset = new Dictionary<int, GameObject>();
         //Repeat tiles to spawn more
         tileset.Add(0, prefab_None);
-        tileset.Add(1, prefab_North);
-        tileset.Add(2, prefab_South);
-        tileset.Add(3, prefab_East);
-        tileset.Add(4, prefab_West);
-        tileset.Add(5, prefab_North_Small);
-        tileset.Add(6, prefab_South_Small);
-        tileset.Add(7, prefab_East_Small);
-        tileset.Add(8, prefab_West_Small);
+        tileset.Add(1, prefab_None);
+        tileset.Add(2, prefab_None);
+        tileset.Add(3, prefab_None);
+        tileset.Add(4, prefab_None);
+        tileset.Add(5, prefab_North);
+        tileset.Add(6, prefab_South);
+        tileset.Add(7, prefab_East);
+        tileset.Add(8, prefab_West);
+        tileset.Add(9, prefab_North_Small);
+        tileset.Add(10, prefab_South_Small);
+        tileset.Add(11, prefab_East_Small);
+        tileset.Add(12, prefab_West_Small);
+        tileset.Add(13, prefab_Item_Chair);
+        tileset.Add(14, prefab_Item_Water);
+        tileset.Add(15, prefab_Item_Box);
+        tileset.Add(16, prefab_EntitySpawn);
     }
 
     void CreateTileGroups()
@@ -83,7 +102,6 @@ public class NoiseGenMap : MonoBehaviour
     {
         /** Generate a 2D grid using the Perlin noise fuction, storing it as
             both raw ID values and tile gameobjects **/
-
         for (int x = 0; x < map_width; x++)
         {
             noise_grid.Add(new List<int>());
@@ -103,10 +121,10 @@ public class NoiseGenMap : MonoBehaviour
         /** Using a grid coordinate input, generate a Perlin noise value to be
             converted into a tile ID code. Rescale the normalised Perlin value
             to the number of tiles available. **/
-
+        System.Random prng = new System.Random(seed);
         float raw_perlin = Mathf.PerlinNoise(
-            (x - x_offset) / magnification,
-            (y - y_offset) / magnification
+            (prng.Next(-100000, 100000) + x - x_offset) / magnification,
+            (prng.Next(-100000, 100000) + y - y_offset) / magnification
         );
         float clamp_perlin = Mathf.Clamp01(raw_perlin);
         float scaled_perlin = clamp_perlin * tileset.Count;
