@@ -32,10 +32,16 @@ public class PlayerController : MonoBehaviour
 
     //player parts
     public Camera playerCamera;
+    public GameObject InvCamera;
+    public GameObject MainCamera;
     public GameObject head;
     public GameObject feet;
     public GameObject death;
     Transform ogHeadTrans;
+
+    Transform Invfrom;
+    Transform Invto;
+    float InvLerpSpeed = 0.01f;
 
     //breathing
     public AudioClip breathingNormal;
@@ -95,6 +101,9 @@ public class PlayerController : MonoBehaviour
     public Vector3 velocity = Vector3.zero;
    
     public bool pauseMenuOpen = false;
+    public bool inventoryOpen = false;
+
+    private Transform InvTempCameraTrans;
 
     //ui
     public Canvas UI;
@@ -152,14 +161,14 @@ public class PlayerController : MonoBehaviour
 
                 if (Input.GetButton("Crouch"))
                 {
-                   
+
                     head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition - new Vector3(0, 10, 0), Time.deltaTime);
-                   
+
 
                 }
                 else
                 {
-                    
+
 
                     head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition, Time.deltaTime);
 
@@ -169,7 +178,6 @@ public class PlayerController : MonoBehaviour
 
             }
         }
-
 
     }
 
@@ -184,6 +192,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        
         if (playerHealth.health <= 0.0f || playerHealth.sanity <= 0.0f)
         {
             die();
@@ -193,7 +202,7 @@ public class PlayerController : MonoBehaviour
         //holding system//
         //==============//
 
-        
+
 
         //pickup
         if (holding == null && Input.GetButton("Grab"))
@@ -211,6 +220,38 @@ public class PlayerController : MonoBehaviour
                 }
             }
 
+        }
+
+        //Inventory
+        if (Input.GetButtonDown("Inventory"))
+        {
+            if (!inventoryOpen && characterController.isGrounded && currentPlayerState == PLAYERSTATES.IDLE)
+            {
+                inventoryOpen = true;
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = true;
+                Debug.Log("Inventory- Player Mouse Unlocked");
+                currentPlayerState = PLAYERSTATES.IMMOBILE;
+
+            }
+            else if (inventoryOpen)
+            {
+                inventoryOpen = false;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                Debug.Log("Inventory- Player Mouse locked");
+                currentPlayerState = PLAYERSTATES.IDLE;
+
+            }
+        }
+        //Lerp
+        if (inventoryOpen)
+        {
+            playerCamera.transform.rotation = Quaternion.Lerp(playerCamera.transform.rotation, Quaternion.Euler(InvCamera.transform.rotation.x, 0, InvCamera.transform.rotation.z), Time.time * InvLerpSpeed);
+        }
+        else if (!inventoryOpen && currentPlayerState == PLAYERSTATES.IDLE)
+        {
+            playerCamera.transform.rotation = Quaternion.Lerp(playerCamera.transform.rotation, MainCamera.transform.rotation, Time.time * InvLerpSpeed);
         }
 
         //throw
@@ -294,7 +335,7 @@ public class PlayerController : MonoBehaviour
 
 
         // Player and Camera rotation
-        if (!dead && Cursor.lockState != CursorLockMode.None)
+        if (!inventoryOpen && !dead && Cursor.lockState != CursorLockMode.None)
         {
             
             if (currentPlayerState != PLAYERSTATES.IMMOBILE)
@@ -585,11 +626,13 @@ public class PlayerController : MonoBehaviour
             currentPlayerState = PLAYERSTATES.IMMOBILE;
 
             playerHealth.canWalk = false;
+            playerHealth.canJump = false;
         }
         if (playerHealth.stamina >= 50)
         {
             playerHealth.canRun = true;
             playerHealth.canWalk = true;
+            playerHealth.canJump = true;
 
         }
 

@@ -22,7 +22,7 @@ public class InventorySystem : MonoBehaviour
     //each item has a specific type of way it is crafted, such as pouring bottles into eachother
 
 
-    int inventoryLimit = 2;
+    int inventoryLimit = 5;
     int currentSelectedInventorySlot = 0;
     List<HoldableObject> inventorySlots;
     HoldableObject currentlyLookingAt;
@@ -74,6 +74,7 @@ public class InventorySystem : MonoBehaviour
             }
         }
 
+        //if (Input.GetButtonDown("Drop") && inventorySlots.Count > 0)
         if (Input.GetButtonDown("Drop") && inventorySlots.Count > 0)
         {
 
