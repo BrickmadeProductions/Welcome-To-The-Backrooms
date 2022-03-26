@@ -42,42 +42,11 @@ public class NoiseGenMap : MonoBehaviour
         GenerateMap();
     }
 
-    void Update()
-    {
-
-    }
-
     void CreateTileset()
     {
-        /** Collect and assign ID codes to the tile prefabs, for ease of access.
-            Best ordered to match land elevation. **/
+        /** Collect and assign ID codes to the tile prefabs, Tiles first on list spawn more often. **/
 
         tileset = new Dictionary<int, GameObject>();
-        //Repeat tiles to spawn more
-
-        /**
-        tileset.Add(0, prefab_None);
-        tileset.Add(1, prefab_None);
-        tileset.Add(2, prefab_None);
-        tileset.Add(3, prefab_None);
-        tileset.Add(4, prefab_None);
-        tileset.Add(5, prefab_North);
-        tileset.Add(6, prefab_South);
-        tileset.Add(7, prefab_East);
-        tileset.Add(8, prefab_West);
-        tileset.Add(9, prefab_North_Small);
-        tileset.Add(10, prefab_South_Small);
-        tileset.Add(11, prefab_East_Small);
-        tileset.Add(12, prefab_West_Small);
-        tileset.Add(13, prefab_Item_Chair);
-        tileset.Add(14, prefab_Item_Water);
-        tileset.Add(15, prefab_Item_Box);
-        tileset.Add(16, prefab_EntitySpawn);
-        **/
-
-
-
-
         for (int Id = 0; Id < Tiles.Count;  Id++)
         {
             tileset.Add(Id, Tiles[Id]);
