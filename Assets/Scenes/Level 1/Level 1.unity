@@ -123,7 +123,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &1375214796
+--- !u!1 &757962599
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -131,49 +131,45 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1375214798}
-  - component: {fileID: 1375214797}
+  - component: {fileID: 757962601}
+  - component: {fileID: 757962600}
   m_Layer: 0
-  m_Name: Generator
+  m_Name: MapGen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
+  m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1375214797
+--- !u!114 &757962600
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1375214796}
+  m_GameObject: {fileID: 757962599}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3310422cd027fcb49b1cce33ec63c3d3, type: 3}
+  m_Script: {fileID: 11500000, guid: f526dec6b7a08294799fe1d44fe969b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gen_enabled: 1
-  entities: []
-  isLoadingChunks: 0
-  currentRoomNumber: 0
-  currentChunkNumber: 0
-  chunks: []
-  chunkDimensions: 2
-  viewDistance: 2
-  roomSize: 18
-  roomHeight: 5
-  oldPlayerChunkLocation: {x: 0, y: 0}
-  tiles:
-  - {fileID: 7998624537947542715, guid: bdd7dab7f277f41488b4bac91ee7da2d, type: 3}
-  - {fileID: 4855249649811740588, guid: 656046148eeddd34a80f0c01a293813d, type: 3}
-  - {fileID: 8789830966879540354, guid: c2628e9703192d844985d2f2ee75dccf, type: 3}
---- !u!4 &1375214798
+  RenderPoint: {fileID: 0}
+  seed: 2147483647
+  Tiles:
+  - {fileID: 2742877344155858628, guid: 3224c6715fba5214c9b783cb84f79a4f, type: 3}
+  - {fileID: 6158096400222259811, guid: a3f11e5f279fd1e44a6066050f64b1c5, type: 3}
+  map_width: 20
+  map_height: 20
+  magnification: 1.1
+  size: 20.5
+  x_offset: -10
+  y_offset: -10
+--- !u!4 &757962601
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1375214796}
+  m_GameObject: {fileID: 757962599}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
