@@ -10,11 +10,19 @@ public class HoldableObject : MonoBehaviour
     public AudioClip[] hitGroundClips;
 
     public GameObject breakablePrefab;
+    bool playSounds = false;
     
     // Start is called before the first frame update
     void Awake()
     {
         holdableObject = GetComponent<Rigidbody>();
+        StartCoroutine("waitToPlaySound");
+    }
+
+    IEnumerator waitToPlaySound()
+    {
+        yield return new WaitForSeconds(2);
+        playSounds = true;
     }
     public void Throw(Vector3 force)
     {
@@ -25,6 +33,7 @@ public class HoldableObject : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+
         Debug.Log(collision.relativeVelocity.magnitude);
         if (collision.gameObject.tag == "Player")
         {
@@ -36,7 +45,7 @@ public class HoldableObject : MonoBehaviour
         }
         else
         {
-            if (transform.gameObject.GetComponent<AudioSource>() != null)
+            if (transform.gameObject.GetComponent<AudioSource>() != null && playSounds)
             {
                 if (!transform.gameObject.GetComponent<AudioSource>().isPlaying)
                 {
