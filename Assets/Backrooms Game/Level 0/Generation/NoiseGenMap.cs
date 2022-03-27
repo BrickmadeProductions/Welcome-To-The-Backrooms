@@ -4,23 +4,28 @@ using UnityEngine;
 
 public class NoiseGenMap : MonoBehaviour
 {
-    //point to loat chuncks around
-    public GameObject RenderPoint;
+
+    //chunk data 
+    public bool loaded;
+    public int id;
+    public float posX;
+    public float posZ;
 
     //perlin seed
     public int seed;
 
     //tile types
     Dictionary<int, GameObject> tileset;
-    Dictionary<int, GameObject> tile_groups;
+    //Dictionary<int, GameObject> tile_groups;
 
     public List<GameObject> Tiles;
 
-    public int map_width;
-    public int map_height;
+    int chunk_width;
+    int chunk_height;
 
-    List<List<int>> noise_grid = new List<List<int>>();
-    List<List<GameObject>> tile_grid = new List<List<GameObject>>();
+    List<List<int>> noise_grid;
+
+    List<List<GameObject>> tile_grid;
 
     //how often tiles spawn ajason to eachother
     public float magnification;
@@ -31,20 +36,64 @@ public class NoiseGenMap : MonoBehaviour
     public int x_offset; // <- +>
     public int y_offset; // v- +^
 
-
-
     private int RoomId;
+
+    public void SetChunkVariables(float posX, float posZ, int id, int width, int height)
+    {
+        loaded = true;
+        this.id = id;
+        this.posX = posX;
+        this.posZ = posZ;
+        this.chunk_width = width;
+        this.chunk_height = height;
+    }
 
     void Start()
     {
+        noise_grid = new List<List<int>>();
+
+        tile_grid = new List<List<GameObject>>();
+
+        seed = Random.Range(-2147483648, 2147483647);
+
+        loaded = true;
         CreateTileset();
         CreateTileGroups();
         GenerateMap();
+
+        
+
     }
 
+    /*
     void Update()
     {
+        
+    }
+    */
 
+    internal void UnLoad()
+    {
+
+        loaded = false;
+
+        gameObject.SetActive(false);
+
+    }
+
+
+    internal void Load()
+    {
+
+        loaded = true;
+
+        gameObject.SetActive(true);
+
+    }
+
+    internal void Delete()
+    {
+        Destroy(gameObject);
     }
 
     void CreateTileset()
@@ -54,26 +103,6 @@ public class NoiseGenMap : MonoBehaviour
 
         tileset = new Dictionary<int, GameObject>();
         //Repeat tiles to spawn more
-
-        /**
-        tileset.Add(0, prefab_None);
-        tileset.Add(1, prefab_None);
-        tileset.Add(2, prefab_None);
-        tileset.Add(3, prefab_None);
-        tileset.Add(4, prefab_None);
-        tileset.Add(5, prefab_North);
-        tileset.Add(6, prefab_South);
-        tileset.Add(7, prefab_East);
-        tileset.Add(8, prefab_West);
-        tileset.Add(9, prefab_North_Small);
-        tileset.Add(10, prefab_South_Small);
-        tileset.Add(11, prefab_East_Small);
-        tileset.Add(12, prefab_West_Small);
-        tileset.Add(13, prefab_Item_Chair);
-        tileset.Add(14, prefab_Item_Water);
-        tileset.Add(15, prefab_Item_Box);
-        tileset.Add(16, prefab_EntitySpawn);
-        **/
 
 
 
@@ -92,26 +121,28 @@ public class NoiseGenMap : MonoBehaviour
         /** Create empty gameobjects for grouping tiles of the same type, ie
             South tiles **/
 
-        tile_groups = new Dictionary<int, GameObject>();
-        foreach (KeyValuePair<int, GameObject> prefab_pair in tileset)
+        //tile_groups = new Dictionary<int, GameObject>();
+
+        /*foreach (KeyValuePair<int, GameObject> prefab_pair in tileset)
         {
             GameObject tile_group = new GameObject(prefab_pair.Value.name);
             tile_group.transform.parent = gameObject.transform;
             tile_group.transform.localPosition = new Vector3(0, 0, 0);
+
             tile_groups.Add(prefab_pair.Key, tile_group);
-        }
+        }*/
     }
 
     void GenerateMap()
     {
         /** Generate a 2D grid using the Perlin noise fuction, storing it as
             both raw ID values and tile gameobjects **/
-        for (int x = 0; x < map_width; x++)
+        for (int x = 0; x < chunk_width; x++)
         {
             noise_grid.Add(new List<int>());
             tile_grid.Add(new List<GameObject>());
 
-            for (int y = 0; y < map_height; y++)
+            for (int y = 0; y < chunk_height; y++)
             {
                 int tile_id = GetIdUsingPerlin(x, y);
                 noise_grid[x].Add(tile_id);
@@ -147,8 +178,9 @@ public class NoiseGenMap : MonoBehaviour
             tiles, set it's position and store the gameobject. **/
 
         GameObject tile_prefab = tileset[tile_id];
-        GameObject tile_group = tile_groups[tile_id];
-        GameObject tile = Instantiate(tile_prefab, tile_group.transform);
+        //GameObject tile_group = tile_groups[tile_id];
+        //GameObject tile = Instantiate(tile_prefab, tile_group.transform);
+        GameObject tile = Instantiate(tile_prefab, gameObject.transform);
 
         tile.name = string.Format("tile_x{0}_y{1}", x, y);
         tile.transform.localPosition = new Vector3(x * size, 0, y * size);

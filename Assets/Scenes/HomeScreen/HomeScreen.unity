@@ -657,12 +657,66 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1747151323}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1, y: 2, z: -1}
+  m_LocalPosition: {x: -1, y: 3, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 687722733}
   m_Father: {fileID: 0}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1951733791
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1951733793}
+  - component: {fileID: 1951733792}
+  m_Layer: 0
+  m_Name: Generator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1951733792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1951733791}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c30f24938df0694f8cd27203dbe755b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gen_enabled: 1
+  entities: []
+  isLoadingChunks: 0
+  currentRoomNumber: 0
+  currentChunkNumber: 0
+  oldPlayerChunkLocation: {x: 0, y: 0}
+  level_chunkGenerator: {fileID: 4220195989476646319, guid: 9ab378b3d88ac5d419748053541cb829, type: 3}
+  chunk_width: 4
+  chunk_height: 4
+  chunks: []
+  viewDistance: 3
+--- !u!4 &1951733793
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1951733791}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 8.861799, y: -7.014021, z: 3.830824}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2061345879
 GameObject:
@@ -781,7 +835,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2100224719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -799,12 +853,12 @@ MonoBehaviour:
   isLoadingChunks: 0
   currentRoomNumber: 0
   currentChunkNumber: 0
-  chunks: []
-  chunkDimensions: 5
-  viewDistance: 3
-  roomSize: 3.5
-  roomHeight: 5
   oldPlayerChunkLocation: {x: 0, y: 0}
+  level_chunkGenerator: {fileID: 0}
+  chunk_width: 0
+  chunk_height: 0
+  chunks: []
+  viewDistance: 3
   wall: {fileID: 6542349369525237753, guid: a10625d36d7b1e049ae10c3f715b1de5, type: 3}
   floor: {fileID: 2959565249353865977, guid: 9a42a5e595b2a9d4ab165bf92bf7cf1d, type: 3}
   ceilings:

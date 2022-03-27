@@ -15,7 +15,7 @@ public class Level2 : InfLevelGenerator
     {
         base.UpdateChunks();
     }
-    protected override void GenerateRoom(float x, float z, int roomNumber, Chunk parentChunk)
+    /*protected override void GenerateRoom(float x, float z, int roomNumber, Chunk parentChunk)
     {
 
         float roomX, roomY;
@@ -32,7 +32,7 @@ public class Level2 : InfLevelGenerator
 
         Instantiate(tiles[0], location, Quaternion.identity, roomContainer.transform);
 
-        /*if (value <= 1f && value > 0.5f)
+        *//*if (value <= 1f && value > 0.5f)
         {
             
         }*/
@@ -43,7 +43,7 @@ public class Level2 : InfLevelGenerator
         else
         {
             Instantiate(tiles[2], location, rotations[UnityEngine.Random.Range(0, 4)], roomContainer.transform);
-        }*/
+        }*//*
 
 
         roomContainer.transform.position = new Vector3(x, 0, z);
@@ -54,9 +54,9 @@ public class Level2 : InfLevelGenerator
 
 
 
-    }
+    }*/
 
-    protected override bool GenerateChunk(int chunkX, int chunkZ, int chunkIndex)
+    /*protected override bool GenerateChunk(int chunkX, int chunkZ, int chunkIndex)
     {
 
         if (!IsChunkGeneratedAtPosition(chunkX, chunkZ))
@@ -90,7 +90,7 @@ public class Level2 : InfLevelGenerator
         }
 
 
-    }
+    }*/
 
 
 

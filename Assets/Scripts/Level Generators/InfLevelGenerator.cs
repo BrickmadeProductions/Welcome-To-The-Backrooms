@@ -6,36 +6,47 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEditor;
 using UnityEngine;
 
-public abstract class InfLevelGenerator : MonoBehaviour
+public class InfLevelGenerator : MonoBehaviour
 {
     public bool gen_enabled;
 
     public List<Entity> entities;
     public Dictionary<Vector3, Entity> entitiesInScene;
 
-    public bool isLoadingChunks = false; 
+    [HideInInspector]
+    public bool isLoadingChunks = false;
 
+    [HideInInspector]
     public int currentRoomNumber;
+
+    [HideInInspector]
     public int currentChunkNumber;
 
+    [HideInInspector]
+    public Vector2 oldPlayerChunkLocation = Vector2.zero;
+
+    public GameObject level_chunkGenerator;
+
+    public int chunk_width;
+    public int chunk_height;
 
     //chunks can be dynamically added and removed therefore there is no point in making it a 2d array
-    public List<Chunk> chunks;
+    public List<NoiseGenMap> chunks;
 
-    //must be even number
-    public int chunkDimensions;
-
-    [Range(0.0f, 5.0f)]
+    [Range(1.0f, 5.0f)]
     //in chunks
     public int viewDistance;
 
-    public float roomSize;
+    void Awake()
+    {
+        ScriptInit();
+    }
 
-    public float roomHeight;
-
+    void Update()
+    {
+        UpdateChunks();
+    }
     
-
-    public Vector2 oldPlayerChunkLocation = Vector2.zero;
 
     //entity spawning logic
     IEnumerator trySpawnEntites()
@@ -57,10 +68,11 @@ public abstract class InfLevelGenerator : MonoBehaviour
         if (gen_enabled)
         {
             
-            chunks = new List<Chunk>();
+            chunks = new List<NoiseGenMap>();
 
             currentRoomNumber = 0;
             currentChunkNumber = 0;
+
             StartCoroutine(Init());
         }
        
@@ -79,6 +91,7 @@ public abstract class InfLevelGenerator : MonoBehaviour
     {
         //StartCoroutine(trySpawnEntites());
 
+        Debug.Log("Init LEVEL_GEN");
 
         for (int x = -viewDistance; x < viewDistance; x++)
         {
@@ -97,9 +110,9 @@ public abstract class InfLevelGenerator : MonoBehaviour
 
         for (int i = chunks.Count - 1; i >= 0 ; i--)
         {
-            Chunk chunk = chunks[i];
+            NoiseGenMap chunk = chunks[i];
 
-            if (Vector2.Distance(new Vector2(chunk.posX, chunk.posY), new Vector2(GetChunkAtPlayerLocation().posX, GetChunkAtPlayerLocation().posY)) > viewDistance)
+            if (Vector2.Distance(new Vector2(chunk.posX, chunk.posZ), new Vector2(GetChunkAtPlayerLocation().posX, GetChunkAtPlayerLocation().posZ)) > viewDistance)
             {
 
                 
@@ -115,7 +128,7 @@ public abstract class InfLevelGenerator : MonoBehaviour
             {
 
                 
-               //chunk.Load();
+               chunk.Load();
 
 
             }
@@ -125,15 +138,34 @@ public abstract class InfLevelGenerator : MonoBehaviour
 
         
     }
-    protected abstract bool GenerateChunk(int chunkX, int chunkZ, int chunkIndex);
+    bool GenerateChunk(int chunkX, int chunkZ, int chunkIndex)
+    {
+        if (!IsChunkGeneratedAtPosition(chunkX, chunkZ))
+        {
+            GameObject chunk = Instantiate(level_chunkGenerator);
 
-    protected abstract void GenerateRoom(float x, float z, int roomNumber, Chunk parentChunk);
+            chunk.name = chunkX + ", " + chunkZ;
+            chunk.GetComponent<NoiseGenMap>().SetChunkVariables(chunkX, chunkZ, chunkIndex, chunk_width, chunk_height);
+            chunk.transform.position = new Vector3(chunkX * ChunkSize(), 0, chunkZ * ChunkSize());
+
+            chunks.Add(chunk.GetComponent<NoiseGenMap>());
+
+            return true;
+        }
+
+        else
+        {
+            return false;
+        }
+            
+    }
+
     
     //does checks to see if chunks are loaded as well
     void TryGenChunks()
     {
 
-        Vector2 newChunkPlayerLocation = new Vector2(GetChunkAtPlayerLocation().posX, GetChunkAtPlayerLocation().posY);
+        Vector2 newChunkPlayerLocation = new Vector2(GetChunkAtPlayerLocation().posX, GetChunkAtPlayerLocation().posZ);
 
         if (newChunkPlayerLocation != oldPlayerChunkLocation && !isLoadingChunks)
         {
@@ -142,7 +174,7 @@ public abstract class InfLevelGenerator : MonoBehaviour
 
             for (int x = (int)(GetChunkAtPlayerLocation().posX - viewDistance); x < (int)(GetChunkAtPlayerLocation().posX + viewDistance); x++)
             {
-                for (int z = (int)(GetChunkAtPlayerLocation().posY - viewDistance); z < (int)(GetChunkAtPlayerLocation().posY + viewDistance); z++)
+                for (int z = (int)(GetChunkAtPlayerLocation().posZ - viewDistance); z < (int)(GetChunkAtPlayerLocation().posZ + viewDistance); z++)
                 {
                     if (GenerateChunk(x, z, currentChunkNumber))
                         currentChunkNumber++;
@@ -156,7 +188,7 @@ public abstract class InfLevelGenerator : MonoBehaviour
             isLoadingChunks = false;
         }
 
-        oldPlayerChunkLocation = new Vector2(GetChunkAtPlayerLocation().posX, GetChunkAtPlayerLocation().posY);
+        oldPlayerChunkLocation = new Vector2(GetChunkAtPlayerLocation().posX, GetChunkAtPlayerLocation().posZ);
     }
     
 
@@ -172,9 +204,9 @@ public abstract class InfLevelGenerator : MonoBehaviour
 
     public bool IsChunkGeneratedAtPosition(int x, int y)
     {
-        foreach (Chunk c in chunks)
+        foreach (NoiseGenMap c in chunks)
         {
-            if ((int)c.posX == x && (int)c.posY == y)
+            if ((int)c.posX == x && (int)c.posZ == y)
             {
                 return true;
             }
@@ -203,27 +235,30 @@ public abstract class InfLevelGenerator : MonoBehaviour
     }
     public float ChunkSize()
     {
-        return chunkDimensions * 2 * roomSize;
+        return level_chunkGenerator.GetComponent<NoiseGenMap>().size * chunk_width;
     }
-    public Chunk GetChunkAtPlayerLocation()
+    public NoiseGenMap GetChunkAtPlayerLocation()
 
     {
+        
 
-        foreach (Chunk c in chunks)
+        foreach (NoiseGenMap c in chunks)
         {
             
             if (c != null)
                 if (CheckPointIntersection(
 
                     (c.posX * ChunkSize()) - ChunkSize() / 2, 
-                    (c.posY * ChunkSize()) - ChunkSize() / 2,
+                    (c.posZ * ChunkSize()) - ChunkSize() / 2,
 
                     (c.posX * ChunkSize()) + ChunkSize() / 2,
-                    (c.posY * ChunkSize()) + ChunkSize() / 2,
+                    (c.posZ * ChunkSize()) + ChunkSize() / 2,
 
                     GameSettings.Instance.Player.transform.position.x, GameSettings.Instance.Player.transform.position.z))
                 {
+                    Debug.Log(c.posX + ", " + c.posZ);
                     return c;
+                    
                 }
         }
 
@@ -231,38 +266,13 @@ public abstract class InfLevelGenerator : MonoBehaviour
         
     }
 
-
-    Chunk GetChunkAtGlobalLocation(int x, int z)
-
-    {
-        foreach (Chunk c in chunks)
-        {
-
-            if (CheckPointIntersection(
-
-                (c.posX * -ChunkSize()) - ChunkSize() / 2,
-                (c.posY * -ChunkSize()) - ChunkSize() / 2,
-
-                (c.posX * ChunkSize()) + ChunkSize() / 2,
-                (c.posY * ChunkSize()) + ChunkSize() / 2,
-
-                x, z))
-            {
-                return c;
-            }
-        }
-
-        return null;
-
-    }
-
-    Chunk GetChunkAtlLocation(int x, int z)
+    NoiseGenMap GetChunkAtlLocation(int x, int z)
 
     {
-        foreach (Chunk c in chunks)
+        foreach (NoiseGenMap c in chunks)
         {
 
-            if (c.posX == x && c.posY == z)
+            if (c.posX == x && c.posZ == z)
             {
                 return c;
             }
@@ -327,7 +337,7 @@ public abstract class InfLevelGenerator : MonoBehaviour
             while (fileStream.Position != fileStream.Length)
             {
                 Chunk c = (Chunk)bFormatter.Deserialize(fileStream);
-                if (c.posX == chunkPos.x && c.posY == chunkPos.y)
+                if (c.posX == chunkPos.x && c.posZ == chunkPos.y)
                     return c;
             }
         }

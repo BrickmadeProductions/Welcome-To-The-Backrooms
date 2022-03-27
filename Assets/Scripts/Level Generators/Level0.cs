@@ -26,7 +26,7 @@ public class Level0 : InfLevelGenerator
         UpdateChunks();
     }
 
-    protected override void GenerateRoom(float x, float z, int roomNumber, Chunk parentChunk)
+    /*protected override void GenerateRoom(float x, float z, int roomNumber, Chunk parentChunk)
     {
         float roomX, roomY;
 
@@ -235,7 +235,7 @@ public class Level0 : InfLevelGenerator
         }
 
 
-    }
+    }*/
     
 
 }

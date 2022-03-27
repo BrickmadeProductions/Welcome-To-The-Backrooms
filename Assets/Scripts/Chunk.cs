@@ -10,6 +10,7 @@ public class Chunk : MonoBehaviour
     public float posX;
     public float posY;
 
+
     public static Chunk CreateComponent(GameObject where, int id, float posX, float posY)
     {
            
@@ -30,10 +31,6 @@ public class Chunk : MonoBehaviour
 
     }
 
-    internal void Delete()
-    {
-        Destroy(gameObject);
-    }
 
     internal void Load()
     {
