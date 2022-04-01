@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using UnityEditor;
 using UnityEngine;
 
-public class InfLevelGenerator : MonoBehaviour
+public class InfLevel1Gen : MonoBehaviour
 {
     public bool gen_enabled;
 
@@ -46,12 +46,13 @@ public class InfLevelGenerator : MonoBehaviour
     {
         UpdateChunks();
     }
-    
+
 
     //entity spawning logic
     IEnumerator trySpawnEntites()
     {
-        while (true) { 
+        while (true)
+        {
 
             if (UnityEngine.Random.value >= 0.98f && entities != null)
                 Instantiate(entities[0], GameSettings.Instance.Player.transform.position + new Vector3(UnityEngine.Random.Range(-50, 50) + UnityEngine.Random.Range(0, 15), 3, UnityEngine.Random.Range(-50, 50) + UnityEngine.Random.Range(0, 15)), Quaternion.identity);
@@ -59,15 +60,15 @@ public class InfLevelGenerator : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
             Debug.Log("Attempting to spawn entity");
         }
-        
+
     }
     public void ScriptInit()
     {
-       
-        
+
+
         if (gen_enabled)
         {
-            
+
             chunks = new List<NoiseGenMap>();
 
             currentRoomNumber = 0;
@@ -75,8 +76,8 @@ public class InfLevelGenerator : MonoBehaviour
 
             StartCoroutine(Init());
         }
-       
-        
+
+
     }
     IEnumerator Init()
     {
@@ -108,15 +109,16 @@ public class InfLevelGenerator : MonoBehaviour
     public void manageChunkLoading()
     {
 
-        for (int i = chunks.Count - 1; i >= 0 ; i--)
+        for (int i = chunks.Count - 1; i >= 0; i--)
         {
             NoiseGenMap chunk = chunks[i];
 
             if (Vector2.Distance(new Vector2(chunk.posX, chunk.posZ), new Vector2(GetChunkAtPlayerLocation().posX, GetChunkAtPlayerLocation().posZ)) > viewDistance)
             {
 
-                
+
                 //unload from loaded chunks
+                chunk.Save();
                 chunk.UnLoad();
                 chunks.Remove(chunk);
                 chunk.Delete();
@@ -127,8 +129,8 @@ public class InfLevelGenerator : MonoBehaviour
             else
             {
 
-                
-               chunk.Load();
+
+                chunk.Load();
 
 
             }
@@ -136,12 +138,13 @@ public class InfLevelGenerator : MonoBehaviour
 
 
 
-        
+
     }
     bool GenerateChunk(int chunkX, int chunkZ, int chunkIndex)
     {
         if (!IsChunkGeneratedAtPosition(chunkX, chunkZ))
         {
+
             GameObject chunk = Instantiate(level_chunkGenerator);
 
             chunk.name = chunkX + ", " + chunkZ;
@@ -151,16 +154,17 @@ public class InfLevelGenerator : MonoBehaviour
             chunks.Add(chunk.GetComponent<NoiseGenMap>());
 
             return true;
+
+
         }
 
         else
         {
             return false;
         }
-            
+
     }
 
-    
     //does checks to see if chunks are loaded as well
     void TryGenChunks()
     {
@@ -190,11 +194,11 @@ public class InfLevelGenerator : MonoBehaviour
 
         oldPlayerChunkLocation = new Vector2(GetChunkAtPlayerLocation().posX, GetChunkAtPlayerLocation().posZ);
     }
-    
+
 
     public bool randomBoolean()
     {
-        
+
         if (UnityEngine.Random.value >= 0.7)
         {
             return true;
@@ -215,12 +219,12 @@ public class InfLevelGenerator : MonoBehaviour
 
         return false;
 
-            
+
     }
-   
-    
-    
-    
+
+
+
+
     public bool CheckPointIntersection(float x1, float y1, float x2, float y2, float x, float y)
     {
         if (x > x1 && x < x2 && y > y1 && y < y2)
@@ -231,7 +235,7 @@ public class InfLevelGenerator : MonoBehaviour
         {
             return false;
         }
-        
+
     }
     public float ChunkSize()
     {
@@ -240,15 +244,15 @@ public class InfLevelGenerator : MonoBehaviour
     public NoiseGenMap GetChunkAtPlayerLocation()
 
     {
-        
+
 
         foreach (NoiseGenMap c in chunks)
         {
-            
+
             if (c != null)
                 if (CheckPointIntersection(
 
-                    (c.posX * ChunkSize()) - ChunkSize() / 2, 
+                    (c.posX * ChunkSize()) - ChunkSize() / 2,
                     (c.posZ * ChunkSize()) - ChunkSize() / 2,
 
                     (c.posX * ChunkSize()) + ChunkSize() / 2,
@@ -258,12 +262,12 @@ public class InfLevelGenerator : MonoBehaviour
                 {
                     Debug.Log(c.posX + ", " + c.posZ);
                     return c;
-                    
+
                 }
         }
 
         return null;
-        
+
     }
 
     NoiseGenMap GetChunkAtlLocation(int x, int z)
@@ -295,12 +299,12 @@ public class InfLevelGenerator : MonoBehaviour
             if (gen_enabled && chunks.Count > 0)
                 TryGenChunks();
         }
-        
-        
+
+
 
     }
 
-  
+
 
     /*private void OnApplicationQuit()
     {
