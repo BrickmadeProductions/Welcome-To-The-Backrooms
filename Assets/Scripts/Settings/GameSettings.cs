@@ -52,6 +52,7 @@ public class GameSettings : MonoBehaviour
 
     public Texture2D cursor;
 
+    public PostProcessProfile homeScreenRoomProfile;
     public PostProcessProfile homeScreenProfile;
 
     public AudioMixer level0Mixer;
@@ -385,6 +386,21 @@ public class GameSettings : MonoBehaviour
 
         switch (name)
         {
+
+            case "RoomHomeScreen":
+
+
+                post.profile = homeScreenRoomProfile;
+
+                player.transform.GetChild(0).GetComponents<AudioSource>()[1].clip = level0Ambience;
+                player.transform.GetChild(0).GetComponents<AudioSource>()[1].Play();
+
+                player.transform.GetChild(0).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+                player.transform.GetChild(1).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+
+                GameScreen();
+
+                break;
 
             case "Level 0":
 

@@ -403,10 +403,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  durability: 1
   inventoryWeight: 1
   holdableObject: {fileID: 0}
   hitGroundClips:
   - {fileID: 8300000, guid: 4864f038af1762b40a1008058d45dce4, type: 3}
+  breakablePrefab: {fileID: 2209628678019894074, guid: 0d8b2a09f8470a94fb155ac9ca047f6f, type: 3}
 --- !u!82 &2216274278999694209
 AudioSource:
   m_ObjectHideFlags: 0

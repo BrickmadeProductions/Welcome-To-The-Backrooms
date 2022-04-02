@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3035513702425716336}
   - component: {fileID: 869247385304841261}
   - component: {fileID: 4167305873519310594}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Flashlight
   m_TagString: Usable
   m_Icon: {fileID: 0}
@@ -77,9 +77,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27f2c7a2e2f154c4d8fe10de6023a3cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  durability: 0
+  inventoryWeight: 1
   holdableObject: {fileID: 0}
   hitGroundClips:
   - {fileID: 8300000, guid: 4864f038af1762b40a1008058d45dce4, type: 3}
+  breakablePrefab: {fileID: 0}
   emission: {fileID: 0}
   flashLight: {fileID: 7973824011364313189}
 --- !u!82 &869247385304841261
@@ -202,7 +205,7 @@ GameObject:
   - component: {fileID: 2973458890545169746}
   - component: {fileID: 5697920647094347121}
   - component: {fileID: 5574516270933406162}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Case
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -283,7 +286,7 @@ GameObject:
   - component: {fileID: 3340003521954395984}
   - component: {fileID: 4042204522441364772}
   - component: {fileID: 1266423751906663358}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -364,7 +367,7 @@ GameObject:
   - component: {fileID: 7770775769403342155}
   - component: {fileID: 978673347103420644}
   - component: {fileID: 2097175266047530638}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Handle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -444,7 +447,7 @@ GameObject:
   m_Component:
   - component: {fileID: 245303769370126564}
   - component: {fileID: 7973824011364313189}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: RealtimeLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -538,7 +541,7 @@ GameObject:
   - component: {fileID: 9042861530265711819}
   - component: {fileID: 5047792547760338533}
   - component: {fileID: 8892419014444634399}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Switch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -619,7 +622,7 @@ GameObject:
   - component: {fileID: 840575520464562911}
   - component: {fileID: 8162929681158687265}
   - component: {fileID: 3794198398377254388}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -698,7 +701,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8496638241458309770}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Flashlight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
