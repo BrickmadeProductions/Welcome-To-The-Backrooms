@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8960332611485665160}
   - component: {fileID: 2124873852441223668}
   - component: {fileID: 153579531112417084}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -92,7 +92,7 @@ GameObject:
   - component: {fileID: 4096810162693124568}
   - component: {fileID: 675385804125130872}
   - component: {fileID: 3004727747851987352}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Water
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -173,7 +173,7 @@ GameObject:
   - component: {fileID: 5874080631936476748}
   - component: {fileID: 3464940989919862559}
   - component: {fileID: 8296298267182356306}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Bottle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -254,7 +254,7 @@ GameObject:
   - component: {fileID: 1520998438508266782}
   - component: {fileID: 5828890130283735261}
   - component: {fileID: 9184125967022426377}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -337,7 +337,7 @@ GameObject:
   - component: {fileID: 5895338581994988498}
   - component: {fileID: 6461271711412109696}
   - component: {fileID: 2216274278999694209}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Almond Water
   m_TagString: HoldableObject
   m_Icon: {fileID: 0}
@@ -404,11 +404,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   durability: 1
+  breakablePrefab: {fileID: 2209628678019894074, guid: 0d8b2a09f8470a94fb155ac9ca047f6f, type: 3}
+  playSounds: 0
   inventoryWeight: 1
   holdableObject: {fileID: 0}
   hitGroundClips:
   - {fileID: 8300000, guid: 4864f038af1762b40a1008058d45dce4, type: 3}
-  breakablePrefab: {fileID: 2209628678019894074, guid: 0d8b2a09f8470a94fb155ac9ca047f6f, type: 3}
 --- !u!82 &2216274278999694209
 AudioSource:
   m_ObjectHideFlags: 0

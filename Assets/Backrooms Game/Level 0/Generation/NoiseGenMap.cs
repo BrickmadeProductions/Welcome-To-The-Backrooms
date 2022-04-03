@@ -152,7 +152,7 @@ public class NoiseGenMap : MonoBehaviour
 
     internal void Save()
     {
-        throw new System.NotImplementedException();
+        
     }
 
     int GetIdUsingPerlin(int x, int y)

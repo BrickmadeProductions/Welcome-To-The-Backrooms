@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class InteractableDoor : InteractableObject
 {
-    
 
     public override void Throw(Vector3 force)
     {
@@ -14,6 +13,7 @@ public class InteractableDoor : InteractableObject
     public override void Use(InteractionSystem player)
     {
         gameObject.GetComponent<Rigidbody>().AddForce(player.transform.forward * 2, ForceMode.Impulse);
+        GameSettings.Instance.LoadScene("Level 0");
     }
     
     public override void Grab(InteractionSystem player)

@@ -404,7 +404,7 @@ public class GameSettings : MonoBehaviour
 
             case "Level 0":
 
-                
+                player.transform.position = new Vector3(0, 4.5f, 0);
 
 
                 post.profile = level0Profile;
