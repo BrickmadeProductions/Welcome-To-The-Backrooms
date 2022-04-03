@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -156,68 +157,70 @@ public class InteractionSystem : MonoBehaviour
         //==============//
         //holding system//
         //==============//
-
+        Debug.DrawRay(player.head.transform.GetChild(1).transform.position, player.head.transform.GetChild(1).transform.forward * 2f, Color.red);
 
         //test for a holdable object
-        RaycastHit[] hits = Physics.RaycastAll(new Ray(player.head.transform.position, player.head.transform.forward), 2f, ~(1 << 11));
-        int layer = 0;
-
-        foreach (RaycastHit hit in hits)
+        RaycastHit[] hits = Physics.RaycastAll(new Ray(player.head.transform.GetChild(1).transform.position, player.head.transform.GetChild(1).transform.forward), 2f, ~(1 << 11)).OrderBy(h => h.distance).ToArray(); ;
+        
+        if (hits.Length > 0)
         {
-            //Debug.Log(hit.collider.name + " " + hit.collider.gameObject.layer);
+            //Debug.Log(hits[0].collider.name + " " + hits[0].collider.gameObject.layer + " ");
 
-            layer++;
-
-            if (hit.collider.GetComponent<HoldableObject>() != null && (hit.collider.gameObject.layer == 9) && layer == 1)
+            if (hits[0].collider.GetComponent<HoldableObject>() != null && (hits[0].collider.gameObject.layer == 9))
             {
 
-                currentlyLookingAt = hit.collider.GetComponent<HoldableObject>();
-                
-                break;
+                currentlyLookingAt = hits[0].collider.GetComponent<HoldableObject>();
+            
 
             }
 
-            if (hit.collider.GetComponent<InteractableDoor>() != null && (hit.collider.gameObject.layer == 10) && layer == 1)
+            else if (hits[0].collider.GetComponent<InteractableDoor>() != null && (hits[0].collider.gameObject.layer == 10))
             {
 
-                currentlyLookingAt = hit.collider.GetComponent<InteractableDoor>();
+                currentlyLookingAt = hits[0].collider.GetComponent<InteractableDoor>();
 
-                break;
-
+            }
+            else
+            {
+                currentlyLookingAt = null;
             }
 
         }
 
-
-        if (hits.Length == 0)
+        else if (hits.Length == 0)
+        {
             currentlyLookingAt = null;
+        }
 
-       
+
 
         if (currentlyLookingAt != null)
         {
-
-            switch (currentlyLookingAt.gameObject.layer)
+            if (currentlyLookingAt.GetComponent<InteractableDoor>() != null || currentlyLookingAt.GetComponent<HoldableObject>() != null)
             {
-                case 9:
-                    pickup.gameObject.SetActive(true);
-                    break;
-                case 10:
-                    open.gameObject.SetActive(true);
-                    break;
+
+                switch (currentlyLookingAt.gameObject.layer)
+                {
+                    case 9:
+                        pickup.gameObject.SetActive(true);
+                        break;
+                    case 10:
+                        open.gameObject.SetActive(true);
+                        break;
+                }
+
             }
 
-           
-            
         }
 
         else
         {
-            
+
             pickup.gameObject.SetActive(false);
-               
+
             open.gameObject.SetActive(false);
- 
+
+
 
         }
 

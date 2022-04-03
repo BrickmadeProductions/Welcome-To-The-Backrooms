@@ -169,7 +169,7 @@ public class PlayerController : MonoBehaviour
                 if (Input.GetButton("Crouch"))
                 {
                    
-                    head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition - new Vector3(0, 10, 0), Time.deltaTime);
+                    head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition - new Vector3(0, 15, 0), Time.deltaTime);
                    
 
                 }
