@@ -150,6 +150,11 @@ public class NoiseGenMap : MonoBehaviour
         }
     }
 
+    internal void Save()
+    {
+        throw new System.NotImplementedException();
+    }
+
     int GetIdUsingPerlin(int x, int y)
     {
         /** Using a grid coordinate input, generate a Perlin noise value to be
