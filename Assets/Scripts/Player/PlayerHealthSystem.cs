@@ -17,6 +17,7 @@ public class PlayerHealthSystem : MonoBehaviour
 
     public bool canRun = true;
     public bool canWalk = true;
+    public bool canJump = true;
 
     public Text heartRateText;
 
