@@ -10,8 +10,8 @@ public class InfLevel1Gen : MonoBehaviour
 {
     public bool gen_enabled;
 
-    public List<Entity> entities;
-    public Dictionary<Vector3, Entity> entitiesInScene;
+    public List<entityAttack> entities;
+    public Dictionary<Vector3, entityAttack> entitiesInScene;
 
     [HideInInspector]
     public bool isLoadingChunks = false;

@@ -6,7 +6,8 @@ using UnityEngine.AI;
 public class HoundAi : MonoBehaviour
 {
     NavMeshAgent agent;
-    public GameObject goal;
+    public GameObject player;
+    public GameObject hitbox;
 
     // Start is called before the first frame update
     void Start()
@@ -17,10 +18,16 @@ public class HoundAi : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (goal == null)
+        if (player == null)
         {
-            goal = GameSettings.Instance.Player;
+            player = GameSettings.Instance.Player;
         }
-        agent.destination = goal.transform.position;
+        agent.destination = player.transform.position;
+
+        if (hitbox)
+        {
+
+        }
     }
+
 }
