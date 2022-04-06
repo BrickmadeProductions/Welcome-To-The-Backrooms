@@ -120,7 +120,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 241230107268624177}
   serializedVersion: 2
-  m_Mass: 1
+  m_Mass: 15
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 1
@@ -237,9 +237,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   durability: 30
+  breakablePrefab: {fileID: 8558210620788555332, guid: 5bb08193fa299c94b9cc58f4941bdc69, type: 3}
+  playSounds: 0
   inventoryWeight: 1
   holdableObject: {fileID: 4618818789321514102}
   hitGroundClips:
   - {fileID: 8300000, guid: 3ec90ec7ba21d9641aba6d72da0fb644, type: 3}
   - {fileID: 8300000, guid: 0e5240b5040937f46a2798f0974643d3, type: 3}
-  breakablePrefab: {fileID: 8558210620788555332, guid: 5bb08193fa299c94b9cc58f4941bdc69, type: 3}

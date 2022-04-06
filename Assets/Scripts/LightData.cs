@@ -26,7 +26,7 @@ public class LightData : MonoBehaviour
             int clipChoice = Random.Range(0, lightSounds.Count);
             GetComponent<AudioSource>().clip = lightSounds[clipChoice];
             GetComponent<AudioSource>().Play();
-            transform.parent.GetChild(0).GetComponent<Light>().intensity = 4f;
+            transform.parent.GetChild(0).GetComponent<Light>().intensity = 2f;
             transform.parent.GetChild(0).GetComponent<Light>().intensity += Random.Range(-1.5f, 2.5f);
 
         }

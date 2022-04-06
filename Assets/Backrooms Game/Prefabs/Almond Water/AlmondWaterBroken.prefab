@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8169286721651473516}
   - component: {fileID: 3792292879875690927}
   - component: {fileID: 1959099994635792507}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -126,7 +126,8 @@ GameObject:
   - component: {fileID: 1686265636583091744}
   - component: {fileID: 8233572382142674244}
   - component: {fileID: 7043086675999707160}
-  m_Layer: 0
+  - component: {fileID: 157218336980199796}
+  m_Layer: 9
   m_Name: BottleTop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -227,6 +228,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &157218336980199796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6567778757702831439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  durability: 0
+  breakablePrefab: {fileID: 0}
+  playSounds: 0
+  inventoryWeight: 1
+  holdableObject: {fileID: 0}
+  hitGroundClips: []
 --- !u!1 &7910912034784804850
 GameObject:
   m_ObjectHideFlags: 0
@@ -240,7 +259,8 @@ GameObject:
   - component: {fileID: 1031955868730904931}
   - component: {fileID: 1781628576233149030}
   - component: {fileID: 3504029208447497083}
-  m_Layer: 0
+  - component: {fileID: 306661652053852410}
+  m_Layer: 9
   m_Name: BottleBottom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -339,6 +359,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &306661652053852410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7910912034784804850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  durability: 0
+  breakablePrefab: {fileID: 0}
+  playSounds: 0
+  inventoryWeight: 1
+  holdableObject: {fileID: 0}
+  hitGroundClips: []
 --- !u!1 &8904948162161435436
 GameObject:
   m_ObjectHideFlags: 0
@@ -350,7 +388,7 @@ GameObject:
   - component: {fileID: 1737811051839225594}
   - component: {fileID: 8735188299807332486}
   - component: {fileID: 7378322522029588046}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}

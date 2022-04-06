@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerHealthSystem : MonoBehaviour
 {
+    PlayerController player;
+
     public float health = 100.0f;
     public float hunger = 100.0f;
     public float thirst = 100.0f;
@@ -18,13 +21,35 @@ public class PlayerHealthSystem : MonoBehaviour
     public bool canRun = true;
     public bool canWalk = true;
     public bool canJump = true;
+    public bool canMoveHead = true;
+    public bool awake = true;
+
+    Coroutine waking = null;
+    public Animator wakeUpAnimator;
 
     public Text heartRateText;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
+
+        player = GetComponent<PlayerController>();
+
+        if (SceneManager.GetActiveScene().name == "RoomHomeScreen")
+
+            WakeUp();
+
+        else
+        {
+            player.wakeUpCamera.gameObject.SetActive(false);
+            player.playerCamera.gameObject.SetActive(true);
+
+        }
+        
+
         StartCoroutine(UpdateHealth());
+
+
     }
 
     // Update is called once per frame
@@ -32,6 +57,40 @@ public class PlayerHealthSystem : MonoBehaviour
     {
         
     }
+
+    public void WakeUp()
+    {
+        awake = false;
+        waking = StartCoroutine(WakeUpSequence());
+    }
+
+    IEnumerator WakeUpSequence()
+    {
+        wakeUpAnimator.SetBool("isWaking", true);
+
+        canMoveHead = false;
+
+        player.wakeUpCamera.gameObject.SetActive(true);
+        player.playerCamera.gameObject.SetActive(false);
+
+        yield return new WaitForSeconds(4.417f);
+
+        player.gameObject.transform.position = new Vector3(2.668f, 2.997f, 1.12f);
+        player.wakeUpCamera.gameObject.SetActive(false);
+        player.playerCamera.gameObject.SetActive(true);
+
+        canMoveHead = true;
+
+        awake = true;
+
+
+    }
+
+    public void Sleep()
+    {
+
+    }
+
     public IEnumerator UpdateHealth()
     {
         while (true)

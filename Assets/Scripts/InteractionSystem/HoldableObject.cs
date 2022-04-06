@@ -63,28 +63,34 @@ public class HoldableObject : InteractableObject
         {
             if (transform.gameObject.GetComponent<AudioSource>() != null && playSounds)
             {
-                if (!transform.gameObject.GetComponent<AudioSource>().isPlaying)
-                {
+                if (collision.relativeVelocity.magnitude >= 4) { 
 
-                    transform.gameObject.GetComponent<AudioSource>().clip = hitGroundClips[Random.Range(0, hitGroundClips.Length)];
-                    transform.gameObject.GetComponent<AudioSource>().pitch = 1f + Random.Range(-0.1f, 0.1f);
-                    transform.gameObject.GetComponent<AudioSource>().Play();
-
-                    if (breakablePrefab != null)
+                    if (!transform.gameObject.GetComponent<AudioSource>().isPlaying)
                     {
-                        if (collision.relativeVelocity.magnitude >= 5)
-                            durability -= collision.relativeVelocity.magnitude;
+                        transform.gameObject.GetComponent<AudioSource>().clip = hitGroundClips[Random.Range(0, hitGroundClips.Length)];
+                        transform.gameObject.GetComponent<AudioSource>().pitch = 1f + Random.Range(-0.15f, 0.15f);
+                        transform.gameObject.GetComponent<AudioSource>().Play();
 
-                        if (durability <= 0)
+                        if (breakablePrefab != null)
                         {
-                            Instantiate(breakablePrefab, transform.position, transform.rotation);
-                            transform.gameObject.SetActive(false);
+
+                            if (collision.relativeVelocity.magnitude >= 5)
+                                durability -= collision.relativeVelocity.magnitude;
+
+                            if (durability < 0)
+                            {
+
+                                Instantiate(breakablePrefab, transform.position, transform.rotation);
+                                transform.gameObject.SetActive(false);
+                                Destroy(gameObject);
+                            }
+
+
                         }
-                       
+
+
 
                     }
-
-                    
                 }
             }               
         }

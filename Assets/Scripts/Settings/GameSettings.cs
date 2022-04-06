@@ -72,12 +72,16 @@ public class GameSettings : MonoBehaviour
     private GameObject player;
     public GameObject Player { get { return player; } }
 
+    public int FOV { get { return fov; } }
+    public float Sensitivity { get { return sensitivity; } }
+
     public Vector3 positionOffset = Vector3.zero;
 
     private int sX, sY;
 
     private bool fullScreen;
 
+    //graphics
     private bool vSyncEnabled;
     private bool antiAliasingEnabled;
     private bool ambientOcclusionEnabled;
@@ -85,6 +89,16 @@ public class GameSettings : MonoBehaviour
     private bool chromEnabled;
     private bool motionBlurEnabled;
     private bool vignetteEnabled;
+
+    //other settings
+    private int fov;
+    private float sensitivity;
+
+    //volume
+    private float masterVolume;
+    private float musicVolume;
+    private float entityVolume;
+    private float AmbientVolume;
 
     private static int m_referenceCount = 0;
 
@@ -153,6 +167,8 @@ public class GameSettings : MonoBehaviour
         level0Mixer = Resources.Load<AudioMixer>("Audio/Level0");
         level1Mixer = Resources.Load<AudioMixer>("Audio/Level1");
 
+        sensitivity = 1.5f;
+        fov = 90;
 
         LoadPost();
 
@@ -256,6 +272,23 @@ public class GameSettings : MonoBehaviour
 
     }
 
+    public void setSensitivity(float sens)
+    {
+        sensitivity = sens;
+        
+    }
+
+    public void setFOV(float fov)
+    {
+        this.fov = (int)fov;
+        Camera.main.fieldOfView = fov;
+    }
+
+    public void setMasterVolume(float volume)
+    {
+        masterVolume = volume;
+        master.SetFloat("MasterVolume", Mathf.Log10(masterVolume) * 20);
+    }
     public void setAmbientOcclusion(bool io)
     {
         
@@ -389,7 +422,6 @@ public class GameSettings : MonoBehaviour
 
             case "RoomHomeScreen":
 
-
                 post.profile = homeScreenRoomProfile;
 
                 player.transform.GetChild(0).GetComponents<AudioSource>()[1].clip = level0Ambience;
@@ -397,6 +429,7 @@ public class GameSettings : MonoBehaviour
 
                 player.transform.GetChild(0).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
                 player.transform.GetChild(1).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+                master = level0Mixer;
 
                 GameScreen();
 
@@ -404,8 +437,7 @@ public class GameSettings : MonoBehaviour
 
             case "Level 0":
 
-                
-
+                player.transform.position = new Vector3(0, 4.5f, 0);
 
                 post.profile = level0Profile;
 
@@ -414,7 +446,8 @@ public class GameSettings : MonoBehaviour
 
                 player.transform.GetChild(0).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
                 player.transform.GetChild(1).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-                
+                master = level0Mixer;
+
                 GameScreen();
 
                 break;
@@ -431,7 +464,8 @@ public class GameSettings : MonoBehaviour
 
                 player.transform.GetChild(0).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
                 player.transform.GetChild(1).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
-                
+                master = level1Mixer;
+
 
                 GameScreen();
 
@@ -449,6 +483,7 @@ public class GameSettings : MonoBehaviour
 
                 player.transform.GetChild(0).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
                 player.transform.GetChild(1).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
+                master = level2Mixer;
 
 
                 GameScreen();
@@ -469,7 +504,7 @@ public class GameSettings : MonoBehaviour
 
 
                 post.profile = homeScreenProfile;
-
+                master = level0Mixer;
                 //player.transform.GetChild(0).GetComponents<AudioSource>()[1].clip = level0Ambience;
                 //player.transform.GetChild(0).GetComponents<AudioSource>()[1].Play();
 

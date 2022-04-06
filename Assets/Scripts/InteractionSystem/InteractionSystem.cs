@@ -63,7 +63,7 @@ public class InteractionSystem : MonoBehaviour
 
             player.holding.transform.parent = null;
 
-            player.holding.Throw(player.head.transform.forward * 400f);
+            player.holding.Throw((player.head.transform.forward * 400f) * player.holding.GetComponent<Rigidbody>().mass);
 
             player.holdLocation.GetComponent<AudioSource>().pitch = 1f + UnityEngine.Random.Range(-0.1f, 0.1f);
             player.holdLocation.GetComponent<AudioSource>().Play();

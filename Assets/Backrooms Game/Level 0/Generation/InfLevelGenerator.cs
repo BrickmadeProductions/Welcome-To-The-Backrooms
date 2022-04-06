@@ -259,7 +259,7 @@ public class InfLevelGenerator : MonoBehaviour
 
                     GameSettings.Instance.Player.transform.position.x, GameSettings.Instance.Player.transform.position.z))
                 {
-                    Debug.Log(c.posX + ", " + c.posZ);
+                    //Debug.Log(c.posX + ", " + c.posZ);
                     return c;
                     
                 }

@@ -41,7 +41,7 @@ MonoBehaviour:
   active: 1
   enabled:
     overrideState: 1
-    value: 0
+    value: 1
   gradingMode:
     overrideState: 1
     value: 1
@@ -51,25 +51,25 @@ MonoBehaviour:
     defaultState: 1
   tonemapper:
     overrideState: 1
-    value: 2
+    value: 3
   toneCurveToeStrength:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: 0.46
   toneCurveToeLength:
-    overrideState: 0
-    value: 0.5
+    overrideState: 1
+    value: 0.33
   toneCurveShoulderStrength:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: 0.89
   toneCurveShoulderLength:
-    overrideState: 0
-    value: 0.5
+    overrideState: 1
+    value: 1.04
   toneCurveShoulderAngle:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: 0.72
   toneCurveGamma:
-    overrideState: 0
-    value: 1
+    overrideState: 1
+    value: 0.76
   ldrLut:
     overrideState: 0
     value: {fileID: 0}
@@ -85,22 +85,22 @@ MonoBehaviour:
     value: 0
   colorFilter:
     overrideState: 1
-    value: {r: 0.990566, g: 0.6775098, b: 0.6775098, a: 1}
+    value: {r: 0.8018868, g: 0.8018868, b: 0.8018868, a: 1}
   hueShift:
     overrideState: 0
     value: 0
   saturation:
     overrideState: 0
-    value: 0
+    value: 2.49
   brightness:
     overrideState: 0
     value: 0
   postExposure:
     overrideState: 1
-    value: 1.51
+    value: -0.45
   contrast:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: -11.9
   mixerRedOutRedIn:
     overrideState: 0
     value: 100
@@ -1377,10 +1377,10 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 0.83
+    value: 2.08
   threshold:
     overrideState: 1
-    value: 0.43
+    value: 0.5
   softKnee:
     overrideState: 1
     value: 0.688
@@ -1389,10 +1389,10 @@ MonoBehaviour:
     value: 65472
   diffusion:
     overrideState: 1
-    value: 8.56
+    value: 5.53
   anamorphicRatio:
     overrideState: 1
-    value: 0.25
+    value: 0.42
   color:
     overrideState: 0
     value: {r: 0.96895725, g: 0.990566, b: 0.87375396, a: 1}

@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
 
     //player parts
     public Camera playerCamera;
+    public Camera wakeUpCamera;
     public GameObject head;
     public GameObject feet;
     public GameObject death;
@@ -50,7 +51,6 @@ public class PlayerController : MonoBehaviour
 
     //fov editingi
     private float _FOVOFFSET;
-    public int fov;
     
     public bool dead = false;
 
@@ -64,7 +64,7 @@ public class PlayerController : MonoBehaviour
     //postEdits
 
     //head movement
-    public float sensitivity = 0f;
+   
     float lookXLimitTop = 90.0f;
     float lookXLimitBottom = 90.0f;
     public float rotationX = 0.0f;
@@ -209,7 +209,7 @@ public class PlayerController : MonoBehaviour
 
 
         // Player and Camera rotation
-        if (!dead && Cursor.lockState != CursorLockMode.None)
+        if (!dead && Cursor.lockState != CursorLockMode.None && playerHealth.canMoveHead)
         {
             
             if (currentPlayerState != PLAYERSTATES.IMMOBILE)
@@ -217,12 +217,12 @@ public class PlayerController : MonoBehaviour
                 SpeedAndFovController();
 
 
-            rotationX += -Input.GetAxis("Mouse Y") * sensitivity / 2;
+            rotationX += -Input.GetAxis("Mouse Y") * GameSettings.Instance.Sensitivity / 2;
             rotationX = Mathf.Clamp(rotationX, -lookXLimitBottom, lookXLimitTop);
 
-            rotationY += Input.GetAxis("Mouse X") * sensitivity;
+            rotationY += Input.GetAxis("Mouse X") * GameSettings.Instance.Sensitivity;
 
-            transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * sensitivity, 0);
+            transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * GameSettings.Instance.Sensitivity, 0);
 
             //player movement
 
@@ -565,7 +565,7 @@ public class PlayerController : MonoBehaviour
         else
         {
 
-            playerCamera.fieldOfView = fov + _FOVOFFSET;
+            playerCamera.fieldOfView = GameSettings.Instance.FOV + _FOVOFFSET;
             walkingSpeed = 3f;
         }
     }
@@ -609,12 +609,12 @@ public class PlayerController : MonoBehaviour
 
             case PLAYERSTATES.WALK:
                 yield return new WaitForSeconds(0.5f);
-                feetSource.volume = UnityEngine.Random.Range(0.06f, 0.1f);
+                feetSource.volume = UnityEngine.Random.Range(0.06f, 0.11f);
                 break;
 
             case PLAYERSTATES.RUN:
                 yield return new WaitForSeconds(0.3f);
-                feetSource.volume = UnityEngine.Random.Range(0.15f, 0.25f);
+                feetSource.volume = UnityEngine.Random.Range(0.11f, 0.24f);
                 break;
             case PLAYERSTATES.JUMP:
                 feetSource.Stop();
@@ -626,7 +626,7 @@ public class PlayerController : MonoBehaviour
         }
 
         
-        feetSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
+        feetSource.pitch = UnityEngine.Random.Range(0.8f, 1.2f);
 
         switch (sound)
         {

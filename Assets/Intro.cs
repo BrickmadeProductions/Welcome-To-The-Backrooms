@@ -19,7 +19,7 @@ public class Intro : MonoBehaviour
         {
             
             StopCoroutine(introC);
-            GameSettings.Instance.LoadScene("RoomHomeScreen");
+            GameSettings.Instance.LoadScene("HomeScreen");
         }
     }
 
@@ -27,6 +27,6 @@ public class Intro : MonoBehaviour
     IEnumerator playIntro()
     {
         yield return new WaitForSeconds(8f);
-        GameSettings.Instance.LoadScene("RoomHomeScreen");
+        GameSettings.Instance.LoadScene("HomeScreen");
     }
 }

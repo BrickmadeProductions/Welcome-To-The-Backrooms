@@ -14,4 +14,6 @@ public abstract class InteractableObject : MonoBehaviour
     public abstract void Use(InteractionSystem player);
 
     public abstract void Grab(InteractionSystem player);
+
+
 }
