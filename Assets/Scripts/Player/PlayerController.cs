@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
 
     private static PlayerController playerInstance;
 
-    PlayerHealthSystem playerHealth;
+    public PlayerHealthSystem playerHealth;
     public DistanceChecker distance;
 
     //movement
@@ -573,6 +573,8 @@ public class PlayerController : MonoBehaviour
 
     public void die()
     {
+        if (!dead)
+        {
 
         anim.SetBool("isCrouching", false);
         anim.SetBool("isProning", false);
@@ -587,6 +589,9 @@ public class PlayerController : MonoBehaviour
 
         dead = true;
 
+        GameSettings.Instance.LoadScene("IntroSequence");
+
+        }
     }
     void OnTriggerEnter(Collider col)
     {
