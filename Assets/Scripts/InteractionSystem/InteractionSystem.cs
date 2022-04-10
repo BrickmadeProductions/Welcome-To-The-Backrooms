@@ -141,11 +141,15 @@ public class InteractionSystem : MonoBehaviour
             Quaternion holdRotation = Quaternion.Euler(player.head.transform.localRotation.x / 2, player.head.transform.localRotation.y, player.head.transform.localRotation.z);
 
             if (player.holding.GetComponent<HoldableObject>().large)
+            {
+                player.playerHealth.canRun = false;
+                player.currentPlayerState = PlayerController.PLAYERSTATES.WALK;
 
                 player.bodyAnim.SetBool("isHoldingLarge", true);
-
+            }
             else
             {
+                
                 player.bodyAnim.SetBool("isHoldingSmall", true);
             } 
                     
