@@ -7,14 +7,15 @@ public class HoldableObject : InteractableObject
     
     public int inventoryWeight = 1;
     public Rigidbody holdableObject;
-    public AudioClip[] hitGroundClips;
-    
-    
+    bool broken;
+    public bool large;
+
     // Start is called before the first frame update
     void Awake()
     {
+        broken = false;
         holdableObject = GetComponent<Rigidbody>();
-        StartCoroutine("waitToPlaySound");
+        StartCoroutine(waitToPlaySound());
     }
 
     IEnumerator waitToPlaySound()
@@ -67,22 +68,32 @@ public class HoldableObject : InteractableObject
 
                     if (!transform.gameObject.GetComponent<AudioSource>().isPlaying)
                     {
-                        transform.gameObject.GetComponent<AudioSource>().clip = hitGroundClips[Random.Range(0, hitGroundClips.Length)];
+                        transform.gameObject.GetComponent<AudioSource>().clip = hitClips[Random.Range(0, hitClips.Length)];
                         transform.gameObject.GetComponent<AudioSource>().pitch = 1f + Random.Range(-0.15f, 0.15f);
                         transform.gameObject.GetComponent<AudioSource>().Play();
 
-                        if (breakablePrefab != null)
+                        if (breakablePrefabs.Length > 0)
                         {
 
                             if (collision.relativeVelocity.magnitude >= 5)
                                 durability -= collision.relativeVelocity.magnitude;
 
-                            if (durability < 0)
+                            //break
+                            if (durability < 0 && !broken && breakClips.Length > 0)
                             {
+                                AudioSource.PlayClipAtPoint(breakClips[Random.Range(0, breakClips.Length)], transform.position);
 
-                                Instantiate(breakablePrefab, transform.position, transform.rotation);
-                                transform.gameObject.SetActive(false);
+                                foreach (GameObject prefab in breakablePrefabs)
+                                {
+                                    GameObject p = Instantiate(prefab, transform.position, transform.rotation);
+                                    p.GetComponent<Rigidbody>().velocity = GetComponent<Rigidbody>().velocity / 2; //friction
+                                }
+                                
+
                                 Destroy(gameObject);
+                                broken = true;
+                                
+                                
                             }
 
 

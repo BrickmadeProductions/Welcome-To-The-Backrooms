@@ -25,7 +25,8 @@ public class PlayerHealthSystem : MonoBehaviour
     public bool awake = true;
 
     Coroutine waking = null;
-    public Animator wakeUpAnimator;
+    Coroutine sleeping = null;
+    public Animator animator;
 
     public Text heartRateText;
 
@@ -41,7 +42,7 @@ public class PlayerHealthSystem : MonoBehaviour
 
         else
         {
-            player.wakeUpCamera.gameObject.SetActive(false);
+            player.animatorCamera.gameObject.SetActive(false);
             player.playerCamera.gameObject.SetActive(true);
 
         }
@@ -60,23 +61,30 @@ public class PlayerHealthSystem : MonoBehaviour
 
     public void WakeUp()
     {
-        awake = false;
-        waking = StartCoroutine(WakeUpSequence());
+        if (!awake)
+            waking = StartCoroutine(WakeUpSequence());
+    }
+    public void Sleep()
+    {
+        if (awake)
+            sleeping = StartCoroutine(SleepSequence());
     }
 
     IEnumerator WakeUpSequence()
     {
-        wakeUpAnimator.SetBool("isWaking", true);
+        
+        animator.SetBool("isSleeping", false);
+        animator.SetBool("isWaking", true);
 
         canMoveHead = false;
 
-        player.wakeUpCamera.gameObject.SetActive(true);
+        player.animatorCamera.gameObject.SetActive(true);
         player.playerCamera.gameObject.SetActive(false);
 
         yield return new WaitForSeconds(4.417f);
 
         player.gameObject.transform.position = new Vector3(2.668f, 2.997f, 1.12f);
-        player.wakeUpCamera.gameObject.SetActive(false);
+        player.animatorCamera.gameObject.SetActive(false);
         player.playerCamera.gameObject.SetActive(true);
 
         canMoveHead = true;
@@ -86,8 +94,27 @@ public class PlayerHealthSystem : MonoBehaviour
 
     }
 
-    public void Sleep()
+    IEnumerator SleepSequence()
     {
+
+        animator.SetBool("isSleeping", true);
+        animator.SetBool("isWaking", false);
+
+        canMoveHead = false;
+
+        player.animatorCamera.gameObject.SetActive(true);
+        player.playerCamera.gameObject.SetActive(false);
+
+        yield return new WaitForSeconds(4.417f);
+
+        player.gameObject.transform.position = new Vector3(2.668f, 2.997f, 1.12f);
+        player.animatorCamera.gameObject.SetActive(false);
+        player.playerCamera.gameObject.SetActive(true);
+
+        canMoveHead = true;
+
+        awake = false;
+
 
     }
 

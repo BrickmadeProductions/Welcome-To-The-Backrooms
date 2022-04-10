@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2998044890602718940}
   - component: {fileID: 5557295489448002588}
   - component: {fileID: 1601341671525743799}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cylinder.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -92,7 +92,7 @@ GameObject:
   - component: {fileID: 2891958640714419772}
   - component: {fileID: 4494756353391914056}
   - component: {fileID: 1723580405266850514}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -173,7 +173,7 @@ GameObject:
   - component: {fileID: 6489875878754960289}
   - component: {fileID: 838319992243038454}
   - component: {fileID: 1737815142001035510}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cylinder.002
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -257,9 +257,9 @@ GameObject:
   - component: {fileID: 7447349725876534975}
   - component: {fileID: 1130512763043454471}
   - component: {fileID: 6768213791637214978}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Soup
-  m_TagString: HoldableObject
+  m_TagString: Food
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -322,6 +322,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  durability: 0
+  breakablePrefab: {fileID: 0}
+  playSounds: 0
   inventoryWeight: 1
   holdableObject: {fileID: 0}
   hitGroundClips:

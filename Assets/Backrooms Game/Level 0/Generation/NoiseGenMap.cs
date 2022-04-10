@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class NoiseGenMap : MonoBehaviour
 {
@@ -16,9 +17,13 @@ public class NoiseGenMap : MonoBehaviour
 
     //tile types
     Dictionary<int, GameObject> tileset;
+    public GameObject exit;
     //Dictionary<int, GameObject> tile_groups;
 
     public List<GameObject> Tiles;
+
+    //entity tiles
+    public List<GameObject> entities;
 
     int chunk_width;
     int chunk_height;
@@ -184,7 +189,48 @@ public class NoiseGenMap : MonoBehaviour
         GameObject tile_prefab = tileset[tile_id];
         //GameObject tile_group = tile_groups[tile_id];
         //GameObject tile = Instantiate(tile_prefab, tile_group.transform);
-        GameObject tile = Instantiate(tile_prefab, gameObject.transform);
+        GameObject tile = null;
+
+
+        float noClipWallChance = Random.Range(0f, 1f);
+        float entityChance = Random.Range(0f, 1f);
+        
+        //make it a precentage chance
+        if (SceneManager.GetActiveScene().name != "HomeScreen")
+        {
+
+            if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 1000
+
+            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 250
+
+            && noClipWallChance > 0.995)
+            {
+
+                tile = Instantiate(exit, gameObject.transform);
+            }
+
+            else if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 50
+
+            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 10
+
+            && entityChance > 0.9997)
+            {
+                tile = Instantiate(entities[Random.Range(0, entities.Count)], gameObject.transform);
+            }
+
+            else
+            {
+                tile = Instantiate(tile_prefab, gameObject.transform);
+            }
+
+            
+        }
+        else
+        {
+            tile = Instantiate(tile_prefab, gameObject.transform);
+
+        }
+           
 
         tile.name = string.Format("tile_x{0}_y{1}", x, y);
         tile.transform.localPosition = new Vector3(x * size, 0, y * size);

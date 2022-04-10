@@ -386,7 +386,7 @@ public class GameSettings : MonoBehaviour
     {
         LEVEL_LOADED = false;
 
-        SceneManager.LoadScene(name, LoadSceneMode.Single);
+        SceneManager.LoadSceneAsync(name, LoadSceneMode.Single);
 
         if (SceneManager.GetActiveScene().name != name)
         {

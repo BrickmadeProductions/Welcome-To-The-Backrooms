@@ -6,7 +6,9 @@ public abstract class InteractableObject : MonoBehaviour
 {
 
     public float durability;
-    public GameObject breakablePrefab;
+    public GameObject[] breakablePrefabs;
+    public AudioClip[] hitClips;
+    public AudioClip[] breakClips;
     public bool playSounds = false;
 
     public abstract void Throw(Vector3 force);

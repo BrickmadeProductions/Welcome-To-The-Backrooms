@@ -18,11 +18,11 @@ public class DistanceChecker : MonoBehaviour
 
     void Start()
     {
-    
         lastPosition = tx.position;
     }
     void Update()
     {
+
         if (GameSettings.LEVEL_LOADED && SceneManager.GetActiveScene().name != "RoomHomeScreen")
         {
             distanceTraveled += (lastPosition - tx.position).magnitude;

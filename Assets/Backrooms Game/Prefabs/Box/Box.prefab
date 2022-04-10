@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5523751968233873819}
   - component: {fileID: 1481797867420506017}
   - component: {fileID: 3627788487539801217}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Box
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ GameObject:
   - component: {fileID: 2061953090263135485}
   - component: {fileID: -3731249983559593665}
   - component: {fileID: -1836866180471499198}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Box
   m_TagString: Wood
   m_Icon: {fileID: 0}
@@ -186,13 +186,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   durability: 0
-  breakablePrefab: {fileID: 0}
-  playSounds: 0
-  inventoryWeight: 1
-  holdableObject: {fileID: 0}
-  hitGroundClips:
+  breakablePrefabs: []
+  hitClips:
   - {fileID: 8300000, guid: 3ec90ec7ba21d9641aba6d72da0fb644, type: 3}
   - {fileID: 8300000, guid: 0e5240b5040937f46a2798f0974643d3, type: 3}
+  breakClips: []
+  playSounds: 1
+  inventoryWeight: 1
+  holdableObject: {fileID: 0}
+  large: 1
 --- !u!54 &8110756884772502744
 Rigidbody:
   m_ObjectHideFlags: 0

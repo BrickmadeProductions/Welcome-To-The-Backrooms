@@ -27,12 +27,13 @@ public class PlayerController : MonoBehaviour
     Coroutine rebuildStamina = null;
     Coroutine removeStamina = null;
 
+    public GameObject handLocation;
     public GameObject holdLocation;
     public HoldableObject holding;
 
     //player parts
     public Camera playerCamera;
-    public Camera wakeUpCamera;
+    public Camera animatorCamera;
     public GameObject head;
     public GameObject feet;
     public GameObject death;
@@ -65,7 +66,7 @@ public class PlayerController : MonoBehaviour
 
     //head movement
    
-    float lookXLimitTop = 90.0f;
+    float lookXLimitTop = 85.0f;
     float lookXLimitBottom = 90.0f;
     public float rotationX = 0.0f;
     public float rotationY = 0.0f;
@@ -87,7 +88,7 @@ public class PlayerController : MonoBehaviour
     public PLAYERSTATES currentPlayerState = PLAYERSTATES.IDLE;
 
     //animation
-    public Animator anim;
+    public Animator bodyAnim;
 
     //playerMovement
     CharacterController characterController;
@@ -301,15 +302,25 @@ public class PlayerController : MonoBehaviour
         if (Mathf.Abs(moveDirection.x) > 0.1f || Mathf.Abs(moveDirection.z) > 0.1f && currentPlayerState != PLAYERSTATES.JUMP)
         {
 
-            if (Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("D") && Input.GetButton("Run") && playerHealth.canRun)
+            if (Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("D") && Input.GetButton("Run") && playerHealth.canRun )
             {
+                bodyAnim.SetBool("isCrouching", false);
+                bodyAnim.SetBool("isWalking", false);
+                bodyAnim.SetBool("isRunning", true);
+                bodyAnim.SetBool("isIdle", false);
+
                 currentPlayerState = PLAYERSTATES.RUN;
 
             }
 
-            if ((Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("S") || Input.GetButton("D")) && playerHealth.canWalk && !Input.GetButton("Run") && !Input.GetButton("Crouch") && playerHealth.canWalk)
+            if ((Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("S") || Input.GetButton("D")) && !Input.GetButton("Run") && !Input.GetButton("Crouch") && playerHealth.canWalk)
             {
-               
+
+                bodyAnim.SetBool("isCrouching", false);
+                bodyAnim.SetBool("isWalking", true);
+                bodyAnim.SetBool("isRunning", false);
+                bodyAnim.SetBool("isIdle", false);
+
                 currentPlayerState = PLAYERSTATES.WALK;
             
 
@@ -317,6 +328,10 @@ public class PlayerController : MonoBehaviour
 
             if (Input.GetButton("Crouch") && playerHealth.canWalk)
             {
+                bodyAnim.SetBool("isCrouching", true);
+                bodyAnim.SetBool("isWalking", false);
+                bodyAnim.SetBool("isRunning", false);
+                bodyAnim.SetBool("isIdle", false);
 
                 currentPlayerState = PLAYERSTATES.CROUCH;
                 
@@ -328,6 +343,11 @@ public class PlayerController : MonoBehaviour
         else if (Input.GetButton("Crouch") && currentPlayerState != PLAYERSTATES.JUMP)
         {
 
+            bodyAnim.SetBool("isCrouching", true);
+            bodyAnim.SetBool("isWalking", false);
+            bodyAnim.SetBool("isRunning", false);
+            bodyAnim.SetBool("isIdle", false);
+
             currentPlayerState = PLAYERSTATES.CROUCH;
        
         }
@@ -335,7 +355,11 @@ public class PlayerController : MonoBehaviour
         //idle
         else
         {
-       
+            bodyAnim.SetBool("isCrouching", false);
+            bodyAnim.SetBool("isWalking", false);
+            bodyAnim.SetBool("isRunning", false);
+            bodyAnim.SetBool("isIdle", true);
+
             currentPlayerState = PLAYERSTATES.IDLE;
 
         }
@@ -373,6 +397,7 @@ public class PlayerController : MonoBehaviour
 
             case PLAYERSTATES.WALK:
 
+                
                 //if (removeStamina == null)
                 //removeStamina = StartCoroutine(playerHealth.ChangeStamina(UnityEngine.Random.Range(-2, -5)));
 
@@ -398,9 +423,11 @@ public class PlayerController : MonoBehaviour
 
             case PLAYERSTATES.RUN:
 
+                
+                
                 if (removeStamina == null)
 
-                    removeStamina = StartCoroutine(playerHealth.ChangeStamina(UnityEngine.Random.Range(-5, -7)));
+                    removeStamina = StartCoroutine(playerHealth.ChangeStamina(UnityEngine.Random.Range(-1, -2)));
 
                 if (run == null)
 
@@ -483,8 +510,6 @@ public class PlayerController : MonoBehaviour
                 StopCoroutine(reviveHeartRate);
                 reviveHeartRate = null;
             }
-
-
         }
 
         //heartrate
@@ -493,16 +518,23 @@ public class PlayerController : MonoBehaviour
         {
             currentPlayerState = PLAYERSTATES.WALK;
 
+            playerHealth.canJump = true;
+            playerHealth.canWalk = true;
             playerHealth.canRun = false;
         }
         if (playerHealth.heartRate >= 140)
         {
+            playerHealth.canJump = false;
+            playerHealth.canWalk = false;
+            playerHealth.canRun = false;
+
             currentPlayerState = PLAYERSTATES.IMMOBILE;
 
             playerHealth.canWalk = false;
         }
-        if (playerHealth.stamina >= 50)
+        else if (playerHealth.stamina >= 50 && playerHealth.heartRate < 100)
         {
+            playerHealth.canJump = true;
             playerHealth.canRun = true;
             playerHealth.canWalk = true;
 
@@ -512,7 +544,7 @@ public class PlayerController : MonoBehaviour
         if (currentPlayerState != PLAYERSTATES.RUN)
         {
             if (rebuildStamina == null)
-                rebuildStamina = StartCoroutine(playerHealth.ChangeStamina(UnityEngine.Random.Range(2, 5)));
+                rebuildStamina = StartCoroutine(playerHealth.ChangeStamina(UnityEngine.Random.Range(1, 3)));
 
             if (removeStamina != null)
             
@@ -538,6 +570,9 @@ public class PlayerController : MonoBehaviour
         else if (playerHealth.stamina <= 0)
         {
             playerHealth.canRun = false;
+            playerHealth.canWalk = true;
+            playerHealth.canJump = false;
+
             currentPlayerState = PLAYERSTATES.WALK;
             playerHealth.stamina = 0;
 
@@ -556,7 +591,7 @@ public class PlayerController : MonoBehaviour
     private void SpeedAndFovController()
     {
 
-        if (anim.GetBool("isProning"))
+        if (bodyAnim.GetBool("isProning"))
         {
 
             walkingSpeed = 0.5f;
@@ -576,20 +611,17 @@ public class PlayerController : MonoBehaviour
         if (!dead)
         {
 
-        anim.SetBool("isCrouching", false);
-        anim.SetBool("isProning", false);
-        anim.SetBool("isReloading", false);
-        anim.SetBool("isAiming", false);
-        anim.SetBool("isRunning", false);
-        anim.SetBool("isWalking", false);
-        anim.SetBool("isSwimming", false);
+            bodyAnim.SetBool("isCrouching", false);
+            bodyAnim.SetBool("isProning", false);
+            bodyAnim.SetBool("isReloading", false);
+            bodyAnim.SetBool("isAiming", false);
+            bodyAnim.SetBool("isRunning", false);
+            bodyAnim.SetBool("isWalking", false);
+            bodyAnim.SetBool("isSwimming", false);
 
+            dead = true;
 
-        GetComponent<Animator>().enabled = false;
-
-        dead = true;
-
-        GameSettings.Instance.LoadScene("IntroSequence");
+            GameSettings.Instance.LoadScene("IntroSequence");
 
         }
     }

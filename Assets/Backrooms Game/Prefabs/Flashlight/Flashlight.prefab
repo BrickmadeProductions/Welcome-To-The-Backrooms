@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 4167305873519310594}
   m_Layer: 9
   m_Name: Flashlight
-  m_TagString: Usable
+  m_TagString: Cement
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -78,11 +78,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   durability: 0
-  inventoryWeight: 1
-  holdableObject: {fileID: 0}
-  hitGroundClips:
-  - {fileID: 8300000, guid: 4864f038af1762b40a1008058d45dce4, type: 3}
-  breakablePrefab: {fileID: 0}
+  breakablePrefabs: []
+  hitClips: []
+  breakClips: []
+  playSounds: 1
   emission: {fileID: 0}
   flashLight: {fileID: 7973824011364313189}
 --- !u!82 &869247385304841261

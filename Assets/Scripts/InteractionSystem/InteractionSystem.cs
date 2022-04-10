@@ -49,16 +49,25 @@ public class InteractionSystem : MonoBehaviour
     {
         //pickup (hold)
         if (player.holding == null && Input.GetButton("Hold") && currentlyLookingAt != null)
-        {
-
+        { 
             player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
 
+            player.holding.gameObject.layer = 13;
+            foreach (Transform child in player.holding.transform)
+            {
+                child.gameObject.layer = 13;
+            }
         }
 
         //throw
-        if (Input.GetButtonDown("Throw") && player.holding != null)
+        if (Input.GetButtonDown("Throw") && player.holding != null && (player.head.transform.localRotation.x * Mathf.Rad2Deg < 15 || !player.holding.GetComponent<HoldableObject>().large))
         {
-
+            
+            player.holding.gameObject.layer = 9;
+            foreach (Transform child in player.holding.transform)
+            {
+                child.gameObject.layer = 9;
+            }
             player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
 
             player.holding.transform.parent = null;
@@ -77,14 +86,21 @@ public class InteractionSystem : MonoBehaviour
 
             player.holding = null;
 
+            player.bodyAnim.SetBool("isHoldingSmall", false);
+            player.bodyAnim.SetBool("isHoldingLarge", false);
+         
 
 
         }
 
-        //drop
+        //drop (hold)
         else if (Input.GetButtonDown("Drop") && player.holding != null)
         {
-
+            player.holding.gameObject.layer = 9;
+            foreach (Transform child in player.holding.transform)
+            {
+                child.gameObject.layer = 9;
+            }
             player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
 
             player.holding.transform.parent = null;
@@ -96,12 +112,14 @@ public class InteractionSystem : MonoBehaviour
             {
                 col.enabled = true;
             }
+            
 
             SceneManager.MoveGameObjectToScene(player.holding.gameObject, SceneManager.GetActiveScene());
 
             player.holding = null;
 
-
+            player.bodyAnim.SetBool("isHoldingSmall", false);
+            player.bodyAnim.SetBool("isHoldingLarge", false);
 
 
         }
@@ -116,11 +134,21 @@ public class InteractionSystem : MonoBehaviour
 
             player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = true;
 
-            player.holding.transform.parent = player.holdLocation.transform;
+            player.holding.transform.parent = player.holding.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.handLocation.transform; //hand or both hands
 
-            player.holding.transform.position = Vector3.Lerp(player.holding.transform.position, player.holdLocation.transform.position, Time.deltaTime * 5);
+            player.holding.transform.position = player.holding.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.handLocation.transform.position;
 
             Quaternion holdRotation = Quaternion.Euler(player.head.transform.localRotation.x / 2, player.head.transform.localRotation.y, player.head.transform.localRotation.z);
+
+            if (player.holding.GetComponent<HoldableObject>().large)
+
+                player.bodyAnim.SetBool("isHoldingLarge", true);
+
+            else
+            {
+                player.bodyAnim.SetBool("isHoldingSmall", true);
+            } 
+                    
 
             player.holding.transform.localRotation = holdRotation;
 
@@ -135,18 +163,21 @@ public class InteractionSystem : MonoBehaviour
             currentlyLookingAt.Use(this);
         }
 
-        //pickup
+        //pickup (inventory)
         if (Input.GetButtonDown("Pickup") && inventorySlots.Count < inventoryLimit && currentlyLookingAt != null)
         {
-
             currentlyLookingAt.Grab(this);
 
         }
 
-        //drop
+        //drop (inventory)
         if (Input.GetButtonDown("Drop") && inventorySlots.Count > 0)
         {
-
+            player.holding.gameObject.layer = 9;
+            foreach (Transform child in player.holding.transform)
+            {
+                child.gameObject.layer = 9;
+            }
             dropInventoryObject();
         }
     }
@@ -157,14 +188,14 @@ public class InteractionSystem : MonoBehaviour
         //==============//
         //holding system//
         //==============//
-        Debug.DrawRay(player.head.transform.GetChild(1).transform.position, player.head.transform.GetChild(1).transform.forward * 2f, Color.red);
+        Debug.DrawRay(player.playerCamera.transform.position, player.playerCamera.transform.forward * 2f, Color.red);
 
         //test for a holdable object
-        RaycastHit[] hits = Physics.RaycastAll(new Ray(player.head.transform.GetChild(1).transform.position, player.head.transform.GetChild(1).transform.forward), 2f, ~(1 << 11)).OrderBy(h => h.distance).ToArray(); ;
+        RaycastHit[] hits = Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 2f, ~(1 << 11)).OrderBy(h => h.distance).ToArray(); ;
         
         if (hits.Length > 0)
         {
-            //Debug.Log(hits[0].collider.name + " " + hits[0].collider.gameObject.layer + " ");
+            Debug.Log(hits[0].collider.name + " " + hits[0].collider.gameObject.layer + " ");
 
             if (hits[0].collider.GetComponent<HoldableObject>() != null && (hits[0].collider.gameObject.layer == 9))
             {

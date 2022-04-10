@@ -36,8 +36,8 @@ Material:
   m_Name: Ceiling
   m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
   m_ShaderKeywords: _DETAIL_MULX2 _DISABLE_DECALS _DISABLE_SSR _DISABLE_SSR_TRANSPARENT
-    _ENVIRONMENTREFLECTIONS_OFF _GLOSSYREFLECTIONS_OFF _NORMALMAP _NORMALMAP_TANGENT_SPACE
-    _SPECULARHIGHLIGHTS_OFF
+    _ENVIRONMENTREFLECTIONS_OFF _GLOSSYREFLECTIONS_OFF _METALLICGLOSSMAP _NORMALMAP
+    _NORMALMAP_TANGENT_SPACE _SPECULARHIGHLIGHTS_OFF
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
@@ -98,8 +98,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: be8c6a0853e79d34d839a5a3079b3a36, type: 3}
+        m_Scale: {x: 15, y: 15}
         m_Offset: {x: 0, y: 0}
     - _DetailMap:
         m_Texture: {fileID: 0}
@@ -110,7 +110,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
-        m_Texture: {fileID: 2800000, guid: 45d78535f567e6b449082c91d1108f0a, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DistortionVectorMap:
@@ -146,7 +146,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 2912e94a142ff084fa91b02e06d34914, type: 3}
+        m_Texture: {fileID: 2800000, guid: 59db83ef7e80ea341b6623b14a3ddf22, type: 3}
         m_Scale: {x: 4.52, y: 3.99}
         m_Offset: {x: -0.0017, y: 0}
     - _MaskMap:
@@ -154,7 +154,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 60e3586bd86206c469ebb55427a520f9, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
@@ -166,7 +166,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
-        m_Texture: {fileID: 2800000, guid: d7f096d2548a73b4aab97961a4196711, type: 3}
+        m_Texture: {fileID: 2800000, guid: 39ce9105e4fa8c544beb71931ffdf1ae, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
@@ -255,7 +255,7 @@ Material:
     - _BUMP_MAP_STRENGTH: 0.3
     - _Blend: 0
     - _BlendMode: 0
-    - _BumpScale: 4.84
+    - _BumpScale: 2.01
     - _COAT_IOR: 1.4
     - _COAT_ROUGHNESS: 0
     - _COAT_THICKNESS: 5
@@ -270,7 +270,7 @@ Material:
     - _DepthOffsetEnable: 0
     - _DetailAlbedoMapScale: 1
     - _DetailAlbedoScale: 1
-    - _DetailNormalMapScale: 0.36
+    - _DetailNormalMapScale: 6.44
     - _DetailNormalScale: 1
     - _DetailSmoothnessScale: 1
     - _DiffusionProfile: 0
@@ -306,8 +306,8 @@ Material:
     - _EnableGeometricSpecularAA: 0
     - _EnergyConservingSpecularColor: 1
     - _EnvironmentReflections: 0
-    - _GlossMapScale: 0.136
-    - _Glossiness: 0.26
+    - _GlossMapScale: 0.22
+    - _Glossiness: 0.17
     - _GlossyReflections: 0
     - _HeightAmplitude: 0.02
     - _HeightCenter: 0.5
@@ -326,13 +326,13 @@ Material:
     - _LinkDetailsWithBase: 1
     - _METALNESS: 0
     - _MaterialID: 1
-    - _Metallic: 0.4
+    - _Metallic: 0
     - _MetallicRemapMax: 0
     - _MetallicRemapMin: 0
     - _Mode: 0
     - _NormalMapSpace: 0
     - _NormalScale: 0.3
-    - _OcclusionStrength: 0.62
+    - _OcclusionStrength: 1
     - _OpaqueCullMode: 2
     - _PPDLodThreshold: 5
     - _PPDMaxSamples: 15
@@ -403,7 +403,7 @@ Material:
     - _BaseColor: {r: 0.8208343, g: 0.8679245, b: 0.70825917, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _COAT_COLOR: {r: 0, g: 0, b: 0, a: 0}
-    - _Color: {r: 0.7924528, g: 0.77369845, b: 0.42986828, a: 1}
+    - _Color: {r: 0.8679245, g: 0.8408794, b: 0.42168033, a: 1}
     - _DiffusionProfileAsset: {r: 0, g: 0, b: 0, a: 0}
     - _DoubleSidedConstants: {r: 1, g: 1, b: 1, a: 0}
     - _EMISSION_COLOR: {r: 0, g: 0, b: 0, a: 0}

@@ -11,7 +11,7 @@ public class InfLevelGenerator : MonoBehaviour
     public bool gen_enabled;
 
 
-    public List<entityAttack> entities;
+    
     public Dictionary<Vector3, entityAttack> entitiesInScene;
 
     [HideInInspector]
@@ -32,6 +32,7 @@ public class InfLevelGenerator : MonoBehaviour
     public int chunk_height;
 
     //chunks can be dynamically added and removed therefore there is no point in making it a 2d array
+    //chunks can be dynamically added and removed therefore there is no point in making it a 2d array
     public List<NoiseGenMap> chunks;
 
     [Range(1.0f, 5.0f)]
@@ -48,20 +49,6 @@ public class InfLevelGenerator : MonoBehaviour
         UpdateChunks();
     }
     
-
-    //entity spawning logic
-    IEnumerator trySpawnEntites()
-    {
-        while (true) { 
-
-            if (UnityEngine.Random.value >= 0.98f && entities != null)
-                Instantiate(entities[0], GameSettings.Instance.Player.transform.position + new Vector3(UnityEngine.Random.Range(-50, 50) + UnityEngine.Random.Range(0, 15), 3, UnityEngine.Random.Range(-50, 50) + UnityEngine.Random.Range(0, 15)), Quaternion.identity);
-
-            yield return new WaitForSeconds(0.5f);
-            Debug.Log("Attempting to spawn entity");
-        }
-        
-    }
     public void ScriptInit()
     {
        

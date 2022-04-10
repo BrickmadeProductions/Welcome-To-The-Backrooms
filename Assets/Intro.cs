@@ -26,7 +26,7 @@ public class Intro : MonoBehaviour
     // Update is called once per frame
     IEnumerator playIntro()
     {
-        yield return new WaitForSeconds(8f);
+        yield return new WaitForSeconds(13.6f);
         GameSettings.Instance.LoadScene("HomeScreen");
     }
 }
