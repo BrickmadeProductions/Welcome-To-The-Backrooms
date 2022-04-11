@@ -9,7 +9,7 @@ public class DistanceChecker : MonoBehaviour
     public int GetDistanceTraveled() { return getDistanceTraveled(); }
     public float GetAverageSpeed() { return distanceTraveled / timePassed; }
 
-    float distanceTraveled = 0f;
+    public float distanceTraveled = 0f;
     int metersTraveled = 0;
     float timePassed = 0f;
 

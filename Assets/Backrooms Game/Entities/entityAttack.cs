@@ -5,13 +5,15 @@ using UnityEngine;
 public class entityAttack : MonoBehaviour
 {
     public bool InHitbox;
+    public int dammage;
+    public float sanityMultiplier;
 
     private IEnumerator attackFunc()
     {
         while (InHitbox == true)
         {
-            GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.health -= 2;
-            GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.sanity *= 0.95f;
+            GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.health -= dammage;
+            GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.sanity *= sanityMultiplier;
 
             Debug.Log("Health: " + GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.health);
             Debug.Log("Sanity: " + GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.sanity);
@@ -23,15 +25,6 @@ public class entityAttack : MonoBehaviour
         }
     }
 
-    /*
-    public void OnTriggerStay(Collider other)
-    {
-        Debug.Log("Trigger");
-        InHitbox = true;
-    }
-
-    */
-
     public void Update()
     {
         Debug.Log("PlayerInTrigger:  " + InHitbox);
@@ -41,7 +34,10 @@ public class entityAttack : MonoBehaviour
     {
 
         InHitbox = true;
-        StartCoroutine(attackFunc());
+        if(other.gameObject.tag == "Player")
+        {
+            StartCoroutine(attackFunc());
+        }
         Debug.Log("StartCoroutine");
 
     }
