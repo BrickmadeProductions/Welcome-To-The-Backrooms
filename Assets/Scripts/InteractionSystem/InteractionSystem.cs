@@ -28,7 +28,8 @@ public class InteractionSystem : MonoBehaviour
 
     int inventoryLimit = 2;
     int currentSelectedInventorySlot = 0;
-    
+
+    bool inventoryOpened = false;
     
     
     PlayerController player;
@@ -45,18 +46,53 @@ public class InteractionSystem : MonoBehaviour
         inventorySlots = new List<HoldableObject>();
         player = GetComponent<PlayerController>();
     }
+
+    void setAllChildrenToLayer(Transform top, int layer)
+    {
+        foreach (Transform child in top)
+        {
+            if (child.childCount > 0)
+            {
+                child.gameObject.layer = layer;
+                setAllChildrenToLayer(child, layer);
+
+            }
+            else
+            {
+                child.gameObject.layer = layer;
+            }
+
+        }
+    }
+
+    void InventoryManager()
+    {
+        if (Input.GetButtonDown("Inventory"))
+        {
+            if (inventoryOpened)
+            {
+                player.Crouch();
+                inventoryOpened = false;
+            }
+            else
+            {
+                player.UnCrouch();
+                inventoryOpened = true;
+            }
+        }
+        
+
+    }
+
     void PickupSystem()
     {
         //pickup (hold)
-        if (player.holding == null && Input.GetButton("Hold") && currentlyLookingAt != null)
+        if (player.holding == null && Input.GetButton("Hold") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
         { 
             player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
 
             player.holding.gameObject.layer = 13;
-            foreach (Transform child in player.holding.transform)
-            {
-                child.gameObject.layer = 13;
-            }
+            setAllChildrenToLayer(player.holding.transform, 13);
         }
 
         //throw
@@ -64,10 +100,8 @@ public class InteractionSystem : MonoBehaviour
         {
             
             player.holding.gameObject.layer = 9;
-            foreach (Transform child in player.holding.transform)
-            {
-                child.gameObject.layer = 9;
-            }
+            setAllChildrenToLayer(player.holding.transform, 9);
+
             player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
 
             player.holding.transform.parent = null;
@@ -97,10 +131,8 @@ public class InteractionSystem : MonoBehaviour
         else if (Input.GetButtonDown("Drop") && player.holding != null)
         {
             player.holding.gameObject.layer = 9;
-            foreach (Transform child in player.holding.transform)
-            {
-                child.gameObject.layer = 9;
-            }
+            setAllChildrenToLayer(player.holding.transform, 9);
+
             player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
 
             player.holding.transform.parent = null;
@@ -142,8 +174,8 @@ public class InteractionSystem : MonoBehaviour
 
             if (player.holding.GetComponent<HoldableObject>().large)
             {
-                player.playerHealth.canRun = false;
-                player.currentPlayerState = PlayerController.PLAYERSTATES.WALK;
+                //player.playerHealth.canRun = false;
+                //player.currentPlayerState = PlayerController.PLAYERSTATES.WALK;
 
                 player.bodyAnim.SetBool("isHoldingLarge", true);
             }
@@ -178,10 +210,8 @@ public class InteractionSystem : MonoBehaviour
         if (Input.GetButtonDown("Drop") && inventorySlots.Count > 0)
         {
             player.holding.gameObject.layer = 9;
-            foreach (Transform child in player.holding.transform)
-            {
-                child.gameObject.layer = 9;
-            }
+            setAllChildrenToLayer(player.holding.transform, 9);
+
             dropInventoryObject();
         }
     }

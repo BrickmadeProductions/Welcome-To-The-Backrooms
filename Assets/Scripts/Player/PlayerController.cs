@@ -82,7 +82,6 @@ public class PlayerController : MonoBehaviour
         RUN = 3,
         JUMP = 4,
         IMMOBILE = 5
-
     }
 
     public PLAYERSTATES currentPlayerState = PLAYERSTATES.IDLE;
@@ -152,6 +151,18 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    public void Crouch()
+    {
+        head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition - new Vector3(0, 15, 0), Time.deltaTime);
+    }
+
+    public void UnCrouch()
+    {
+        head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition, Time.deltaTime);
+
+        head.transform.localRotation = Quaternion.Lerp(head.transform.localRotation, ogHeadTrans.localRotation, Time.deltaTime);
+
+    }
     private void LateUpdate()
     {
         if (!dead && !pauseMenuOpen)
@@ -169,18 +180,12 @@ public class PlayerController : MonoBehaviour
 
                 if (Input.GetButton("Crouch"))
                 {
-                   
-                    head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition - new Vector3(0, 15, 0), Time.deltaTime);
-                   
 
+                    Crouch();
                 }
                 else
                 {
-                    
-
-                    head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition, Time.deltaTime);
-
-                    head.transform.localRotation = Quaternion.Lerp(head.transform.localRotation, ogHeadTrans.localRotation, Time.deltaTime);
+                    UnCrouch();                    
                 }
 
 
@@ -299,10 +304,10 @@ public class PlayerController : MonoBehaviour
         if (!characterController.isGrounded)
             currentPlayerState = PLAYERSTATES.JUMP;
 
-        if (Mathf.Abs(moveDirection.x) > 0.1f || Mathf.Abs(moveDirection.z) > 0.1f && currentPlayerState != PLAYERSTATES.JUMP)
+        if (Mathf.Abs(moveDirection.x) > 0.1f || Mathf.Abs(moveDirection.z) > 0.1f)
         {
 
-            if (Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("D") && Input.GetButton("Run") && playerHealth.canRun )
+            if ((Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("D")) && Input.GetButton("Run") && playerHealth.canRun)
             {
                 bodyAnim.SetBool("isCrouching", false);
                 bodyAnim.SetBool("isWalking", false);
@@ -313,10 +318,9 @@ public class PlayerController : MonoBehaviour
 
             }
 
-            if ((Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("S") || Input.GetButton("D")) && !Input.GetButton("Run") && !Input.GetButton("Crouch") && playerHealth.canWalk)
+            else if ((Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("S") || Input.GetButton("D")) && playerHealth.canWalk)
             {
 
-                bodyAnim.SetBool("isCrouching", false);
                 bodyAnim.SetBool("isWalking", true);
                 bodyAnim.SetBool("isRunning", false);
                 bodyAnim.SetBool("isIdle", false);
@@ -326,7 +330,7 @@ public class PlayerController : MonoBehaviour
 
             }
 
-            if (Input.GetButton("Crouch") && playerHealth.canWalk)
+            if (Input.GetButton("Crouch") && playerHealth.canWalk && currentPlayerState != PLAYERSTATES.RUN)
             {
                 bodyAnim.SetBool("isCrouching", true);
                 bodyAnim.SetBool("isWalking", false);
@@ -344,9 +348,7 @@ public class PlayerController : MonoBehaviour
         {
 
             bodyAnim.SetBool("isCrouching", true);
-            bodyAnim.SetBool("isWalking", false);
             bodyAnim.SetBool("isRunning", false);
-            bodyAnim.SetBool("isIdle", false);
 
             currentPlayerState = PLAYERSTATES.CROUCH;
        
@@ -356,8 +358,8 @@ public class PlayerController : MonoBehaviour
         else
         {
             bodyAnim.SetBool("isCrouching", false);
-            bodyAnim.SetBool("isWalking", false);
             bodyAnim.SetBool("isRunning", false);
+            bodyAnim.SetBool("isWalking", false);
             bodyAnim.SetBool("isIdle", true);
 
             currentPlayerState = PLAYERSTATES.IDLE;
@@ -524,15 +526,15 @@ public class PlayerController : MonoBehaviour
         }
         if (playerHealth.heartRate >= 140)
         {
-            playerHealth.canJump = false;
-            playerHealth.canWalk = false;
-            playerHealth.canRun = false;
 
             currentPlayerState = PLAYERSTATES.IMMOBILE;
 
+            playerHealth.canJump = false;
             playerHealth.canWalk = false;
+            playerHealth.canRun = false;            
+
         }
-        else if (playerHealth.stamina >= 50 && playerHealth.heartRate < 100)
+        if (playerHealth.stamina >= 50 && playerHealth.heartRate < 100)
         {
             playerHealth.canJump = true;
             playerHealth.canRun = true;
@@ -629,8 +631,6 @@ public class PlayerController : MonoBehaviour
     {
         if (col.tag == "Enter1")
         {
-            
-
             GameSettings.Instance.LoadScene("Level 1");
         }
     }

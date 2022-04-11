@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 162047497364895038}
   m_LocalRotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: -0, y: 1, z: 0}
+  m_LocalPosition: {x: 0.013233724, y: 0.22165596, z: -0.082364954}
   m_LocalScale: {x: 1.0488334, y: 1.0488334, z: 0.95172536}
   m_Children: []
   m_Father: {fileID: 8327791197747540966}
@@ -107,7 +107,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5089581174438468109}
   m_LocalRotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: -0, y: 1, z: 0}
+  m_LocalPosition: {x: 0.013233724, y: 0.22165596, z: -0.082364954}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 8327791197747540966}
@@ -188,7 +188,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6239185709313815323}
   m_LocalRotation: {x: -0.670558, y: -0.011121542, z: -0.0061433734, w: 0.74174833}
-  m_LocalPosition: {x: 0.0067662755, y: 2.648344, z: -0.017635047}
+  m_LocalPosition: {x: 0.02, y: 1.87, z: -0.1}
   m_LocalScale: {x: 0.3315497, y: 0.48248065, z: 0.034101486}
   m_Children: []
   m_Father: {fileID: 8327791197747540966}
@@ -293,7 +293,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1.9706341, y: 2.7540312, z: 1.9718804}
-  m_Center: {x: -0.039159715, y: 1.3388338, z: 0.017112374}
+  m_Center: {x: -0.039159715, y: 0.47, z: 0.017112374}
 --- !u!54 &6002717535329537520
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -323,12 +323,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   durability: 0
-  breakablePrefab: {fileID: 0}
+  breakablePrefabs: []
+  hitClips: []
+  breakClips: []
   playSounds: 0
   inventoryWeight: 1
   holdableObject: {fileID: 0}
-  hitGroundClips:
-  - {fileID: 8300000, guid: 4864f038af1762b40a1008058d45dce4, type: 3}
+  large: 0
 --- !u!65 &1130512763043454471
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -341,7 +342,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 5, y: 5, z: 5}
-  m_Center: {x: 0, y: 1.33, z: 0}
+  m_Center: {x: 0, y: 1.06, z: 0}
 --- !u!82 &6768213791637214978
 AudioSource:
   m_ObjectHideFlags: 0
