@@ -93,11 +93,13 @@ GameObject:
   - component: {fileID: 4618818789321514102}
   - component: {fileID: 6533066443745741963}
   - component: {fileID: 3693248661749687413}
+  - component: {fileID: 6571218108610327320}
   - component: {fileID: 5278602852102931094}
   - component: {fileID: 5116661784154172053}
+  - component: {fileID: 1416917235703432808}
   m_Layer: 9
   m_Name: Chair
-  m_TagString: Wood
+  m_TagString: HoldableObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -114,7 +116,6 @@ Transform:
   m_LocalScale: {x: 23, y: 23, z: 23}
   m_Children:
   - {fileID: 8475160849458265341}
-  - {fileID: 1638309408685804896}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -242,7 +243,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  durability: 30
+  durability: 50
   breakablePrefabs:
   - {fileID: 1923194832838819152, guid: cd3bc0b72eb07034cb7cb889c0603ef7, type: 3}
   - {fileID: 7288439816490005900, guid: cf1624820f1d6824880367892b947330, type: 3}
@@ -261,6 +262,23 @@ MonoBehaviour:
   inventoryWeight: 1
   holdableObject: {fileID: 0}
   large: 1
+  animationPlaying: 0
+  animationClips: []
+  animationBools: []
+--- !u!114 &6571218108610327320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 241230107268624177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03be77203f75e634e86866193396b769, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damage: 10
+  connetedObject: {fileID: 3693248661749687413}
 --- !u!65 &5278602852102931094
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -285,64 +303,18 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.006051437, y: 0.04844517, z: 0.04}
-  m_Center: {x: 0.0058208336, y: 0.040340483, z: 0}
---- !u!1 &4179236201089351691
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1638309408685804896}
-  - component: {fileID: 9086892447293011202}
-  - component: {fileID: 3894823681198317364}
-  m_Layer: 11
-  m_Name: DammageCollider
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1638309408685804896
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4179236201089351691}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.018079134, y: 0.0221, z: -0.0017467451}
-  m_LocalScale: {x: 0.043478258, y: 0.043478258, z: 0.043478258}
-  m_Children: []
-  m_Father: {fileID: 581761694327403915}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &9086892447293011202
+  m_Size: {x: 0.00809507, y: 0.049170747, z: 0.04}
+  m_Center: {x: 0.0047990163, y: 0.040703274, z: 0}
+--- !u!65 &1416917235703432808
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4179236201089351691}
+  m_GameObject: {fileID: 241230107268624177}
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.48, y: 2.06, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3894823681198317364
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4179236201089351691}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03be77203f75e634e86866193396b769, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  InHitbox: 0
-  dammage: 10
+  m_Size: {x: 0.056440074, y: 0.09952989, z: 0.052192368}
+  m_Center: {x: -0.0132691655, y: 0.018952105, z: 0.0009513005}

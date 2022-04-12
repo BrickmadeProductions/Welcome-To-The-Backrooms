@@ -7,6 +7,10 @@ using UnityEngine.SceneManagement;
 
 public class GameSettings : MonoBehaviour
 {
+    private List<EntityAI> globalEntityList;
+
+    public List<EntityAI> GlobalEntityList { get { return globalEntityList; } set { globalEntityList = GlobalEntityList; } }
+
     private PostProcessVolume post;
 
     public PostProcessVolume Post { get { return post; } }
@@ -81,6 +85,10 @@ public class GameSettings : MonoBehaviour
 
     private bool fullScreen;
 
+    private bool pauseMenuOpen = false;
+
+    public bool PauseMenuOpen { get { return pauseMenuOpen; } }
+
     //graphics
     private bool vSyncEnabled;
     private bool antiAliasingEnabled;
@@ -120,6 +128,7 @@ public class GameSettings : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             SettingsScreen();
+            
         }
 
         
@@ -148,6 +157,8 @@ public class GameSettings : MonoBehaviour
     }
     void LoadDefaults()
     {
+        globalEntityList = new List<EntityAI>();
+
         post = GetComponent<PostProcessVolume>();
 
         ConnectPost();
@@ -224,6 +235,7 @@ public class GameSettings : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+        Time.timeScale = 1;
         mainScreen.transform.gameObject.SetActive(true);
         settingsScreen.transform.gameObject.SetActive(false);
     }
@@ -233,6 +245,7 @@ public class GameSettings : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+        Time.timeScale = 0;
         settingsScreen.transform.gameObject.SetActive(true);
         mainScreen.transform.gameObject.SetActive(false);
     }
@@ -241,6 +254,7 @@ public class GameSettings : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        Time.timeScale = 1;
         settingsScreen.transform.gameObject.SetActive(false);
         mainScreen.transform.gameObject.SetActive(false);
     }

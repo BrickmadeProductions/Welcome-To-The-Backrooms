@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class HoldableObject : InteractableObject
 {
@@ -9,6 +10,10 @@ public class HoldableObject : InteractableObject
     public Rigidbody holdableObject;
     bool broken;
     public bool large;
+    public bool animationPlaying;
+
+    public List<AnimationClip> animationClips;
+    public List<string> animationBools;
 
     // Start is called before the first frame update
     void Awake()
@@ -27,10 +32,28 @@ public class HoldableObject : InteractableObject
     {
         holdableObject.AddForceAtPosition(force, transform.position);
     }
-
+    IEnumerator playAnimation(string boolName, int animChosen)
+    {
+        GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, true);
+        animationPlaying = true;
+        yield return new WaitForSeconds(animationClips[animChosen].length);
+        animationPlaying = false;
+        GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, false);
+    }
     public override void Use(InteractionSystem player)
     {
 
+        if (!animationPlaying)
+        {
+            int animChosen = Random.Range(0, animationBools.Count);
+
+            StartCoroutine(playAnimation(animationBools[animChosen], animChosen));
+
+        }
+        
+            
+
+        
     }
 
     public override void Grab(InteractionSystem player)
@@ -110,8 +133,16 @@ public class HoldableObject : InteractableObject
     
     
 
-    private void FixedUpdate()
+    private void FixedUpdate() 
     {
+        if (SceneManager.GetActiveScene().name != "HomeScreen")
+
+            if (GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1)
+            {
+                GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Stab1", false);
+                GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Slice", false);
+            }
+        
         transform.position += pushAmt;
         pushAmt *= 0.95f; // fake friction
     }

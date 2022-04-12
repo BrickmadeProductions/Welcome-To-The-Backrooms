@@ -85,6 +85,11 @@ MonoBehaviour:
   inventoryWeight: 1
   holdableObject: {fileID: 7088627852523957309}
   large: 0
+  animationPlaying: 0
+  animationClips:
+  - {fileID: -7113424028858833629, guid: c3da10c4a15ca9244bab8ba9a82842e0, type: 3}
+  animationBools:
+  - Stab1
 --- !u!1 &7088627852977277467
 GameObject:
   m_ObjectHideFlags: 0
@@ -290,8 +295,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.454, y: 2.5, z: 0.454}
-  m_Center: {x: -0.04361674, y: 1.2702335, z: -0.009369987}
+  m_Size: {x: 0.454, y: 2.4422302, z: 0.454}
+  m_Center: {x: -0.043610696, y: 1.2413557, z: -0.009369985}
 --- !u!114 &3776288657296359871
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -304,4 +309,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03be77203f75e634e86866193396b769, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dammage: 15
+  damage: 15
+  connetedObject: {fileID: 7088627852523957308}

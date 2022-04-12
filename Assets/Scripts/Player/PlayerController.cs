@@ -94,7 +94,7 @@ public class PlayerController : MonoBehaviour
     public Vector3 moveDirection;
     public Vector3 velocity = Vector3.zero;
    
-    public bool pauseMenuOpen = false;
+    
 
     //ui
     public Canvas UI;
@@ -165,7 +165,7 @@ public class PlayerController : MonoBehaviour
     }
     private void LateUpdate()
     {
-        if (!dead && !pauseMenuOpen)
+        if (!dead && !GameSettings.Instance.PauseMenuOpen)
         {
 
             head.transform.rotation = Quaternion.Euler(rotationX, rotationY, 0);

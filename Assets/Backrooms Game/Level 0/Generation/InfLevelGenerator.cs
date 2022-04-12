@@ -12,7 +12,7 @@ public class InfLevelGenerator : MonoBehaviour
 
 
     
-    public Dictionary<Vector3, entityAttack> entitiesInScene;
+    //public Dictionary<Vector3, entityAttack> entitiesInScene;
 
     [HideInInspector]
     public bool isLoadingChunks = false;
@@ -33,7 +33,7 @@ public class InfLevelGenerator : MonoBehaviour
 
     //chunks can be dynamically added and removed therefore there is no point in making it a 2d array
     //chunks can be dynamically added and removed therefore there is no point in making it a 2d array
-    public List<NoiseGenMap> chunks;
+    public List<NoiseChunk> chunks;
 
     [Range(1.0f, 5.0f)]
     //in chunks
@@ -56,7 +56,7 @@ public class InfLevelGenerator : MonoBehaviour
         if (gen_enabled)
         {
             
-            chunks = new List<NoiseGenMap>();
+            chunks = new List<NoiseChunk>();
 
             currentRoomNumber = 0;
             currentChunkNumber = 0;
@@ -98,7 +98,7 @@ public class InfLevelGenerator : MonoBehaviour
 
         for (int i = chunks.Count - 1; i >= 0 ; i--)
         {
-            NoiseGenMap chunk = chunks[i];
+            NoiseChunk chunk = chunks[i];
 
             if (Vector2.Distance(new Vector2(chunk.posX, chunk.posZ), new Vector2(GetChunkAtPlayerLocation().posX, GetChunkAtPlayerLocation().posZ)) > viewDistance)
             {
@@ -135,10 +135,10 @@ public class InfLevelGenerator : MonoBehaviour
             GameObject chunk = Instantiate(level_chunkGenerator);
 
             chunk.name = chunkX + ", " + chunkZ;
-            chunk.GetComponent<NoiseGenMap>().SetChunkVariables(chunkX, chunkZ, chunkIndex, chunk_width, chunk_height);
+            chunk.GetComponent<NoiseChunk>().SetChunkVariables(chunkX, chunkZ, chunkIndex, chunk_width, chunk_height);
             chunk.transform.position = new Vector3(chunkX * ChunkSize(), 0, chunkZ * ChunkSize());
 
-            chunks.Add(chunk.GetComponent<NoiseGenMap>());
+            chunks.Add(chunk.GetComponent<NoiseChunk>());
 
             return true;
 
@@ -197,7 +197,7 @@ public class InfLevelGenerator : MonoBehaviour
 
     public bool IsChunkGeneratedAtPosition(int x, int y)
     {
-        foreach (NoiseGenMap c in chunks)
+        foreach (NoiseChunk c in chunks)
         {
             if ((int)c.posX == x && (int)c.posZ == y)
             {
@@ -228,14 +228,14 @@ public class InfLevelGenerator : MonoBehaviour
     }
     public float ChunkSize()
     {
-        return level_chunkGenerator.GetComponent<NoiseGenMap>().size * chunk_width;
+        return level_chunkGenerator.GetComponent<NoiseChunk>().size * chunk_width;
     }
-    public NoiseGenMap GetChunkAtPlayerLocation()
+    public NoiseChunk GetChunkAtPlayerLocation()
 
     {
         
 
-        foreach (NoiseGenMap c in chunks)
+        foreach (NoiseChunk c in chunks)
         {
             
             if (c != null)
@@ -259,10 +259,10 @@ public class InfLevelGenerator : MonoBehaviour
         
     }
 
-    NoiseGenMap GetChunkAtlLocation(int x, int z)
+    NoiseChunk GetChunkAtlLocation(int x, int z)
 
     {
-        foreach (NoiseGenMap c in chunks)
+        foreach (NoiseChunk c in chunks)
         {
 
             if (c.posX == x && c.posZ == z)

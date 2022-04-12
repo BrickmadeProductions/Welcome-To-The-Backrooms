@@ -145,8 +145,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.95370597, y: 5.902047, z: 0.35374433}
-  m_Center: {x: -0.14454253, y: 1.1131384, z: 0.065944046}
+  m_Size: {x: 0.95370597, y: 5.902047, z: 0.23780338}
+  m_Center: {x: -0.14454249, y: 1.1131384, z: 0.00797356}
 --- !u!114 &2139753846115895302
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167,6 +167,13 @@ MonoBehaviour:
   inventoryWeight: 1
   holdableObject: {fileID: 0}
   large: 0
+  animationPlaying: 0
+  animationClips:
+  - {fileID: -7113424028858833629, guid: c3da10c4a15ca9244bab8ba9a82842e0, type: 3}
+  - {fileID: -1137777096495922415, guid: c3da10c4a15ca9244bab8ba9a82842e0, type: 3}
+  animationBools:
+  - Stab1
+  - Slice
 --- !u!1 &1932414967620199583
 GameObject:
   m_ObjectHideFlags: 0
@@ -260,7 +267,7 @@ GameObject:
   - component: {fileID: 7415084982289359979}
   - component: {fileID: 4994370466832655447}
   m_Layer: 11
-  m_Name: DammageCollider
+  m_Name: DamageCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -291,8 +298,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.0035539302, y: 0.02, z: 0.03}
-  m_Center: {x: -0.001393625, y: -0.0051599797, z: 0.025}
+  m_Size: {x: 0.00355393, y: 0.015754018, z: 0.041428205}
+  m_Center: {x: -0.0013936259, y: -0.0054491465, z: 0.03071376}
 --- !u!114 &4994370466832655447
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -305,8 +312,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03be77203f75e634e86866193396b769, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  InHitbox: 0
-  dammage: 25
+  damage: 15
+  connetedObject: {fileID: 2139753846115895302}
 --- !u!1 &4310614810654234118
 GameObject:
   m_ObjectHideFlags: 0

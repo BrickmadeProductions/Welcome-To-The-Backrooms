@@ -49,6 +49,8 @@ public class InteractionSystem : MonoBehaviour
 
     void setAllChildrenToLayer(Transform top, int layer)
     {
+        top.gameObject.layer = layer;
+
         foreach (Transform child in top)
         {
             if (child.childCount > 0)
@@ -91,15 +93,18 @@ public class InteractionSystem : MonoBehaviour
         { 
             player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
 
-            player.holding.gameObject.layer = 13;
-            setAllChildrenToLayer(player.holding.transform, 13);
+            if (player.holding.GetComponent<HoldableObject>().large)
+                setAllChildrenToLayer(player.holding.transform, 14);
+            else
+            {
+                setAllChildrenToLayer(player.holding.transform, 13);
+            }
         }
 
         //throw
         if (Input.GetButtonDown("Throw") && player.holding != null && (player.head.transform.localRotation.x * Mathf.Rad2Deg < 15 || !player.holding.GetComponent<HoldableObject>().large))
         {
             
-            player.holding.gameObject.layer = 9;
             setAllChildrenToLayer(player.holding.transform, 9);
 
             player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
@@ -130,7 +135,6 @@ public class InteractionSystem : MonoBehaviour
         //drop (hold)
         else if (Input.GetButtonDown("Drop") && player.holding != null)
         {
-            player.holding.gameObject.layer = 9;
             setAllChildrenToLayer(player.holding.transform, 9);
 
             player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
@@ -209,10 +213,15 @@ public class InteractionSystem : MonoBehaviour
         //drop (inventory)
         if (Input.GetButtonDown("Drop") && inventorySlots.Count > 0)
         {
-            player.holding.gameObject.layer = 9;
             setAllChildrenToLayer(player.holding.transform, 9);
 
             dropInventoryObject();
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (player.holding != null)
+                player.holding.Use(this);
         }
     }
 
@@ -229,7 +238,7 @@ public class InteractionSystem : MonoBehaviour
         
         if (hits.Length > 0)
         {
-            Debug.Log(hits[0].collider.name + " " + hits[0].collider.gameObject.layer + " ");
+            //Debug.Log(hits[0].collider.name + " " + hits[0].collider.gameObject.layer + " ");
 
             if (hits[0].collider.GetComponent<HoldableObject>() != null && (hits[0].collider.gameObject.layer == 9))
             {

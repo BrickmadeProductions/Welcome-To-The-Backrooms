@@ -4,16 +4,18 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
-    public int dammage;
+    public int damage;
+    public HoldableObject connetedObject;
 
     public void OnTriggerEnter(Collider other)
     {
 
-        if (other.gameObject.tag == "Entity")
+        if (other.gameObject.tag == "Entity" && gameObject.layer == 13 && connetedObject.animationPlaying) //13 is the layer the player holds items in their hand
         {
-            other.gameObject.GetComponent<EntityStats>().health -= dammage;
+            Debug.Log("Player Attack");
+            other.gameObject.GetComponent<EntityStats>().health -= damage;
         }
-        Debug.Log("StartCoroutine");
+        
 
     }
 

@@ -2,39 +2,80 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PartygoerAI : MonoBehaviour
+public class PartygoerAI : EntityAI
 {
-    // The target marker.
-    private Transform target;
-
     // Angular speed in radians per sec.
-    public float speed = 1.0f;
+    public float speed;
+    private Transform Target;
 
-    private IEnumerator attackFunc()
+    public override IEnumerator attackFunc()
     {
         while (true)
         {
+            if (canAttack)
+            {
 
-            target = GameSettings.Instance.Player.transform;
+                Target = GameSettings.Instance.Player.transform;
 
-            Vector3 targetDirection = target.transform.position - transform.position;
-            float singleStep = speed * Time.deltaTime;
-            Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetDirection, singleStep, 0.0f);
-            transform.rotation = Quaternion.LookRotation(newDirection);
+                foreach (Collider box in attackHitboxs)
+                    box.enabled = true;
 
-            // Move our position a step closer to the target.
-            float step = speed * Time.deltaTime; // calculate distance to move
-            transform.position = Vector3.MoveTowards(transform.position, target.position, step);
 
-            transform.position = new Vector3(transform.position.x, 0f, transform.position.z);
-            transform.rotation = new Quaternion(0, transform.rotation.y, 0, transform.rotation.w);
+                float step = speed * Time.deltaTime;
+                transform.position = Vector3.MoveTowards(transform.position, Target.position + new Vector3(Random.Range(-2f, 2f), 0, Random.Range(-2f, 2f)), step);
 
-            yield return new WaitForSeconds(2);
+                transform.position = new Vector3(transform.position.x, 0.1f, transform.position.z);
+                
+
+                Vector3 targetDirection = Target.transform.position - transform.position;
+                float singleStep = speed * Time.deltaTime;
+                Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetDirection, singleStep, 0.0f);
+                transform.rotation = Quaternion.LookRotation(newDirection);
+
+                transform.rotation = new Quaternion(0, transform.rotation.y, 0, transform.rotation.w);
+
+                int twitchPhase = Random.Range(0, 3);
+                int twitchNoise = Random.Range(0, noises.Length);
+
+                noiseSource.clip = noises[twitchPhase];
+                noiseSource.pitch = Random.Range(0.9f, 1.1f);
+                noiseSource.Play();
+
+                //only twitch towards player if farther than 15 units
+                if (Vector3.Distance(Target.position, transform.position) > 5)
+                {
+                    entityAnimator.SetBool("Twitch" + twitchPhase, true);
+
+                    yield return new WaitForSeconds(3f);
+
+                    //ambient
+                    GetComponent<AudioSource>().pitch = Random.Range(0.5f, 1.2f);
+
+                    entityAnimator.SetBool("Twitch" + twitchPhase, false);
+                }
+                else
+                {
+                    entityAnimator.SetBool("Twitch0", false);
+                    entityAnimator.SetBool("Twitch1", false);
+                    entityAnimator.SetBool("Twitch2", false);
+                    entityAnimator.SetBool("Twitch3", false);
+
+                    yield return new WaitForSeconds(3f);
+
+                    entityAnimator.SetBool("Attack", true);
+                }
+                
+
+                foreach (Collider box in attackHitboxs)
+                    box.enabled = true;
+            }
+            else
+            {
+                yield return new WaitForSeconds(3f);
+            }
+
         }
     }
 
-    void Start()
-    {
-        StartCoroutine(attackFunc());
-    }
+    
 }
