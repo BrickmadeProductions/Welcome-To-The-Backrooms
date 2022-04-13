@@ -31,9 +31,12 @@ public class PlayerController : MonoBehaviour
     public GameObject holdLocation;
     public HoldableObject holding;
 
+    public GameObject arms;
+
     //player parts
     public Camera playerCamera;
     public Camera animatorCamera;
+
     public GameObject head;
     public GameObject feet;
     public GameObject death;

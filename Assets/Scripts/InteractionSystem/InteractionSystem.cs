@@ -178,14 +178,15 @@ public class InteractionSystem : MonoBehaviour
 
             if (player.holding.GetComponent<HoldableObject>().large)
             {
-                //player.playerHealth.canRun = false;
-                //player.currentPlayerState = PlayerController.PLAYERSTATES.WALK;
-
+                player.bodyAnim.SetBool("isHoldingSmall", false);
                 player.bodyAnim.SetBool("isHoldingLarge", true);
+                player.playerHealth.canRun = false;
+                player.currentPlayerState = PlayerController.PLAYERSTATES.WALK;
+                
             }
             else
             {
-                
+                player.bodyAnim.SetBool("isHoldingLarge", false);
                 player.bodyAnim.SetBool("isHoldingSmall", true);
             } 
                     
@@ -200,7 +201,7 @@ public class InteractionSystem : MonoBehaviour
         if (currentlyLookingAt != null && currentlyLookingAt.gameObject.tag == "Usable" && Input.GetButtonDown("Hold"))
         {
             Debug.Log("Use " + currentlyLookingAt.name);
-            currentlyLookingAt.Use(this);
+            currentlyLookingAt.Use(this, false);
         }
 
         //pickup (inventory)
@@ -221,84 +222,92 @@ public class InteractionSystem : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             if (player.holding != null)
-                player.holding.Use(this);
+                player.holding.Use(this, true);
+        }
+        else if (Input.GetMouseButtonDown(1))
+        {
+            if (player.holding != null)
+                player.holding.Use(this, false);
         }
     }
 
     void Update()
     {
-
         //==============//
         //holding system//
         //==============//
-        Debug.DrawRay(player.playerCamera.transform.position, player.playerCamera.transform.forward * 2f, Color.red);
 
-        //test for a holdable object
-        RaycastHit[] hits = Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 2f, ~(1 << 11)).OrderBy(h => h.distance).ToArray(); ;
-        
-        if (hits.Length > 0)
+        if (!GameSettings.Instance.PauseMenuOpen)
         {
-            //Debug.Log(hits[0].collider.name + " " + hits[0].collider.gameObject.layer + " ");
+            Debug.DrawRay(player.playerCamera.transform.position, player.playerCamera.transform.forward * 2f, Color.red);
 
-            if (hits[0].collider.GetComponent<HoldableObject>() != null && (hits[0].collider.gameObject.layer == 9))
+            //test for a holdable object
+            RaycastHit[] hits = Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 2f, ~(1 << 11)).OrderBy(h => h.distance).ToArray(); ;
+
+            if (hits.Length > 0)
             {
+                //Debug.Log(hits[0].collider.name + " " + hits[0].collider.gameObject.layer + " ");
 
-                currentlyLookingAt = hits[0].collider.GetComponent<HoldableObject>();
-            
-
-            }
-
-            else if (hits[0].collider.GetComponent<InteractableDoor>() != null && (hits[0].collider.gameObject.layer == 10))
-            {
-
-                currentlyLookingAt = hits[0].collider.GetComponent<InteractableDoor>();
-
-            }
-            else
-            {
-                currentlyLookingAt = null;
-            }
-
-        }
-
-        else if (hits.Length == 0)
-        {
-            currentlyLookingAt = null;
-        }
-
-
-
-        if (currentlyLookingAt != null)
-        {
-            if (currentlyLookingAt.GetComponent<InteractableDoor>() != null || currentlyLookingAt.GetComponent<HoldableObject>() != null)
-            {
-
-                switch (currentlyLookingAt.gameObject.layer)
+                if (hits[0].collider.GetComponent<HoldableObject>() != null && (hits[0].collider.gameObject.layer == 9))
                 {
-                    case 9:
-                        pickup.gameObject.SetActive(true);
-                        break;
-                    case 10:
-                        open.gameObject.SetActive(true);
-                        break;
+
+                    currentlyLookingAt = hits[0].collider.GetComponent<HoldableObject>();
+
+
+                }
+
+                else if (hits[0].collider.GetComponent<InteractableDoor>() != null && (hits[0].collider.gameObject.layer == 10))
+                {
+
+                    currentlyLookingAt = hits[0].collider.GetComponent<InteractableDoor>();
+
+                }
+                else
+                {
+                    currentlyLookingAt = null;
                 }
 
             }
 
+            else if (hits.Length == 0)
+            {
+                currentlyLookingAt = null;
+            }
+
+
+
+            if (currentlyLookingAt != null)
+            {
+                if (currentlyLookingAt.GetComponent<InteractableDoor>() != null || currentlyLookingAt.GetComponent<HoldableObject>() != null)
+                {
+
+                    switch (currentlyLookingAt.gameObject.layer)
+                    {
+                        case 9:
+                            pickup.gameObject.SetActive(true);
+                            break;
+                        case 10:
+                            open.gameObject.SetActive(true);
+                            break;
+                    }
+
+                }
+
+            }
+
+            else
+            {
+
+                pickup.gameObject.SetActive(false);
+
+                open.gameObject.SetActive(false);
+
+
+
+            }
+
+            PickupSystem();
         }
-
-        else
-        {
-
-            pickup.gameObject.SetActive(false);
-
-            open.gameObject.SetActive(false);
-
-
-
-        }
-
-        PickupSystem();
 
         
     }

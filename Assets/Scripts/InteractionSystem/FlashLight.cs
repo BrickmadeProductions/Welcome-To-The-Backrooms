@@ -27,7 +27,7 @@ public class FlashLight : HoldableObject
         emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
 
     }
-    public override void Use(InteractionSystem player)
+    public override void Use(InteractionSystem player, bool LMB)
     {
         on = !on;
 

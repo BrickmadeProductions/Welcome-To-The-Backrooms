@@ -199,9 +199,9 @@ public class NoiseChunk : MonoBehaviour
         if (SceneManager.GetActiveScene().name != "HomeScreen")
         {
 
-            if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 1000
+            if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 750
 
-            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 250
+            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 500
 
             && noClipWallChance > 0.995)
             {
@@ -217,11 +217,11 @@ public class NoiseChunk : MonoBehaviour
             {
                 tile = Instantiate(tile_prefab, gameObject.transform);
 
-                GameObject entity = Instantiate(entities[Random.Range(0, entities.Count)]);
-
-                GameSettings.Instance.GlobalEntityList.Add(entity.GetComponent<EntityAI>());
-
-                entity.transform.position = gameObject.transform.position;
+                if (entities.Count <= 2) // keep total entities around you under 2
+                {
+                    GameSettings.Instance.AddEntity(gameObject.transform, entities[Random.Range(0, entities.Count)].GetComponent<Entity>());
+                }
+                
             }
 
             else

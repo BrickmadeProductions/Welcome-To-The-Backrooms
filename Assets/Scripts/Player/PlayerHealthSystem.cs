@@ -24,8 +24,9 @@ public class PlayerHealthSystem : MonoBehaviour
     public bool canMoveHead = true;
     public bool awake = true;
 
-    Coroutine waking = null;
-    Coroutine sleeping = null;
+    public Coroutine waking = null;
+    public Coroutine sleeping = null;
+
     public Animator animator;
 
     public Text heartRateText;
@@ -50,19 +51,31 @@ public class PlayerHealthSystem : MonoBehaviour
 
         StartCoroutine(UpdateHealth());
 
+        //StartCoroutine(GetComponent<Blinking>().RandomBlinking());
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetButton("Blink"))
+        {
+            GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", true);
+        }
+        else if (Input.GetButtonUp("Blink"))
+        {
+            GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
+        }
     }
 
     public void WakeUp()
     {
         if (!awake)
+        {
+            StartCoroutine(GetComponent<Blinking>().WakeUp());
             waking = StartCoroutine(WakeUpSequence());
+        }
+            
     }
     public void Sleep()
     {
@@ -72,7 +85,10 @@ public class PlayerHealthSystem : MonoBehaviour
 
     IEnumerator WakeUpSequence()
     {
-        
+
+        animator.speed = 0.3f;
+        player.arms.SetActive(false);
+
         animator.SetBool("isSleeping", false);
         animator.SetBool("isWaking", true);
 
@@ -81,7 +97,11 @@ public class PlayerHealthSystem : MonoBehaviour
         player.animatorCamera.gameObject.SetActive(true);
         player.playerCamera.gameObject.SetActive(false);
 
-        yield return new WaitForSeconds(4.417f);
+        yield return new WaitForSeconds(4.417f * 1.95f);
+
+        animator.speed = 1;
+
+        yield return new WaitForSeconds(1.1f);
 
         player.gameObject.transform.position = new Vector3(2.668f, 2.997f, 1.12f);
         player.animatorCamera.gameObject.SetActive(false);
@@ -91,6 +111,7 @@ public class PlayerHealthSystem : MonoBehaviour
 
         awake = true;
 
+        player.arms.SetActive(true);
 
     }
 

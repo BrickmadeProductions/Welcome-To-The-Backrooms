@@ -2,32 +2,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PartygoerAI : EntityAI
+public class PartygoerAI : Entity
 {
     // Angular speed in radians per sec.
     public float speed;
-    private Transform Target;
 
+    public override void Despawn()
+    {
+        Destroy(this);
+    }
     public override IEnumerator attackFunc()
     {
         while (true)
         {
             if (canAttack)
             {
-
-                Target = GameSettings.Instance.Player.transform;
-
                 foreach (Collider box in attackHitboxs)
                     box.enabled = true;
 
 
                 float step = speed * Time.deltaTime;
-                transform.position = Vector3.MoveTowards(transform.position, Target.position + new Vector3(Random.Range(-2f, 2f), 0, Random.Range(-2f, 2f)), step);
+                transform.position = Vector3.MoveTowards(transform.position, GameSettings.Instance.Player.transform.position + new Vector3(Random.Range(-2f, 2f), 0, Random.Range(-2f, 2f)), step);
 
                 transform.position = new Vector3(transform.position.x, 0.1f, transform.position.z);
                 
 
-                Vector3 targetDirection = Target.transform.position - transform.position;
+                Vector3 targetDirection = GameSettings.Instance.Player.transform.transform.position - transform.position;
                 float singleStep = speed * Time.deltaTime;
                 Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetDirection, singleStep, 0.0f);
                 transform.rotation = Quaternion.LookRotation(newDirection);
@@ -42,18 +42,27 @@ public class PartygoerAI : EntityAI
                 noiseSource.Play();
 
                 //only twitch towards player if farther than 15 units
-                if (Vector3.Distance(Target.position, transform.position) > 5)
+                /*if (Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > 5)
                 {
                     entityAnimator.SetBool("Twitch" + twitchPhase, true);
 
-                    yield return new WaitForSeconds(3f);
+                    yield return new WaitForSeconds(1f);
 
                     //ambient
                     GetComponent<AudioSource>().pitch = Random.Range(0.5f, 1.2f);
 
                     entityAnimator.SetBool("Twitch" + twitchPhase, false);
-                }
-                else
+                }*/
+                entityAnimator.SetBool("Twitch" + twitchPhase, true);
+
+                yield return new WaitForSeconds(1f);
+
+                //ambient
+                GetComponent<AudioSource>().pitch = Random.Range(0.5f, 1.2f);
+
+                entityAnimator.SetBool("Twitch" + twitchPhase, false);
+
+                /*else
                 {
                     entityAnimator.SetBool("Twitch0", false);
                     entityAnimator.SetBool("Twitch1", false);
@@ -63,8 +72,8 @@ public class PartygoerAI : EntityAI
                     yield return new WaitForSeconds(3f);
 
                     entityAnimator.SetBool("Attack", true);
-                }
-                
+                }*/
+
 
                 foreach (Collider box in attackHitboxs)
                     box.enabled = true;

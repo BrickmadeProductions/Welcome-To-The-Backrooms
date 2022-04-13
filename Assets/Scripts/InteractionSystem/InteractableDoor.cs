@@ -11,7 +11,7 @@ public class InteractableDoor : InteractableObject
         
     }
 
-    public override void Use(InteractionSystem player)
+    public override void Use(InteractionSystem player, bool LMB)
     {
         gameObject.GetComponent<Rigidbody>().AddForce(player.transform.forward * 2, ForceMode.Impulse);
         GameSettings.Instance.LoadScene("Level 0");

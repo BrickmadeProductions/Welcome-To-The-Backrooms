@@ -12,8 +12,11 @@ public class HoldableObject : InteractableObject
     public bool large;
     public bool animationPlaying;
 
-    public List<AnimationClip> animationClips;
-    public List<string> animationBools;
+    public List<AnimationClip> LMBAnimationClips;
+    public List<string> LMBAnimationBools;
+
+    public List<AnimationClip> RMBAnimationClips;
+    public List<string> RMBAnimationBools;
 
     // Start is called before the first frame update
     void Awake()
@@ -32,27 +35,42 @@ public class HoldableObject : InteractableObject
     {
         holdableObject.AddForceAtPosition(force, transform.position);
     }
-    IEnumerator playAnimation(string boolName, int animChosen)
+    IEnumerator playAnimation(string boolName, int animChosen, bool LMB)
     {
+        
         GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, true);
         animationPlaying = true;
-        yield return new WaitForSeconds(animationClips[animChosen].length);
+        if (LMB)
+            yield return new WaitForSeconds(LMBAnimationClips[animChosen].length);
+        else
+        {
+            yield return new WaitForSeconds(RMBAnimationClips[animChosen].length);
+        }
         animationPlaying = false;
         GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, false);
+        
     }
-    public override void Use(InteractionSystem player)
+    public override void Use(InteractionSystem player, bool LMB)
     {
 
         if (!animationPlaying)
         {
-            int animChosen = Random.Range(0, animationBools.Count);
+            //regular
+            if (LMB)
+            {
+                int animChosen = Random.Range(0, LMBAnimationBools.Count);
 
-            StartCoroutine(playAnimation(animationBools[animChosen], animChosen));
+                StartCoroutine(playAnimation(LMBAnimationBools[animChosen], animChosen, LMB));
+            }
+            //hard hit
+            else
+            {
+                int animChosen = Random.Range(0, RMBAnimationBools.Count);
+
+                StartCoroutine(playAnimation(RMBAnimationBools[animChosen], animChosen, LMB));
+            }
 
         }
-        
-            
-
         
     }
 
@@ -70,6 +88,7 @@ public class HoldableObject : InteractableObject
 
     Vector3 pushAmt; // global "pushed by RBs" accumulator
 
+    //breaking and other collisions
     private void OnCollisionEnter(Collision collision)
     {
 
@@ -135,14 +154,21 @@ public class HoldableObject : InteractableObject
 
     private void FixedUpdate() 
     {
-        if (SceneManager.GetActiveScene().name != "HomeScreen")
+        if (SceneManager.GetActiveScene().name != "HomeScreen" && SceneManager.GetActiveScene().name != "IntroSequence")
 
             if (GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1)
             {
-                GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Stab1", false);
-                GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Slice", false);
+                foreach (string anim in LMBAnimationBools)
+                {
+                    GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(anim, false);
+                }
+                foreach (string anim in RMBAnimationBools)
+                {
+                    GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(anim, false);
+                }
+
             }
-        
+
         transform.position += pushAmt;
         pushAmt *= 0.95f; // fake friction
     }

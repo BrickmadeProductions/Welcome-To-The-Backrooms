@@ -6215,7 +6215,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6172414190686351424}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 264428577078894348}
@@ -6236,6 +6236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06a184180caf2fc498a95f7824ec001e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  type: 67
   attackHitboxs:
   - {fileID: 8131789114843621237}
   - {fileID: 7003642056744562687}
@@ -6246,7 +6247,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: b1f3fcda874d5464ab823ee1627ad3ad, type: 3}
   - {fileID: 8300000, guid: 0b49c059700a97e4f9be4c9c1d0bdaac, type: 3}
   noiseSource: {fileID: 5895150748535646049}
-  speed: 500
+  maxAllowed: 2
+  despawnDistance: 500
+  speed: 250
 --- !u!114 &7937651569654579243
 MonoBehaviour:
   m_ObjectHideFlags: 0

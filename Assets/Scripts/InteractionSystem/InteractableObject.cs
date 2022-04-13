@@ -13,7 +13,7 @@ public abstract class InteractableObject : MonoBehaviour
 
     public abstract void Throw(Vector3 force);
 
-    public abstract void Use(InteractionSystem player);
+    public abstract void Use(InteractionSystem player, bool LMB);
 
     public abstract void Grab(InteractionSystem player);
 

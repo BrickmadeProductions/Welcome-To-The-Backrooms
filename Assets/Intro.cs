@@ -10,6 +10,7 @@ public class Intro : MonoBehaviour
     void Start()
     {
         introC = StartCoroutine(playIntro());
+        
     }
 
     private void Update()

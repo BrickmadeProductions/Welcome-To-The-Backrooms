@@ -35,9 +35,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Ceiling
   m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-  m_ShaderKeywords: _DETAIL_MULX2 _DISABLE_DECALS _DISABLE_SSR _DISABLE_SSR_TRANSPARENT
-    _ENVIRONMENTREFLECTIONS_OFF _GLOSSYREFLECTIONS_OFF _METALLICGLOSSMAP _NORMALMAP
-    _NORMALMAP_TANGENT_SPACE _SPECULARHIGHLIGHTS_OFF
+  m_ShaderKeywords: _DETAIL_MULX2 _ENVIRONMENTREFLECTIONS_OFF _GLOSSYREFLECTIONS_OFF
+    _METALLICGLOSSMAP _METALLICSPECGLOSSMAP _NORMALMAP _OCCLUSIONMAP _SPECULARHIGHLIGHTS_OFF
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
@@ -74,9 +73,9 @@ Material:
         m_Scale: {x: 3.27, y: 2}
         m_Offset: {x: 0, y: 0}
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 756d6b4f6400c2a44b833058e6b7332e, type: 3}
-        m_Scale: {x: 4, y: 2}
-        m_Offset: {x: 0, y: 0}
+        m_Texture: {fileID: 2800000, guid: 59db83ef7e80ea341b6623b14a3ddf22, type: 3}
+        m_Scale: {x: 4.52, y: 3.99}
+        m_Offset: {x: -0.0017, y: 0}
     - _BentNormalMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -351,7 +350,7 @@ Material:
     - _RefractionModel: 0
     - _RenderQueueType: 1
     - _RequireSplitLighting: 0
-    - _Smoothness: 0.28
+    - _Smoothness: 0.22
     - _SmoothnessRemapMax: 1
     - _SmoothnessRemapMin: 0
     - _SmoothnessTextureChannel: 0
@@ -400,7 +399,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BASE_COLOR: {r: 1, g: 1, b: 1, a: 1}
-    - _BaseColor: {r: 0.8208343, g: 0.8679245, b: 0.70825917, a: 1}
+    - _BaseColor: {r: 0.8679245, g: 0.8408794, b: 0.4216803, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _COAT_COLOR: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 0.8679245, g: 0.8408794, b: 0.42168033, a: 1}

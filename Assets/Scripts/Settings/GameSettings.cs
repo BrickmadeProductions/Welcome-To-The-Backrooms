@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Rendering.PostProcessing;
@@ -7,9 +9,9 @@ using UnityEngine.SceneManagement;
 
 public class GameSettings : MonoBehaviour
 {
-    private List<EntityAI> globalEntityList;
+    private List<Entity> globalEntityList;
 
-    public List<EntityAI> GlobalEntityList { get { return globalEntityList; } set { globalEntityList = GlobalEntityList; } }
+    public List<Entity> GlobalEntityList { get { return globalEntityList; } set { globalEntityList = GlobalEntityList; } }
 
     private PostProcessVolume post;
 
@@ -79,7 +81,7 @@ public class GameSettings : MonoBehaviour
     public int FOV { get { return fov; } }
     public float Sensitivity { get { return sensitivity; } }
 
-    public Vector3 positionOffset = Vector3.zero;
+    public Vector2 positionOffset;
 
     private int sX, sY;
 
@@ -98,6 +100,8 @@ public class GameSettings : MonoBehaviour
     private bool motionBlurEnabled;
     private bool vignetteEnabled;
 
+    private int textureRes;
+
     //other settings
     private int fov;
     private float sensitivity;
@@ -114,7 +118,8 @@ public class GameSettings : MonoBehaviour
 
     public static bool LEVEL_LOADED = false;
 
-    
+    public bool IsCutScene { get { return cutScene; } }
+    private bool cutScene;
 
     public static GameSettings Instance
     {
@@ -128,17 +133,20 @@ public class GameSettings : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             SettingsScreen();
-            
+
         }
 
-        
+
     }
     void Awake()
     {
+        GameScreen();
         LoadDefaults();
 
         player = null;
-        
+
+        positionOffset = new Vector2(cursor.width / 2f - 40f, (cursor.height / 2f) - 100f);
+
         Cursor.SetCursor(cursor, positionOffset, CursorMode.Auto);
 
         m_referenceCount++;
@@ -152,12 +160,12 @@ public class GameSettings : MonoBehaviour
         // Use this line if you need the object to persist across scenes
         DontDestroyOnLoad(gameObject);
 
-        
+
 
     }
     void LoadDefaults()
     {
-        globalEntityList = new List<EntityAI>();
+        globalEntityList = new List<Entity>();
 
         post = GetComponent<PostProcessVolume>();
 
@@ -171,6 +179,8 @@ public class GameSettings : MonoBehaviour
         motionBlurEnabled = false;
         vignetteEnabled = true;
         fullScreen = true;
+
+        textureRes = 2048;
 
         sX = 1920;
         sY = 1080;
@@ -197,6 +207,7 @@ public class GameSettings : MonoBehaviour
         setFullscreen(fullScreen);
         setVSync(vSyncEnabled);
         setMotionBlur(motionBlurEnabled);
+        //setTextureRes(0);
     }
 
     void ConnectPost()
@@ -240,6 +251,7 @@ public class GameSettings : MonoBehaviour
         settingsScreen.transform.gameObject.SetActive(false);
     }
 
+
     public void SettingsScreen()
     {
 
@@ -273,12 +285,20 @@ public class GameSettings : MonoBehaviour
                 sY = 2160;
                 break;
             case 1:
+                sX = 2560;
+                sY = 1440;
+                break;
+            case 2:
                 sX = 1920;
                 sY = 1080;
                 break;
-            case 2:
+            case 3:
                 sX = 1280;
                 sY = 720;
+                break;
+            case 4:
+                sX = 640;
+                sY = 480;
                 break;
         }
 
@@ -286,10 +306,16 @@ public class GameSettings : MonoBehaviour
 
     }
 
+    public void setTextureRes(int res)
+    {
+        QualitySettings.masterTextureLimit = textureRes;
+
+    }
+
     public void setSensitivity(float sens)
     {
         sensitivity = sens;
-        
+
     }
 
     public void setFOV(float fov)
@@ -305,7 +331,7 @@ public class GameSettings : MonoBehaviour
     }
     public void setAmbientOcclusion(bool io)
     {
-        
+
         ambientOcclusion.active = io;
         ambientOcclusionEnabled = io;
         ConnectPost();
@@ -383,7 +409,7 @@ public class GameSettings : MonoBehaviour
                 break;
         }
         vSyncEnabled = io;
-       
+
     }
 
     void OnDestroy()
@@ -395,7 +421,7 @@ public class GameSettings : MonoBehaviour
         }
 
     }
-    
+
     public void LoadScene(string name)
     {
         LEVEL_LOADED = false;
@@ -408,7 +434,7 @@ public class GameSettings : MonoBehaviour
         }
 
     }
- 
+
     IEnumerator waitForSceneLoad(string name)
     {
         while (SceneManager.GetActiveScene().name != name)
@@ -421,6 +447,31 @@ public class GameSettings : MonoBehaviour
         {
             PostLoadScene(name);
         }
+    }
+
+    public void AddEntity(Transform location, Entity entity)
+    {
+        int typeAmountInGame = 0;
+
+        foreach (Entity e in globalEntityList)
+        {
+            if (e.type == entity.type)
+            {
+                typeAmountInGame++;
+            }
+        }
+
+        //only instatiate if under the amount allowed on the game, balancing reasons. Max 15 entities total around the player
+        if (typeAmountInGame <= entity.maxAllowed && globalEntityList.Count <= 10)
+        {
+            Instantiate(entity);
+            entity.transform.position = gameObject.transform.position;
+
+            globalEntityList.Add(entity);
+        }
+
+
+
     }
 
     void PostLoadScene(string name)
@@ -527,14 +578,14 @@ public class GameSettings : MonoBehaviour
 
                 break;
         }
-        
+
 
         LEVEL_LOADED = true;
 
         Debug.Log("Loaded " + name);
 
         LoadPost();
-        
+
     }
 
 
