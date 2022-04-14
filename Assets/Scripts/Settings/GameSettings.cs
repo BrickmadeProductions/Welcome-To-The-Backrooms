@@ -13,6 +13,10 @@ public class GameSettings : MonoBehaviour
 
     public List<Entity> GlobalEntityList { get { return globalEntityList; } set { globalEntityList = GlobalEntityList; } }
 
+    private List<Entity> globalObjectsList;
+
+    public List<Entity> GlobalObjectsList { get { return globalObjectsList; } set { globalObjectsList = GlobalObjectsList; } }
+
     private PostProcessVolume post;
 
     public PostProcessVolume Post { get { return post; } }
@@ -473,6 +477,7 @@ public class GameSettings : MonoBehaviour
 
 
     }
+
 
     void PostLoadScene(string name)
     {

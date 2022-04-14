@@ -465,7 +465,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 24300002, guid: 20bfa29a2ece3284f935fedf32737170, type: 2}
   m_audioClip: {fileID: 8300000, guid: ccde535e13ca208499c3619b46c46e65, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.426
+  m_Volume: 1
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -694,7 +694,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gen_enabled: 1
-  entities: []
   isLoadingChunks: 0
   currentRoomNumber: 0
   currentChunkNumber: 0
@@ -848,32 +847,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ed2d6bd42df37647905eb449fbfc749, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gen_enabled: 1
-  entities: []
-  isLoadingChunks: 0
-  currentRoomNumber: 0
-  currentChunkNumber: 0
-  oldPlayerChunkLocation: {x: 0, y: 0}
-  level_chunkGenerator: {fileID: 0}
-  chunk_width: 0
-  chunk_height: 0
-  chunks: []
-  viewDistance: 3
-  wall: {fileID: 6542349369525237753, guid: a10625d36d7b1e049ae10c3f715b1de5, type: 3}
-  floor: {fileID: 2959565249353865977, guid: 9a42a5e595b2a9d4ab165bf92bf7cf1d, type: 3}
-  ceilings:
-  - {fileID: 4172094681314513827, guid: 0d0f4d67897cd474fbe416e3e4557f41, type: 3}
-  - {fileID: 216508584417294522, guid: 9934aba765a894346ab7cdd7360da36c, type: 3}
-  - {fileID: 3379445275204148831, guid: 83179440feee54942b207b8db1eca085, type: 3}
-  exit: {fileID: 7361993401778087727, guid: eda69e3b3b78c2f45aa30a5984ea05ae, type: 3}
-  extraWalls:
-  - {fileID: 4140087585826680394, guid: bf7fccb46ccbe3b44b1a723507f4947b, type: 3}
-  - {fileID: 4612319930834085839, guid: 07e6f5f3c7a5eb24a8c71f5a32517bae, type: 3}
-  - {fileID: 1150824116968180064, guid: 22fc03ad6ae965e4e99b6fcef70a692d, type: 3}
-  - {fileID: 4529826254639836436, guid: dfea3f8d4fc76e544b7f90971af972aa, type: 3}
-  props:
-  - {fileID: 241230107268624177, guid: a6d82421082750949b31f75449e3460d, type: 3}
-  - {fileID: 8858197199751230024, guid: b95df38760cc2404ab6833f6a42b6266, type: 3}
 --- !u!4 &2100224720
 Transform:
   m_ObjectHideFlags: 0

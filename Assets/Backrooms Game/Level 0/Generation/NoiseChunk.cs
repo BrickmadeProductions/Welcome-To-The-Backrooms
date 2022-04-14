@@ -18,11 +18,13 @@ public class NoiseChunk : MonoBehaviour
     //tile types
     Dictionary<int, GameObject> tileset;
     public GameObject exit;
-    //Dictionary<int, GameObject> tile_groups;
 
     public List<GameObject> Tiles;
 
-    //entity tiles
+    //tiles with objects
+    public List<GameObject> specialTiles;
+
+    //entity tiles (types that can be created)
     public List<GameObject> entities;
 
     int chunk_width;
@@ -199,29 +201,39 @@ public class NoiseChunk : MonoBehaviour
         if (SceneManager.GetActiveScene().name != "HomeScreen")
         {
 
+            //noclip wall spawning
             if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 750
 
             && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 500
 
-            && noClipWallChance > 0.995)
+            && noClipWallChance > 0.995f)
             {
 
                 tile = Instantiate(exit, gameObject.transform);
             }
 
+            //entity spawning
             else if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 100
 
             && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 50
 
-            && entityChance > 0.999)
+            && entityChance > 0.999f)
             {
                 tile = Instantiate(tile_prefab, gameObject.transform);
 
-                if (entities.Count <= 2) // keep total entities around you under 2
-                {
-                    GameSettings.Instance.AddEntity(gameObject.transform, entities[Random.Range(0, entities.Count)].GetComponent<Entity>());
-                }
+                GameSettings.Instance.AddEntity(gameObject.transform, entities[Random.Range(0, entities.Count)].GetComponent<Entity>());
                 
+            }
+
+            //special or rare tiles
+            else if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 100
+
+            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 50
+
+            && entityChance > 0.85f)
+            {
+                tile = Instantiate(specialTiles[Random.Range(0, specialTiles.Count)]);                
+
             }
 
             else
