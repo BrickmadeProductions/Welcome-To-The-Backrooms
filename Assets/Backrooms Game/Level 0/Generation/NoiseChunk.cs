@@ -213,11 +213,11 @@ public class NoiseChunk : MonoBehaviour
             }
 
             //entity spawning
-            else if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 100
+            else if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 5
 
-            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 50
+            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 5
 
-            && entityChance > 0.999f)
+            && entityChance > 0.99f)
             {
                 tile = Instantiate(tile_prefab, gameObject.transform);
 
@@ -225,14 +225,10 @@ public class NoiseChunk : MonoBehaviour
                 
             }
 
-            //special or rare tiles
-            else if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 100
-
-            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 50
-
-            && entityChance > 0.85f)
+            //special tiles
+            if (entityChance > 0.97f)
             {
-                tile = Instantiate(specialTiles[Random.Range(0, specialTiles.Count)]);                
+                tile = Instantiate(specialTiles[Random.Range(0, specialTiles.Count)], gameObject.transform);                
 
             }
 

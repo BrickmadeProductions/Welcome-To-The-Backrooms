@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -10,11 +11,16 @@ public class DistanceChecker : MonoBehaviour
     public float GetAverageSpeed() { return distanceTraveled / timePassed; }
 
     public float distanceTraveled = 0f;
+
     int metersTraveled = 0;
+    public TextMeshProUGUI metersTraveledText;
+
     float timePassed = 0f;
 
     public Transform tx;
     Vector3 lastPosition;
+
+   
 
     void Start()
     {
@@ -31,7 +37,7 @@ public class DistanceChecker : MonoBehaviour
 
             metersTraveled = ((int)distanceTraveled / 3);
 
-            GetComponent<Text>().text = "Distance Traveled: " + metersTraveled + " Meters";
+            metersTraveledText.text = metersTraveled + " Meters";
         }
         
     }

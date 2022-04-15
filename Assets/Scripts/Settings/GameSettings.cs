@@ -466,7 +466,7 @@ public class GameSettings : MonoBehaviour
         }
 
         //only instatiate if under the amount allowed on the game, balancing reasons. Max 15 entities total around the player
-        if (typeAmountInGame <= entity.maxAllowed && globalEntityList.Count <= 10)
+        if (typeAmountInGame < entity.maxAllowed && globalEntityList.Count <= 10)
         {
             Instantiate(entity);
             entity.transform.position = gameObject.transform.position;
@@ -494,11 +494,11 @@ public class GameSettings : MonoBehaviour
 
                 post.profile = homeScreenRoomProfile;
 
-                player.transform.GetChild(0).GetComponents<AudioSource>()[1].clip = level0Ambience;
-                player.transform.GetChild(0).GetComponents<AudioSource>()[1].Play();
+                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
+                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
 
-                player.transform.GetChild(0).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-                player.transform.GetChild(1).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+                player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
                 master = level0Mixer;
 
                 GameScreen();
@@ -511,11 +511,11 @@ public class GameSettings : MonoBehaviour
 
                 post.profile = level0Profile;
 
-                player.transform.GetChild(0).GetComponents<AudioSource>()[1].clip = level0Ambience;
-                player.transform.GetChild(0).GetComponents<AudioSource>()[1].Play();
+                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
+                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
 
-                player.transform.GetChild(0).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-                player.transform.GetChild(1).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+                player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
                 master = level0Mixer;
 
                 GameScreen();
@@ -529,11 +529,11 @@ public class GameSettings : MonoBehaviour
                 post.profile = level1Profile;
 
 
-                player.transform.GetChild(0).GetComponents<AudioSource>()[1].clip = level1Ambience;
-                player.transform.GetChild(0).GetComponents<AudioSource>()[1].Play();
+                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level1Ambience;
+                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
 
-                player.transform.GetChild(0).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
-                player.transform.GetChild(1).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
+                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
+                player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
                 master = level1Mixer;
 
 
@@ -548,11 +548,11 @@ public class GameSettings : MonoBehaviour
                 post.profile = level2Profile;
 
 
-                player.transform.GetChild(0).GetComponents<AudioSource>()[1].clip = level1Ambience;
-                player.transform.GetChild(0).GetComponents<AudioSource>()[1].Play();
+                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level1Ambience;
+                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
 
-                player.transform.GetChild(0).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
-                player.transform.GetChild(1).GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
+                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
+                player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
                 master = level2Mixer;
 
 

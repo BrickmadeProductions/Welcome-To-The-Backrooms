@@ -24,7 +24,8 @@ public class ItemSway : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        if (transform.parent.parent.GetComponent<PlayerController>().currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE)
+        if (GameSettings.Instance.Player.GetComponent<PlayerController>().currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE 
+            && GameSettings.Instance.Player.GetComponent<PlayerController>().holding != null)
         {
             float movementX = -Input.GetAxis("Mouse X") / 4 * amount;
             float movementY = -Input.GetAxis("Mouse Y") * amount;
@@ -34,6 +35,10 @@ public class ItemSway : MonoBehaviour
 
             Vector3 finalPosition = new Vector3(movementX, movementY, 0);
             transform.localPosition = Vector3.Lerp(transform.localPosition, finalPosition + initialPosition, Time.deltaTime * smoothingAmount);
+        }
+        else
+        {
+            transform.localPosition = initialPosition;
         }
 
 

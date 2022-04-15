@@ -102,7 +102,7 @@ public class HeadBobber : MonoBehaviour
                 timer += Time.deltaTime * walkingBobbingSpeed;
 
 
-                if (!Input.GetButton("LeanLeft") && !Input.GetButton("LeanRight"))
+                if (!Input.GetButton("LeanLeft") && !Input.GetButton("LeanRight") && controller.currentPlayerState != PlayerController.PLAYERSTATES.WATCH)
                     transform.localPosition = new Vector3(Mathf.Lerp(prevPosX, defaultPosX + Mathf.Sin(timer / 10) * horizontalBobbingAmount, Time.deltaTime * 10), Mathf.Lerp(transform.localPosition.y, defaultPosY, Time.deltaTime * walkingBobbingSpeed), transform.localPosition.z);
                
                 prevPosX = transform.localPosition.x;

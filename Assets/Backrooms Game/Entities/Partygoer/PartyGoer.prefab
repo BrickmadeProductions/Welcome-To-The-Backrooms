@@ -6238,7 +6238,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 67
   attackHitboxs:
-  - {fileID: 8131789114843621237}
   - {fileID: 7003642056744562687}
   canAttack: 1
   entityAnimator: {fileID: 669922764369782365}
@@ -6249,7 +6248,8 @@ MonoBehaviour:
   noiseSource: {fileID: 5895150748535646049}
   maxAllowed: 2
   despawnDistance: 500
-  speed: 250
+  speed: 750
+  grabLocation: {fileID: 7128770136166274654}
 --- !u!114 &7937651569654579243
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6262,8 +6262,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a26506a098f71c34baaf9ad891d5992d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 20
-  health: 20
+  maxHealth: 40
+  health: 40
   agrivation: 0
   hunger: 0
 --- !u!136 &1630502107365177850
@@ -6590,6 +6590,36 @@ Transform:
   - {fileID: 5863758831100633285}
   m_Father: {fileID: 2036332363000513988}
   m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7128770136166274654
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7633057722113609283}
+  m_Layer: 0
+  m_Name: GrabLocation
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7633057722113609283
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7128770136166274654}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.004, y: 0.0064, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1554647884127686278}
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7315094167944906200
 GameObject:
@@ -7155,6 +7185,7 @@ Transform:
   - {fileID: 1701627257591333294}
   - {fileID: 5766593364718746694}
   - {fileID: 2289444686258599713}
+  - {fileID: 7633057722113609283}
   m_Father: {fileID: 7040629201389184103}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7184,8 +7215,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerInHitbox: 0
-  damage: 100
-  sanityMultiplier: 0
+  damage: 1
+  sanityMultiplier: 1
 --- !u!1 &9078237878604102067
 GameObject:
   m_ObjectHideFlags: 0
@@ -7226,8 +7257,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2036332363000513988}
-  - component: {fileID: 8131789114843621237}
-  - component: {fileID: 4260179374594045121}
   m_Layer: 0
   m_Name: LeftHand
   m_TagString: Untagged
@@ -7254,34 +7283,6 @@ Transform:
   m_Father: {fileID: 5923794549025551583}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &8131789114843621237
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9202484733367901172}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.0043134945, y: 0.01047636, z: 0.009813312}
-  m_Center: {x: 0.00082213874, y: 0.007496573, z: -0.0013534193}
---- !u!114 &4260179374594045121
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9202484733367901172}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 575d5c5a0f29fdb4eb55601cf787eb00, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerInHitbox: 0
-  damage: 100
-  sanityMultiplier: 0
 --- !u!1 &9212992769600946282
 GameObject:
   m_ObjectHideFlags: 0

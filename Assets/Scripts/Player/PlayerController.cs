@@ -19,6 +19,8 @@ public class PlayerController : MonoBehaviour
     float jumpSpeed = 6.0f;
     float gravity = 20.0f;
 
+    public bool grabbed = false;
+
     Coroutine run = null;
     Coroutine walk = null;
     Coroutine reviveHeartRate = null;
@@ -38,6 +40,7 @@ public class PlayerController : MonoBehaviour
     public Camera animatorCamera;
 
     public GameObject head;
+    public GameObject neck;
     public GameObject feet;
     public GameObject death;
     Transform ogHeadTrans;
@@ -84,7 +87,8 @@ public class PlayerController : MonoBehaviour
         CROUCH = 2,
         RUN = 3,
         JUMP = 4,
-        IMMOBILE = 5
+        WATCH = 5,
+        IMMOBILE = 6
     }
 
     public PLAYERSTATES currentPlayerState = PLAYERSTATES.IDLE;
@@ -121,21 +125,21 @@ public class PlayerController : MonoBehaviour
     }
 
         void Awake()
-    {
-        DontDestroyOnLoad(gameObject);
+        {
+            DontDestroyOnLoad(gameObject);
 
-        if (playerInstance == null)
-        {
-            playerInstance = this;
+            if (playerInstance == null)
+            {
+                playerInstance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+            //UI.transform.Find("PlayerID").GetComponent<Text>().text = "PlayerID: " + CreatePlayerData.playerID;
+            //UI.transform.Find("PlayerName").GetComponent<Text>().text = "PlayerName: " + CreatePlayerData.playerName;
+            //GetComponent<AudioSource>().playOnAwake = true;
         }
-        else
-        {
-            Destroy(gameObject);
-        }
-        //UI.transform.Find("PlayerID").GetComponent<Text>().text = "PlayerID: " + CreatePlayerData.playerID;
-        //UI.transform.Find("PlayerName").GetComponent<Text>().text = "PlayerName: " + CreatePlayerData.playerName;
-        //GetComponent<AudioSource>().playOnAwake = true;
-    }
 
     void Start()
     {
@@ -214,9 +218,6 @@ public class PlayerController : MonoBehaviour
             die();
         }
 
-        
-
-
         // Player and Camera rotation
         if (!dead && Cursor.lockState != CursorLockMode.None && playerHealth.canMoveHead)
         {
@@ -260,7 +261,7 @@ public class PlayerController : MonoBehaviour
             // Apply gravity. Gravity is multiplied by deltaTime twice (once here, and once below
             // when the moveDirection is multiplied by deltaTime). This is because gravity should be applied
             // as an acceleration (ms^-2)
-            if (!characterController.isGrounded)
+            if (!characterController.isGrounded && !grabbed)
             {
                 moveDirection.y -= gravity * Time.deltaTime;
             }
@@ -363,10 +364,27 @@ public class PlayerController : MonoBehaviour
             bodyAnim.SetBool("isCrouching", false);
             bodyAnim.SetBool("isRunning", false);
             bodyAnim.SetBool("isWalking", false);
+            bodyAnim.SetBool("Watch", false);
             bodyAnim.SetBool("isIdle", true);
+            
 
             currentPlayerState = PLAYERSTATES.IDLE;
 
+        }
+
+        if (Input.GetButton("Watch"))
+        {
+            bodyAnim.SetBool("Watch", true);
+
+        }
+        if (Input.GetButtonUp("Watch"))
+        {
+            bodyAnim.SetBool("Watch", false);
+        }
+
+        if (grabbed)
+        {
+            currentPlayerState = PLAYERSTATES.IMMOBILE;
         }
 
         //controll player stamina volume indicator

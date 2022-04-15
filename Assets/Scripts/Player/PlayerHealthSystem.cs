@@ -3,20 +3,31 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class PlayerHealthSystem : MonoBehaviour
 {
     PlayerController player;
 
     public float health = 100.0f;
+    public TextMeshProUGUI healthText;
+
     public float hunger = 100.0f;
+    public TextMeshProUGUI hungerText;
+
     public float thirst = 100.0f;
+    public TextMeshProUGUI thirstText;
+
     public float stamina = 100.0f;
+
     public float sanity = 100.0f;
+    public TextMeshProUGUI sanityText;
 
     public int heartRate = 90;
+    public TextMeshProUGUI heartRateText;
 
     public float bodyTemperature = 98.6f;
+    public TextMeshProUGUI bodyTemperatureText;
 
     public bool canRun = true;
     public bool canWalk = true;
@@ -29,7 +40,8 @@ public class PlayerHealthSystem : MonoBehaviour
 
     public Animator animator;
 
-    public Text heartRateText;
+
+    
 
     // Start is called before the first frame update
     void Awake()
@@ -66,6 +78,11 @@ public class PlayerHealthSystem : MonoBehaviour
         {
             GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
         }
+
+        healthText.text = (int)health + " HP";
+        //hungerText.text = (int)hunger + " FP";
+        heartRateText.text = (int)heartRate + " BPM";
+        thirstText.text = (int)thirst + " TP";
     }
 
     public void WakeUp()
@@ -143,10 +160,10 @@ public class PlayerHealthSystem : MonoBehaviour
     {
         while (true)
         {
-            hunger *= 0.99f;
-            sanity *= 0.99f;
+            hunger -= 1;
+            sanity -= 1;
 
-            yield return new WaitForSeconds(60f);
+            yield return new WaitForSeconds(5f);
         }
     }
 
@@ -215,7 +232,7 @@ public class PlayerHealthSystem : MonoBehaviour
     {
         heartRate = (int)amount;
         
-        heartRateText.text = "HeartRate: " + heartRate + " BPM";
+        //heartRateText.text = "HeartRate: " + heartRate + " BPM";
 
     }
 
