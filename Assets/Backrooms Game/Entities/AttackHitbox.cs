@@ -12,10 +12,10 @@ public class AttackHitbox : MonoBehaviour
     {
         while (playerInHitbox == true)
         {
-            GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.health -= damage;
+            /*GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.health -= damage;
             GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.sanity *= sanityMultiplier;
 
-            /*Debug.Log("Health: " + GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.health);
+            *//*Debug.Log("Health: " + GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.health);
             Debug.Log("Sanity: " + GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.sanity);
             Debug.Log("Attacked");*/
 

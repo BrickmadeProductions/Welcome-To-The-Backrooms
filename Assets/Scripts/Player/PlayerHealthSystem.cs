@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Audio;
 
 public class PlayerHealthSystem : MonoBehaviour
 {
@@ -29,6 +30,10 @@ public class PlayerHealthSystem : MonoBehaviour
     public float bodyTemperature = 98.6f;
     public TextMeshProUGUI bodyTemperatureText;
 
+    public bool adrenalineActive = false;
+    public bool canUseAdrenaline = true;
+
+
     public bool canRun = true;
     public bool canWalk = true;
     public bool canJump = true;
@@ -39,9 +44,12 @@ public class PlayerHealthSystem : MonoBehaviour
     public Coroutine sleeping = null;
 
     public Animator animator;
-
-
     
+    //audio
+    public AudioSource heartBeatSource;
+    public AudioMixerGroup heartBeatMixer;
+
+    public AudioSource adrenalineAudio;
 
     // Start is called before the first frame update
     void Awake()
@@ -83,6 +91,10 @@ public class PlayerHealthSystem : MonoBehaviour
         //hungerText.text = (int)hunger + " FP";
         heartRateText.text = (int)heartRate + " BPM";
         thirstText.text = (int)thirst + " TP";
+
+        heartBeatMixer.audioMixer.SetFloat("pitchBend", 1f / (heartRate / 90f));
+        heartBeatSource.pitch = heartRate / 90f;
+        heartBeatSource.volume = (heartRate / 100f) - 1f;
     }
 
     public void WakeUp()
@@ -171,17 +183,50 @@ public class PlayerHealthSystem : MonoBehaviour
     {
         while (true)
         {
-            ChangeHeartRate(heartRate + 2);
+            ChangeHeartRate(1);
 
             yield return new WaitForSeconds(Random.Range(1, 3));
         }
     }
 
+    public IEnumerator ActivateAdrenaline()
+    {
+        adrenalineAudio.Play();
+
+        adrenalineActive = true;
+        player.adrenalineSpeedMultiplier = 1.35f;
+
+        while (adrenalineActive)
+        {
+            
+            ChangeHeartRate(Random.Range(2f, 4f));
+            health -= 0.5f;
+            yield return new WaitForSeconds(1f);
+            if (heartRate >= 140)
+            {
+                player.adrenalineSpeedMultiplier = 1f;
+                StartCoroutine(AdrenalineCooldown());
+                adrenalineActive = false;
+                
+            }
+            
+        }
+    }
+    public IEnumerator AdrenalineCooldown()
+    {
+        adrenalineAudio.Stop();
+
+        canUseAdrenaline = false;
+        yield return new WaitForSeconds(300f);
+        canUseAdrenaline = true;
+    }
+
+
     public IEnumerator Walk()
     {
         while (true)
         {
-            ChangeHeartRate(heartRate + 1);
+            ChangeHeartRate(1);
 
             yield return new WaitForSeconds(10f);
         }
@@ -197,7 +242,7 @@ public class PlayerHealthSystem : MonoBehaviour
     {
         while (true)
         {
-            ChangeHeartRate(heartRate + Random.Range(-2, 2));
+            ChangeHeartRate(Random.Range(-2, 2));
             yield return new WaitForSeconds(5f);
             
         }
@@ -208,7 +253,7 @@ public class PlayerHealthSystem : MonoBehaviour
         
         while (true)
         {
-            ChangeHeartRate(heartRate - Random.Range(2, 3));
+            ChangeHeartRate(Random.Range(-3, -4));
             yield return new WaitForSeconds(2f);
             
         }
@@ -230,7 +275,7 @@ public class PlayerHealthSystem : MonoBehaviour
 
     public void ChangeHeartRate(float amount)
     {
-        heartRate = (int)amount;
+        heartRate += (int)amount;
         
         //heartRateText.text = "HeartRate: " + heartRate + " BPM";
 

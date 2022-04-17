@@ -100,7 +100,7 @@ public class InfLevelGenerator : MonoBehaviour
         {
             NoiseChunk chunk = chunks[i];
 
-            if (Vector2.Distance(new Vector2(chunk.posX, chunk.posZ), new Vector2(GetChunkAtPlayerLocation().posX, GetChunkAtPlayerLocation().posZ)) > viewDistance)
+            if (Vector2.Distance(new Vector2(chunk.chunkPosX, chunk.chunkPosZ), new Vector2(GetChunkAtPlayerLocation().chunkPosX, GetChunkAtPlayerLocation().chunkPosZ)) > viewDistance)
             {
 
 
@@ -158,16 +158,16 @@ public class InfLevelGenerator : MonoBehaviour
     void TryGenChunks()
     {
 
-        Vector2 newChunkPlayerLocation = new Vector2(GetChunkAtPlayerLocation().posX, GetChunkAtPlayerLocation().posZ);
+        Vector2 newChunkPlayerLocation = new Vector2(GetChunkAtPlayerLocation().chunkPosX, GetChunkAtPlayerLocation().chunkPosZ);
 
         if (newChunkPlayerLocation != oldPlayerChunkLocation && !isLoadingChunks)
         {
             isLoadingChunks = true;
 
 
-            for (int x = (int)(GetChunkAtPlayerLocation().posX - viewDistance); x < (int)(GetChunkAtPlayerLocation().posX + viewDistance); x++)
+            for (int x = (int)(GetChunkAtPlayerLocation().chunkPosX - viewDistance); x < (int)(GetChunkAtPlayerLocation().chunkPosX + viewDistance); x++)
             {
-                for (int z = (int)(GetChunkAtPlayerLocation().posZ - viewDistance); z < (int)(GetChunkAtPlayerLocation().posZ + viewDistance); z++)
+                for (int z = (int)(GetChunkAtPlayerLocation().chunkPosZ - viewDistance); z < (int)(GetChunkAtPlayerLocation().chunkPosZ + viewDistance); z++)
                 {
                     if (GenerateChunk(x, z, currentChunkNumber))
                         currentChunkNumber++;
@@ -181,7 +181,7 @@ public class InfLevelGenerator : MonoBehaviour
             isLoadingChunks = false;
         }
 
-        oldPlayerChunkLocation = new Vector2(GetChunkAtPlayerLocation().posX, GetChunkAtPlayerLocation().posZ);
+        oldPlayerChunkLocation = new Vector2(GetChunkAtPlayerLocation().chunkPosX, GetChunkAtPlayerLocation().chunkPosZ);
     }
     
 
@@ -199,7 +199,7 @@ public class InfLevelGenerator : MonoBehaviour
     {
         foreach (NoiseChunk c in chunks)
         {
-            if ((int)c.posX == x && (int)c.posZ == y)
+            if ((int)c.chunkPosX == x && (int)c.chunkPosZ == y)
             {
                 return true;
             }
@@ -241,11 +241,11 @@ public class InfLevelGenerator : MonoBehaviour
             if (c != null)
                 if (CheckPointIntersection(
 
-                    (c.posX * ChunkSize()) - ChunkSize() / 2, 
-                    (c.posZ * ChunkSize()) - ChunkSize() / 2,
+                    (c.chunkPosX * ChunkSize()) - ChunkSize() / 2, 
+                    (c.chunkPosZ * ChunkSize()) - ChunkSize() / 2,
 
-                    (c.posX * ChunkSize()) + ChunkSize() / 2,
-                    (c.posZ * ChunkSize()) + ChunkSize() / 2,
+                    (c.chunkPosX * ChunkSize()) + ChunkSize() / 2,
+                    (c.chunkPosZ * ChunkSize()) + ChunkSize() / 2,
 
                     GameSettings.Instance.Player.transform.position.x, GameSettings.Instance.Player.transform.position.z))
                 {
@@ -265,7 +265,7 @@ public class InfLevelGenerator : MonoBehaviour
         foreach (NoiseChunk c in chunks)
         {
 
-            if (c.posX == x && c.posZ == z)
+            if (c.chunkPosX == x && c.chunkPosZ == z)
             {
                 return c;
             }

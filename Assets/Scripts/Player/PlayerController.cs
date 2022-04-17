@@ -17,6 +17,8 @@ public class PlayerController : MonoBehaviour
     float runningSpeed = 6f;
     float crouchingSpeed = 0.5f;
     float jumpSpeed = 6.0f;
+
+    public float adrenalineSpeedMultiplier;
     float gravity = 20.0f;
 
     public bool grabbed = false;
@@ -71,9 +73,8 @@ public class PlayerController : MonoBehaviour
     //postEdits
 
     //head movement
-   
-    float lookXLimitTop = 85.0f;
-    float lookXLimitBottom = 90.0f;
+    public float lookXLimitTop = 85.0f;
+    public float lookXLimitBottom = 90.0f;
     public float rotationX = 0.0f;
     public float rotationY = 0.0f;
     float height = 3.35f;
@@ -87,7 +88,6 @@ public class PlayerController : MonoBehaviour
         CROUCH = 2,
         RUN = 3,
         JUMP = 4,
-        WATCH = 5,
         IMMOBILE = 6
     }
 
@@ -244,8 +244,8 @@ public class PlayerController : MonoBehaviour
             // Press Left Shift to run
 
 
-            float curSpeedX = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") : 0;
-            float curSpeedY = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") : 0;
+            float curSpeedX = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") * adrenalineSpeedMultiplier : 0;
+            float curSpeedY = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") * adrenalineSpeedMultiplier : 0;
                 
             if (currentPlayerState == PLAYERSTATES.CROUCH)
             {
@@ -521,86 +521,91 @@ public class PlayerController : MonoBehaviour
 
     private void HandleHealthSystem()
     {
-        //heart system
-        if (playerHealth.heartRate > 90 && currentPlayerState != PLAYERSTATES.RUN && reviveHeartRate == null)
+        //adrenaline (100+bpm)
+        if (Input.GetButtonDown("Adrenaline") && playerHealth.heartRate >= 100 && !playerHealth.adrenalineActive && playerHealth.canUseAdrenaline)
+
+            StartCoroutine(playerHealth.ActivateAdrenaline());
+
+        //heart system (revive and drop)
+        if (!playerHealth.adrenalineActive)
         {
-            reviveHeartRate = StartCoroutine(playerHealth.ReviveHeartRate());
-        }
-        if (playerHealth.heartRate <= 90 && reviveHeartRate != null)
-        {
-            if (reviveHeartRate != null)
+            if (playerHealth.heartRate > 90 && currentPlayerState != PLAYERSTATES.RUN && reviveHeartRate == null)
             {
-                StopCoroutine(reviveHeartRate);
-                reviveHeartRate = null;
+                reviveHeartRate = StartCoroutine(playerHealth.ReviveHeartRate());
+            }
+            if (playerHealth.heartRate <= 90 && reviveHeartRate != null)
+            {
+                if (reviveHeartRate != null)
+                {
+                    StopCoroutine(reviveHeartRate);
+                    reviveHeartRate = null;
+                }
+            }
+            //heartrate
+            if (playerHealth.heartRate >= 120)
+            {
+                currentPlayerState = PLAYERSTATES.WALK;
+
+                playerHealth.canJump = true;
+                playerHealth.canWalk = true;
+                playerHealth.canRun = false;
+            }
+            if (playerHealth.heartRate >= 160)
+            {
+
+                currentPlayerState = PLAYERSTATES.IMMOBILE;
+
+                playerHealth.canJump = false;
+                playerHealth.canWalk = false;
+                playerHealth.canRun = false;
+
+            }
+            if (playerHealth.stamina >= 50 && playerHealth.heartRate < 100)
+            {
+                playerHealth.canJump = true;
+                playerHealth.canRun = true;
+                playerHealth.canWalk = true;
+
+            }
+
+            //stamina
+            if (currentPlayerState != PLAYERSTATES.RUN)
+            {
+                if (rebuildStamina == null)
+                    rebuildStamina = StartCoroutine(playerHealth.ChangeStamina(UnityEngine.Random.Range(1, 3)));
+
+                if (removeStamina != null)
+
+                    StopCoroutine(removeStamina);
+
+
+
+
+
+            }
+
+            if (playerHealth.stamina >= 100)
+            {
+                playerHealth.stamina = 100;
+
+                if (rebuildStamina != null)
+                    StopCoroutine(rebuildStamina);
+
+                rebuildStamina = null;
+
+            }
+
+            else if (playerHealth.stamina <= 0)
+            {
+                playerHealth.canRun = false;
+                playerHealth.canWalk = true;
+                playerHealth.canJump = false;
+
+                currentPlayerState = PLAYERSTATES.WALK;
+                playerHealth.stamina = 0;
+
             }
         }
-
-        //heartrate
-       
-        if (playerHealth.heartRate >= 120)
-        {
-            currentPlayerState = PLAYERSTATES.WALK;
-
-            playerHealth.canJump = true;
-            playerHealth.canWalk = true;
-            playerHealth.canRun = false;
-        }
-        if (playerHealth.heartRate >= 140)
-        {
-
-            currentPlayerState = PLAYERSTATES.IMMOBILE;
-
-            playerHealth.canJump = false;
-            playerHealth.canWalk = false;
-            playerHealth.canRun = false;            
-
-        }
-        if (playerHealth.stamina >= 50 && playerHealth.heartRate < 100)
-        {
-            playerHealth.canJump = true;
-            playerHealth.canRun = true;
-            playerHealth.canWalk = true;
-
-        }
-
-        //stamina
-        if (currentPlayerState != PLAYERSTATES.RUN)
-        {
-            if (rebuildStamina == null)
-                rebuildStamina = StartCoroutine(playerHealth.ChangeStamina(UnityEngine.Random.Range(1, 3)));
-
-            if (removeStamina != null)
-            
-                StopCoroutine(removeStamina);
-                
-            
-                
-
-            
-        }
-
-        if (playerHealth.stamina >= 100)
-        {
-            playerHealth.stamina = 100;
-
-            if (rebuildStamina != null)
-                StopCoroutine(rebuildStamina);
-
-            rebuildStamina = null;
-
-        }
-
-        else if (playerHealth.stamina <= 0)
-        {
-            playerHealth.canRun = false;
-            playerHealth.canWalk = true;
-            playerHealth.canJump = false;
-
-            currentPlayerState = PLAYERSTATES.WALK;
-            playerHealth.stamina = 0;
-
-        }
-
 
     }
 
@@ -678,6 +683,9 @@ public class PlayerController : MonoBehaviour
                 feetSource.Stop();
                 break;
             case PLAYERSTATES.IDLE:
+                feetSource.Stop();
+                break;
+            case PLAYERSTATES.IMMOBILE:
                 feetSource.Stop();
                 break;
 

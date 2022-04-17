@@ -13,9 +13,9 @@ public class GameSettings : MonoBehaviour
 
     public List<Entity> GlobalEntityList { get { return globalEntityList; } set { globalEntityList = GlobalEntityList; } }
 
-    private List<Entity> globalObjectsList;
+    private List<InteractableObject> globalObjectsList;
 
-    public List<Entity> GlobalObjectsList { get { return globalObjectsList; } set { globalObjectsList = GlobalObjectsList; } }
+    public List<InteractableObject> GlobalObjectsList { get { return globalObjectsList; } set { globalObjectsList = GlobalObjectsList; } }
 
     private PostProcessVolume post;
 
@@ -170,6 +170,7 @@ public class GameSettings : MonoBehaviour
     void LoadDefaults()
     {
         globalEntityList = new List<Entity>();
+        globalObjectsList = new List<InteractableObject>();
 
         post = GetComponent<PostProcessVolume>();
 
@@ -453,7 +454,7 @@ public class GameSettings : MonoBehaviour
         }
     }
 
-    public void AddEntity(Transform location, Entity entity)
+    public Entity AddEntity(Vector3 position, Entity entity)
     {
         int typeAmountInGame = 0;
 
@@ -468,13 +469,26 @@ public class GameSettings : MonoBehaviour
         //only instatiate if under the amount allowed on the game, balancing reasons. Max 15 entities total around the player
         if (typeAmountInGame < entity.maxAllowed && globalEntityList.Count <= 10)
         {
-            Instantiate(entity);
-            entity.transform.position = gameObject.transform.position;
-
+            Entity spawnedEntity = Instantiate(entity);
+            spawnedEntity.gameObject.transform.position = position;
+            
             globalEntityList.Add(entity);
+
+            return spawnedEntity;
         }
 
+        return null;
+    }
 
+    public InteractableObject AddItem(Vector3 position, InteractableObject item)
+    {
+
+        InteractableObject spawnedObject = Instantiate(item);
+        spawnedObject.gameObject.transform.position = position;
+        
+        globalObjectsList.Add(item);
+
+        return spawnedObject;
 
     }
 

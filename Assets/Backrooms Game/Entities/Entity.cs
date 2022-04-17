@@ -13,13 +13,16 @@ public abstract class Entity : MonoBehaviour
     public AudioClip[] noises;
     public AudioSource noiseSource;
 
+    public int damage;
+    public float sanityMultiplier;
+
     public int maxAllowed; //total allowed in the game at one time
     public int despawnDistance;
 
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(attackFunc());
+        StartCoroutine(AI());
     }
 
     private void Update()
@@ -27,7 +30,7 @@ public abstract class Entity : MonoBehaviour
         if (Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > despawnDistance) ;
     }
 
-    public abstract IEnumerator attackFunc();
+    public abstract IEnumerator AI();
 
     public abstract void Despawn();
 }

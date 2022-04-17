@@ -9,8 +9,9 @@ public class NoiseChunk : MonoBehaviour
     //chunk data 
     public bool loaded;
     public int id;
-    public float posX;
-    public float posZ;
+    public float chunkPosX;
+    public float chunkPosZ;
+
 
     //perlin seed
     public int seed;
@@ -21,11 +22,10 @@ public class NoiseChunk : MonoBehaviour
 
     public List<GameObject> Tiles;
 
-    //tiles with objects
-    public List<GameObject> specialTiles;
-
     //entity tiles (types that can be created)
-    public List<GameObject> entities;
+    public List<Entity> entities;
+    //objects (types that can be created)
+    public List<HoldableObject> objects;
 
     int chunk_width;
     int chunk_height;
@@ -49,8 +49,8 @@ public class NoiseChunk : MonoBehaviour
     {
         loaded = true;
         this.id = id;
-        this.posX = posX;
-        this.posZ = posZ;
+        this.chunkPosX = posX;
+        this.chunkPosZ = posZ;
         this.chunk_width = width;
         this.chunk_height = height;
     }
@@ -67,8 +67,6 @@ public class NoiseChunk : MonoBehaviour
         CreateTileset();
         CreateTileGroups();
         GenerateMap();
-
-        
 
     }
 
@@ -189,49 +187,57 @@ public class NoiseChunk : MonoBehaviour
             tiles, set it's position and store the gameobject. **/
 
         GameObject tile_prefab = tileset[tile_id];
-        //GameObject tile_group = tile_groups[tile_id];
-        //GameObject tile = Instantiate(tile_prefab, tile_group.transform);
         GameObject tile = null;
 
-
-        float noClipWallChance = Random.Range(0f, 1f);
-        float entityChance = Random.Range(0f, 1f);
-        
-        //make it a precentage chance
         if (SceneManager.GetActiveScene().name != "HomeScreen")
         {
-
             //noclip wall spawning
             if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 750
 
-            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 500
-
-            && noClipWallChance > 0.995f)
+            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 500)
             {
+                float noClipWallChance = Random.Range(0f, 1f);
 
-                tile = Instantiate(exit, gameObject.transform);
+                if (noClipWallChance > 0.995f)
+                    tile = Instantiate(exit, gameObject.transform);
             }
 
             //entity spawning
-            else if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 5
+            else if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 100
 
-            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 5
-
-            && entityChance > 0.99f)
+            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 50)
             {
+                float entityChance = Random.Range(0f, 1f);
+
                 tile = Instantiate(tile_prefab, gameObject.transform);
 
-                GameSettings.Instance.AddEntity(gameObject.transform, entities[Random.Range(0, entities.Count)].GetComponent<Entity>());
-                
+                if (entityChance > 0.99f)
+                {
+
+                    GameSettings.Instance.AddEntity(new Vector3((x * size) + (chunkPosX * chunk_width * size), 0.2f, (y * size) + (chunkPosZ * chunk_width * size)), entities[Random.Range(0, entities.Count)]);
+                }
+                    
+
+
             }
 
-            //special tiles
-            if (entityChance > 0.97f)
+            //object spawning
+            else if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 25
+
+            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 20)
             {
-                tile = Instantiate(specialTiles[Random.Range(0, specialTiles.Count)], gameObject.transform);                
+                float objectChance = Random.Range(0f, 1f);
 
+                tile = Instantiate(tile_prefab, gameObject.transform);
+
+                if (objectChance > 0.99f)
+                {
+                    
+                    GameSettings.Instance.AddItem(new Vector3((x * size) + (chunkPosX * chunk_width * size), 0.2f, (y * size) + (chunkPosZ * chunk_width * size)), objects[Random.Range(0, objects.Count)]);
+                }
             }
 
+            //regular tile spawning
             else
             {
                 tile = Instantiate(tile_prefab, gameObject.transform);

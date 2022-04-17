@@ -289,6 +289,7 @@ GameObject:
   - component: {fileID: 1547085649790515587}
   - component: {fileID: 3508687629664583607}
   - component: {fileID: 2205897879195106350}
+  - component: {fileID: 8681135396768391963}
   m_Layer: 13
   m_Name: OverLayScreen
   m_TagString: Untagged
@@ -304,7 +305,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4860928661352022375}
   m_LocalRotation: {x: -0.00000005338508, y: 0.7071068, z: -0.70710677, w: -0.000000053385076}
-  m_LocalPosition: {x: 0, y: 0.015, z: -1.042}
+  m_LocalPosition: {x: -0.000000043655746, y: 0.014999641, z: -1.042}
   m_LocalScale: {x: 96, y: 123.3, z: 96}
   m_Children: []
   m_Father: {fileID: 6683295190188815750}
@@ -359,6 +360,39 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!215 &8681135396768391963
+ReflectionProbe:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4860928661352022375}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Type: 0
+  m_Mode: 1
+  m_RefreshMode: 0
+  m_TimeSlicingMode: 0
+  m_Resolution: 128
+  m_UpdateFrequency: 0
+  m_BoxSize: {x: 1, y: 1, z: 1}
+  m_BoxOffset: {x: 0, y: 0, z: 0}
+  m_NearClip: 0.01
+  m_FarClip: 1000
+  m_ShadowDistance: 100
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IntensityMultiplier: 1
+  m_BlendDistance: 1
+  m_HDR: 1
+  m_BoxProjection: 0
+  m_RenderDynamicObjects: 0
+  m_UseOcclusionCulling: 1
+  m_Importance: 1
+  m_CustomBakedTexture: {fileID: 0}
 --- !u!1 &6078620553814156777
 GameObject:
   m_ObjectHideFlags: 0

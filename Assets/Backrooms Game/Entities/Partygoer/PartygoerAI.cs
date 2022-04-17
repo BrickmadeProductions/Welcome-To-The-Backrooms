@@ -14,14 +14,36 @@ public class PartygoerAI : Entity
         Destroy(this);
     }
 
-    public override IEnumerator attackFunc()
+    private void Update()
+    {
+        if (strangling == true)
+        {
+            
+            Vector3 targetDirection = GameSettings.Instance.Player.transform.transform.position - transform.position;
+
+            GameSettings.Instance.Player.GetComponent<PlayerController>().transform.position = grabLocation.transform.position - new Vector3(0.05f, 1.2f, 0.1f);
+            GameSettings.Instance.Player.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(GameSettings.Instance.Player.transform.forward, transform.position, 1f, 0.0f));
+            GameSettings.Instance.Player.GetComponent<PlayerController>().grabbed = true;
+            GameSettings.Instance.Player.GetComponent<CharacterController>().enabled = false;
+
+            Vector3 attackDirection = Vector3.RotateTowards(transform.forward, targetDirection, 1f, 0.0f);
+            transform.rotation = Quaternion.LookRotation(attackDirection);
+
+            GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Choking", true);
+
+            //GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canMoveHead = false;
+
+            transform.rotation = new Quaternion(0, transform.rotation.y, 0, transform.rotation.w);
+
+        }
+    }
+
+    public override IEnumerator AI()
     {
         while (true)
         {
             if (canAttack)
             {
-                foreach (Collider box in attackHitboxs)
-                    box.enabled = true;
 
                 Vector3 targetDirection = GameSettings.Instance.Player.transform.transform.position - transform.position;
 
@@ -33,7 +55,7 @@ public class PartygoerAI : Entity
                 int twitchNoise = Random.Range(0, noises.Length);
 
                 //only twitch towards player if farther than 2 units, then attack
-                if (Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > 2 && !strangling)
+                if (Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > 4 && !strangling)
                 {
                     float step = speed * Time.deltaTime;
                     transform.position = Vector3.MoveTowards(transform.position, GameSettings.Instance.Player.transform.position + new Vector3(Random.Range(-2f, 2f), 0, Random.Range(-2f, 2f)), step);
@@ -43,7 +65,7 @@ public class PartygoerAI : Entity
                     transform.rotation = Quaternion.LookRotation(newDirection);
 
                     transform.rotation = new Quaternion(0, transform.rotation.y, 0, transform.rotation.w);
-                    noiseSource.clip = noises[twitchPhase];
+                    noiseSource.clip = noises[twitchNoise];
                     noiseSource.pitch = Random.Range(0.9f, 1.1f);
                     noiseSource.Play();
 
@@ -60,16 +82,6 @@ public class PartygoerAI : Entity
                 {
                     strangling = true;
 
-                    GameSettings.Instance.Player.GetComponent<PlayerController>().transform.position = grabLocation.transform.position;
-                    GameSettings.Instance.Player.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(GameSettings.Instance.Player.transform.forward, transform.position, singleStep, 0.0f));
-                    GameSettings.Instance.Player.GetComponent<PlayerController>().grabbed = true;
-                    GameSettings.Instance.Player.GetComponent<CharacterController>().enabled = false;
-
-                    Vector3 attackDirection = Vector3.RotateTowards(transform.forward, targetDirection, singleStep, 0.0f);
-                    transform.rotation = Quaternion.LookRotation(newDirection);
-
-                    transform.rotation = new Quaternion(0, transform.rotation.y, 0, transform.rotation.w);
-
                     entityAnimator.SetBool("Twitch0", false);
                     entityAnimator.SetBool("Twitch1", false);
                     entityAnimator.SetBool("Twitch2", false);
@@ -80,8 +92,22 @@ public class PartygoerAI : Entity
 
 
                 }
+                else if (strangling == true)
+                {
+                    GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.health -= damage;
+                    GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.sanity *= sanityMultiplier;
+
+                    GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.ChangeHeartRate(2f);
+
+                    /*Debug.Log("Health: " + GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.health);
+                    Debug.Log("Sanity: " + GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.sanity);
+                    Debug.Log("Attacked");*/
+
+                    yield return new WaitForSeconds(1);
+                }
                 else
                 {
+                    
                     yield return new WaitForSeconds(3f);
                 }
 
