@@ -82,14 +82,19 @@ MonoBehaviour:
   hitClips: []
   breakClips: []
   playSounds: 1
+  parentScene:
+    m_Handle: 0
   inventoryWeight: 1
   holdableObject: {fileID: 7088627852523957309}
   large: 0
   animationPlaying: 0
-  animationClips:
-  - {fileID: -7113424028858833629, guid: c3da10c4a15ca9244bab8ba9a82842e0, type: 3}
-  animationBools:
+  LMBAnimationClips:
+  - {fileID: -1232988704551948498, guid: c3da10c4a15ca9244bab8ba9a82842e0, type: 3}
+  LMBAnimationBools:
   - Stab1
+  RMBAnimationClips: []
+  RMBAnimationBools: []
+  CustomHoldAnimation: 
 --- !u!1 &7088627852977277467
 GameObject:
   m_ObjectHideFlags: 0

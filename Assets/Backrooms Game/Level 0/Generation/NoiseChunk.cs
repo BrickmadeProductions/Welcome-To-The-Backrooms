@@ -24,8 +24,8 @@ public class NoiseChunk : MonoBehaviour
 
     //entity tiles (types that can be created)
     public List<Entity> entities;
-    //objects (types that can be created)
-    public List<HoldableObject> objects;
+    //specialTiles
+    public List<GameObject> specialTiles;
 
     int chunk_width;
     int chunk_height;
@@ -203,15 +203,15 @@ public class NoiseChunk : MonoBehaviour
             }
 
             //entity spawning
-            else if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 100
+            else if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > -1
 
-            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 50)
+            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > -1 && entities.Count > 0)
             {
                 float entityChance = Random.Range(0f, 1f);
 
                 tile = Instantiate(tile_prefab, gameObject.transform);
 
-                if (entityChance > 0.99f)
+                if (entityChance > 0.95f)
                 {
 
                     GameSettings.Instance.AddEntity(new Vector3((x * size) + (chunkPosX * chunk_width * size), 0.2f, (y * size) + (chunkPosZ * chunk_width * size)), entities[Random.Range(0, entities.Count)]);
@@ -224,16 +224,14 @@ public class NoiseChunk : MonoBehaviour
             //object spawning
             else if (GameSettings.Instance.Player.GetComponent<PlayerController>().distance.GetDistanceTraveled() > 25
 
-            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 20)
+            && Vector3.Distance(GameSettings.Instance.Player.transform.position, Vector3.zero) > 20 && specialTiles.Count > 0)
             {
                 float objectChance = Random.Range(0f, 1f);
 
-                tile = Instantiate(tile_prefab, gameObject.transform);
-
-                if (objectChance > 0.99f)
+                if (objectChance > 0.95f)
                 {
-                    
-                    GameSettings.Instance.AddItem(new Vector3((x * size) + (chunkPosX * chunk_width * size), 0.2f, (y * size) + (chunkPosZ * chunk_width * size)), objects[Random.Range(0, objects.Count)]);
+
+                    tile = Instantiate(specialTiles[Random.Range(0, specialTiles.Count)], gameObject.transform);
                 }
             }
 

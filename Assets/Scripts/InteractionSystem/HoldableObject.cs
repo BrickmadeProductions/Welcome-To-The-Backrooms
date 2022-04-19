@@ -18,9 +18,12 @@ public class HoldableObject : InteractableObject
     public List<AnimationClip> RMBAnimationClips;
     public List<string> RMBAnimationBools;
 
+    public string CustomHoldAnimation = "";
+
     // Start is called before the first frame update
     void Awake()
     {
+        GameSettings.Instance.GlobalObjectsList.Add(this);
         broken = false;
         holdableObject = GetComponent<Rigidbody>();
         StartCoroutine(waitToPlaySound());

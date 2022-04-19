@@ -21,13 +21,18 @@ public class Intro : MonoBehaviour
             
             StopCoroutine(introC);
             GameSettings.Instance.LoadScene("HomeScreen");
+            GameSettings.Instance.setCutScene(false);
         }
     }
 
     // Update is called once per frame
     IEnumerator playIntro()
     {
+        GameSettings.Instance.setCutScene(true);
+
         yield return new WaitForSeconds(13.6f);
         GameSettings.Instance.LoadScene("HomeScreen");
+
+        GameSettings.Instance.setCutScene(false);
     }
 }

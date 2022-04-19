@@ -37,7 +37,7 @@ public class DistanceChecker : MonoBehaviour
 
             metersTraveled = ((int)distanceTraveled / 3);
 
-            metersTraveledText.text = metersTraveled + " Meters";
+            metersTraveledText.text = metersTraveled + " M";
         }
         
     }

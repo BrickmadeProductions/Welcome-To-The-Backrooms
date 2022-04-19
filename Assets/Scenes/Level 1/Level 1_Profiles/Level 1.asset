@@ -26,6 +26,43 @@ MonoBehaviour:
   fastMode:
     overrideState: 0
     value: 1
+--- !u!114 &-3079349369918018818
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3f6f3f7c722b4544b97e3c75840aa33, type: 3}
+  m_Name: AutoExposure
+  m_EditorClassIdentifier: 
+  active: 1
+  enabled:
+    overrideState: 1
+    value: 1
+  filtering:
+    overrideState: 1
+    value: {x: 54.000008, y: 99}
+  minLuminance:
+    overrideState: 1
+    value: 0
+  maxLuminance:
+    overrideState: 1
+    value: 0
+  keyValue:
+    overrideState: 0
+    value: 1
+  eyeAdaptation:
+    overrideState: 0
+    value: 0
+  speedUp:
+    overrideState: 0
+    value: 2
+  speedDown:
+    overrideState: 0
+    value: 1
 --- !u!114 &-278061543496427998
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -95,6 +132,7 @@ MonoBehaviour:
   - {fileID: -6086108271011315648}
   - {fileID: 803239355021030078}
   - {fileID: 8795616618507292558}
+  - {fileID: -3079349369918018818}
 --- !u!114 &803239355021030078
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -110,7 +148,7 @@ MonoBehaviour:
   active: 1
   enabled:
     overrideState: 1
-    value: 0
+    value: 1
   gradingMode:
     overrideState: 1
     value: 1
@@ -154,7 +192,7 @@ MonoBehaviour:
     value: 0
   colorFilter:
     overrideState: 1
-    value: {r: 0.5849056, g: 0.5849056, b: 0.5849056, a: 1}
+    value: {r: 0.9103774, g: 0.9200533, b: 1, a: 1}
   hueShift:
     overrideState: 0
     value: 0
@@ -166,7 +204,7 @@ MonoBehaviour:
     value: 0
   postExposure:
     overrideState: 1
-    value: 1.59
+    value: 2.17
   contrast:
     overrideState: 0
     value: 0
@@ -1452,22 +1490,22 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 3.32
+    value: 1.13
   threshold:
     overrideState: 1
-    value: 0.53
+    value: 0.09
   softKnee:
     overrideState: 1
-    value: 0.43
+    value: 1
   clamp:
     overrideState: 0
     value: 65472
   diffusion:
     overrideState: 1
-    value: 4
+    value: 6.96
   anamorphicRatio:
     overrideState: 1
-    value: 0.16
+    value: -0.34
   color:
     overrideState: 1
     value: {r: 1.0867403, g: 1.0788282, b: 1.0201005, a: 1}
@@ -1480,7 +1518,7 @@ MonoBehaviour:
     defaultState: 1
   dirtIntensity:
     overrideState: 1
-    value: 0.5
+    value: 0.06
 --- !u!114 &8519621084541951595
 MonoBehaviour:
   m_ObjectHideFlags: 3

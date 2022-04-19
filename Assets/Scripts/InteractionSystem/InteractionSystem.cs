@@ -88,13 +88,15 @@ public class InteractionSystem : MonoBehaviour
 
     void PickupSystem()
     {
-        //pickup (hold)
+        //pickup (hold) set hold
         if (player.holding == null && Input.GetButton("Hold") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
         { 
             player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
 
             if (player.holding.GetComponent<HoldableObject>().large)
+
                 setAllChildrenToLayer(player.holding.transform, 14);
+
             else
             {
                 setAllChildrenToLayer(player.holding.transform, 13);
@@ -123,12 +125,10 @@ public class InteractionSystem : MonoBehaviour
 
             SceneManager.MoveGameObjectToScene(player.holding.gameObject, SceneManager.GetActiveScene());
 
-            player.holding = null;
-
-            player.bodyAnim.SetBool("isHoldingSmall", false);
+            player.bodyAnim.SetBool(player.holding.CustomHoldAnimation != "" ? player.holding.CustomHoldAnimation : "isHoldingSmall", false);
             player.bodyAnim.SetBool("isHoldingLarge", false);
-         
 
+            player.holding = null;
 
         }
 
@@ -152,10 +152,10 @@ public class InteractionSystem : MonoBehaviour
 
             SceneManager.MoveGameObjectToScene(player.holding.gameObject, SceneManager.GetActiveScene());
 
-            player.holding = null;
-
-            player.bodyAnim.SetBool("isHoldingSmall", false);
+            player.bodyAnim.SetBool(player.holding.CustomHoldAnimation != "" ? player.holding.CustomHoldAnimation : "isHoldingSmall", false);
             player.bodyAnim.SetBool("isHoldingLarge", false);
+
+            player.holding = null;
 
 
         }
@@ -178,7 +178,6 @@ public class InteractionSystem : MonoBehaviour
 
             if (player.holding.GetComponent<HoldableObject>().large)
             {
-                player.bodyAnim.SetBool("isHoldingSmall", false);
                 player.bodyAnim.SetBool("isHoldingLarge", true);
                 player.playerHealth.canRun = false;
                 player.currentPlayerState = PlayerController.PLAYERSTATES.WALK;
@@ -186,8 +185,7 @@ public class InteractionSystem : MonoBehaviour
             }
             else
             {
-                player.bodyAnim.SetBool("isHoldingLarge", false);
-                player.bodyAnim.SetBool("isHoldingSmall", true);
+                player.bodyAnim.SetBool(player.holding.CustomHoldAnimation != "" ? player.holding.CustomHoldAnimation : "isHoldingSmall", true);
             } 
                     
 

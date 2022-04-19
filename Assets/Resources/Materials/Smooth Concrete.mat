@@ -22,7 +22,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Smooth Concrete
   m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-  m_ShaderKeywords: _METALLICGLOSSMAP _METALLICSPECGLOSSMAP _NORMALMAP _OCCLUSIONMAP
+  m_ShaderKeywords: _DETAIL_MULX2 _METALLICGLOSSMAP _METALLICSPECGLOSSMAP _NORMALMAP
+    _OCCLUSIONMAP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -37,19 +38,19 @@ Material:
         m_Scale: {x: 15, y: 15}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: 45d78535f567e6b449082c91d1108f0a, type: 3}
+        m_Texture: {fileID: 2800000, guid: 878b443ab96ce5240a647778f99d38b2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 5, y: 5}
+        m_Scale: {x: 50, y: 50}
         m_Offset: {x: 0, y: 0}
     - _DetailMask:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 1dbd4b4f96f7cae419d9ddb54bfa4bf2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 45d78535f567e6b449082c91d1108f0a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
@@ -65,7 +66,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
-        m_Texture: {fileID: 2800000, guid: 2e49155f4af2fee4987d149e51aabb56, type: 3}
+        m_Texture: {fileID: 2800000, guid: 935015a69a6ea654fbe90e0a7de84ccc, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
@@ -91,13 +92,13 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _Blend: 0
-    - _BumpScale: 0.73
+    - _BumpScale: 2.48
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
-    - _DetailNormalMapScale: 1
+    - _DetailNormalMapScale: 1.31
     - _DstBlend: 0
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0.23
@@ -119,7 +120,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0.45283014, g: 0.45283014, b: 0.45283014, a: 1}
-    - _Color: {r: 0.4528302, g: 0.4528302, b: 0.4528302, a: 1}
+    - _Color: {r: 0.509434, g: 0.507031, b: 0.507031, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []

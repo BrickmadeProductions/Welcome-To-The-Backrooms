@@ -45,13 +45,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   loaded: 0
   id: 0
-  posX: 0
-  posZ: 0
+  chunkPosX: 0
+  chunkPosZ: 0
   seed: 0
   exit: {fileID: 0}
   Tiles:
   - {fileID: 7998624537947542715, guid: bdd7dab7f277f41488b4bac91ee7da2d, type: 3}
+  - {fileID: 9220206704640043249, guid: 06a7b2f06405af341af924a70cf9eaf4, type: 3}
   entities: []
+  objects: []
   magnification: 1.1
   size: 37
   x_offset: -8

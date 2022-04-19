@@ -94,7 +94,6 @@ GameObject:
   - component: {fileID: 772252839623779345}
   - component: {fileID: 3410426583687511987}
   - component: {fileID: 2099069454143870053}
-  - component: {fileID: 3604709150839883058}
   - component: {fileID: 8110756884772502744}
   - component: {fileID: 2061953090263135485}
   - component: {fileID: -3731249983559593665}
@@ -173,28 +172,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 2.14, y: 2.14, z: 2.322544}
   m_Center: {x: -0.033269048, y: -0.015526891, z: 0.06872791}
---- !u!114 &3604709150839883058
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8869514509181134166}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  durability: 0
-  breakablePrefabs: []
-  hitClips:
-  - {fileID: 8300000, guid: 3ec90ec7ba21d9641aba6d72da0fb644, type: 3}
-  - {fileID: 8300000, guid: 0e5240b5040937f46a2798f0974643d3, type: 3}
-  breakClips: []
-  playSounds: 1
-  inventoryWeight: 1
-  holdableObject: {fileID: 0}
-  large: 1
 --- !u!54 &8110756884772502744
 Rigidbody:
   m_ObjectHideFlags: 0

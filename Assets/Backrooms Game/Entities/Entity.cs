@@ -19,6 +19,14 @@ public abstract class Entity : MonoBehaviour
     public int maxAllowed; //total allowed in the game at one time
     public int despawnDistance;
 
+    public enum ENTITYSTATES : int
+    {
+        SEARCHING = 1,
+        ATTACKING = 2
+    }
+
+    public ENTITYSTATES currentEntityState = ENTITYSTATES.SEARCHING;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -27,12 +35,17 @@ public abstract class Entity : MonoBehaviour
 
     private void Update()
     {
-        if (Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > despawnDistance) ;
+        if (Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > despawnDistance)
+        {
+            Despawn();
+        }
     }
 
     public abstract IEnumerator AI();
 
     public abstract void Despawn();
+
+    public abstract void OnDestroy();
 }
 public enum ENTITY_TYPE : int
 {

@@ -13,9 +13,6 @@ public class EntityStats : MonoBehaviour
     public int hunger;
     
 
-   
-
-
     // Start is called before the first frame update
     void Start()
     {

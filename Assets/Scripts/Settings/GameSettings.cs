@@ -91,10 +91,6 @@ public class GameSettings : MonoBehaviour
 
     private bool fullScreen;
 
-    private bool pauseMenuOpen = false;
-
-    public bool PauseMenuOpen { get { return pauseMenuOpen; } }
-
     //graphics
     private bool vSyncEnabled;
     private bool antiAliasingEnabled;
@@ -122,8 +118,12 @@ public class GameSettings : MonoBehaviour
 
     public static bool LEVEL_LOADED = false;
 
+    private bool cutScene = false;
     public bool IsCutScene { get { return cutScene; } }
-    private bool cutScene;
+
+    private bool pauseMenuOpen = false;
+
+    public bool PauseMenuOpen { get { return pauseMenuOpen; } }
 
     public static GameSettings Instance
     {
@@ -132,14 +132,26 @@ public class GameSettings : MonoBehaviour
             return m_instance;
         }
     }
-    private void Update()
+    public void setCutScene(bool tf)
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        cutScene = tf;
+    }
+
+    public void setPauseMenuOpen(bool tf)
+    {
+        pauseMenuOpen = tf;
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape) && !cutScene)
         {
             SettingsScreen();
 
         }
 
+        Debug.Log(IsCutScene);
+        Debug.Log(PauseMenuOpen);
 
     }
     void Awake()
@@ -194,7 +206,7 @@ public class GameSettings : MonoBehaviour
         level1Mixer = Resources.Load<AudioMixer>("Audio/Level1");
 
         sensitivity = 1.5f;
-        fov = 90;
+        fov = 80;
 
         LoadPost();
 
@@ -259,7 +271,7 @@ public class GameSettings : MonoBehaviour
 
     public void SettingsScreen()
     {
-
+        setPauseMenuOpen(true);
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         Time.timeScale = 0;
@@ -269,6 +281,7 @@ public class GameSettings : MonoBehaviour
 
     public void GameScreen()
     {
+        setPauseMenuOpen(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         Time.timeScale = 1;
@@ -483,13 +496,17 @@ public class GameSettings : MonoBehaviour
     public InteractableObject AddItem(Vector3 position, InteractableObject item)
     {
 
-        InteractableObject spawnedObject = Instantiate(item);
-        spawnedObject.gameObject.transform.position = position;
-        
-        globalObjectsList.Add(item);
+        if (globalObjectsList.Count <= 100)
+        {
+            InteractableObject spawnedObject = Instantiate(item);
+            spawnedObject.gameObject.transform.position = position;
 
-        return spawnedObject;
+            globalObjectsList.Add(item);
 
+            return spawnedObject;
+        }
+
+        return null;
     }
 
 
@@ -521,7 +538,7 @@ public class GameSettings : MonoBehaviour
 
             case "Level 0":
 
-                player.transform.position = new Vector3(0, 4.5f, 0);
+                player.transform.position = new Vector3(0, 1.5f, 0);
 
                 post.profile = level0Profile;
 
@@ -538,7 +555,7 @@ public class GameSettings : MonoBehaviour
 
             case "Level 1":
 
-                player.transform.position = new Vector3(15, 4, 15);
+                player.transform.position = new Vector3(0, 4, 0);
 
                 post.profile = level1Profile;
 

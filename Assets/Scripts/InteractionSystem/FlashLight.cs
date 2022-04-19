@@ -29,27 +29,31 @@ public class FlashLight : HoldableObject
     }
     public override void Use(InteractionSystem player, bool LMB)
     {
-        on = !on;
-
-        flashLight.enabled = on;
-        
-        switch (on)
+        if (LMB)
         {
-            case true:
-                emission.EnableKeyword("_EMISSION");
-                emission.SetColor("_EmissionColor", emissionColor);
-                emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
-                break;
+            on = !on;
 
-            case false:
-                emission.EnableKeyword("_EMISSION");
-                emission.SetColor("_EmissionColor", Color.black);
-                emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
-                break;
+            flashLight.enabled = on;
+
+            switch (on)
+            {
+                case true:
+                    emission.EnableKeyword("_EMISSION");
+                    emission.SetColor("_EmissionColor", emissionColor);
+                    emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+                    break;
+
+                case false:
+                    emission.EnableKeyword("_EMISSION");
+                    emission.SetColor("_EmissionColor", Color.black);
+                    emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
+                    break;
+            }
+
+            lightAudio.pitch = UnityEngine.Random.Range(0.6f, 1.3f);
+            lightAudio.PlayOneShot(lightAudio.clip);
         }
-
-        lightAudio.pitch = UnityEngine.Random.Range(0.7f, 1.1f);
-        lightAudio.PlayOneShot(lightAudio.clip);
+        
 
     }
 

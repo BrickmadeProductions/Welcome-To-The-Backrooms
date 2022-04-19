@@ -33,6 +33,7 @@ public class PlayerHealthSystem : MonoBehaviour
     public bool adrenalineActive = false;
     public bool canUseAdrenaline = true;
 
+    public bool calmingActive = false;
 
     public bool canRun = true;
     public bool canWalk = true;
@@ -42,6 +43,8 @@ public class PlayerHealthSystem : MonoBehaviour
 
     public Coroutine waking = null;
     public Coroutine sleeping = null;
+
+    public Coroutine calmingDown = null;
 
     public Animator animator;
     
@@ -58,8 +61,12 @@ public class PlayerHealthSystem : MonoBehaviour
         player = GetComponent<PlayerController>();
 
         if (SceneManager.GetActiveScene().name == "RoomHomeScreen")
-
+        {
+           
             WakeUp();
+        }
+
+            
 
         else
         {
@@ -78,19 +85,26 @@ public class PlayerHealthSystem : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButton("Blink"))
+        if (Input.GetButton("Blink") && !GameSettings.Instance.IsCutScene)
         {
             GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", true);
+
+            if (calmingDown == null)
+                calmingDown = StartCoroutine(Calm());
+
         }
-        else if (Input.GetButtonUp("Blink"))
+        else if (Input.GetButtonUp("Blink") && !GameSettings.Instance.IsCutScene)
         {
             GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
+
+            StopCoroutine(Calm());
         }
 
-        healthText.text = (int)health + " HP";
-        //hungerText.text = (int)hunger + " FP";
-        heartRateText.text = (int)heartRate + " BPM";
-        thirstText.text = (int)thirst + " TP";
+        healthText.text = (int)health + "";
+        //hungerText.text = (int)hunger + "";
+        heartRateText.text = (int)heartRate + "";
+        thirstText.text = (int)thirst + "";
+        sanityText.text = (int)sanity + "";
 
         heartBeatMixer.audioMixer.SetFloat("pitchBend", 1f / (heartRate / 90f));
         heartBeatSource.pitch = heartRate / 90f;
@@ -111,10 +125,30 @@ public class PlayerHealthSystem : MonoBehaviour
         if (awake)
             sleeping = StartCoroutine(SleepSequence());
     }
+    public IEnumerator Calm()
+    {
+        while (sanity < 100)
+        {
+            if (health < 100)
+                health++;
 
+            sanity++;
+
+            yield return new WaitForSeconds(0.5f);
+        }
+    }
+    public IEnumerator NaturalRegen()
+    {
+        while (health < 100)
+        {
+            health++;
+            yield return new WaitForSeconds(0.5f);
+        }
+        
+    }
     IEnumerator WakeUpSequence()
     {
-
+        GameSettings.Instance.setCutScene(true);
         animator.speed = 0.3f;
         player.arms.SetActive(false);
 
@@ -141,7 +175,7 @@ public class PlayerHealthSystem : MonoBehaviour
         awake = true;
 
         player.arms.SetActive(true);
-
+        GameSettings.Instance.setCutScene(false);
     }
 
     IEnumerator SleepSequence()
@@ -173,7 +207,9 @@ public class PlayerHealthSystem : MonoBehaviour
         while (true)
         {
             hunger -= 1;
-            sanity -= 1;
+
+            if (SceneManager.GetActiveScene().name != "RoomHomeScreen")
+                sanity -= 1;
 
             yield return new WaitForSeconds(5f);
         }
@@ -202,7 +238,7 @@ public class PlayerHealthSystem : MonoBehaviour
             ChangeHeartRate(Random.Range(2f, 4f));
             health -= 0.5f;
             yield return new WaitForSeconds(1f);
-            if (heartRate >= 140)
+            if (heartRate >= 150)
             {
                 player.adrenalineSpeedMultiplier = 1f;
                 StartCoroutine(AdrenalineCooldown());

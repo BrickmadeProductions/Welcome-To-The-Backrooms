@@ -45,8 +45,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   loaded: 0
   id: 0
-  posX: 0
-  posZ: 0
+  chunkPosX: 0
+  chunkPosZ: 0
   seed: 0
   exit: {fileID: 1447220690998866670, guid: ab686be1c710a314791278f29762a91b, type: 3}
   Tiles:
@@ -82,9 +82,8 @@ MonoBehaviour:
   - {fileID: 7437542324044909286, guid: fd7e58e6fe22bb14b8c995719eea06f4, type: 3}
   entities:
   - {fileID: 4225260656200758192, guid: f254f54165076c64ba860e8b6002ed68, type: 3}
-  objects:
-  - {fileID: 3693248661749687413, guid: a6d82421082750949b31f75449e3460d, type: 3}
-  - {fileID: 6461271711412109696, guid: b95df38760cc2404ab6833f6a42b6266, type: 3}
+  specialTiles:
+  - {fileID: 9011361979301346272, guid: 18db7cc18c263b54a81d0de462016fb9, type: 3}
   magnification: 1.1
   size: 5.5
   x_offset: -8

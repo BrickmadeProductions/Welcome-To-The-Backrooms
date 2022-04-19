@@ -175,10 +175,10 @@ public class PlayerController : MonoBehaviour
         if (!dead && !GameSettings.Instance.PauseMenuOpen)
         {
 
-            head.transform.rotation = Quaternion.Euler(rotationX, rotationY, 0);
+            
 
             //animations
-            if (currentPlayerState != PLAYERSTATES.IMMOBILE && characterController.isGrounded)
+            if (currentPlayerState != PLAYERSTATES.IMMOBILE && characterController.isGrounded && !grabbed)
             {
 
                 if (Input.GetButton("Jump"))
@@ -233,6 +233,8 @@ public class PlayerController : MonoBehaviour
             rotationY += Input.GetAxis("Mouse X") * GameSettings.Instance.Sensitivity;
 
             transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * GameSettings.Instance.Sensitivity, 0);
+
+            head.transform.rotation = Quaternion.Euler(rotationX, !grabbed ? rotationY : 0, 0);
 
             //player movement
 
@@ -649,16 +651,21 @@ public class PlayerController : MonoBehaviour
 
             dead = true;
 
-            GameSettings.Instance.LoadScene("IntroSequence");
+            GameSettings.Instance.LoadScene("HomeScreen");
 
         }
     }
     void OnTriggerEnter(Collider col)
     {
+        if (col.tag == "Enter0")
+        {
+            GameSettings.Instance.LoadScene("Level 0");
+        }
         if (col.tag == "Enter1")
         {
             GameSettings.Instance.LoadScene("Level 1");
         }
+        
     }
     IEnumerator PlayFootstep(string sound)
     {
@@ -676,7 +683,7 @@ public class PlayerController : MonoBehaviour
                 break;
 
             case PLAYERSTATES.RUN:
-                yield return new WaitForSeconds(0.3f);
+                yield return new WaitForSeconds(0.28f);
                 feetSource.volume = UnityEngine.Random.Range(0.11f, 0.24f);
                 break;
             case PLAYERSTATES.JUMP:
