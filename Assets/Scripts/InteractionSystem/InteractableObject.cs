@@ -6,10 +6,6 @@ using UnityEngine.SceneManagement;
 public abstract class InteractableObject : MonoBehaviour
 {
 
-    public float durability;
-    public GameObject[] breakablePrefabs;
-    public AudioClip[] hitClips;
-    public AudioClip[] breakClips;
     public bool playSounds = false;
     public Scene parentScene;
 

@@ -5,7 +5,12 @@ using UnityEngine.SceneManagement;
 
 public class HoldableObject : InteractableObject
 {
-    
+
+    public float durability;
+    public GameObject[] breakablePrefabs;
+    public AudioClip[] hitClips;
+    public AudioClip[] breakClips;
+
     public int inventoryWeight = 1;
     public Rigidbody holdableObject;
     bool broken;
@@ -111,42 +116,41 @@ public class HoldableObject : InteractableObject
             {
                 if (collision.relativeVelocity.magnitude >= 4) { 
 
-                    if (!transform.gameObject.GetComponent<AudioSource>().isPlaying)
+                    if (!transform.gameObject.GetComponent<AudioSource>().isPlaying && hitClips.Length > 0)
                     {
                         transform.gameObject.GetComponent<AudioSource>().clip = hitClips[Random.Range(0, hitClips.Length)];
                         transform.gameObject.GetComponent<AudioSource>().pitch = 1f + Random.Range(-0.15f, 0.15f);
                         transform.gameObject.GetComponent<AudioSource>().Play();
+                    }
+                    
+                    //breaking
+                    if (breakablePrefabs.Length > 0)
+                    {
 
-                        if (breakablePrefabs.Length > 0)
+                        if (collision.relativeVelocity.magnitude >= 5)
+                            durability -= collision.relativeVelocity.magnitude;
+
+                        //break
+                        if (durability < 0 && !broken && breakClips.Length > 0)
                         {
+                            AudioSource.PlayClipAtPoint(breakClips[Random.Range(0, breakClips.Length)], transform.position);
 
-                            if (collision.relativeVelocity.magnitude >= 5)
-                                durability -= collision.relativeVelocity.magnitude;
-
-                            //break
-                            if (durability < 0 && !broken && breakClips.Length > 0)
+                            foreach (GameObject prefab in breakablePrefabs)
                             {
-                                AudioSource.PlayClipAtPoint(breakClips[Random.Range(0, breakClips.Length)], transform.position);
-
-                                foreach (GameObject prefab in breakablePrefabs)
-                                {
-                                    GameObject p = Instantiate(prefab, transform.position, transform.rotation);
-                                    p.GetComponent<Rigidbody>().velocity = GetComponent<Rigidbody>().velocity / 2; //friction
-                                }
-                                
-
-                                Destroy(gameObject);
-                                broken = true;
-                                
-                                
+                                GameObject p = Instantiate(prefab, transform.position, transform.rotation);
+                                p.GetComponent<Rigidbody>().velocity = GetComponent<Rigidbody>().velocity / 2; //friction
                             }
+                                
 
-
+                            Destroy(gameObject);
+                            broken = true;
+                                
+                                
                         }
 
 
-
                     }
+                    
                 }
             }               
         }

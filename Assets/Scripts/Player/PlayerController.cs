@@ -95,6 +95,7 @@ public class PlayerController : MonoBehaviour
 
     //animation
     public Animator bodyAnim;
+    public GameObject headAnimLocation;
 
     //playerMovement
     CharacterController characterController;
@@ -213,7 +214,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (playerHealth.health <= 0.0f || playerHealth.sanity <= 0.0f)
+        if (playerHealth.health <= 0.0f)
         {
             die();
         }
@@ -230,15 +231,14 @@ public class PlayerController : MonoBehaviour
             rotationX += -Input.GetAxis("Mouse Y") * GameSettings.Instance.Sensitivity / 2;
             rotationX = Mathf.Clamp(rotationX, -lookXLimitBottom, lookXLimitTop);
 
-            rotationY += Input.GetAxis("Mouse X") * GameSettings.Instance.Sensitivity;
+            rotationY = Input.GetAxis("Mouse X") * GameSettings.Instance.Sensitivity;
 
-            transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * GameSettings.Instance.Sensitivity, 0);
+            transform.rotation *= Quaternion.Euler(0, rotationY, 0);
 
-            head.transform.rotation = Quaternion.Euler(rotationX, !grabbed ? rotationY : 0, 0);
-
+            head.transform.rotation = Quaternion.Euler(rotationX, head.transform.rotation.eulerAngles.y, head.transform.rotation.eulerAngles.z);
             //player movement
 
-            PlayerMovement();
+            PlayerLoop();
 
             // We are grounded, so recalculate move direction based on axes
             Vector3 forward = transform.TransformDirection(Vector3.forward);
@@ -263,7 +263,7 @@ public class PlayerController : MonoBehaviour
             // Apply gravity. Gravity is multiplied by deltaTime twice (once here, and once below
             // when the moveDirection is multiplied by deltaTime). This is because gravity should be applied
             // as an acceleration (ms^-2)
-            if (!characterController.isGrounded && !grabbed)
+            if (!characterController.isGrounded && !grabbed && GameSettings.LEVEL_LOADED)
             {
                 moveDirection.y -= gravity * Time.deltaTime;
             }
@@ -382,11 +382,6 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonUp("Watch"))
         {
             bodyAnim.SetBool("Watch", false);
-        }
-
-        if (grabbed)
-        {
-            currentPlayerState = PLAYERSTATES.IMMOBILE;
         }
 
         //controll player stamina volume indicator
@@ -524,10 +519,16 @@ public class PlayerController : MonoBehaviour
     private void HandleHealthSystem()
     {
         //adrenaline (100+bpm)
-        if (Input.GetButtonDown("Adrenaline") && playerHealth.heartRate >= 100 && !playerHealth.adrenalineActive && playerHealth.canUseAdrenaline)
-
+        if (Input.GetButtonDown("Adrenaline") && playerHealth.heartRate >= 100 && !playerHealth.adrenalineActive && playerHealth.canUseAdrenaline && !playerHealth.adrenalineCoolDownActive)
+        {
             StartCoroutine(playerHealth.ActivateAdrenaline());
+        }     
 
+        if (playerHealth.adrenalineActive == false && !playerHealth.canUseAdrenaline && playerHealth.adrenalineCoolDownActive)
+        {
+            StartCoroutine(playerHealth.AdrenalineCooldown());
+            playerHealth.adrenalineCoolDownActive = false;
+        }
         //heart system (revive and drop)
         if (!playerHealth.adrenalineActive)
         {
@@ -611,9 +612,11 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    private void PlayerMovement()
+    private void PlayerLoop()
     {
-        HandleFootstep();
+        if (!grabbed)
+            HandleFootstep();
+
         HandlePlayerStates();
         HandleHealthSystem();
     }
@@ -651,7 +654,7 @@ public class PlayerController : MonoBehaviour
 
             dead = true;
 
-            GameSettings.Instance.LoadScene("HomeScreen");
+            GameSettings.Instance.LoadScene(GameSettings.SCENE.HOMESCREEN);
 
         }
     }
@@ -659,11 +662,11 @@ public class PlayerController : MonoBehaviour
     {
         if (col.tag == "Enter0")
         {
-            GameSettings.Instance.LoadScene("Level 0");
+            GameSettings.Instance.LoadScene(GameSettings.SCENE.LEVEL0);
         }
         if (col.tag == "Enter1")
         {
-            GameSettings.Instance.LoadScene("Level 1");
+            GameSettings.Instance.LoadScene(GameSettings.SCENE.LEVEL1);
         }
         
     }
@@ -721,4 +724,6 @@ public class PlayerController : MonoBehaviour
 
         
     }
+
+    
 }

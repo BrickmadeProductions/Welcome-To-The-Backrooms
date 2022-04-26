@@ -11,7 +11,7 @@ public class EntityStats : MonoBehaviour
     public int health;
     public float agrivation;
     public int hunger;
-    
+    public Entity connectedEntity;
 
     // Start is called before the first frame update
     void Start()
@@ -20,16 +20,5 @@ public class EntityStats : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        if (health <= 0)
-        {
-            Die();
-        }
-    }
-
-    public void Die()
-    {
-        Destroy(gameObject);
-    }
+    
 }

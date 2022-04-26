@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -10,8 +10,8 @@ public class InfLevelGenerator : MonoBehaviour
 {
     public bool gen_enabled;
 
+    public bool ThreeDimensional;
 
-    
     //public Dictionary<Vector3, entityAttack> entitiesInScene;
 
     [HideInInspector]
@@ -24,16 +24,16 @@ public class InfLevelGenerator : MonoBehaviour
     public int currentChunkNumber;
 
     [HideInInspector]
-    public Vector2 oldPlayerChunkLocation = Vector2.zero;
+    public Vector3 oldPlayerChunkLocation = Vector3.zero;
 
     public GameObject level_chunkGenerator;
 
-    public int chunk_width;
-    public int chunk_height;
+    public int chunk_length;
+    public int layers;
 
     //chunks can be dynamically added and removed therefore there is no point in making it a 2d array
     //chunks can be dynamically added and removed therefore there is no point in making it a 2d array
-    public List<NoiseChunk> chunks;
+    public List<Chunk> chunks;
 
     [Range(1.0f, 5.0f)]
     //in chunks
@@ -42,6 +42,7 @@ public class InfLevelGenerator : MonoBehaviour
     void Awake()
     {
         ScriptInit();
+        
     }
 
     void Update()
@@ -56,7 +57,7 @@ public class InfLevelGenerator : MonoBehaviour
         if (gen_enabled)
         {
             
-            chunks = new List<NoiseChunk>();
+            chunks = new List<Chunk>();
 
             currentRoomNumber = 0;
             currentChunkNumber = 0;
@@ -81,13 +82,18 @@ public class InfLevelGenerator : MonoBehaviour
 
         Debug.Log("Init LEVEL_GEN");
 
+
         for (int x = -viewDistance; x < viewDistance; x++)
         {
             for (int z = -viewDistance; z < viewDistance; z++)
             {
-                if (GenerateChunk(x, z, currentChunkNumber))
-                    currentChunkNumber++;
+                for (int y = 0; y < layers; y++)
+                {
+                    if (GenerateChunk(x, y, z, currentChunkNumber))
+                        currentChunkNumber++;
+                }
             }
+            
         }
 
     }
@@ -98,9 +104,9 @@ public class InfLevelGenerator : MonoBehaviour
 
         for (int i = chunks.Count - 1; i >= 0 ; i--)
         {
-            NoiseChunk chunk = chunks[i];
+            Chunk chunk = chunks[i];
 
-            if (Vector2.Distance(new Vector2(chunk.chunkPosX, chunk.chunkPosZ), new Vector2(GetChunkAtPlayerLocation().chunkPosX, GetChunkAtPlayerLocation().chunkPosZ)) > viewDistance)
+            if (Vector3.Distance(new Vector3(chunk.chunkPosX, chunk.chunkPosY * 3, chunk.chunkPosZ), new Vector3(GetChunkAtPlayerLocation().chunkPosX, GetChunkAtPlayerLocation().chunkPosY * 3, GetChunkAtPlayerLocation().chunkPosZ)) > viewDistance)
             {
 
 
@@ -121,67 +127,88 @@ public class InfLevelGenerator : MonoBehaviour
 
 
             }
+
+            if (chunk != null)
+                chunk.UpdateChunkData();
         }
 
 
 
         
     }
-    bool GenerateChunk(int chunkX, int chunkZ, int chunkIndex)
+    bool GenerateChunk(int chunkX, int chunkY, int chunkZ, int chunkIndex)
     {
-        if (!IsChunkGeneratedAtPosition(chunkX, chunkZ))
+        if (!IsChunkGeneratedAtPosition(chunkX, chunkY, chunkZ))
         {
             
             GameObject chunk = Instantiate(level_chunkGenerator);
 
-            chunk.name = chunkX + ", " + chunkZ;
-            chunk.GetComponent<NoiseChunk>().SetChunkVariables(chunkX, chunkZ, chunkIndex, chunk_width, chunk_height);
-            chunk.transform.position = new Vector3(chunkX * ChunkSize(), 0, chunkZ * ChunkSize());
+            chunk.name = chunkX + ", " + chunkY + ","  + chunkZ;
+            chunk.GetComponent<Chunk>().SetChunkVariables(chunkX, chunkY, chunkZ, chunkIndex, chunk_length, chunk_length);
+            chunk.transform.position = new Vector3(chunkX * ChunkSize(), chunkY * ChunkHeight(), chunkZ * ChunkSize());
 
-            chunks.Add(chunk.GetComponent<NoiseChunk>());
+            chunks.Add(chunk.GetComponent<Chunk>());
 
             return true;
 
             
-            //NavMeshUpdate
-
         }
 
         else
         {
             return false;
         }
-            
+
     }
     
     //does checks to see if chunks are loaded as well
     void TryGenChunks()
     {
-
-        Vector2 newChunkPlayerLocation = new Vector2(GetChunkAtPlayerLocation().chunkPosX, GetChunkAtPlayerLocation().chunkPosZ);
-
-        if (newChunkPlayerLocation != oldPlayerChunkLocation && !isLoadingChunks)
+        if (GetChunkAtPlayerLocation() != null)
         {
-            isLoadingChunks = true;
+            Vector3 newChunkPlayerLocation = new Vector3(GetChunkAtPlayerLocation().chunkPosX, GetChunkAtPlayerLocation().chunkPosY, GetChunkAtPlayerLocation().chunkPosZ);
 
-
-            for (int x = (int)(GetChunkAtPlayerLocation().chunkPosX - viewDistance); x < (int)(GetChunkAtPlayerLocation().chunkPosX + viewDistance); x++)
+            if (newChunkPlayerLocation != oldPlayerChunkLocation && !isLoadingChunks)
             {
-                for (int z = (int)(GetChunkAtPlayerLocation().chunkPosZ - viewDistance); z < (int)(GetChunkAtPlayerLocation().chunkPosZ + viewDistance); z++)
+                isLoadingChunks = true;
+
+                for (int x = (int)(GetChunkAtPlayerLocation().chunkPosX - viewDistance); x < (int)(GetChunkAtPlayerLocation().chunkPosX + viewDistance); x++)
                 {
-                    if (GenerateChunk(x, z, currentChunkNumber))
-                        currentChunkNumber++;
+                    for (int z = (int)(GetChunkAtPlayerLocation().chunkPosZ - viewDistance); z < (int)(GetChunkAtPlayerLocation().chunkPosZ + viewDistance); z++)
+                    {
+                        if (layers > 1)
+                        {
+                            for (int y = (int)(GetChunkAtPlayerLocation().chunkPosY - layers); y < (int)(GetChunkAtPlayerLocation().chunkPosY + layers); y++)
+                            {
+
+                                if (GenerateChunk(x, y, z, currentChunkNumber))
+                                    currentChunkNumber++;
+                            }
+                        }
+                        else
+                        {
+
+
+                            if (GenerateChunk(x, 0, z, currentChunkNumber))
+                                currentChunkNumber++;
+
+                        }
+
+                    }
+
+
+
                 }
 
+                manageChunkLoading();
+
+                isLoadingChunks = false;
 
             }
 
-            manageChunkLoading();
-
-            isLoadingChunks = false;
+            oldPlayerChunkLocation = new Vector3(GetChunkAtPlayerLocation().chunkPosX, GetChunkAtPlayerLocation().chunkPosY, GetChunkAtPlayerLocation().chunkPosZ);
         }
-
-        oldPlayerChunkLocation = new Vector2(GetChunkAtPlayerLocation().chunkPosX, GetChunkAtPlayerLocation().chunkPosZ);
+        
     }
     
 
@@ -195,11 +222,11 @@ public class InfLevelGenerator : MonoBehaviour
         return false;
     }
 
-    public bool IsChunkGeneratedAtPosition(int x, int y)
+    public bool IsChunkGeneratedAtPosition(int x, int y, int z)
     {
-        foreach (NoiseChunk c in chunks)
+        foreach (Chunk c in chunks)
         {
-            if ((int)c.chunkPosX == x && (int)c.chunkPosZ == y)
+            if ((int)c.chunkPosX == x && (int)c.chunkPosY == y && (int)c.chunkPosZ == z)
             {
                 return true;
             }
@@ -214,9 +241,9 @@ public class InfLevelGenerator : MonoBehaviour
     
     
     
-    public bool CheckPointIntersection(float x1, float y1, float x2, float y2, float x, float y)
+    public bool CheckPointIntersection(float x1, float y1, float z1, float x2, float y2, float z2, float x, float y, float z)
     {
-        if (x > x1 && x < x2 && y > y1 && y < y2)
+        if (x > x1 && x < x2 && y > y1 && y < y2 && z > z1 && z < z2)
 
             return true;
 
@@ -228,26 +255,35 @@ public class InfLevelGenerator : MonoBehaviour
     }
     public float ChunkSize()
     {
-        return level_chunkGenerator.GetComponent<NoiseChunk>().size * chunk_width;
+        return level_chunkGenerator.GetComponent<Chunk>().sizeLength * chunk_length;
     }
-    public NoiseChunk GetChunkAtPlayerLocation()
+
+    public float ChunkHeight()
+    {
+        return level_chunkGenerator.GetComponent<Chunk>().sizeHeight * layers;
+    }
+    public Chunk GetChunkAtPlayerLocation()
 
     {
         
 
-        foreach (NoiseChunk c in chunks)
+        foreach (Chunk c in chunks)
         {
             
             if (c != null)
                 if (CheckPointIntersection(
 
-                    (c.chunkPosX * ChunkSize()) - ChunkSize() / 2, 
+                    (c.chunkPosX * ChunkSize()) - ChunkSize() / 2,
+                    (c.chunkPosY * ChunkHeight()) - ChunkHeight() / 2,
                     (c.chunkPosZ * ChunkSize()) - ChunkSize() / 2,
 
                     (c.chunkPosX * ChunkSize()) + ChunkSize() / 2,
+                    (c.chunkPosY * ChunkHeight()) + ChunkHeight() / 2,
                     (c.chunkPosZ * ChunkSize()) + ChunkSize() / 2,
 
-                    GameSettings.Instance.Player.transform.position.x, GameSettings.Instance.Player.transform.position.z))
+
+
+                    GameSettings.Instance.Player.transform.position.x, GameSettings.Instance.Player.transform.position.y, GameSettings.Instance.Player.transform.position.z))
                 {
                     //Debug.Log(c.posX + ", " + c.posZ);
                     return c;
@@ -257,22 +293,6 @@ public class InfLevelGenerator : MonoBehaviour
 
         return null;
         
-    }
-
-    NoiseChunk GetChunkAtlLocation(int x, int z)
-
-    {
-        foreach (NoiseChunk c in chunks)
-        {
-
-            if (c.chunkPosX == x && c.chunkPosZ == z)
-            {
-                return c;
-            }
-        }
-
-        return null;
-
     }
 
     public void UpdateChunks()

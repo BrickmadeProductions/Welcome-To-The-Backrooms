@@ -1,5 +1,45 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!244 &-6491510101854200640
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: f9fa56d7a25aa314db2f76a1a2d7c574
+  m_EffectName: Lowpass
+  m_MixLevel: d0214cc2f43f19a4aab940438d5593f9
+  m_Parameters:
+  - m_ParameterName: Cutoff freq
+    m_GUID: 42dea498ffc33b64cad836a9f47c4ae3
+  - m_ParameterName: Resonance
+    m_GUID: c992b09cdb132ea43925b33f92de6d09
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 0
+--- !u!244 &-2784004378905754067
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: 7d221e37089e09d4b823bd071af3c226
+  m_EffectName: Compressor
+  m_MixLevel: 4592c9f1dd95a6e4eb6df7924923f16b
+  m_Parameters:
+  - m_ParameterName: Threshold
+    m_GUID: 90777bf3dde5500489819f83d5e83bf8
+  - m_ParameterName: Attack
+    m_GUID: 5af4f66294aed954e80fcc72c6008058
+  - m_ParameterName: Release
+    m_GUID: a99fd55325f95ac428306887c8d723e4
+  - m_ParameterName: Make up gain
+    m_GUID: 967c31df49c30a245a783d7e334d3f99
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 1
 --- !u!241 &24100000
 AudioMixerController:
   m_ObjectHideFlags: 0
@@ -18,6 +58,8 @@ AudioMixerController:
   m_ExposedParameters:
   - guid: 0b47e7204b7215843b64ba9cfa35208c
     name: MasterVolume
+  - guid: 42dea498ffc33b64cad836a9f47c4ae3
+    name: cutoffFrequency
   m_AudioMixerGroupViews:
   - guids:
     - f154dfaf367f7dc45847873e4ad47ec1
@@ -41,6 +83,8 @@ AudioMixerGroupController:
   - {fileID: 24400004}
   - {fileID: 6338953132906739076}
   - {fileID: 4470773588841335599}
+  - {fileID: -2784004378905754067}
+  - {fileID: -6491510101854200640}
   m_UserColorIndex: 0
   m_Mute: 0
   m_Solo: 0
@@ -71,10 +115,15 @@ AudioMixerSnapshotController:
   m_FloatValues:
     0108204016825bf4aadf2728fc01a825: -8026
     b872c6c15fe44844789c7d4c24707921: 100
+    5af4f66294aed954e80fcc72c6008058: 39
     3b0860922b28f41478a467b3796494ad: 0.83800006
+    a99fd55325f95ac428306887c8d723e4: 61
+    90777bf3dde5500489819f83d5e83bf8: 0
     199871b587c106142a2e3eb1dc3b3dac: -2545
     ea522b063e5a8e2439742d778970b759: 229
     b76f3ff6eb9d355438e8b466e036d29d: 0.08
+    42dea498ffc33b64cad836a9f47c4ae3: 20000
+    967c31df49c30a245a783d7e334d3f99: 20.5
   m_TransitionOverrides: {}
 --- !u!244 &4470773588841335599
 AudioMixerEffectController:

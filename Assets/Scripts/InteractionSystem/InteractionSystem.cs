@@ -198,7 +198,7 @@ public class InteractionSystem : MonoBehaviour
         //interactables / doors / usable objects / etc.
         if (currentlyLookingAt != null && currentlyLookingAt.gameObject.tag == "Usable" && Input.GetButtonDown("Hold"))
         {
-            Debug.Log("Use " + currentlyLookingAt.name);
+            
             currentlyLookingAt.Use(this, false);
         }
 
@@ -260,6 +260,13 @@ public class InteractionSystem : MonoBehaviour
                     currentlyLookingAt = hits[0].collider.GetComponent<InteractableDoor>();
 
                 }
+
+                else if (hits[0].collider.GetComponent<InteractableButton>() != null && (hits[0].collider.gameObject.layer == 17))
+                {
+
+                    currentlyLookingAt = hits[0].collider.GetComponent<InteractableButton>();
+
+                }
                 else
                 {
                     currentlyLookingAt = null;
@@ -276,7 +283,7 @@ public class InteractionSystem : MonoBehaviour
 
             if (currentlyLookingAt != null)
             {
-                if (currentlyLookingAt.GetComponent<InteractableDoor>() != null || currentlyLookingAt.GetComponent<HoldableObject>() != null)
+                if (currentlyLookingAt.GetComponent<InteractableObject>())
                 {
 
                     switch (currentlyLookingAt.gameObject.layer)
@@ -285,6 +292,9 @@ public class InteractionSystem : MonoBehaviour
                             pickup.gameObject.SetActive(true);
                             break;
                         case 10:
+                            open.gameObject.SetActive(true);
+                            break;
+                        case 17:
                             open.gameObject.SetActive(true);
                             break;
                     }
@@ -315,7 +325,7 @@ public class InteractionSystem : MonoBehaviour
     {
         inventorySlots[currentSelectedInventorySlot].gameObject.SetActive(true);
         inventorySlots[currentSelectedInventorySlot].gameObject.transform.parent = null;
-        inventorySlots[currentSelectedInventorySlot].gameObject.transform.position = dropLocation.transform.position;
+        inventorySlots[currentSelectedInventorySlot].gameObject.transform.position = player.holdLocation.transform.position;
         inventorySlots.RemoveAt(currentSelectedInventorySlot);
 
 

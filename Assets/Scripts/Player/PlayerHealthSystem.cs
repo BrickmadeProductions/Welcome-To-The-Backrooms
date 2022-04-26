@@ -32,6 +32,7 @@ public class PlayerHealthSystem : MonoBehaviour
 
     public bool adrenalineActive = false;
     public bool canUseAdrenaline = true;
+    public bool adrenalineCoolDownActive = false;
 
     public bool calmingActive = false;
 
@@ -93,11 +94,12 @@ public class PlayerHealthSystem : MonoBehaviour
                 calmingDown = StartCoroutine(Calm());
 
         }
-        else if (Input.GetButtonUp("Blink") && !GameSettings.Instance.IsCutScene)
+        if (Input.GetButtonUp("Blink") && !GameSettings.Instance.IsCutScene)
         {
             GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
 
-            StopCoroutine(Calm());
+            StopCoroutine(calmingDown);
+            calmingDown = null;
         }
 
         healthText.text = (int)health + "";
@@ -127,16 +129,18 @@ public class PlayerHealthSystem : MonoBehaviour
     }
     public IEnumerator Calm()
     {
-        while (sanity < 100)
+        while (true)
         {
             if (health < 100)
                 health++;
 
-            sanity++;
+            if (sanity < 100)
+                sanity++;
 
             yield return new WaitForSeconds(0.5f);
         }
     }
+
     public IEnumerator NaturalRegen()
     {
         while (health < 100)
@@ -206,12 +210,17 @@ public class PlayerHealthSystem : MonoBehaviour
     {
         while (true)
         {
-            hunger -= 1;
+            hunger -= 0.5f;
 
-            if (SceneManager.GetActiveScene().name != "RoomHomeScreen")
-                sanity -= 1;
+            if (SceneManager.GetActiveScene().name != "RoomHomeScreen" && sanity > 0)
+                sanity -= 0.1f;
 
-            yield return new WaitForSeconds(5f);
+            if (sanity <= 0)
+            {
+                sanity = 0;
+                health--;
+            }
+            yield return new WaitForSeconds(2f);
         }
     }
 
@@ -232,29 +241,69 @@ public class PlayerHealthSystem : MonoBehaviour
         adrenalineActive = true;
         player.adrenalineSpeedMultiplier = 1.35f;
 
+        float pass = 20000;
+
         while (adrenalineActive)
         {
             
             ChangeHeartRate(Random.Range(2f, 4f));
-            health -= 0.5f;
-            yield return new WaitForSeconds(1f);
+
+            health -= 0.1f;
+
+            if (pass > 1500)
+            {
+                pass -= 1500;
+                GameSettings.Instance.Master.SetFloat("cutoffFrequency", pass);
+            }
+
             if (heartRate >= 150)
             {
                 player.adrenalineSpeedMultiplier = 1f;
-                StartCoroutine(AdrenalineCooldown());
+
                 adrenalineActive = false;
                 
             }
+
+            yield return new WaitForSeconds(0.5f);
+            
             
         }
+        canUseAdrenaline = false;
+        adrenalineCoolDownActive = true;
     }
     public IEnumerator AdrenalineCooldown()
     {
-        adrenalineAudio.Stop();
+        
+        bool freqFix = true;
 
-        canUseAdrenaline = false;
+        float pass;
+
+        GameSettings.Instance.Master.GetFloat("cutoffFrequency", out pass);
+
+        while (freqFix)
+        {
+            
+            if (pass < 20000)
+            {
+                pass += 1500;
+                GameSettings.Instance.Master.SetFloat("cutoffFrequency", pass);
+                
+            }
+            else
+            {
+                
+                freqFix = false;
+            }
+            
+            yield return new WaitForSeconds(0.5f);
+
+            Debug.Log("Fixing Audio");
+        }
+
+        adrenalineAudio.Stop();
         yield return new WaitForSeconds(300f);
         canUseAdrenaline = true;
+        
     }
 
 

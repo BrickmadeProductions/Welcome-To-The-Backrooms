@@ -4,24 +4,41 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
-    public int damage;
+    public float damage;
     public HoldableObject connetedObject;
 
     public void OnTriggerEnter(Collider other)
     {
+        /*
+         * Hitable - 18
+         */
+        Vector3 collisionPoint = other.gameObject.GetComponent<Collider>().ClosestPointOnBounds(transform.position);
 
-        if (other.gameObject.tag == "Entity" && gameObject.layer == 13 && connetedObject.animationPlaying) //13 is the layer the player holds items in their hand
+        if (gameObject.layer == 13 && other.gameObject.layer == 18 && connetedObject.animationPlaying) //13 is the layer the player holds items in their hand
         {
-            Debug.Log("Player Attack");
-            other.gameObject.GetComponent<EntityStats>().health -= damage;
+            //Debug.Log("Player Attack");
+            AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
+            if (limb != null)
+            {
+                if (!limb.attachedEntity.stunned && limb.attachedEntity.health < limb.attachedEntity.maxHealth % 4)
+                {
+                    StartCoroutine(limb.attachedEntity.StunTimer());
+                }
+                limb.attachedEntity.health -= (damage * limb.damageMultiplier);
+                limb.PlayerStabClip();
+            }
+                
+            
+            
         }
-        
 
-    }
+
+
+        }
 
     public void OnTriggerExit(Collider other)
     {
-        Debug.Log("TriggerExit");
+       //Debug.Log("TriggerExit");
     }
 
 }

@@ -15,9 +15,9 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 1
-  m_FogColor: {r: 0.17254902, g: 0.17254902, b: 0.17254902, a: 0}
-  m_FogMode: 1
-  m_FogDensity: 0.02
+  m_FogColor: {r: 0.14117648, g: 0.14117648, b: 0.14117648, a: 0}
+  m_FogMode: 3
+  m_FogDensity: 0.035
   m_LinearFogStart: 1
   m_LinearFogEnd: 80
   m_AmbientSkyColor: {r: 0.09411765, g: 0.09411765, b: 0.09411765, a: 1}
@@ -35,10 +35,10 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 128
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 0.435
+  m_ReflectionIntensity: 0.15
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.03650669, g: 0.03650669, b: 0.03650669, a: 0.435}
+  m_IndirectSpecularColor: {r: 0.012588515, g: 0.012588515, b: 0.012588515, a: 0.15}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -153,15 +153,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gen_enabled: 1
+  ThreeDimensional: 0
   isLoadingChunks: 0
   currentRoomNumber: 0
   currentChunkNumber: 0
-  oldPlayerChunkLocation: {x: 0, y: 0}
+  oldPlayerChunkLocation: {x: 0, y: 0, z: 0}
   level_chunkGenerator: {fileID: 3412154389276086693, guid: beb495f9bc813784481d55e9860c43d1, type: 3}
-  chunk_width: 2
-  chunk_height: 2
+  chunk_length: 1
+  layers: 2
   chunks: []
-  viewDistance: 2
+  viewDistance: 3
 --- !u!4 &757962601
 Transform:
   m_ObjectHideFlags: 0

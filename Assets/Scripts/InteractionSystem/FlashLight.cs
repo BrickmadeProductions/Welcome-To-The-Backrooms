@@ -9,6 +9,8 @@ public class FlashLight : HoldableObject
     public Light flashLight;
     AudioSource lightAudio;
 
+    GameObject runtimeFlashLightCollider;
+
     bool on = false;
 
     private void Start()
@@ -20,8 +22,6 @@ public class FlashLight : HoldableObject
         emissionColor = emission.GetColor("_EmissionColor");
 
 
-        //turn off on start
-        flashLight.enabled = on;
         emission.EnableKeyword("_EMISSION");
         emission.SetColor("_EmissionColor", Color.black);
         emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
@@ -33,20 +33,20 @@ public class FlashLight : HoldableObject
         {
             on = !on;
 
-            flashLight.enabled = on;
-
             switch (on)
             {
                 case true:
                     emission.EnableKeyword("_EMISSION");
                     emission.SetColor("_EmissionColor", emissionColor);
                     emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+                    runtimeFlashLightCollider = Instantiate(flashLight.gameObject, transform.GetChild(0));
                     break;
 
                 case false:
                     emission.EnableKeyword("_EMISSION");
                     emission.SetColor("_EmissionColor", Color.black);
                     emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
+                    Destroy(runtimeFlashLightCollider);
                     break;
             }
 

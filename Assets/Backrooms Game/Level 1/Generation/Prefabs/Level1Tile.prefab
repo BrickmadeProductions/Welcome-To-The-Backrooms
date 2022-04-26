@@ -47,14 +47,20 @@ MonoBehaviour:
   id: 0
   chunkPosX: 0
   chunkPosZ: 0
-  seed: 0
-  exit: {fileID: 0}
+  chunkPosY: 0
+  exit: {fileID: 7998624537947542715, guid: bdd7dab7f277f41488b4bac91ee7da2d, type: 3}
   Tiles:
   - {fileID: 7998624537947542715, guid: bdd7dab7f277f41488b4bac91ee7da2d, type: 3}
-  - {fileID: 9220206704640043249, guid: 06a7b2f06405af341af924a70cf9eaf4, type: 3}
-  entities: []
-  objects: []
-  magnification: 1.1
-  size: 37
+  - {fileID: 5011649312331890240, guid: 5ed437d60b5c44947af6e436e0485bd1, type: 3}
+  entities:
+  - {fileID: 7706871903603223783, guid: b76058a6d76eb8c4c833853585c482a9, type: 3}
+  specialTiles:
+  - {fileID: 6373889918585593496, guid: 06a7b2f06405af341af924a70cf9eaf4, type: 3}
+  regTiles:
+  - {fileID: 1686728438583982637, guid: 6c395cbb0999bb345ba65938ad6e5d14, type: 3}
+  regTileSpace: 4
+  magnification: 1.05
+  sizeLength: 42
+  sizeHeight: 4
   x_offset: -8
-  y_offset: -8
+  z_offset: 0
