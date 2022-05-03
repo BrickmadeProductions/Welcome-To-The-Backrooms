@@ -1,62 +1,71 @@
+// Blinking
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Blinking : MonoBehaviour
 {
-    public GameObject eyelid;
+	public GameObject eyelid;
 
-    public IEnumerator Blink()
-    {
-        
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", true);
-        yield return new WaitForSeconds(0.1f);
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
+	public IEnumerator Blink()
+	{
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+		yield return new WaitForSeconds(0.1f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: false);
+	}
 
-    }
+	public IEnumerator RandomBlinking()
+	{
+		while (true)
+		{
+			yield return new WaitForSeconds(Random.Range(2f, 10f));
+			eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+			yield return new WaitForSeconds(0.1f);
+			eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: false);
+		}
+	}
 
-    public IEnumerator RandomBlinking()
-    {
-        while (true)
-        {
-            
-            yield return new WaitForSeconds(Random.Range(2f, 10f));
-            eyelid.GetComponent<Animator>().SetBool("eyesClosed", true);
-            yield return new WaitForSeconds(0.1f);
-            eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
-            
-            
-        }
-        
-    }
+	public IEnumerator WakeUpOther()
+	{
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+		yield return new WaitForEndOfFrame();
+		yield return new WaitForFixedUpdate();
+		yield return new WaitForSeconds(1f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: false);
+		yield return new WaitForSeconds(0.2f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+		yield return new WaitForSeconds(0.3f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: false);
+		yield return new WaitForSeconds(0.2f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+		yield return new WaitForSeconds(0.1f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: false);
+	}
 
-    public IEnumerator WakeUp()
-    {
-        yield return new WaitForEndOfFrame();
-        yield return new WaitForFixedUpdate();
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", true);
-        yield return new WaitForSeconds(2f); //closed
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
-        yield return new WaitForSeconds(0.25f); //opened
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", true);
-        yield return new WaitForSeconds(0.5f); //closed
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
-        yield return new WaitForSeconds(2f); //closed
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
-        yield return new WaitForSeconds(0.25f); //opened
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", true);
-        yield return new WaitForSeconds(0.5f); //closed
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
-        yield return new WaitForSeconds(0.25f); //opened
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", true);
-        yield return new WaitForSeconds(0.5f); //closed
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
-        yield return new WaitForSeconds(0.25f); //opened
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", true);
-        yield return new WaitForSeconds(0.5f); //closed
-        eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
-    }
+	public IEnumerator WakeUpRoom()
+	{
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+		yield return new WaitForEndOfFrame();
+		yield return new WaitForFixedUpdate();
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+		yield return new WaitForSeconds(2f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: false);
+		yield return new WaitForSeconds(0.25f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+		yield return new WaitForSeconds(0.5f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: false);
+		yield return new WaitForSeconds(2f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: false);
+		yield return new WaitForSeconds(0.25f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+		yield return new WaitForSeconds(0.5f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: false);
+		yield return new WaitForSeconds(0.25f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+		yield return new WaitForSeconds(0.5f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: false);
+		yield return new WaitForSeconds(0.25f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+		yield return new WaitForSeconds(0.5f);
+		eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: false);
+	}
 }

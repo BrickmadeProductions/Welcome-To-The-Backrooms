@@ -6,6 +6,6 @@ public class ExtraLightData : MonoBehaviour
 {
     private void Start()
     {
-        GameSettings.Instance.GlobalLightsList.Add(GetComponent<Light>());
+        //GameSettings.Instance.GlobalLightsList.Add(GetComponent<Light>());
     }
 }

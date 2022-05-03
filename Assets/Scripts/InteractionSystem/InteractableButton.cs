@@ -1,35 +1,36 @@
-using System.Collections;
-using System.Collections.Generic;
+// InteractableButton
 using UnityEngine;
 
 public class InteractableButton : InteractableObject
 {
-    public bool pressed;
-    private bool justPressed;
-    public override void Grab(InteractionSystem player)
-    {
-        
-    }
+	public bool pressed;
 
-    public override void Throw(Vector3 force)
-    {
-        
-    }
+	private bool justPressed;
 
-    public override void Use(InteractionSystem player, bool LMB)
-    {
-        justPressed = true;
-        pressed = true;
-    }
+	public override void Grab(InteractionSystem player)
+	{
+	}
 
-    public void Update()
-    {
-        if (justPressed)
-        {
-            pressed = false;
-            justPressed = false;
-            
-        }
-            
-    }
+	public override void Throw(Vector3 force)
+	{
+	}
+
+	public override void Use(InteractionSystem player, bool LMB)
+	{
+		justPressed = true;
+		pressed = true;
+	}
+
+	public void Update()
+	{
+		if (justPressed)
+		{
+			pressed = false;
+			justPressed = false;
+		}
+	}
+
+	public override void Init()
+	{
+	}
 }

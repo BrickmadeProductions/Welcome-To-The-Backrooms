@@ -1,184 +1,156 @@
-﻿using System.Collections;
+﻿// HoldableObject
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class HoldableObject : InteractableObject
 {
+	public float durability;
 
-    public float durability;
-    public GameObject[] breakablePrefabs;
-    public AudioClip[] hitClips;
-    public AudioClip[] breakClips;
+	public GameObject[] breakablePrefabs;
 
-    public int inventoryWeight = 1;
-    public Rigidbody holdableObject;
-    bool broken;
-    public bool large;
-    public bool animationPlaying;
+	public AudioClip[] hitClips;
 
-    public List<AnimationClip> LMBAnimationClips;
-    public List<string> LMBAnimationBools;
+	public AudioClip[] breakClips;
 
-    public List<AnimationClip> RMBAnimationClips;
-    public List<string> RMBAnimationBools;
+	public int inventoryWeight = 1;
 
-    public string CustomHoldAnimation = "";
+	public Rigidbody holdableObject;
 
-    // Start is called before the first frame update
-    void Awake()
-    {
-        GameSettings.Instance.GlobalObjectsList.Add(this);
-        broken = false;
-        holdableObject = GetComponent<Rigidbody>();
-        StartCoroutine(waitToPlaySound());
-    }
+	private bool broken;
 
-    IEnumerator waitToPlaySound()
-    {
-        yield return new WaitForSeconds(2);
-        playSounds = true;
-    }
-    public override void Throw(Vector3 force)
-    {
-        holdableObject.AddForceAtPosition(force, transform.position);
-    }
-    IEnumerator playAnimation(string boolName, int animChosen, bool LMB)
-    {
-        
-        GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, true);
-        animationPlaying = true;
-        if (LMB)
-            yield return new WaitForSeconds(LMBAnimationClips[animChosen].length);
-        else
-        {
-            yield return new WaitForSeconds(RMBAnimationClips[animChosen].length);
-        }
-        animationPlaying = false;
-        GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, false);
-        
-    }
-    public override void Use(InteractionSystem player, bool LMB)
-    {
+	public bool large;
 
-        if (!animationPlaying)
-        {
-            //regular
-            if (LMB)
-            {
-                int animChosen = Random.Range(0, LMBAnimationBools.Count);
+	public bool animationPlaying;
 
-                StartCoroutine(playAnimation(LMBAnimationBools[animChosen], animChosen, LMB));
-            }
-            //hard hit
-            else
-            {
-                int animChosen = Random.Range(0, RMBAnimationBools.Count);
+	public List<AnimationClip> LMBAnimationClips;
 
-                StartCoroutine(playAnimation(RMBAnimationBools[animChosen], animChosen, LMB));
-            }
+	public List<string> LMBAnimationBools;
 
-        }
-        
-    }
+	public List<AnimationClip> RMBAnimationClips;
 
-    public override void Grab(InteractionSystem player)
-    {
-        player.currentlyLookingAt.gameObject.SetActive(false);
+	public List<string> RMBAnimationBools;
 
-        player.inventorySlots.Add(this);
+	public string CustomHoldAnimation = "";
 
-        transform.SetParent(player.currentlyLookingAt.gameObject.transform);
+	private Vector3 pushAmt;
 
-        Debug.Log("Added Object " + name);
-        player.currentlyLookingAt = null;
-    }
+	private IEnumerator waitToPlaySound()
+	{
+		yield return new WaitForSeconds(2f);
+		playSounds = true;
+	}
 
-    Vector3 pushAmt; // global "pushed by RBs" accumulator
+	public override void Init()
+	{
+		playSounds = false;
+		broken = false;
+		holdableObject = GetComponent<Rigidbody>();
+		StartCoroutine(waitToPlaySound());
+	}
 
-    //breaking and other collisions
-    private void OnCollisionEnter(Collision collision)
-    {
+	public override void Throw(Vector3 force)
+	{
+		holdableObject.AddForceAtPosition(force, base.transform.position);
+	}
 
-        //Debug.Log(collision.relativeVelocity.magnitude);
+	private IEnumerator playAnimation(string boolName, int animChosen, bool LMB)
+	{
+		GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, value: true);
+		animationPlaying = true;
+		if (LMB)
+		{
+			yield return new WaitForSeconds(LMBAnimationClips[animChosen].length);
+		}
+		else
+		{
+			yield return new WaitForSeconds(RMBAnimationClips[animChosen].length);
+		}
+		animationPlaying = false;
+		GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, value: false);
+	}
 
-        if (collision.gameObject.tag == "Player")
-        {
-            Rigidbody rb = collision.rigidbody;
-            if (rb != null)
-            {
-                //pushAmt += rb.velocity * 1f;
-            }
-        }
-        else
-        {
-            if (transform.gameObject.GetComponent<AudioSource>() != null && playSounds)
-            {
-                if (collision.relativeVelocity.magnitude >= 4) { 
+	public override void Use(InteractionSystem player, bool LMB)
+	{
+		if (!animationPlaying)
+		{
+			if (LMB)
+			{
+				int num = Random.Range(0, LMBAnimationBools.Count);
+				StartCoroutine(playAnimation(LMBAnimationBools[num], num, LMB));
+			}
+			else
+			{
+				int num2 = Random.Range(0, RMBAnimationBools.Count);
+				StartCoroutine(playAnimation(RMBAnimationBools[num2], num2, LMB));
+			}
+		}
+	}
 
-                    if (!transform.gameObject.GetComponent<AudioSource>().isPlaying && hitClips.Length > 0)
-                    {
-                        transform.gameObject.GetComponent<AudioSource>().clip = hitClips[Random.Range(0, hitClips.Length)];
-                        transform.gameObject.GetComponent<AudioSource>().pitch = 1f + Random.Range(-0.15f, 0.15f);
-                        transform.gameObject.GetComponent<AudioSource>().Play();
-                    }
-                    
-                    //breaking
-                    if (breakablePrefabs.Length > 0)
-                    {
+	public override void Grab(InteractionSystem interactionSystem)
+	{
+		interactionSystem.inventorySlots.Add(this);
+		interactionSystem.currentlyLookingAt.gameObject.SetActive(value: false);
+		interactionSystem.currentlyLookingAt = null;
+		Debug.Log("Added Object " + base.name);
+		base.transform.SetParent(interactionSystem.inventoryObject.transform);
+	}
 
-                        if (collision.relativeVelocity.magnitude >= 5)
-                            durability -= collision.relativeVelocity.magnitude;
+	private void OnCollisionEnter(Collision collision)
+	{
+		if (collision.gameObject.tag == "Player")
+		{
+			_ = collision.rigidbody != null;
+		}
+		else
+		{
+			if (!(base.transform.gameObject.GetComponent<AudioSource>() != null) || !playSounds || !(collision.relativeVelocity.magnitude >= 4f))
+			{
+				return;
+			}
+			if (!base.transform.gameObject.GetComponent<AudioSource>().isPlaying && hitClips.Length != 0)
+			{
+				base.transform.gameObject.GetComponent<AudioSource>().clip = hitClips[Random.Range(0, hitClips.Length)];
+				base.transform.gameObject.GetComponent<AudioSource>().pitch = 1f + Random.Range(-0.15f, 0.15f);
+				base.transform.gameObject.GetComponent<AudioSource>().Play();
+			}
+			if (breakablePrefabs.Length == 0)
+			{
+				return;
+			}
+			if (collision.relativeVelocity.magnitude >= 5f)
+			{
+				durability -= collision.relativeVelocity.magnitude;
+			}
+			if (durability < 0f && !broken && breakClips.Length != 0)
+			{
+				AudioSource.PlayClipAtPoint(breakClips[Random.Range(0, breakClips.Length)], base.transform.position);
+				GameObject[] array = breakablePrefabs;
+				for (int i = 0; i < array.Length; i++)
+				{
+					Object.Instantiate(array[i], base.transform.position, base.transform.rotation).GetComponent<Rigidbody>().velocity = GetComponent<Rigidbody>().velocity / 2f;
+				}
+				Object.Destroy(base.gameObject);
+				broken = true;
+			}
+		}
+	}
 
-                        //break
-                        if (durability < 0 && !broken && breakClips.Length > 0)
-                        {
-                            AudioSource.PlayClipAtPoint(breakClips[Random.Range(0, breakClips.Length)], transform.position);
-
-                            foreach (GameObject prefab in breakablePrefabs)
-                            {
-                                GameObject p = Instantiate(prefab, transform.position, transform.rotation);
-                                p.GetComponent<Rigidbody>().velocity = GetComponent<Rigidbody>().velocity / 2; //friction
-                            }
-                                
-
-                            Destroy(gameObject);
-                            broken = true;
-                                
-                                
-                        }
-
-
-                    }
-                    
-                }
-            }               
-        }
-        
-    }
-    
-    
-
-    private void FixedUpdate() 
-    {
-        if (SceneManager.GetActiveScene().name != "HomeScreen" && SceneManager.GetActiveScene().name != "IntroSequence")
-
-            if (GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1)
-            {
-                foreach (string anim in LMBAnimationBools)
-                {
-                    GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(anim, false);
-                }
-                foreach (string anim in RMBAnimationBools)
-                {
-                    GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(anim, false);
-                }
-
-            }
-
-        transform.position += pushAmt;
-        pushAmt *= 0.95f; // fake friction
-    }
-
-    
+	private void FixedUpdate()
+	{
+		if (SceneManager.GetActiveScene().name != "HomeScreen" && SceneManager.GetActiveScene().name != "IntroSequence" && GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
+		{
+			foreach (string lMBAnimationBool in LMBAnimationBools)
+			{
+				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(lMBAnimationBool, value: false);
+			}
+			foreach (string rMBAnimationBool in RMBAnimationBools)
+			{
+				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(rMBAnimationBool, value: false);
+			}
+		}
+		base.transform.position += pushAmt;
+		pushAmt *= 0.95f;
+	}
 }

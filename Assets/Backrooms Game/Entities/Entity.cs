@@ -1,141 +1,211 @@
+// Entity
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using System;
+using Newtonsoft.Json;
+
+[Serializable]
+public struct SaveableEntity
+{
+	public string runTimeID;
+
+	public float[] location;
+
+	public float[] rotationEuler;
+
+	public ENTITY_TYPE type;
+
+	[JsonIgnore]
+	public Entity instance;
+
+	public override string ToString()
+	{
+		return type.ToString() + "-" + runTimeID;
+	}
+}
 
 public abstract class Entity : MonoBehaviour
 {
-    //Health
-    public float maxHealth;
-    public float health;
-    public float agrivation;
-    public float hunger;
+	public SaveableEntity saveableData;
 
-    public ENTITY_TYPE type;
+	public float maxHealth;
 
-    public bool canAttack;
-    public Animator entityAnimator;
+	public float health;
 
-    public AudioClip[] movementNoises;
-    public AudioSource movementNoiseSource;
+	public float agrivation;
 
-    public AudioClip[] attackNoises;
-    public AudioSource attackNoiseSource;
+	public float hunger;
 
-    public AudioClip[] hurtNoises;
-    public AudioSource hurtNoisesSource;
+	public ENTITY_TYPE type;
 
-    public int damage;
-    public float sanityMultiplier;
+	public bool canAttack;
 
-    public int maxAllowed; //total allowed in the game at one time
-    public int despawnDistance;
-    public int entityViewDistance = 500;
-    public int memoryOfPlayerLocationInSeconds;
+	public Animator entityAnimator;
 
-    Coroutine rememberPlayerLocation = null;
+	public AudioClip[] movementNoises;
 
-    public LayerMask sightMask;
-    public bool canSeePlayer;
-    public bool playerCanSee;
+	public AudioSource movementNoiseSource;
 
-    public float spawnChance;
+	public AudioClip[] attackNoises;
 
-    public float speed;
+	public AudioSource attackNoiseSource;
 
-    public bool stunned = false;
-    public float stunTime;
+	public AudioClip[] hurtNoises;
 
-    public Transform eyes;
+	public AudioSource hurtNoisesSource;
 
-    public SkinnedMeshRenderer entitySkin;
+	public int damage;
 
-    bool isDespawned = false;
+	public float sanityMultiplier;
 
-    public int ID;
+	public int maxAllowed;
 
-    public GameObject bloodPrefab;
+	public int despawnDistance;
 
+	public int entityViewDistance = 500;
 
+	public int memoryOfPlayerLocationInSeconds;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        StartCoroutine(AI());
-        Debug.Log("Spawned " + type);
-    }
-    
-    private IEnumerator RememberPlayerLocation()
-    {
-        yield return new WaitForSeconds(memoryOfPlayerLocationInSeconds);
-        canSeePlayer = false;
-        rememberPlayerLocation = null;
-        attackNoiseSource.Stop();
-    }
+	private Coroutine rememberPlayerLocation;
 
-    private void Update()
-    {
-        
-        UpdateEntity();
+	public LayerMask sightMask;
 
-        if ((Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > despawnDistance && !isDespawned) || health <= 0)
-        {            
-            Despawn();
-            isDespawned = true;
-        }
-        else
-        {
-            Vector3 playerPos = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.position;
+	public bool canSeePlayer;
 
-            RaycastHit hit;
-            if (Vector3.Distance(eyes.transform.position, playerPos) < entityViewDistance)
-            {
-                //Debug.Log("Searching For Player");
-                if (Physics.Raycast(eyes.transform.position, (playerPos - eyes.transform.position), out hit, despawnDistance, sightMask))
-                {
-                    if (hit.collider.gameObject.layer == 11)
-                    {
-                        canSeePlayer = true;
+	public bool playerCanSee;
 
-                    }
-                    else if (rememberPlayerLocation == null)
-                    {
-                        rememberPlayerLocation = StartCoroutine(RememberPlayerLocation());
-                    }
+	public float spawnChance;
 
+	public float speed;
 
-                }
-            }
-        }
-    }
-    public IEnumerator StunTimer()
-    {
-        stunned = true;
-        yield return new WaitForSeconds(stunTime);
-        stunned = false;
-    }
+	public bool stunned;
 
-    private void OnBecameVisible()
-    {
-        playerCanSee = true;
-    }
-    private void OnBecameInvisible()
-    {
-        playerCanSee = false;
-    }
+	public float stunTime;
 
-    public abstract void UpdateEntity();
-    public abstract IEnumerator AI();
+	public Transform eyes;
 
-    public abstract void Despawn();
+	public SkinnedMeshRenderer entitySkin;
 
-    public void OnDestroy()
-    {
-        Debug.Log(GameSettings.Instance.GlobalEntityList.Count);
-        Debug.Log("Despawned " + type);
-        GameSettings.Instance.GlobalEntityList.Remove(ID);
-        Debug.Log(GameSettings.Instance.GlobalEntityList.Count);
-    }
+	private bool isDespawned;
+
+	public string runTimeID;
+
+	public GameObject bloodPrefab;
+
+	public void GenerateID(BackroomsLevelWorld world)
+	{
+		runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
+		while (world.CheckWorldForEntityKey(type.ToString() + "-" + runTimeID))
+		{
+			runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
+		}
+		base.gameObject.name = type.ToString() + "-" + runTimeID;
+		Save();
+	}
+
+	public void Load(SaveableEntity entityData)
+	{
+		saveableData = entityData;
+		type = saveableData.type;
+		runTimeID = saveableData.runTimeID;
+		base.transform.position = new Vector3(saveableData.location[0], saveableData.location[1], saveableData.location[2]);
+		base.transform.rotation = Quaternion.Euler(saveableData.rotationEuler[0], saveableData.rotationEuler[1], saveableData.rotationEuler[2]);
+		base.gameObject.name = type.ToString() + "-" + runTimeID;
+		saveableData.instance = this;
+	}
+
+	public SaveableEntity Save()
+	{
+		saveableData = new SaveableEntity
+		{
+			runTimeID = runTimeID,
+			location = new float[3]
+			{
+				base.transform.position.x,
+				base.transform.position.y,
+				base.transform.position.z
+			},
+			rotationEuler = new float[3]
+			{
+				base.transform.rotation.eulerAngles.x,
+				base.transform.rotation.eulerAngles.y,
+				base.transform.rotation.eulerAngles.z
+			},
+			type = type,
+			instance = this
+		};
+		return saveableData;
+	}
+
+	private void Awake()
+	{
+	}
+
+	private void Start()
+	{
+		StartCoroutine(AI());
+		Debug.Log("Spawned " + type);
+	}
+
+	private IEnumerator RememberPlayerLocation()
+	{
+		yield return new WaitForSeconds(memoryOfPlayerLocationInSeconds);
+		canSeePlayer = false;
+		rememberPlayerLocation = null;
+		attackNoiseSource.Stop();
+	}
+
+	private void Update()
+	{
+		UpdateEntity();
+		if ((Vector3.Distance(GameSettings.Instance.Player.transform.position, base.transform.position) > (float)despawnDistance && !isDespawned) || health <= 0f)
+		{
+			Despawn();
+			isDespawned = true;
+			return;
+		}
+		Vector3 position = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.position;
+		if (Vector3.Distance(eyes.transform.position, position) < (float)entityViewDistance && Physics.Raycast(eyes.transform.position, position - eyes.transform.position, out var hitInfo, despawnDistance, sightMask))
+		{
+			if (hitInfo.collider.gameObject.layer == 11)
+			{
+				canSeePlayer = true;
+			}
+			else if (rememberPlayerLocation == null)
+			{
+				rememberPlayerLocation = StartCoroutine(RememberPlayerLocation());
+			}
+		}
+	}
+
+	public IEnumerator StunTimer()
+	{
+		stunned = true;
+		yield return new WaitForSeconds(stunTime);
+		stunned = false;
+	}
+
+	private void OnBecameVisible()
+	{
+		playerCanSee = true;
+	}
+
+	private void OnBecameInvisible()
+	{
+		playerCanSee = false;
+	}
+
+	public abstract void UpdateEntity();
+
+	public abstract IEnumerator AI();
+
+	public abstract void Despawn();
+
+	public void OnDestroy()
+	{
+	}
 }
+
 public enum ENTITY_TYPE : int
 {
     WINDOW = 2,

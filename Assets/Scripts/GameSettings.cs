@@ -1,827 +1,768 @@
+// GameSettings
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using Lowscope.Saving;
+using Lowscope.Saving.Components;
+using Newtonsoft.Json;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
-using Lowscope.Saving;
 using UnityEngine.UI;
-using TMPro;
 
 public class GameSettings : MonoBehaviour, ISaveable
 {
+	[Serializable]
+	public struct SaveData
+	{
+		public SCENE lastSavedScene;
 
-    private Dictionary<int, Entity> globalEntityList;
+		public bool ao;
 
-    public Dictionary<int, Entity> GlobalEntityList { get { return globalEntityList; } set { globalEntityList = GlobalEntityList; } }
+		public bool bloom;
 
-    private List<InteractableObject> globalObjectsList;
+		public bool antiAliasing;
 
-    public List<InteractableObject> GlobalObjectsList { get { return globalObjectsList; } set { globalObjectsList = GlobalObjectsList; } }
+		public bool chrom;
 
-    private List<Light> globalLightsList;
+		public bool vsync;
 
-    public List<Light> GlobalLightsList { get { return globalLightsList; } set { globalLightsList = GlobalLightsList; } }
+		public bool motionBlur;
 
+		public bool fullScreen;
 
-    private PostProcessVolume post;
+		public int screenResIndex;
 
-    public PostProcessVolume Post { get { return post; } }
+		public int fov;
 
+		public float sensitivity;
 
-    private Vignette vignette;
+		public float masterVolume;
+	}
 
-    public Vignette Vignette { get { return vignette; } }
+	public enum SCENE
+	{
+		INTRO,
+		HOMESCREEN,
+		ROOM,
+		LEVEL0,
+		LEVEL1,
+		LEVEL2
+	}
 
+	private SaveData runtimeSaveData;
 
-    private ChromaticAberration chrom;
+	[SerializeField]
+	private List<InteractableObject> propDatabase;
 
-    public ChromaticAberration Chrom { get { return chrom; } }
+	public Dictionary<OBJECT_TYPE, InteractableObject> PropDatabase;
 
+	[SerializeField]
+	private List<Entity> entityDatabase;
 
-    private Grain grain;
+	public Dictionary<ENTITY_TYPE, Entity> EntityDatabase;
 
-    public Grain Grain { get { return grain; } }
+	public static volatile bool GAME_FIRST_LOADED = true;
 
+	public static volatile bool LEVEL_SAVE_LOADED = false;
 
-    private Bloom bloom;
+	public static volatile bool LEVEL_GENERATED = false;
 
-    public Bloom Bloom { get { return bloom; } }
+	public static volatile bool LEVEL_LOADED = false;
 
+	public static volatile bool PLAYER_DATA_LOADED_IN_SCENE = false;
 
-    private ColorGrading colorGrading;
+	private PostProcessVolume post;
 
-    public ColorGrading ColorGrading { get { return colorGrading; } }
+	private Vignette vignette;
 
+	private ChromaticAberration chrom;
 
-    private AmbientOcclusion ambientOcclusion;
+	private Grain grain;
 
-    public AmbientOcclusion AbientOcclusion { get { return ambientOcclusion; } }
+	private Bloom bloom;
 
-    private MotionBlur motionBlur;
+	private ColorGrading colorGrading;
 
-    public MotionBlur MotionBlur { get { return motionBlur; } }
+	private AmbientOcclusion ambientOcclusion;
 
-    private AudioMixer master;
+	private MotionBlur motionBlur;
 
-    public AudioMixer Master { get { return master; } }
+	private AudioMixer master;
 
+	public Texture2D cursor;
 
-    public Texture2D cursor;
+	public PostProcessProfile homeScreenRoomProfile;
 
-    public PostProcessProfile homeScreenRoomProfile;
-    public PostProcessProfile homeScreenProfile;
+	public PostProcessProfile homeScreenProfile;
 
-    public AudioMixer level0Mixer;
-    public PostProcessProfile level0Profile;
-    public AudioClip level0Ambience;
+	public AudioMixer level0Mixer;
 
-    public AudioMixer level1Mixer;
-    public PostProcessProfile level1Profile;
-    public AudioClip level1Ambience;
+	public PostProcessProfile level0Profile;
 
-    public AudioMixer level2Mixer;
-    public PostProcessProfile level2Profile;
-    public AudioClip level2Ambience;
+	public AudioClip level0Ambience;
 
-    public GameObject playerPrefab;
+	public AudioMixer level1Mixer;
 
-    private GameObject player;
-    public GameObject Player { get { return player; } }
+	public PostProcessProfile level1Profile;
 
-    public GameObject Logo;
+	public AudioClip level1Ambience;
 
+	public AudioMixer level2Mixer;
 
+	public PostProcessProfile level2Profile;
 
-    public Vector2 positionOffset;
+	public AudioClip level2Ambience;
 
-    private int sX = 1920, sY = 1080;
+	public GameObject playerPrefab;
 
-    private int textureRes;
+	private GameObject player;
 
-    //settings
-    public int ScreenResIndex { get { return screenResIndex; } }
-    private int screenResIndex = 2; //1920, 1080
+	public GameObject Logo;
 
-    [SerializeField]
-    public TMP_Dropdown screenResDropDown;
-    public bool FullScreenEnabled { get { return fullScreenEnabled; } }
-    private bool fullScreenEnabled = true;
+	public Vector2 positionOffset;
 
-    [SerializeField]
-    public Toggle fullScreenButton;
-    public bool VSyncEnabled { get { return vSyncEnabled; } }
-    private bool vSyncEnabled = false;
+	private int sX = 1920;
 
-    [SerializeField]
-    public Toggle vsyncButton;
+	private int sY = 1080;
 
-    public bool AntiAliasingEnabled { get { return antiAliasingEnabled; } }
-    private bool antiAliasingEnabled = true;
+	private int textureRes;
 
-    [SerializeField]
-    public Toggle antiAliasingButton;
+	public static bool IS_SAVING = false;
 
-    public bool AmbientOcclusionEnabled { get { return ambientOcclusionEnabled; } }
-    private bool ambientOcclusionEnabled = true;
+	private int screenResIndex = 2;
 
-    [SerializeField]
-    public Toggle ambientOcclusionButton;
+	[SerializeField]
+	public TMP_Dropdown screenResDropDown;
 
-    public bool BloomEnabled { get { return bloomEnabled; } }
-    private bool bloomEnabled = true;
+	private bool fullScreenEnabled = true;
 
-    [SerializeField]
-    public Toggle bloomButton;
+	[SerializeField]
+	public Toggle fullScreenButton;
 
-    public bool ChromEnabled { get { return chromEnabled; } }
-    private bool chromEnabled = true;
+	private bool vSyncEnabled;
 
-    [SerializeField]
-    public Toggle chromButton;
+	[SerializeField]
+	public Toggle vsyncButton;
 
-    public bool MotionBlurEnabled { get { return motionBlurEnabled; } }
-    private bool motionBlurEnabled = true;
+	private bool antiAliasingEnabled = true;
 
-    [SerializeField]
-    public Toggle motionBlurButton;
+	[SerializeField]
+	public Toggle antiAliasingButton;
 
-    public bool VignetteEnabled { get { return vignetteEnabled; } }
-    private bool vignetteEnabled = true;
+	private bool ambientOcclusionEnabled = true;
 
-    //other settings
-    public int FOV { get { return fov; } }
-    private int fov = 80;
+	[SerializeField]
+	public Toggle ambientOcclusionButton;
 
-    [SerializeField]
-    public Slider fovSlider;
+	private bool bloomEnabled = true;
 
-    public float Sensitivity { get { return sensitivity; } }
-    private float sensitivity = 1.5f;
+	[SerializeField]
+	public Toggle bloomButton;
 
-    [SerializeField]
-    public Slider sensitivitySlider;
+	private bool chromEnabled = true;
 
-    //volume
-    public float MasterVolume { get { return masterVolume; } }
-    private float masterVolume = 1f;
+	[SerializeField]
+	public Toggle chromButton;
 
-    [SerializeField]
-    public Slider masterVolumeSlider;
+	private bool motionBlurEnabled = true;
 
-    private float musicVolume;
-    private float entityVolume;
-    private float AmbientVolume;
+	[SerializeField]
+	public Toggle motionBlurButton;
 
-    private static int m_referenceCount = 0;
+	private bool vignetteEnabled = true;
 
-    private static GameSettings m_instance;
+	private int fov = 80;
 
-    public static bool LEVEL_LOADED = false;
+	[SerializeField]
+	public Slider fovSlider;
 
-    private bool cutScene = false;
-    public bool IsCutScene { get { return cutScene; } }
+	private float sensitivity = 1.5f;
 
-    private bool pauseMenuOpen = false;
+	[SerializeField]
+	public Slider sensitivitySlider;
 
-    public bool PauseMenuOpen { get { return pauseMenuOpen; } }
+	private float masterVolume = 0.99f;
 
-    bool smilerLogoOn = true;
+	[SerializeField]
+	public Slider masterVolumeSlider;
 
-    void Awake()
-    {
-        GameScreen();
-        Init();
+	private float musicVolume;
 
-        player = null;
+	private float entityVolume;
 
-        positionOffset = new Vector2(cursor.width / 2f - 40f, (cursor.height / 2f) - 100f);
+	private float AmbientVolume;
 
-        Cursor.SetCursor(cursor, positionOffset, CursorMode.Auto);
+	private static int m_referenceCount = 0;
 
-        m_referenceCount++;
-        if (m_referenceCount > 1)
-        {
-            DestroyImmediate(this.gameObject);
-            return;
-        }
+	private static GameSettings m_instance;
 
-        m_instance = this;
-        // Use this line if you need the object to persist across scenes
-        DontDestroyOnLoad(gameObject);
+	private bool cutScene;
 
-    }
-    void Init()
-    {
-        globalEntityList = new Dictionary<int, Entity>();
-        globalObjectsList = new List<InteractableObject>();
-        globalLightsList = new List<Light>();
+	private bool pauseMenuOpen;
 
-        post = GetComponent<PostProcessVolume>();
+	private bool smilerLogoOn = true;
 
-        level0Mixer = Resources.Load<AudioMixer>("Audio/Level0");
-        level1Mixer = Resources.Load<AudioMixer>("Audio/Level1");
-    }
+	public GameObject mainScreen;
 
-    //component game save loader
-    [System.Serializable]
-    public struct SaveData
-    {
-        //game data
-        public int lastSavedScene;
+	public GameObject settingsScreen;
 
-        //settings data
-        public bool ao;
-        public bool bloom;
-        public bool antiAliasing;
-        public bool chrom;
-        public bool vsync;
-        public bool motionBlur;
+	public SCENE ActiveScene;
 
-        public bool fullScreen;
-        public int screenResIndex;
+	public SCENE LastSavedScene = SCENE.ROOM;
 
-        public int fov;
+	public PostProcessVolume Post => post;
 
-        public float sensitivity;
+	public Vignette Vignette => vignette;
 
-        public float masterVolume;
-        
-    }
+	public ChromaticAberration Chrom => chrom;
 
-    //component game save loader
-    public void OnLoad(string data)
-    {
-        StartCoroutine(OnLoadAsync(data));
-    }
+	public Grain Grain => grain;
 
-    IEnumerator OnLoadAsync(string data)
-    {
-        SaveData saveData = JsonUtility.FromJson<SaveData>(data);
+	public Bloom Bloom => bloom;
 
-        while (ActiveScene == SCENE.INTRO)
-        {
-            yield return new WaitForEndOfFrame();
-            Debug.Log("Waiting for Level to load before loading game data...");
-        }
+	public ColorGrading ColorGrading => colorGrading;
 
-        ConnectSettings();
-        LoadSettings();
+	public AmbientOcclusion AbientOcclusion => ambientOcclusion;
 
-        ambientOcclusionEnabled = saveData.ao;
-        ambientOcclusionButton.isOn = AmbientOcclusionEnabled;
+	public MotionBlur MotionBlur => motionBlur;
 
-        bloomEnabled = saveData.bloom;
-        bloomButton.isOn = BloomEnabled;
+	public AudioMixer Master => master;
 
-        antiAliasingEnabled = saveData.antiAliasing;
-        antiAliasingButton.isOn = AntiAliasingEnabled;
+	public GameObject Player => player;
 
-        chromEnabled = saveData.chrom;
-        chromButton.isOn = ChromEnabled;
+	public int ScreenResIndex => screenResIndex;
 
-        vSyncEnabled = saveData.vsync;
-        vsyncButton.isOn = VSyncEnabled;
+	public bool FullScreenEnabled => fullScreenEnabled;
 
-        motionBlurEnabled = saveData.motionBlur;
-        motionBlurButton.isOn = MotionBlurEnabled;
+	public bool VSyncEnabled => vSyncEnabled;
 
-        fullScreenEnabled = saveData.fullScreen;
-        fullScreenButton.isOn = FullScreenEnabled;
+	public bool AntiAliasingEnabled => antiAliasingEnabled;
 
-        screenResIndex = saveData.screenResIndex;
-        screenResDropDown.value = ScreenResIndex;
+	public bool AmbientOcclusionEnabled => ambientOcclusionEnabled;
 
-        fov = saveData.fov;
-        fovSlider.value = FOV;
+	public bool BloomEnabled => bloomEnabled;
 
-        masterVolume = saveData.masterVolume;
-        masterVolumeSlider.value = MasterVolume;
-
-        sensitivity = saveData.sensitivity;
-        sensitivitySlider.value = Sensitivity;
-
-        LastSavedScene = (SCENE)saveData.lastSavedScene;
-
-        setScreenRes(screenResIndex);
-        setFullscreen(fullScreenEnabled);
-        //graphics settings loaded
-    }
-    //component game save loader
-    public string OnSave()
-    {
-        return JsonUtility.ToJson(new SaveData() { 
-
-            ao = AmbientOcclusionEnabled, 
-            bloom = BloomEnabled,
-            antiAliasing = AntiAliasingEnabled,
-            chrom = ChromEnabled,
-            vsync = VSyncEnabled,
-            motionBlur = MotionBlurEnabled,
-            lastSavedScene = (int)LastSavedScene,
-            fov = FOV,
-            fullScreen = FullScreenEnabled,
-            screenResIndex = ScreenResIndex,
-            masterVolume = MasterVolume,
-            sensitivity = Sensitivity
-
-        });
-    }
-
-    public bool OnSaveCondition()
-    {
-        return true;
-    }
-
-    public static GameSettings Instance
-    {
-        get
-        {
-            return m_instance;
-        }
-    }
-    public void OpenURL(string url)
-    {
-        Application.OpenURL(url);
-    }
-
-    public void setCutScene(bool tf)
-    {
-        cutScene = tf;
-    }
-
-    public void setPauseMenuOpen(bool tf)
-    {
-        pauseMenuOpen = tf;
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape) && !cutScene)
-        {
-            SettingsScreen();
-
-        }
-
-        Logo.transform.rotation = Quaternion.Euler(Mathf.Sin(Time.realtimeSinceStartup * 0.5f) * 3, Mathf.Sin(Time.realtimeSinceStartup * 0.5f) * -3, 0);
-
-        if (Random.value >= 0.99)
-        {
-            smilerLogoOn = !smilerLogoOn;
-
-            Logo.transform.GetChild(0).gameObject.SetActive(smilerLogoOn);
-
-        }
-        
-    }
-
-    void LoadSettings()
-    {
-        
-        setAmbientOcclusion(ambientOcclusionEnabled);
-        setAntiAliasing(antiAliasingEnabled);
-        setVignette(vignetteEnabled);
-        setBloom(bloomEnabled);
-        setChromatic(chromEnabled);
-        setScreenRes(screenResIndex);
-        setFullscreen(fullScreenEnabled);
-        setVSync(vSyncEnabled);
-        setMotionBlur(motionBlurEnabled);
-        setFOV(fov);
-        setMasterVolume(masterVolume);
-        setSensitivity(sensitivity);
-        //setTextureRes(0);
-    }
-    void ConnectSettings()
-    {
-        post.profile.TryGetSettings(out ambientOcclusion);
-        post.profile.TryGetSettings(out vignette);
-        post.profile.TryGetSettings(out chrom);
-        post.profile.TryGetSettings(out grain);
-        post.profile.TryGetSettings(out bloom);
-        post.profile.TryGetSettings(out colorGrading);
-        post.profile.TryGetSettings(out motionBlur);
-    }
-
-    public GameObject mainScreen;
-    public GameObject settingsScreen;
-
-    public void BackFromSettings()
-    {
-        switch (SceneManager.GetActiveScene().name)
-        {
-            case "HomeScreen":
-                HomeScreen();
-                break;
-
-            default:
-                GameScreen();
-                break;
-        }
-    }
-
-    public void ExitGame()
-    {
-        Application.Quit();
-    }
-
-    public void HomeScreen()
-    {
-        setPauseMenuOpen(false);
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-        Time.timeScale = 1;
-        mainScreen.transform.gameObject.SetActive(true);
-        settingsScreen.transform.gameObject.SetActive(false);
-    }
-
-    public void SettingsScreen()
-    {
-        setPauseMenuOpen(true);
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-        Time.timeScale = 0;
-        settingsScreen.transform.gameObject.SetActive(true);
-        mainScreen.transform.gameObject.SetActive(false);
-    }
-
-    public void GameScreen()
-    {
-        setPauseMenuOpen(false);
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        Time.timeScale = 1;
-        settingsScreen.transform.gameObject.SetActive(false);
-        mainScreen.transform.gameObject.SetActive(false);
-    }
-
-    public void setFullscreen(bool fullscreen)
-    {
-        ConnectSettings();
-        fullScreenEnabled = fullscreen;
-        Screen.SetResolution(sX, sY, fullscreen);
-        
-    }
-    public void setScreenRes(int res)
-    {
-        ConnectSettings();
-        switch (res)
-        {
-            case 0:
-                sX = 3840;
-                sY = 2160;
-                break;
-            case 1:
-                sX = 2560;
-                sY = 1440;
-                break;
-            case 2:
-                sX = 1920;
-                sY = 1080;
-                break;
-            case 3:
-                sX = 1280;
-                sY = 720;
-                break;
-            case 4:
-                sX = 640;
-                sY = 480;
-                break;
-        }
-        screenResIndex = res;
-        Screen.SetResolution(sX, sY, fullScreenEnabled);
-
-    }
-    public void setTextureRes(int res)
-    {
-        ConnectSettings();
-        QualitySettings.masterTextureLimit = textureRes;
-
-    }
-    public void setSensitivity(float sens)
-    {
-        ConnectSettings();
-        sensitivity = sens;
-
-    }
-    public void setFOV(float fov)
-    {
-        ConnectSettings();
-        this.fov = (int)fov;
-        Camera.main.fieldOfView = fov;
-    }
-    public void setMasterVolume(float volume)
-    {
-        ConnectSettings();
-        masterVolume = volume;
-        master.SetFloat("MasterVolume", Mathf.Log10(masterVolume) * 20);
-    }
-    public void setAmbientOcclusion(bool io)
-    {
-        ConnectSettings();
-        ambientOcclusion.active = io;
-        ambientOcclusionEnabled = io;
-        
-    }
-    public void setMotionBlur(bool io)
-    {
-        ConnectSettings();
-        motionBlur.active = io;
-        motionBlurEnabled = io;
-        
-    }
-    public void setChromatic(bool io)
-    {
-        ConnectSettings();
-        chrom.active = io;
-        chromEnabled = io;
-
-    }
-    public void setVignette(bool io)
-    {
-        ConnectSettings();
-        vignette.active = io;
-        vignetteEnabled = io;
-
-    }
-    public void setAntiAliasing(bool io)
-    {
-        ConnectSettings();
-        if (Camera.main.gameObject.GetComponent<PostProcessLayer>() != null)
-
-            switch (io)
-            {
-                case false:
-                    antiAliasingEnabled = false;
-                    Camera.main.gameObject.GetComponent<PostProcessLayer>().antialiasingMode = PostProcessLayer.Antialiasing.None;
-                    break;
-
-                case true:
-                    antiAliasingEnabled = true;
-                    Camera.main.gameObject.GetComponent<PostProcessLayer>().antialiasingMode = PostProcessLayer.Antialiasing.TemporalAntialiasing;
-                    break;
-            }
-
-        antiAliasingEnabled = io;
-
-
-    }
-    public void setBloom(bool io)
-    {
-        ConnectSettings();
-        bloom.active = io;
-        bloomEnabled = io;
-    }
-    public void setVSync(bool io)
-    {
-        ConnectSettings();
-        switch (io)
-        {
-            case false:
-
-                vSyncEnabled = false;
-
-                QualitySettings.vSyncCount = 0;
-                Application.targetFrameRate = -1;
-
-                break;
-
-            case true:
-
-                vSyncEnabled = true;
-
-                QualitySettings.vSyncCount = 1;
-                Application.targetFrameRate = Screen.currentResolution.refreshRate;
-
-                break;
-        }
-        vSyncEnabled = io;
-
-    }
-
-    void OnDestroy()
-    {
-        m_referenceCount--;
-        if (m_referenceCount == 0)
-        {
-            m_instance = null;
-        }
-
-    }
-
-    public enum SCENE: int
-    {
-        INTRO = 0,
-        HOMESCREEN = 1,
-        ROOM = 2, 
-        LEVEL0 = 3,
-        LEVEL1 = 4,
-        LEVEL2 = 5,
-    }
-
-    SCENE ActiveScene = SCENE.INTRO;
-    SCENE LastSavedScene = SCENE.ROOM; //init with room
-
-    public void LoadSavedScene() 
-    { 
-        switch (LastSavedScene)
-        {
-            //dont load from saved scenes if homescreen or intro was the last saved scene
-            case SCENE.HOMESCREEN:
-                LoadScene(SCENE.ROOM);
-                break;
-            case SCENE.INTRO:
-                LoadScene(SCENE.ROOM);
-                break;
-        }
-        if (LastSavedScene != SCENE.INTRO && LastSavedScene != SCENE.HOMESCREEN)
-        {
-            LoadScene(LastSavedScene);
-        }
-        
-    }
-    public void LoadScene(SCENE id)
-    {
-        StartCoroutine(PreLoadScene(id));
-    }
-
-    IEnumerator PreLoadScene(SCENE id)
-    {
-        LEVEL_LOADED = false;
-        yield return SceneManager.LoadSceneAsync((int)id, LoadSceneMode.Single);
-        PostLoadScene(id);
-    }
-
-    void PostLoadScene(SCENE id)
-    {
-        //homescreen or first loaded
-        if (player == null || player.name == "CameraContainer")
-        {
-            player = Instantiate(playerPrefab);
-        }
-
-        switch (id)
-        {
-            case SCENE.ROOM:
-
-                post.profile = homeScreenRoomProfile;
-
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
-
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-                player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
-                master = level0Mixer;
-
-                GameScreen();
-
-                break;
-
-            case SCENE.HOMESCREEN:
-
-                transform.GetChild(0).gameObject.SetActive(true);
-                transform.GetChild(1).gameObject.SetActive(false);
-                transform.GetChild(2).gameObject.SetActive(false);
-               
-
-                if (player != null)
-                    Destroy(player);
-
-
-                player = GameObject.Find("CameraContainer");
-                player.transform.GetChild(0).GetComponent<AudioSource>().Play();
-
-                post.profile = homeScreenProfile;
-                master = level0Mixer;
-                //player.transform.GetChild(0).GetComponents<AudioSource>()[1].clip = level0Ambience;
-                //player.transform.GetChild(0).GetComponents<AudioSource>()[1].Play();
-
-
-                HomeScreen();
-
-                break;
-
-            case SCENE.LEVEL0:
-
-                player.transform.position = new Vector3(0, 2f, 0);
-
-                post.profile = level0Profile;
-
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
-
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-                player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-                master = level0Mixer;
-
-                GameScreen();
-
-                break;
-
-            case SCENE.LEVEL1:
-
-                player.transform.position = new Vector3(0, 2f, 0);
-
-                post.profile = level1Profile;
-
-
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level1Ambience;
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
-
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
-                player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
-
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
-                master = level1Mixer;
-
-
-                GameScreen();
-
-                break;
-
-            case SCENE.LEVEL2:
-
-                player.transform.position = new Vector3(8, 6.5f, 0);
-
-                post.profile = level2Profile;
-
-
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level2Ambience;
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
-
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level2Mixer.FindMatchingGroups("Master")[0];
-                player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level2Mixer.FindMatchingGroups("Master")[0];
-
-                player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level2Mixer.FindMatchingGroups("Master")[0];
-                master = level2Mixer;
-
-                GameScreen();
-
-                break;
-        }
-
-        ActiveScene = id;
-        if (ActiveScene != SCENE.INTRO && ActiveScene != SCENE.HOMESCREEN)
-            LastSavedScene = ActiveScene;
-
-        LEVEL_LOADED = true;
-    }
-
-    public Entity AddEntity(Vector3 position, Entity entity)
-    {
-        int typeAmountInGame = 0;
-
-        foreach (KeyValuePair<int, Entity> e in GlobalEntityList)
-        {
-            if (e.Value.type == entity.type)
-            {
-                typeAmountInGame++;
-            }
-        }
-
-        //only instatiate if under the amount allowed on the game, balancing reasons. Max 15 entities total around the player
-        if (typeAmountInGame < entity.maxAllowed && globalEntityList.Count <= 100)
-        {
-            Entity spawnedEntity = Instantiate(entity);
-            spawnedEntity.gameObject.transform.position = position;
-
-            //generate a key for our entity
-            spawnedEntity.ID = Random.Range(-1000, 1000);
-
-            //regen if its already there, (this shouldnt happen EVER)
-            while (GlobalEntityList.ContainsKey(spawnedEntity.ID))
-                spawnedEntity.ID = Random.Range(-1000, 1000);
-
-            GlobalEntityList.Add(spawnedEntity.ID, spawnedEntity);
-
-            return spawnedEntity;
-        }
-
-        return null;
-    }
-
-    public InteractableObject AddItem(Vector3 position, InteractableObject item)
-    {
-
-        if (globalObjectsList.Count <= 100)
-        {
-            InteractableObject spawnedObject = Instantiate(item);
-            spawnedObject.gameObject.transform.position = position;
-
-            globalObjectsList.Add(item);
-
-            return spawnedObject;
-        }
-
-        return null;
-    }
-
-   
+	public bool ChromEnabled => chromEnabled;
 
+	public bool MotionBlurEnabled => motionBlurEnabled;
 
+	public bool VignetteEnabled => vignetteEnabled;
+
+	public int FOV => fov;
+
+	public float Sensitivity => sensitivity;
+
+	public float MasterVolume => masterVolume;
+
+	public bool IsCutScene => cutScene;
+
+	public bool PauseMenuOpen => pauseMenuOpen;
+
+	public static GameSettings Instance => m_instance;
+
+	private void Awake()
+	{
+		GameScreen();
+		Init();
+		player = null;
+		positionOffset = new Vector2((float)cursor.width / 2f - 40f, (float)cursor.height / 2f - 100f);
+		Cursor.SetCursor(cursor, positionOffset, CursorMode.Auto);
+		m_referenceCount++;
+		if (m_referenceCount > 1)
+		{
+			UnityEngine.Object.DestroyImmediate(base.gameObject);
+			return;
+		}
+		m_instance = this;
+		UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
+	}
+
+	private void Init()
+	{
+		post = GetComponent<PostProcessVolume>();
+		PropDatabase = new Dictionary<OBJECT_TYPE, InteractableObject>();
+		foreach (InteractableObject item in propDatabase)
+		{
+			PropDatabase.Add(item.type, item);
+		}
+		EntityDatabase = new Dictionary<ENTITY_TYPE, Entity>();
+		foreach (Entity item2 in entityDatabase)
+		{
+			EntityDatabase.Add(item2.type, item2);
+		}
+		level0Mixer = Resources.Load<AudioMixer>("Audio/Level0");
+		level1Mixer = Resources.Load<AudioMixer>("Audio/Level1");
+	}
+
+	public void OnLoad(string data)
+	{
+		StartCoroutine(OnLoadAsync(data));
+	}
+
+	private IEnumerator OnLoadAsync(string data)
+	{
+		while (ActiveScene == SCENE.INTRO)
+		{
+			yield return new WaitForEndOfFrame();
+		}
+		runtimeSaveData = JsonConvert.DeserializeObject<SaveData>(data);
+		ConnectSettings();
+		LoadSettings(runtimeSaveData);
+		ambientOcclusionButton.isOn = AmbientOcclusionEnabled;
+		bloomButton.isOn = BloomEnabled;
+		antiAliasingButton.isOn = AntiAliasingEnabled;
+		chromButton.isOn = ChromEnabled;
+		vsyncButton.isOn = VSyncEnabled;
+		motionBlurButton.isOn = MotionBlurEnabled;
+		fullScreenButton.isOn = FullScreenEnabled;
+		screenResDropDown.value = ScreenResIndex;
+		fovSlider.value = FOV;
+		masterVolumeSlider.value = MasterVolume;
+		sensitivitySlider.value = Sensitivity;
+		LastSavedScene = runtimeSaveData.lastSavedScene;
+		setScreenRes(screenResIndex);
+		setFullscreen(fullScreenEnabled);
+	}
+
+	public void OnLoadNoData()
+	{
+	}
+
+	public string OnSave()
+	{
+		runtimeSaveData = new SaveData
+		{
+			ao = AmbientOcclusionEnabled,
+			bloom = BloomEnabled,
+			antiAliasing = AntiAliasingEnabled,
+			chrom = ChromEnabled,
+			vsync = VSyncEnabled,
+			motionBlur = MotionBlurEnabled,
+			lastSavedScene = LastSavedScene,
+			fov = FOV,
+			fullScreen = FullScreenEnabled,
+			screenResIndex = ScreenResIndex,
+			masterVolume = MasterVolume,
+			sensitivity = Sensitivity
+		};
+		return JsonConvert.SerializeObject(runtimeSaveData);
+	}
+
+	public void ResetGame()
+	{
+		LastSavedScene = SCENE.ROOM;
+		Saveable[] array = SaveMaster.GetAllSavables().ToArray();
+		foreach (Saveable saveable in array)
+		{
+			if (saveable != GetComponent<Saveable>())
+			{
+				SaveMaster.WipeSaveable(saveable);
+			}
+		}
+		SaveMaster.WriteActiveSaveToDisk();
+		Instance.LoadScene(SCENE.HOMESCREEN);
+	}
+
+	public bool OnSaveCondition()
+	{
+		return true;
+	}
+
+	public void OpenURL(string url)
+	{
+		Application.OpenURL(url);
+	}
+
+	public void setCutScene(bool tf)
+	{
+		cutScene = tf;
+	}
+
+	public void setPauseMenuOpen(bool tf)
+	{
+		pauseMenuOpen = tf;
+	}
+
+	private void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.Escape) && !cutScene)
+		{
+			SettingsScreen();
+		}
+		Logo.transform.rotation = Quaternion.Euler(Mathf.Sin(Time.realtimeSinceStartup * 0.5f) * 3f, Mathf.Sin(Time.realtimeSinceStartup * 0.5f) * -3f, 0f);
+		if ((double)UnityEngine.Random.value >= 0.99)
+		{
+			smilerLogoOn = !smilerLogoOn;
+			Logo.transform.GetChild(0).gameObject.SetActive(smilerLogoOn);
+		}
+	}
+
+	private void LoadSettings(SaveData data)
+	{
+		setAmbientOcclusion(data.ao);
+		setAntiAliasing(data.antiAliasing);
+		setVignette(vignetteEnabled);
+		setBloom(data.bloom);
+		setChromatic(data.chrom);
+		setScreenRes(data.screenResIndex);
+		setFullscreen(data.fullScreen);
+		setVSync(data.vsync);
+		setMotionBlur(data.motionBlur);
+		setFOV(data.fov);
+		setMasterVolume(data.masterVolume);
+		setSensitivity(data.sensitivity);
+	}
+
+	private void ConnectSettings()
+	{
+		post.profile.TryGetSettings<AmbientOcclusion>(out ambientOcclusion);
+		post.profile.TryGetSettings<Vignette>(out vignette);
+		post.profile.TryGetSettings<ChromaticAberration>(out chrom);
+		post.profile.TryGetSettings<Grain>(out grain);
+		post.profile.TryGetSettings<Bloom>(out bloom);
+		post.profile.TryGetSettings<ColorGrading>(out colorGrading);
+		post.profile.TryGetSettings<MotionBlur>(out motionBlur);
+	}
+
+	public void BackFromSettings()
+	{
+		string text = SceneManager.GetActiveScene().name;
+		if (text != null && text == "HomeScreen")
+		{
+			HomeScreen();
+		}
+		else
+		{
+			GameScreen();
+		}
+	}
+
+	public void ExitGame()
+	{
+		Application.Quit();
+	}
+
+	public void HomeScreen()
+	{
+		setPauseMenuOpen(tf: false);
+		Cursor.lockState = CursorLockMode.None;
+		Cursor.visible = true;
+		Time.timeScale = 1f;
+		mainScreen.transform.gameObject.SetActive(value: true);
+		settingsScreen.transform.gameObject.SetActive(value: false);
+	}
+
+	public void SettingsScreen()
+	{
+		setPauseMenuOpen(tf: true);
+		Cursor.lockState = CursorLockMode.None;
+		Cursor.visible = true;
+		Time.timeScale = 0f;
+		settingsScreen.transform.gameObject.SetActive(value: true);
+		mainScreen.transform.gameObject.SetActive(value: false);
+	}
+
+	public void GameScreen()
+	{
+		setPauseMenuOpen(tf: false);
+		Cursor.lockState = CursorLockMode.Locked;
+		Cursor.visible = false;
+		Time.timeScale = 1f;
+		settingsScreen.transform.gameObject.SetActive(value: false);
+		mainScreen.transform.gameObject.SetActive(value: false);
+	}
+
+	public void setFullscreen(bool fullscreen)
+	{
+		ConnectSettings();
+		fullScreenEnabled = fullscreen;
+		Screen.SetResolution(sX, sY, fullscreen);
+	}
+
+	public void setScreenRes(int res)
+	{
+		ConnectSettings();
+		switch (res)
+		{
+			case 0:
+				sX = 3840;
+				sY = 2160;
+				break;
+			case 1:
+				sX = 2560;
+				sY = 1440;
+				break;
+			case 2:
+				sX = 1920;
+				sY = 1080;
+				break;
+			case 3:
+				sX = 1280;
+				sY = 720;
+				break;
+			case 4:
+				sX = 640;
+				sY = 480;
+				break;
+		}
+		screenResIndex = res;
+		Screen.SetResolution(sX, sY, fullScreenEnabled);
+	}
+
+	public void setTextureRes(int res)
+	{
+		ConnectSettings();
+		QualitySettings.masterTextureLimit = textureRes;
+	}
+
+	public void setSensitivity(float sens)
+	{
+		ConnectSettings();
+		sensitivity = sens;
+	}
+
+	public void setFOV(float fov)
+	{
+		ConnectSettings();
+		this.fov = (int)fov;
+		Camera.main.fieldOfView = fov;
+	}
+
+	public void setMasterVolume(float volume)
+	{
+		ConnectSettings();
+		masterVolume = volume;
+		master.SetFloat("MasterVolume", Mathf.Log10(masterVolume) * 20f);
+	}
+
+	public void setAmbientOcclusion(bool io)
+	{
+		ConnectSettings();
+		ambientOcclusion.active = io;
+		ambientOcclusionEnabled = io;
+	}
+
+	public void setMotionBlur(bool io)
+	{
+		ConnectSettings();
+		motionBlur.active = io;
+		motionBlurEnabled = io;
+	}
+
+	public void setChromatic(bool io)
+	{
+		ConnectSettings();
+		chrom.active = io;
+		chromEnabled = io;
+	}
+
+	public void setVignette(bool io)
+	{
+		ConnectSettings();
+		vignette.active = io;
+		vignetteEnabled = io;
+	}
+
+	public void setAntiAliasing(bool io)
+	{
+		ConnectSettings();
+		if (Camera.main.gameObject.GetComponent<PostProcessLayer>() != null)
+		{
+			if (!io)
+			{
+				antiAliasingEnabled = false;
+				Camera.main.gameObject.GetComponent<PostProcessLayer>().antialiasingMode = PostProcessLayer.Antialiasing.None;
+			}
+			else
+			{
+				antiAliasingEnabled = true;
+				Camera.main.gameObject.GetComponent<PostProcessLayer>().antialiasingMode = PostProcessLayer.Antialiasing.TemporalAntialiasing;
+			}
+		}
+		antiAliasingEnabled = io;
+	}
+
+	public void setBloom(bool io)
+	{
+		ConnectSettings();
+		bloom.active = io;
+		bloomEnabled = io;
+	}
+
+	public void setVSync(bool io)
+	{
+		ConnectSettings();
+		if (!io)
+		{
+			vSyncEnabled = false;
+			QualitySettings.vSyncCount = 0;
+			Application.targetFrameRate = -1;
+		}
+		else
+		{
+			vSyncEnabled = true;
+			QualitySettings.vSyncCount = 1;
+			Application.targetFrameRate = Screen.currentResolution.refreshRate;
+		}
+		vSyncEnabled = io;
+	}
+
+	public static void SaveAllProgress()
+	{
+		IS_SAVING = true;
+		SaveMaster.SyncSave();
+		SaveMaster.WriteActiveSaveToDisk();
+		Debug.Log("Saved Progress!");
+		IS_SAVING = false;
+	}
+
+	private void OnApplicationQuit()
+	{
+		SaveAllProgress();
+	}
+
+	private void OnDestroy()
+	{
+		m_referenceCount--;
+		if (m_referenceCount == 0)
+		{
+			m_instance = null;
+		}
+	}
+
+	public void LoadSavedScene()
+	{
+		switch (LastSavedScene)
+		{
+			case SCENE.HOMESCREEN:
+				Debug.LogError("LASTSAVEDSCENEERROR");
+				LoadScene(SCENE.ROOM);
+				break;
+			case SCENE.INTRO:
+				Debug.LogError("LASTSAVEDSCENEERROR");
+				LoadScene(SCENE.ROOM);
+				break;
+		}
+		if (LastSavedScene != 0 && LastSavedScene != SCENE.HOMESCREEN)
+		{
+			LoadScene(LastSavedScene);
+		}
+	}
+
+	public void LoadScene(SCENE id)
+	{
+		StartCoroutine(PreLoadScene(id));
+	}
+
+	public void LoadScene(int id)
+	{
+		StartCoroutine(PreLoadScene((SCENE)id));
+	}
+
+	private IEnumerator PreLoadScene(SCENE id)
+	{
+		SaveAllProgress();
+		yield return new WaitUntil(() => !IS_SAVING);
+		LEVEL_LOADED = false;
+		LEVEL_SAVE_LOADED = false;
+		LEVEL_GENERATED = false;
+		PLAYER_DATA_LOADED_IN_SCENE = false;
+		yield return SceneManager.LoadSceneAsync((int)id, LoadSceneMode.Single);
+		PostLoadScene(id);
+	}
+
+	private void PostLoadScene(SCENE id)
+	{
+		if (ActiveScene != 0 && player == null)
+		{
+			player = UnityEngine.Object.Instantiate(playerPrefab);
+		}
+		switch (id)
+		{
+			case SCENE.ROOM:
+				player.transform.position = new Vector3(0f, 1.1f, 0.7f);
+				post.profile = homeScreenRoomProfile;
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+				player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+				master = level0Mixer;
+				LEVEL_SAVE_LOADED = true;
+				PLAYER_DATA_LOADED_IN_SCENE = true;
+				GameScreen();
+				player.GetComponent<PlayerHealthSystem>().WakeUpRoom();
+				break;
+			case SCENE.HOMESCREEN:
+				base.transform.GetChild(0).gameObject.SetActive(value: true);
+				base.transform.GetChild(1).gameObject.SetActive(value: false);
+				base.transform.GetChild(2).gameObject.SetActive(value: false);
+				if (player != null)
+				{
+					UnityEngine.Object.Destroy(player);
+					player = null;
+				}
+				player = GameObject.Find("CameraContainer");
+				player.transform.GetChild(0).GetComponent<AudioSource>().Play();
+				post.profile = homeScreenProfile;
+				master = level0Mixer;
+				LEVEL_SAVE_LOADED = true;
+				PLAYER_DATA_LOADED_IN_SCENE = true;
+				HomeScreen();
+				break;
+			case SCENE.LEVEL0:
+				post.profile = level0Profile;
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+				player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+				master = level0Mixer;
+				GameScreen();
+				break;
+			case SCENE.LEVEL1:
+				post.profile = level1Profile;
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level1Ambience;
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
+				player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
+				master = level1Mixer;
+				GameScreen();
+				break;
+			case SCENE.LEVEL2:
+				post.profile = level2Profile;
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level2Ambience;
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level2Mixer.FindMatchingGroups("Master")[0];
+				player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level2Mixer.FindMatchingGroups("Master")[0];
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level2Mixer.FindMatchingGroups("Master")[0];
+				master = level2Mixer;
+				GameScreen();
+				break;
+		}
+		ActiveScene = id;
+		if (AmInSavableScene())
+		{
+			LastSavedScene = ActiveScene;
+		}
+		LEVEL_LOADED = true;
+		if (ActiveScene != SCENE.ROOM)
+		{
+			player.GetComponent<PlayerHealthSystem>().WakeUpOther();
+		}
+		GAME_FIRST_LOADED = false;
+	}
+
+	public bool AmInSavableScene()
+	{
+		if (ActiveScene != 0 && ActiveScene != SCENE.HOMESCREEN)
+		{
+			return ActiveScene != SCENE.ROOM;
+		}
+		return false;
+	}
 }
