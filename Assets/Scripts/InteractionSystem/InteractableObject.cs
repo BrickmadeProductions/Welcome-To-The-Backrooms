@@ -40,11 +40,14 @@ public abstract class InteractableObject : MonoBehaviour
 	public void GenerateID(BackroomsLevelWorld world)
 	{
 		runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
+
 		while (world.CheckWorldForPropKey(type.ToString() + "-" + runTimeID))
 		{
 			runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
 		}
-		base.gameObject.name = type.ToString() + "-" + runTimeID;
+
+		gameObject.name = type.ToString() + "-" + runTimeID;
+
 		Save();
 	}
 
@@ -53,13 +56,14 @@ public abstract class InteractableObject : MonoBehaviour
 		saveableData = objectData;
 		type = saveableData.type;
 		runTimeID = saveableData.runTimeID;
-		base.gameObject.name = type.ToString() + "-" + runTimeID;
+		gameObject.name = type.ToString() + "-" + runTimeID;
+
 		if (saveableData.parentName != "")
 		{
 			Transform transform = GameObject.Find(saveableData.parentName).transform;
-			base.transform.parent = transform;
-			base.transform.position = Vector3.zero;
-			base.transform.rotation = Quaternion.identity;
+			transform.parent = transform;
+			transform.position = Vector3.zero;
+			transform.rotation = Quaternion.identity;
 			if (transform.name == "HoldLocation" || transform.name == "HandLocation")
 			{
 				Debug.Log("Reparenting To Hand...");
@@ -70,9 +74,10 @@ public abstract class InteractableObject : MonoBehaviour
 		}
 		else
 		{
-			base.transform.position = new Vector3(saveableData.location[0], saveableData.location[1], saveableData.location[2]);
-			base.transform.rotation = Quaternion.Euler(saveableData.rotationEuler[0], saveableData.rotationEuler[1], saveableData.rotationEuler[2]);
+			transform.position = new Vector3(saveableData.location[0], saveableData.location[1], saveableData.location[2]);
+			transform.rotation = Quaternion.Euler(saveableData.rotationEuler[0], saveableData.rotationEuler[1], saveableData.rotationEuler[2]);
 		}
+
 		saveableData.instance = this;
 	}
 
@@ -83,20 +88,21 @@ public abstract class InteractableObject : MonoBehaviour
 			runTimeID = runTimeID,
 			location = new float[3]
 			{
-				base.transform.position.x,
-				base.transform.position.y,
-				base.transform.position.z
+				transform.position.x,
+				transform.position.y,
+				transform.position.z
 			},
 			rotationEuler = new float[3]
 			{
-				base.transform.rotation.eulerAngles.x,
-				base.transform.rotation.eulerAngles.y,
-				base.transform.rotation.eulerAngles.z
+				transform.rotation.eulerAngles.x,
+				transform.rotation.eulerAngles.y,
+				transform.rotation.eulerAngles.z
 			},
 			type = type,
 			instance = this,
-			parentName = ((base.transform.parent != null) ? base.transform.parent.name : "")
+			parentName = ((transform.parent != null) ? transform.parent.name : "")
 		};
+
 		return saveableData;
 	}
 
@@ -124,5 +130,6 @@ public enum OBJECT_TYPE
 	KNIFE,
 	CHAIR,
 	ALMOND_WATER,
-	SCREWDRIVER
+	SCREWDRIVER,
+	SOUP
 }

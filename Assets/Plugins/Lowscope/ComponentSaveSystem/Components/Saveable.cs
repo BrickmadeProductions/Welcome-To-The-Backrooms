@@ -304,6 +304,10 @@ namespace Lowscope.Saving.Components
 
         private void Awake()
         {
+            
+        }
+        private void Start()
+        {
             // Store the component identifiers into a dictionary for performant retrieval.
             for (int i = 0; i < cachedSaveableComponents.Count; i++)
             {
@@ -316,7 +320,6 @@ namespace Lowscope.Saving.Components
                 SaveMaster.AddListener(this);
             }
         }
-
         private void OnDestroy()
         {
             if (!manualSaveLoad)

@@ -434,6 +434,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 
+    location: []
+    rotationEuler: []
+    parentName: 
+    type: 0
+    instance: {fileID: 0}
+  type: 2
+  playSounds: 1
+  spawnChance: 0
+  runTimeID: 
   durability: 1
   breakablePrefabs:
   - {fileID: 4027876766965811622, guid: d7adc3900566bf646862e3db1977c0c5, type: 3}
@@ -444,9 +455,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: cc2036b5a64bd3646ac68f2e42e79b2b, type: 3}
   - {fileID: 8300000, guid: d19e1b1a6ada2bc45a23c463accfb0ec, type: 3}
   - {fileID: 8300000, guid: 5112c95477f193b4b9fe637b9d43eafe, type: 3}
-  playSounds: 1
-  parentScene:
-    m_Handle: 0
   inventoryWeight: 1
   holdableObject: {fileID: 0}
   large: 0

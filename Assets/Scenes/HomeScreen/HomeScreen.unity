@@ -633,7 +633,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1299993657
+--- !u!1 &1652259511
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -641,8 +641,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1299993659}
-  - component: {fileID: 1299993658}
+  - component: {fileID: 1652259513}
+  - component: {fileID: 1652259512}
   m_Layer: 0
   m_Name: Map
   m_TagString: Untagged
@@ -650,13 +650,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1299993658
+--- !u!114 &1652259512
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1299993657}
+  m_GameObject: {fileID: 1652259511}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c30f24938df0694f8cd27203dbe755b, type: 3}
@@ -668,18 +668,40 @@ MonoBehaviour:
   currentRoomNumber: 0
   currentChunkNumber: 0
   oldPlayerChunkLocation: {x: 0, y: 0, z: 0}
+  newPlayerChunkLocation: {x: 0, y: 0, z: 0}
   level_chunkGenerator: {fileID: 4220195989476646319, guid: 9ab378b3d88ac5d419748053541cb829, type: 3}
-  chunk_length: 3
-  layers: 1
-  chunks: []
+  chunk_width: 3
+  layerDistance: 1
   viewDistance: 3
---- !u!4 &1299993659
+  Exit: {fileID: 1468027130790313995, guid: 611490a103b094e49ae42bf3fce25277, type: 3}
+  SpecialTiles: []
+  Tiles:
+  - {fileID: 1500668993258839883, guid: 82871c831ff947d43b613b314240b936, type: 3}
+  - {fileID: 951711572128319385, guid: 955a0807d6739e74a958a493a640be00, type: 3}
+  - {fileID: 8209230494130185599, guid: 53cc790fa15f0ba44a8a286ff24b1b3e, type: 3}
+  - {fileID: 8200912594904982171, guid: ceec923753edb414aa09a2facda71e41, type: 3}
+  - {fileID: 592779262607433856, guid: e52212ca8db524942b16bcee87ec0c85, type: 3}
+  - {fileID: 7437542324044909286, guid: fd7e58e6fe22bb14b8c995719eea06f4, type: 3}
+  - {fileID: 5355474440270252669, guid: e84158a55ba1e3f408a1159e02f3146d, type: 3}
+  - {fileID: 7208132867317714789, guid: 32ef2ea7779220d4f8343f31c0d02b11, type: 3}
+  - {fileID: 3932920042542064116, guid: 09a3cc5c0463b434f8d446c1ea0f136d, type: 3}
+  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
+  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
+  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
+  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
+  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
+  RegTiles: []
+  propsThatCanSpawnOnThisLevel: 010000000200000003000000
+  entitiesThatCanSpawnOnThisLevel: 43000000
+  regTileSpace: 0
+  seed: 0
+--- !u!4 &1652259513
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1299993657}
+  m_GameObject: {fileID: 1652259511}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}

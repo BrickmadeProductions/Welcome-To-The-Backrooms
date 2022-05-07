@@ -6525,6 +6525,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06a184180caf2fc498a95f7824ec001e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 
+    location: []
+    rotationEuler: []
+    type: 67
+    instance: {fileID: 0}
   maxHealth: 100
   health: 100
   agrivation: 0
@@ -6562,7 +6568,7 @@ MonoBehaviour:
   stunTime: 0
   eyes: {fileID: 109001933242770219}
   entitySkin: {fileID: 439210178674126766}
-  ID: 0
+  runTimeID: 
   bloodPrefab: {fileID: 7958769173995355173, guid: b312d9f9b9fdd274e9c1247c10da9100, type: 3}
   grabLocation: {fileID: 7128770136166274654}
   ragDoll: {fileID: 9106987160413300465, guid: dbaccbbf15b7232458f712bf8e0eaede, type: 3}

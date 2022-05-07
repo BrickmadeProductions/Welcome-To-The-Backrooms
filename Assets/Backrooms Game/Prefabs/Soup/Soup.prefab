@@ -322,13 +322,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 
+    location: []
+    rotationEuler: []
+    parentName: 
+    type: 0
+    instance: {fileID: 0}
+  type: 4
+  playSounds: 0
+  spawnChance: 0
+  runTimeID: 
   durability: 0
   breakablePrefabs: []
   hitClips: []
   breakClips: []
-  playSounds: 0
-  parentScene:
-    m_Handle: 0
   inventoryWeight: 1
   holdableObject: {fileID: 0}
   large: 0
@@ -337,6 +345,7 @@ MonoBehaviour:
   LMBAnimationBools: []
   RMBAnimationClips: []
   RMBAnimationBools: []
+  CustomHoldAnimation: 
 --- !u!65 &1130512763043454471
 BoxCollider:
   m_ObjectHideFlags: 0

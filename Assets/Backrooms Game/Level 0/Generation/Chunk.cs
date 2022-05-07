@@ -63,11 +63,15 @@ public class Chunk : MonoBehaviour
 			},
 			instance = this
 		};
+
 		this.parentGenerator = parentGenerator;
+
 		chunkPosX = posX;
 		chunkPosY = posY;
 		chunkPosZ = posZ;
+
 		CreateTileset(parentGenerator.Tiles);
+
 		if (shouldGenerateInstantly)
 		{
 			GenerateRandomMap();
@@ -144,29 +148,35 @@ public class Chunk : MonoBehaviour
 
 	private void CreateTile(int tile_id, int x, int y, int z)
 	{
-		GameObject original = tileset[tile_id];
-		GameObject gameObject = null;
+		GameObject tileToSpawn = tileset[tile_id];
+
+		GameObject createdTile = null;
+
 		if (SceneManager.GetActiveScene().name != "HomeScreen")
 		{
-			if (gameObject == null)
+			if (createdTile == null)
 			{
-				gameObject = UnityEngine.Object.Instantiate(original, base.gameObject.transform);
+				createdTile = Instantiate(tileToSpawn, gameObject.transform);
 			}
 		}
 		else
 		{
-			gameObject = UnityEngine.Object.Instantiate(original, base.gameObject.transform);
+			createdTile = Instantiate(tileToSpawn, gameObject.transform);
 		}
-		gameObject.name = $"tile_x{x + chunkPosX}_y{y + chunkPosY}_z{z + chunkPosZ}";
-		gameObject.transform.localPosition = new Vector3((float)x * tileWidth, 0f, (float)z * tileWidth);
-		tile_grid.Add(gameObject.GetComponent<Tile>());
-		gameObject.GetComponent<Tile>().tilePos = new Vector2Int(x, y);
+		createdTile.name = $"tile_x{x + chunkPosX}_y{y + chunkPosY}_z{z + chunkPosZ}";
+
+		createdTile.transform.localPosition = new Vector3(x * tileWidth, 0f, z * tileWidth);
+
+		tile_grid.Add(createdTile.GetComponent<Tile>());
+
+		createdTile.GetComponent<Tile>().tilePos = new Vector2Int(x, y);
+
 		if (chunkPosY > 0)
 		{
-			Elevator componentInChildren = gameObject.GetComponentInChildren<Elevator>();
+			Elevator componentInChildren = createdTile.GetComponentInChildren<Elevator>();
 			if (componentInChildren != null)
 			{
-				UnityEngine.Object.Destroy(componentInChildren.gameObject);
+				Destroy(componentInChildren.gameObject);
 			}
 		}
 	}

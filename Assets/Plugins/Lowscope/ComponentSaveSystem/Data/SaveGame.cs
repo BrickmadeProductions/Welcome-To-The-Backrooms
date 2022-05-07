@@ -131,7 +131,7 @@ namespace Lowscope.Saving.Data
 
                 saveData.Add(newSaveData);
                 saveDataCache.Add(id, saveData.Count - 1);
-                AddSceneID(scene, id);
+                //AddSceneID(scene, id);
             }
         }
 

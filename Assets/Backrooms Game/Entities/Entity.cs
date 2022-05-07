@@ -95,11 +95,14 @@ public abstract class Entity : MonoBehaviour
 	public void GenerateID(BackroomsLevelWorld world)
 	{
 		runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
+
 		while (world.CheckWorldForEntityKey(type.ToString() + "-" + runTimeID))
 		{
 			runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
 		}
-		base.gameObject.name = type.ToString() + "-" + runTimeID;
+
+		gameObject.name = type.ToString() + "-" + runTimeID;
+
 		Save();
 	}
 
@@ -108,9 +111,9 @@ public abstract class Entity : MonoBehaviour
 		saveableData = entityData;
 		type = saveableData.type;
 		runTimeID = saveableData.runTimeID;
-		base.transform.position = new Vector3(saveableData.location[0], saveableData.location[1], saveableData.location[2]);
-		base.transform.rotation = Quaternion.Euler(saveableData.rotationEuler[0], saveableData.rotationEuler[1], saveableData.rotationEuler[2]);
-		base.gameObject.name = type.ToString() + "-" + runTimeID;
+		transform.position = new Vector3(saveableData.location[0], saveableData.location[1], saveableData.location[2]);
+		transform.rotation = Quaternion.Euler(saveableData.rotationEuler[0], saveableData.rotationEuler[1], saveableData.rotationEuler[2]);
+		gameObject.name = type.ToString() + "-" + runTimeID;
 		saveableData.instance = this;
 	}
 
@@ -121,19 +124,20 @@ public abstract class Entity : MonoBehaviour
 			runTimeID = runTimeID,
 			location = new float[3]
 			{
-				base.transform.position.x,
-				base.transform.position.y,
-				base.transform.position.z
+				transform.position.x,
+				transform.position.y,
+				transform.position.z
 			},
 			rotationEuler = new float[3]
 			{
-				base.transform.rotation.eulerAngles.x,
-				base.transform.rotation.eulerAngles.y,
-				base.transform.rotation.eulerAngles.z
+				transform.rotation.eulerAngles.x,
+				transform.rotation.eulerAngles.y,
+				transform.rotation.eulerAngles.z
 			},
 			type = type,
 			instance = this
 		};
+
 		return saveableData;
 	}
 
@@ -158,7 +162,7 @@ public abstract class Entity : MonoBehaviour
 	private void Update()
 	{
 		UpdateEntity();
-		if ((Vector3.Distance(GameSettings.Instance.Player.transform.position, base.transform.position) > (float)despawnDistance && !isDespawned) || health <= 0f)
+		if ((Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > (float)despawnDistance && !isDespawned) || health <= 0f)
 		{
 			Despawn();
 			isDespawned = true;

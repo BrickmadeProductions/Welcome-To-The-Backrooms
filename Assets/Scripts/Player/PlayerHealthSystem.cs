@@ -77,7 +77,7 @@ public class PlayerHealthSystem : MonoBehaviour
 	{
 		if (Input.GetButton("Blink") && !GameSettings.Instance.IsCutScene)
 		{
-			GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+			GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", true);
 			if (calmingDown == null)
 			{
 				calmingDown = StartCoroutine(Calm());
@@ -85,7 +85,7 @@ public class PlayerHealthSystem : MonoBehaviour
 		}
 		if (Input.GetButtonUp("Blink") && !GameSettings.Instance.IsCutScene)
 		{
-			GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: false);
+			GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
 			StopCoroutine(calmingDown);
 			calmingDown = null;
 		}
@@ -154,54 +154,54 @@ public class PlayerHealthSystem : MonoBehaviour
 	{
 		GameSettings.Instance.setCutScene(tf: true);
 		animator.speed = 0.3f;
-		player.arms.SetActive(value: false);
-		animator.SetBool("isSleeping", value: false);
-		animator.SetBool("isWakingRoom", value: true);
+		player.arms.SetActive(false);
+		animator.SetBool("isSleeping", false);
+		animator.SetBool("isWakingRoom", true);
 		canMoveHead = false;
-		player.animatorCamera.gameObject.SetActive(value: true);
-		player.playerCamera.gameObject.SetActive(value: false);
+		player.animatorCamera.gameObject.SetActive(true);
+		player.playerCamera.gameObject.SetActive(false);
 		yield return new WaitForSeconds(8.61315f);
 		animator.speed = 1f;
 		yield return new WaitForSeconds(1.1f);
 		player.gameObject.transform.position = new Vector3(2.668f, 2.997f, 1.12f);
-		player.animatorCamera.gameObject.SetActive(value: false);
-		player.playerCamera.gameObject.SetActive(value: true);
+		player.animatorCamera.gameObject.SetActive(false);
+		player.playerCamera.gameObject.SetActive(true);
 		canMoveHead = true;
 		awake = true;
-		animator.SetBool("isWakingRoom", value: false);
-		player.arms.SetActive(value: true);
+		animator.SetBool("isWakingRoom", false);
+		player.arms.SetActive(true);
 		GameSettings.Instance.setCutScene(tf: false);
 	}
 
 	private IEnumerator WakeUpSequenceOther()
 	{
 		GameSettings.Instance.setCutScene(tf: true);
-		player.bodyAnim.SetBool("isSleeping", value: false);
-		player.bodyAnim.SetBool("isWakingOther", value: true);
+		player.bodyAnim.SetBool("isSleeping", false);
+		player.bodyAnim.SetBool("isWakingOther", true);
 		canMoveHead = false;
-		player.animatorCamera.gameObject.SetActive(value: true);
-		player.playerCamera.gameObject.SetActive(value: false);
+		player.animatorCamera.gameObject.SetActive(true);
+		player.playerCamera.gameObject.SetActive(false);
 		animator.speed = 1f;
 		yield return new WaitForSeconds(5f);
-		player.animatorCamera.gameObject.SetActive(value: false);
-		player.playerCamera.gameObject.SetActive(value: true);
+		player.animatorCamera.gameObject.SetActive(false);
+		player.playerCamera.gameObject.SetActive(true);
 		canMoveHead = true;
 		awake = true;
-		player.bodyAnim.SetBool("isWakingOther", value: false);
+		player.bodyAnim.SetBool("isWakingOther", false);
 		GameSettings.Instance.setCutScene(tf: false);
 	}
 
 	private IEnumerator SleepSequence()
 	{
-		animator.SetBool("isSleeping", value: true);
-		animator.SetBool("isWaking", value: false);
+		animator.SetBool("isSleeping", true);
+		animator.SetBool("isWaking", false);
 		canMoveHead = false;
-		player.animatorCamera.gameObject.SetActive(value: true);
-		player.playerCamera.gameObject.SetActive(value: false);
+		player.animatorCamera.gameObject.SetActive(true);
+		player.playerCamera.gameObject.SetActive(false);
 		yield return new WaitForSeconds(4.417f);
 		player.gameObject.transform.position = new Vector3(2.668f, 2.997f, 1.12f);
-		player.animatorCamera.gameObject.SetActive(value: false);
-		player.playerCamera.gameObject.SetActive(value: true);
+		player.animatorCamera.gameObject.SetActive(false);
+		player.playerCamera.gameObject.SetActive(true);
 		canMoveHead = true;
 		awake = false;
 	}

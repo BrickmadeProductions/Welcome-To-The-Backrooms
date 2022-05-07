@@ -151,29 +151,35 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public IEnumerator TrySpawnEntityEveryFrame()
 	{
-		while (true)
+		while (true && GameSettings.Instance.ActiveScene != GameSettings.SCENE.INTRO && GameSettings.Instance.ActiveScene != GameSettings.SCENE.HOMESCREEN)
 		{
 			yield return new WaitForSecondsRealtime(0.05f);
-			KeyValuePair<ENTITY_TYPE, Entity>[] array = levelEntities.ToArray();
-			for (int i = 0; i < array.Length; i++)
+
+			foreach (KeyValuePair<ENTITY_TYPE, Entity> entity in GameSettings.Instance.EntityDatabase)
 			{
-				KeyValuePair<ENTITY_TYPE, Entity> keyValuePair = array[i];
-				float num = UnityEngine.Random.Range(0f, 0.99f);
-				if (keyValuePair.Value.spawnChance > num)
+
+				float spawnChanceSelection = UnityEngine.Random.Range(0f, 0.99f);
+
+				if (entity.Value.spawnChance > spawnChanceSelection)
 				{
-					Chunk value = loadedChunks.ElementAt(UnityEngine.Random.Range(0, loadedChunks.Count)).Value;
-					string key = value.chunkPosX + "," + value.chunkPosY + "," + value.chunkPosZ;
-					int index = UnityEngine.Random.Range(0, value.tile_grid.Count - 1);
-					Tile tile = value.tile_grid[index];
+					Chunk chunk = loadedChunks.ElementAt(UnityEngine.Random.Range(0, loadedChunks.Count)).Value;
+
+					string key = chunk.chunkPosX + "," + chunk.chunkPosY + "," + chunk.chunkPosZ;
+
+					int tileToSpawnIn = UnityEngine.Random.Range(0, chunk.tile_grid.Count - 1);
+
+					Tile tile = chunk.tile_grid[tileToSpawnIn];
+
 					if (tile.entitySpawnLocations.Count > 0)
 					{
-						AddNewEntity(tile.entitySpawnLocations[UnityEngine.Random.Range(0, tile.entitySpawnLocations.Count)].position, keyValuePair.Value, value);
+						AddNewEntity(tile.entitySpawnLocations[UnityEngine.Random.Range(0, tile.entitySpawnLocations.Count)].position, entity.Value, chunk);
 					}
 					else
 					{
-						AddNewEntity(new Vector3((float)tile.tilePos.x * value.tileWidth + (float)(value.chunkPosX * chunk_width) * value.tileWidth, 0f, (float)tile.tilePos.y * value.tileWidth + (float)(value.chunkPosZ * chunk_width) * value.tileWidth), keyValuePair.Value, value);
+						AddNewEntity(new Vector3((float)tile.tilePos.x * chunk.tileWidth + (float)(chunk.chunkPosX * chunk_width) * chunk.tileWidth, 0f, (float)tile.tilePos.y * chunk.tileWidth + (float)(chunk.chunkPosZ * chunk_width) * chunk.tileWidth), entity.Value, chunk);
 					}
-					allChunks[key] = value.saveableData;
+
+					allChunks[key] = chunk.saveableData;
 				}
 			}
 		}
@@ -185,47 +191,74 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			return;
 		}
+
 		levelProps = new Dictionary<OBJECT_TYPE, InteractableObject>();
 		levelEntities = new Dictionary<ENTITY_TYPE, Entity>();
-		foreach (OBJECT_TYPE item in propsThatCanSpawnOnThisLevel)
+
+		foreach (OBJECT_TYPE propID in propsThatCanSpawnOnThisLevel)
 		{
-			InteractableObject value = null;
-			GameSettings.Instance.PropDatabase.TryGetValue(item, out value);
-			if (value != null)
+			InteractableObject propToGet = null;
+
+			GameSettings.Instance.PropDatabase.TryGetValue(propID, out propToGet);
+
+			if (propToGet != null)
 			{
-				levelProps.Add(item, value);
+				levelProps.Add(propID, propToGet);
 			}
 		}
-		foreach (ENTITY_TYPE item2 in entitiesThatCanSpawnOnThisLevel)
+
+		foreach (ENTITY_TYPE entityID in entitiesThatCanSpawnOnThisLevel)
 		{
-			Entity value2 = null;
-			GameSettings.Instance.EntityDatabase.TryGetValue(item2, out value2);
-			if (value2 != null)
+			Entity entityToGet = null;
+
+			GameSettings.Instance.EntityDatabase.TryGetValue(entityID, out entityToGet);
+
+			if (entityToGet != null)
 			{
-				levelEntities.Add(item2, value2);
+				levelEntities.Add(entityID, entityToGet);
 			}
 		}
+
 		loadedChunks = new Dictionary<string, Chunk>();
 		allChunks = new Dictionary<string, SerealizedChunk>();
+
 		currentRoomNumber = 0;
 		currentChunkNumber = 0;
+
+		Debug.Log("Begin Init");
 		StartCoroutine(Init());
 	}
 
 	private IEnumerator Init()
 	{
 		Debug.Log("Waiting For Scene To Load Before Loading Chunks");
+
 		yield return new WaitUntil(() => GameSettings.LEVEL_LOADED);
+
 		Debug.Log("Waiting For Player Data To Load Before Loading Chunks");
+
 		yield return new WaitUntil(() => GameSettings.PLAYER_DATA_LOADED_IN_SCENE);
+
+		Debug.Log("Player Data save loaded");
+
 		yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
+		//yield return new WaitUntil(() => GameSettings.Instance.Player != null);
+
+		Debug.Log("Level save loaded");
+
+		newPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
+
+		//Debug.Log(newPlayerChunkLocation + " " + viewDistance);
+
 		for (int x = newPlayerChunkLocation.x - viewDistance; x < newPlayerChunkLocation.x + viewDistance; x++)
 		{
+			//Debug.Log(newPlayerChunkLocation + " " + viewDistance);
 			for (int z = newPlayerChunkLocation.z - viewDistance; z < newPlayerChunkLocation.z + viewDistance; z++)
 			{
 				for (int y = (ThreeDimensional ? (newPlayerChunkLocation.y - layerDistance) : 0); y < ((!ThreeDimensional) ? 1 : (newPlayerChunkLocation.y + layerDistance)); y++)
 				{
 					GameObject chunk = GenerateChunk(x, y, z, shouldGenInstantly: true);
+					
 					if (chunk != null)
 					{
 						yield return new WaitUntil(() => chunk.GetComponent<Chunk>().ALL_TILES_GENERATED);
@@ -235,32 +268,43 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				}
 			}
 		}
+
 		GameSettings.LEVEL_GENERATED = true;
-		Dictionary<string, SaveableProp> dictionary = new Dictionary<string, SaveableProp>();
-		KeyValuePair<string, SerealizedChunk>[] array = allChunks.ToArray();
-		foreach (KeyValuePair<string, SerealizedChunk> keyValuePair in array)
+
+		Dictionary<string, SaveableProp> propsFromOtherScenes = new Dictionary<string, SaveableProp>();
+
+		foreach (KeyValuePair<string, SerealizedChunk> serealizedChunks in allChunks.ToArray())
 		{
-			foreach (KeyValuePair<string, SaveableProp> propClusterDatum in keyValuePair.Value.propData.propClusterData)
+			foreach (KeyValuePair<string, SaveableProp> propClusterDatum in serealizedChunks.Value.propData.propClusterData)
 			{
-				dictionary.Add(propClusterDatum.Key, propClusterDatum.Value);
+				propsFromOtherScenes.Add(propClusterDatum.Key, propClusterDatum.Value);
 			}
 		}
-		InteractableObject[] array2 = UnityEngine.Object.FindObjectsOfType<InteractableObject>();
-		foreach (InteractableObject interactableObject in array2)
+
+		//load in objets brought from other scenes
+		foreach (InteractableObject iObject in FindObjectsOfType<InteractableObject>())
 		{
-			if (!dictionary.ContainsKey(interactableObject.saveableData.type.ToString() + "-" + interactableObject.saveableData.runTimeID))
+			if (!propsFromOtherScenes.ContainsKey(iObject.saveableData.type.ToString() + "-" + iObject.saveableData.runTimeID))
 			{
-				interactableObject.GenerateID(this);
-				Vector3 vector = GetChunkKeyAtWorldLocation(interactableObject.transform.position);
-				string key = vector.x + "," + vector.y + "," + vector.z;
-				string key2 = interactableObject.type.ToString() + "-" + interactableObject.runTimeID;
-				allChunks[key].propData.propClusterData.Add(key2, interactableObject.saveableData);
-				Debug.Log("Loaded over a " + interactableObject.type.ToString() + " From other scene..");
+				iObject.GenerateID(this);
+
+				Vector3 position = GetChunkKeyAtWorldLocation(iObject.transform.position);
+
+				string key = position.x + "," + position.y + "," + position.z;
+
+				string key2 = iObject.type.ToString() + "-" + iObject.runTimeID;
+
+				allChunks[key].propData.propClusterData.Add(key2, iObject.saveableData);
+
+				Debug.Log("Loaded over a " + iObject.type.ToString() + " From other scene..");
 			}
 		}
+
 		GameSettings.LEVEL_SAVE_LOADED = true;
+
 		StartCoroutine(SaveDataEveryXMinutes(0.05f));
 		StartCoroutine(TrySpawnEntityEveryFrame());
+
 		Debug.Log("Done With Spawn Region");
 	}
 
@@ -272,9 +316,12 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	public string OnSave()
 	{
 		SaveAllObjectsAndEntities();
-		WorldSaveData worldSaveData = default(WorldSaveData);
-		worldSaveData.savedSeed = seed;
-		worldSaveData.savedChunks = allChunks;
+		WorldSaveData worldSaveData = new WorldSaveData
+        {
+			savedSeed = seed,
+			savedChunks = allChunks
+		};
+		
 		return JsonConvert.SerializeObject(worldSaveData);
 	}
 
@@ -288,7 +335,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		catch (ArgumentException exception)
 		{
 			Debug.LogError("LEVEL_READ_ERROR");
-			Debug.LogException(exception);
+			//Debug.LogException(exception);
 		}
 		GameSettings.LEVEL_SAVE_LOADED = true;
 		Debug.Log("Level Save Loaded");
@@ -297,6 +344,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	private void LoadSaveData(WorldSaveData saveData)
 	{
 		seed = saveData.savedSeed;
+
 		if (saveData.savedChunks != null)
 		{
 			allChunks = saveData.savedChunks;
@@ -333,9 +381,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	private void TryGenChunks()
 	{
 		newPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
+		//Debug.Log(GameSettings.Instance.Player.transform.position);
 		if (newPlayerChunkLocation != oldPlayerChunkLocation && !isLoadingChunks)
 		{
 			isLoadingChunks = true;
+
 			for (int i = newPlayerChunkLocation.x - viewDistance; i < newPlayerChunkLocation.x + viewDistance; i++)
 			{
 				for (int j = newPlayerChunkLocation.z - viewDistance; j < newPlayerChunkLocation.z + viewDistance; j++)
@@ -357,40 +407,52 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public void ManageLoadedChunks()
 	{
-		KeyValuePair<string, Chunk>[] array = loadedChunks.ToArray();
-		for (int i = 0; i < array.Length; i++)
+		foreach (KeyValuePair<string, Chunk> loadedChunk in loadedChunks.ToArray())
 		{
-			KeyValuePair<string, Chunk> keyValuePair = array[i];
-			Chunk value = keyValuePair.Value;
-			if (Vector3.Distance(new Vector3(value.chunkPosX, value.chunkPosY, value.chunkPosZ), GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position)) > (float)viewDistance)
+			Chunk chunk = loadedChunk.Value;
+
+			if (Vector3.Distance(new Vector3(chunk.chunkPosX, chunk.chunkPosY, chunk.chunkPosZ), GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position)) > viewDistance)
 			{
-				KeyValuePair<string, SaveableProp>[] array2 = value.saveableData.propData.propClusterData.ToArray();
-				foreach (KeyValuePair<string, SaveableProp> keyValuePair2 in array2)
+				foreach (KeyValuePair<string, SaveableProp> prop in chunk.saveableData.propData.propClusterData.ToArray())
 				{
-					UnityEngine.Object.Destroy(keyValuePair2.Value.instance.gameObject);
+					//dont use remove so its still in the database
+					Destroy(prop.Value.instance.gameObject);
 				}
-				KeyValuePair<string, SaveableEntity>[] array3 = value.saveableData.entityData.entityClusterData.ToArray();
-				foreach (KeyValuePair<string, SaveableEntity> keyValuePair3 in array3)
+
+				foreach (KeyValuePair<string, SaveableEntity> entity in chunk.saveableData.entityData.entityClusterData.ToArray())
 				{
-					UnityEngine.Object.Destroy(keyValuePair3.Value.instance.gameObject);
+					//dont use remove so its still in the database
+					Destroy(entity.Value.instance.gameObject);
 				}
-				loadedChunks.Remove(keyValuePair.Key);
-				UnityEngine.Object.Destroy(value.gameObject);
+
+				loadedChunks.Remove(loadedChunk.Key);
+
+				Destroy(chunk.gameObject);
 			}
 		}
 	}
 
 	private GameObject GenerateChunk(int chunkX, int chunkY, int chunkZ, bool shouldGenInstantly)
 	{
+		
+
 		if (!ChunkLocationLoaded(chunkX, chunkY, chunkZ))
 		{
-			Chunk component = UnityEngine.Object.Instantiate(level_chunkGenerator).GetComponent<Chunk>();
-			component.name = chunkX + "," + chunkY + "," + chunkZ;
-			component.GetComponent<Chunk>().CreateChunk(chunkX, chunkY, chunkZ, this, shouldGenInstantly);
-			component.transform.position = new Vector3((float)chunkX * ChunkSize(), (float)chunkY * ChunkHeight(), (float)chunkZ * ChunkSize());
-			loadedChunks.Add(chunkX + "," + chunkY + "," + chunkZ, component);
-			StartCoroutine(LoadInObjectsAndEntities(component));
-			return component.gameObject;
+			Debug.Log("Chunk Gen");
+
+			Chunk chunk = Instantiate(level_chunkGenerator).GetComponent<Chunk>();
+
+			chunk.name = chunkX + "," + chunkY + "," + chunkZ;
+
+			chunk.GetComponent<Chunk>().CreateChunk(chunkX, chunkY, chunkZ, this, shouldGenInstantly);
+
+			chunk.transform.position = new Vector3(chunkX * ChunkSize(), chunkY * ChunkHeight(), chunkZ * ChunkSize());
+
+			loadedChunks.Add(chunkX + "," + chunkY + "," + chunkZ, chunk);
+
+			StartCoroutine(LoadInObjectsAndEntities(chunk));
+
+			return chunk.gameObject;
 		}
 		return null;
 	}
@@ -398,57 +460,68 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	private IEnumerator LoadInObjectsAndEntities(Chunk chunk)
 	{
 		yield return new WaitUntil(() => chunk.ALL_TILES_GENERATED);
-		string key = chunk.chunkPosX + "," + chunk.chunkPosY + "," + chunk.chunkPosZ;
+
+		string chunkKey = chunk.chunkPosX + "," + chunk.chunkPosY + "," + chunk.chunkPosZ;
+
 		if (allChunks.ContainsKey(chunk.chunkPosX + "," + chunk.chunkPosY + "," + chunk.chunkPosZ))
 		{
-			chunk.saveableData = allChunks[key];
+			chunk.saveableData = allChunks[chunkKey];
 			chunk.saveableData.instance = chunk;
-			KeyValuePair<string, SaveableEntity>[] array = chunk.saveableData.entityData.entityClusterData.ToArray();
-			foreach (KeyValuePair<string, SaveableEntity> keyValuePair in array)
+
+			foreach (KeyValuePair<string, SaveableEntity> entity in chunk.saveableData.entityData.entityClusterData.ToArray())
 			{
-				LoadSavedEntity(keyValuePair.Value, chunk);
+				LoadSavedEntity(entity.Value, chunk);
 			}
-			KeyValuePair<string, SaveableProp>[] array2 = chunk.saveableData.propData.propClusterData.ToArray();
-			foreach (KeyValuePair<string, SaveableProp> keyValuePair2 in array2)
+
+			foreach (KeyValuePair<string, SaveableProp> prop in chunk.saveableData.propData.propClusterData.ToArray())
 			{
-				LoadSavedProp(keyValuePair2.Value, chunk);
+				LoadSavedProp(prop.Value, chunk);
 			}
-			allChunks[key] = chunk.saveableData;
+			allChunks[chunkKey] = chunk.saveableData;
 		}
+
 		else
 		{
-			KeyValuePair<OBJECT_TYPE, InteractableObject>[] array3 = levelProps.ToArray();
-			for (int i = 0; i < array3.Length; i++)
+			foreach (KeyValuePair<OBJECT_TYPE, InteractableObject> prop in levelProps.ToArray())
 			{
-				KeyValuePair<OBJECT_TYPE, InteractableObject> keyValuePair3 = array3[i];
-				float num = UnityEngine.Random.Range(0f, 0.99f);
-				int index = UnityEngine.Random.Range(0, chunk.tile_grid.Count);
-				Tile tile = chunk.tile_grid[index];
+				float spawnChanceSelection = UnityEngine.Random.Range(0f, 0.99f);
+
+				int tileIndex = UnityEngine.Random.Range(0, chunk.tile_grid.Count);
+
+				Tile tile = chunk.tile_grid[tileIndex];
+
 				UnityEngine.Random.Range(0, tile.propSpawnLocations.Count);
-				if (keyValuePair3.Value.spawnChance > num && tile.propSpawnLocations.Count > 0)
+
+				if (prop.Value.spawnChance > spawnChanceSelection && tile.propSpawnLocations.Count > 0)
 				{
-					int index2 = UnityEngine.Random.Range(0, tile.propSpawnLocations.Count);
-					AddNewProp(tile.propSpawnLocations[index2].position, tile.propSpawnLocations[index2].rotation, keyValuePair3.Value, chunk);
+					int spawnLocationChoice = UnityEngine.Random.Range(0, tile.propSpawnLocations.Count);
+
+					AddNewProp(tile.propSpawnLocations[spawnLocationChoice].position, tile.propSpawnLocations[spawnLocationChoice].rotation, prop.Value, chunk);
 				}
 			}
-			allChunks.Add(key, chunk.saveableData);
+
+			allChunks.Add(chunkKey, chunk.saveableData);
 		}
+
 		chunk.ALL_OBJECTS_AND_ENTITES_LOADED = true;
+
 		SaveAllObjectsAndEntities();
 	}
 
 	public bool CheckWorldForEntityKey(string key)
 	{
-		using (Dictionary<string, SerealizedChunk>.Enumerator enumerator = allChunks.GetEnumerator())
+		foreach (KeyValuePair<string, SerealizedChunk> chunk in allChunks)
 		{
-			if (enumerator.MoveNext())
+			
+			if (chunk.Value.entityData.entityClusterData.ContainsKey(key))
 			{
-				if (enumerator.Current.Value.entityData.entityClusterData.ContainsKey(key))
-				{
-					return true;
-				}
-				return false;
+				return true;
 			}
+            else
+            {
+				return false;
+            }
+			
 		}
 		return false;
 	}
@@ -503,7 +576,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				if (current.Value.entityData.entityClusterData.ContainsKey(key))
 				{
 					current.Value.entityData.entityClusterData.TryGetValue(key, out var value);
-					UnityEngine.Object.Destroy(value.instance.gameObject);
+					Destroy(value.instance.gameObject);
 					current.Value.entityData.entityClusterData.Remove(key);
 					return true;
 				}
@@ -515,16 +588,18 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public bool CheckWorldForPropKey(string key)
 	{
-		using (Dictionary<string, SerealizedChunk>.Enumerator enumerator = allChunks.GetEnumerator())
+		foreach (KeyValuePair<string, SerealizedChunk> chunk in allChunks)
 		{
-			if (enumerator.MoveNext())
+
+			if (chunk.Value.propData.propClusterData.ContainsKey(key))
 			{
-				if (enumerator.Current.Value.propData.propClusterData.ContainsKey(key))
-				{
-					return true;
-				}
+				return true;
+			}
+			else
+			{
 				return false;
 			}
+
 		}
 		return false;
 	}
@@ -538,11 +613,16 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		}
 		if (num <= 100)
 		{
-			InteractableObject component = UnityEngine.Object.Instantiate(item.gameObject).GetComponent<InteractableObject>();
+			InteractableObject component = Instantiate(item.gameObject).GetComponent<InteractableObject>();
+
 			component.GenerateID(this);
+
 			component.gameObject.transform.position = position;
+
 			component.gameObject.transform.rotation = rotation;
+
 			chunk.saveableData.propData.propClusterData.Add(component.type.ToString() + "-" + component.runTimeID, component.Save());
+
 			return component;
 		}
 		return null;
@@ -552,12 +632,17 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	{
 		if (GameSettings.Instance.PropDatabase.ContainsKey(savedObjectData.type))
 		{
-			InteractableObject value = null;
-			GameSettings.Instance.PropDatabase.TryGetValue(savedObjectData.type, out value);
-			InteractableObject interactableObject = UnityEngine.Object.Instantiate(value);
-			interactableObject.Load(savedObjectData);
-			chunk.saveableData.propData.propClusterData[interactableObject.type.ToString() + "-" + interactableObject.runTimeID] = interactableObject.saveableData;
-			return interactableObject;
+			InteractableObject databaseObject = null;
+
+			GameSettings.Instance.PropDatabase.TryGetValue(savedObjectData.type, out databaseObject);
+
+			InteractableObject spawnedObject = Instantiate(databaseObject);
+
+			spawnedObject.Load(savedObjectData);
+
+			chunk.saveableData.propData.propClusterData[spawnedObject.type.ToString() + "-" + spawnedObject.runTimeID] = spawnedObject.saveableData;
+
+			return spawnedObject;
 		}
 		return null;
 	}
@@ -572,8 +657,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				if (current.Value.propData.propClusterData.ContainsKey(key))
 				{
 					current.Value.propData.propClusterData.TryGetValue(key, out var value);
-					UnityEngine.Object.Destroy(value.instance.gameObject);
+
+					Destroy(value.instance.gameObject);
+
 					current.Value.propData.propClusterData.Remove(key);
+
 					return true;
 				}
 				return false;
@@ -657,6 +745,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			KeyValuePair<string, SerealizedChunk> keyValuePair = array[i];
 			KeyValuePair<string, SaveableEntity>[] array2 = keyValuePair.Value.entityData.entityClusterData.ToArray();
+
 			for (int j = 0; j < array2.Length; j++)
 			{
 				KeyValuePair<string, SaveableEntity> keyValuePair2 = array2[j];

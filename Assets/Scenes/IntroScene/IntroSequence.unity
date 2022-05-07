@@ -4374,6 +4374,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6ff514004cb2c34bbf55ececf19efd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  propDatabase:
+  - {fileID: 6461271711412109696, guid: b95df38760cc2404ab6833f6a42b6266, type: 3}
+  - {fileID: 3693248661749687413, guid: a6d82421082750949b31f75449e3460d, type: 3}
+  - {fileID: 2139753846115895302, guid: e161201840b17e141a77746ee12159c6, type: 3}
+  - {fileID: 7088627852523957308, guid: 881cfdb00f488ed4983c716ec7251793, type: 3}
+  - {fileID: 7447349725876534975, guid: 9110fbc95cf49a54497e6f23746e4980, type: 3}
+  entityDatabase:
+  - {fileID: 4225260656200758192, guid: f254f54165076c64ba860e8b6002ed68, type: 3}
+  - {fileID: 7706871903603223783, guid: b76058a6d76eb8c4c833853585c482a9, type: 3}
   cursor: {fileID: 2800000, guid: 2d2efef682a8a334291db706fc03efdc, type: 3}
   homeScreenRoomProfile: {fileID: 11400000, guid: d038d44b177282642b492385598ea2f3, type: 2}
   homeScreenProfile: {fileID: 11400000, guid: 4a7241e22d670404dacbf934700480a0, type: 2}
@@ -4402,6 +4411,8 @@ MonoBehaviour:
   masterVolumeSlider: {fileID: 1676192604}
   mainScreen: {fileID: 1586155871}
   settingsScreen: {fileID: 1043948232}
+  ActiveScene: 0
+  LastSavedScene: 2
 --- !u!114 &1005928951
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4457,7 +4468,7 @@ MonoBehaviour:
   cachedSaveableComponents:
   - identifier: GameSettings-63dc1
     monoBehaviour: {fileID: 1005928950}
-  saveIdentification: IntroSequence-GameSettings-129d6
+  saveIdentification: WTTB-43fdh
   sceneName: IntroSequence
 --- !u!1 &1017207760
 GameObject:
@@ -8823,7 +8834,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timer: 0
   refresh: 0
-  avgFramerate: 38
+  avgFramerate: 0
 --- !u!114 &1987178679
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,13 +1,126 @@
-﻿using System.Collections;
+﻿using Lowscope.Saving;
+using Lowscope.Saving.Components;
+using System;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CharacterController))]
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, ISaveable
 {
 
-    private static PlayerController playerInstance;
+    [Serializable]
+    private struct PlayerSaveData
+    {
+        public float[] savedPosition;
+
+        public float[] savedHeadRotationEuler;
+
+        public float[] savedBodyRotationEuler;
+
+        public float savedRotationX;
+
+        public float savedRotationY;
+    }
+
+    public string OnSave()
+    {
+        float[] savedPosition = new float[3]
+        {
+            transform.position.x,
+            transform.position.y,
+            transform.position.z
+        };
+        float[] savedHeadRotationEuler = new float[3]
+        {
+            head.transform.rotation.eulerAngles.x,
+            head.transform.rotation.eulerAngles.y,
+            head.transform.rotation.eulerAngles.z
+        };
+        float[] savedBodyRotationEuler = new float[3]
+        {
+            transform.rotation.eulerAngles.x,
+            transform.rotation.eulerAngles.y,
+            transform.rotation.eulerAngles.z
+        };
+        PlayerSaveData playerSaveData = new PlayerSaveData()
+        {
+            savedPosition = savedPosition,
+            savedHeadRotationEuler = savedHeadRotationEuler,
+            savedBodyRotationEuler = savedBodyRotationEuler,
+            savedRotationX = rotationX,
+            savedRotationY = rotationY
+        };
+        
+
+        return JsonUtility.ToJson(playerSaveData);
+    }
+
+    public void OnLoad(string data)
+    {
+        StartCoroutine(OnLoadAsync(data));
+    }
+
+    public void OnLoadNoData()
+    {
+        if (GameSettings.Instance.AmInSavableScene())
+        {
+            transform.position = new Vector3(0f, 1.25f, 0f);
+        }
+        StartCoroutine(OnLoadNoDataAsync());
+    }
+
+    private IEnumerator OnLoadNoDataAsync()
+    {
+        Debug.Log("Player Data Doesnt Exist");
+        yield return new WaitUntil(() => GameSettings.Instance.AmInSavableScene());
+
+        characterController.enabled = false;
+
+        yield return new WaitUntil(() => GameSettings.LEVEL_LOADED);
+
+        GameSettings.PLAYER_DATA_LOADED_IN_SCENE = true;
+
+        yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
+        yield return new WaitUntil(() => GameSettings.LEVEL_GENERATED);
+        
+        characterController.enabled = true;
+        Debug.Log("Player Data Finished Loading");
+    }
+
+    private IEnumerator OnLoadAsync(string data)
+    {
+        Debug.Log("Player Data Loading");
+
+        PlayerSaveData saveData = JsonUtility.FromJson<PlayerSaveData>(data);
+
+        yield return new WaitUntil(() => GameSettings.Instance.AmInSavableScene());
+
+        characterController.enabled = false;
+
+        yield return new WaitUntil(() => GameSettings.LEVEL_LOADED);
+
+        transform.position = new Vector3(saveData.savedPosition[0], saveData.savedPosition[1], saveData.savedPosition[2]);
+        transform.rotation = Quaternion.Euler(saveData.savedBodyRotationEuler[0], saveData.savedBodyRotationEuler[1], saveData.savedBodyRotationEuler[2]);
+        head.transform.rotation = Quaternion.Euler(saveData.savedHeadRotationEuler[0], saveData.savedHeadRotationEuler[1], saveData.savedHeadRotationEuler[2]);
+        rotationX = saveData.savedRotationX;
+        rotationY = saveData.savedRotationY;
+
+        GameSettings.PLAYER_DATA_LOADED_IN_SCENE = true;
+
+        yield return new WaitUntil(() => GameSettings.LEVEL_GENERATED);
+        yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
+
+        characterController.enabled = true;
+        Debug.Log("Player Data Finished Loading");
+    }
+
+    public bool OnSaveCondition()
+    {
+        return GameSettings.Instance.AmInSavableScene();
+    }
+
+    public GameObject playerRagDoll;
 
     public PlayerHealthSystem playerHealth;
     public DistanceChecker distance;
@@ -125,28 +238,21 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-        void Awake()
-        {
-            DontDestroyOnLoad(gameObject);
+    void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+        Saveable component = gameObject.AddComponent<Saveable>();
+        component.SaveIdentification = "RJC-f88ss";
+        component.AddSaveableComponent("PlayerData", this, true);
+        SaveMaster.AddListener(component);
+        SaveMaster.SyncLoad();
 
-            if (playerInstance == null)
-            {
-                playerInstance = this;
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
-            //UI.transform.Find("PlayerID").GetComponent<Text>().text = "PlayerID: " + CreatePlayerData.playerID;
-            //UI.transform.Find("PlayerName").GetComponent<Text>().text = "PlayerName: " + CreatePlayerData.playerName;
-            //GetComponent<AudioSource>().playOnAwake = true;
-        }
+    }
+
 
     void Start()
     {
        
-        
-
         playerHealth = GetComponent<PlayerHealthSystem>();
 
         
@@ -724,6 +830,9 @@ public class PlayerController : MonoBehaviour
 
         
     }
-
+    void OnDestroy()
+    {
+        //SaveMaster.RemoveListener(GetComponent<Saveable>());
+    }
     
 }

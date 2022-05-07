@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43eeabd8e89dc7c4ea0e6f7a1b3b8329, type: 3}
   m_Name: Save Plugin Settings
   m_EditorClassIdentifier: 
-  fileExtensionName: .savegame
+  fileExtensionName: .wttbdata
   fileFolderName: SaveData
-  fileName: Slot
+  fileName: GameSave
   useJsonPrettyPrint: 1
-  maxSaveSlotCount: 300
+  maxSaveSlotCount: 1
   trackTimePlayed: 1
   autoSaveOnExit: 1
   autoSaveOnSlotSwitch: 1
@@ -28,8 +28,8 @@ MonoBehaviour:
   loadDefaultSlotOnStart: 1
   defaultSlot: 0
   useHotkeys: 0
-  saveAndWriteToDiskKey: 283
-  syncSaveGameKey: 285
-  syncLoadGameKey: 286
-  wipeActiveSceneData: 287
+  saveAndWriteToDiskKey: 0
+  syncSaveGameKey: 0
+  syncLoadGameKey: 0
+  wipeActiveSceneData: 0
   showSaveFileUtilityLog: 0
