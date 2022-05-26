@@ -110,6 +110,7 @@ public class InteractionSystem : MonoBehaviour
 		player.holding.transform.parent = (player.holding.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.handLocation.transform);
 		player.holding.transform.position = (player.holding.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.handLocation.transform.position);
 		Quaternion localRotation = Quaternion.Euler(player.head.transform.localRotation.x / 2f, player.head.transform.localRotation.y, player.head.transform.localRotation.z);
+
 		if (player.holding.GetComponent<HoldableObject>().large)
 		{
 			player.bodyAnim.SetBool("isHoldingLarge", value: true);

@@ -138,7 +138,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		Begin();
 	}
 
-	public IEnumerator SaveDataEveryXMinutes(float minutes)
+    public IEnumerator SaveDataEveryXMinutes(float minutes)
 	{
 		while (true)
 		{
@@ -157,30 +157,33 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			foreach (KeyValuePair<ENTITY_TYPE, Entity> entity in GameSettings.Instance.EntityDatabase)
 			{
+				if (entitiesThatCanSpawnOnThisLevel.Contains(entity.Value.type))
+                {
+					float spawnChanceSelection = UnityEngine.Random.Range(0f, 0.99f);
 
-				float spawnChanceSelection = UnityEngine.Random.Range(0f, 0.99f);
-
-				if (entity.Value.spawnChance > spawnChanceSelection)
-				{
-					Chunk chunk = loadedChunks.ElementAt(UnityEngine.Random.Range(0, loadedChunks.Count)).Value;
-
-					string key = chunk.chunkPosX + "," + chunk.chunkPosY + "," + chunk.chunkPosZ;
-
-					int tileToSpawnIn = UnityEngine.Random.Range(0, chunk.tile_grid.Count - 1);
-
-					Tile tile = chunk.tile_grid[tileToSpawnIn];
-
-					if (tile.entitySpawnLocations.Count > 0)
+					if (entity.Value.spawnChance > spawnChanceSelection)
 					{
-						AddNewEntity(tile.entitySpawnLocations[UnityEngine.Random.Range(0, tile.entitySpawnLocations.Count)].position, entity.Value, chunk);
-					}
-					else
-					{
-						AddNewEntity(new Vector3((float)tile.tilePos.x * chunk.tileWidth + (float)(chunk.chunkPosX * chunk_width) * chunk.tileWidth, 0f, (float)tile.tilePos.y * chunk.tileWidth + (float)(chunk.chunkPosZ * chunk_width) * chunk.tileWidth), entity.Value, chunk);
-					}
+						Chunk chunk = loadedChunks.ElementAt(UnityEngine.Random.Range(0, loadedChunks.Count)).Value;
 
-					allChunks[key] = chunk.saveableData;
+						string key = chunk.chunkPosX + "," + chunk.chunkPosY + "," + chunk.chunkPosZ;
+
+						int tileToSpawnIn = UnityEngine.Random.Range(0, chunk.tile_grid.Count - 1);
+
+						Tile tile = chunk.tile_grid[tileToSpawnIn];
+
+						if (tile.entitySpawnLocations.Count > 0)
+						{
+							AddNewEntity(tile.entitySpawnLocations[UnityEngine.Random.Range(0, tile.entitySpawnLocations.Count)].position, entity.Value, chunk);
+						}
+						else
+						{
+							AddNewEntity(new Vector3((float)tile.tilePos.x * chunk.tileWidth + (float)(chunk.chunkPosX * chunk_width) * chunk.tileWidth, 0f, (float)tile.tilePos.y * chunk.tileWidth + (float)(chunk.chunkPosZ * chunk_width) * chunk.tileWidth), entity.Value, chunk);
+						}
+
+						allChunks[key] = chunk.saveableData;
+					}
 				}
+				
 			}
 		}
 	}
@@ -316,6 +319,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	public string OnSave()
 	{
 		SaveAllObjectsAndEntities();
+
 		WorldSaveData worldSaveData = new WorldSaveData
         {
 			savedSeed = seed,
@@ -328,6 +332,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	private IEnumerator OnLoadAsync(string data)
 	{
 		yield return new WaitUntil(() => GameSettings.LEVEL_LOADED);
+
 		try
 		{
 			LoadSaveData(JsonConvert.DeserializeObject<WorldSaveData>(data));
@@ -365,6 +370,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public void OnLoadNoData()
 	{
+
 		GameSettings.LEVEL_SAVE_LOADED = true;
 		Debug.LogError("No Save To Load");
 	}
@@ -543,7 +549,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		}
 		if (num < entity.maxAllowed && num2 <= 15)
 		{
-			Entity component = UnityEngine.Object.Instantiate(entity.gameObject).GetComponent<Entity>();
+			Entity component = Instantiate(entity.gameObject).GetComponent<Entity>();
 			component.GenerateID(this);
 			component.gameObject.transform.position = position;
 			chunk.saveableData.entityData.entityClusterData.Add(component.type.ToString() + "-" + component.runTimeID, component.Save());
@@ -558,7 +564,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			Entity value = null;
 			GameSettings.Instance.EntityDatabase.TryGetValue(entityData.type, out value);
-			Entity entity = UnityEngine.Object.Instantiate(value);
+			Entity entity = Instantiate(value);
 			entity.Load(entityData);
 			chunk.saveableData.entityData.entityClusterData[entity.type.ToString() + "-" + entity.runTimeID] = entity.saveableData;
 			return entity;

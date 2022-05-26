@@ -240,12 +240,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     void Awake()
     {
-        DontDestroyOnLoad(gameObject);
-        Saveable component = gameObject.AddComponent<Saveable>();
-        component.SaveIdentification = "RJC-f88ss";
-        component.AddSaveableComponent("PlayerData", this, true);
-        SaveMaster.AddListener(component);
-        SaveMaster.SyncLoad();
+        
 
     }
 
@@ -262,7 +257,13 @@ public class PlayerController : MonoBehaviour, ISaveable
 
         characterController = GetComponent<CharacterController>();
 
+        DontDestroyOnLoad(gameObject);
+        Saveable component = gameObject.AddComponent<Saveable>();
+        component.SaveIdentification = "RJC-f88ss";
+        component.AddSaveableComponent("PlayerData", this, true);
 
+        SaveMaster.AddListener(component);
+        SaveMaster.SyncLoad();
     }
 
     public void Crouch()

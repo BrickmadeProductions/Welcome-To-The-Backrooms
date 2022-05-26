@@ -60,10 +60,12 @@ public abstract class InteractableObject : MonoBehaviour
 
 		if (saveableData.parentName != "")
 		{
-			Transform transform = GameObject.Find(saveableData.parentName).transform;
-			transform.parent = transform;
+			transform.parent = GameObject.Find(saveableData.parentName).transform;
+			transform.localPosition = Vector3.zero;
 			transform.position = Vector3.zero;
 			transform.rotation = Quaternion.identity;
+			transform.localRotation = Quaternion.identity;
+
 			if (transform.name == "HoldLocation" || transform.name == "HandLocation")
 			{
 				Debug.Log("Reparenting To Hand...");

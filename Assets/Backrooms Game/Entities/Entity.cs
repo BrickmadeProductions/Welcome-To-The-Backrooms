@@ -162,6 +162,7 @@ public abstract class Entity : MonoBehaviour
 	private void Update()
 	{
 		UpdateEntity();
+
 		if ((Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > (float)despawnDistance && !isDespawned) || health <= 0f)
 		{
 			Despawn();

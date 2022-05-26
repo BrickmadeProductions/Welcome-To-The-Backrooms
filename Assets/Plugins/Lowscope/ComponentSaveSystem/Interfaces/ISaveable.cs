@@ -21,6 +21,10 @@ namespace Lowscope.Saving
         /// Returning true will allow the save to occur, else it will skip the save.
         /// This is useful when you want to call OnSave() only when something has actually changed.
         /// </summary>
+        /// 
+
+        void OnLoadNoData();
+
         bool OnSaveCondition();
     }
 }

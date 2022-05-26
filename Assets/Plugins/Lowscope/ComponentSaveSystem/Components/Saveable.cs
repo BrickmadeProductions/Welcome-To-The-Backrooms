@@ -448,6 +448,10 @@ namespace Lowscope.Saving.Components
                     {
                         getSaveable.OnLoad(getData);
                     }
+                    else
+                    {
+                        getSaveable.OnLoadNoData();
+                    }
                 }
             }
         }

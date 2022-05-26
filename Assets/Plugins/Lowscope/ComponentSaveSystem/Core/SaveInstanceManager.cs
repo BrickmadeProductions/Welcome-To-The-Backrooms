@@ -229,5 +229,11 @@ namespace Lowscope.Saving.Core
         {
             return true;
         }
+
+        public void OnLoadNoData()
+        {
+            
+        }
+
     }
 }

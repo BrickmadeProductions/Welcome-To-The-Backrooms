@@ -40,6 +40,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 		public float sensitivity;
 
 		public float masterVolume;
+
 	}
 
 	public enum SCENE
@@ -279,8 +280,12 @@ public class GameSettings : MonoBehaviour, ISaveable
 		m_instance = this;
 		DontDestroyOnLoad(gameObject);
 	}
+    private void Start()
+    {
+		SaveMaster.SyncLoad();
+    }
 
-	private void Init()
+    private void Init()
 	{
 		post = GetComponent<PostProcessVolume>();
 		PropDatabase = new Dictionary<OBJECT_TYPE, InteractableObject>();
@@ -314,7 +319,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 		runtimeSaveData = JsonConvert.DeserializeObject<SaveData>(data);
 		ConnectSettings();
 		LoadSettings(runtimeSaveData);
-		ambientOcclusionButton.isOn = AmbientOcclusionEnabled;
+	    ambientOcclusionButton.isOn = AmbientOcclusionEnabled;
 		bloomButton.isOn = BloomEnabled;
 		antiAliasingButton.isOn = AntiAliasingEnabled;
 		chromButton.isOn = ChromEnabled;
@@ -684,6 +689,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 		yield return SceneManager.LoadSceneAsync((int)id, LoadSceneMode.Single);
 
 		PostLoadScene(id);
+
+		SaveAllProgress();
 	}
 
 	private void PostLoadScene(SCENE id)
@@ -806,7 +813,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 			player.GetComponent<PlayerHealthSystem>().WakeUpOther();
 		}
 		GAME_FIRST_LOADED = false;
-
 		SaveMaster.SyncLoad();
 
 	}
