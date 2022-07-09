@@ -74,7 +74,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 3d3e6a77a2a05464e9e49fe0fc126078, type: 3}
-  m_Color: {r: 0.6792453, g: 0.6135635, b: 0.28515485, a: 0.69411767}
+  m_Color: {r: 0.8207547, g: 0.79903567, b: 0.6929957, a: 0.69411767}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -245,17 +245,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d685d7ca68b373a45bb94d7704186899, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 
+    location: []
+    rotationEuler: []
+    type: 0
+    instance: {fileID: 0}
+  maxHealth: 0
+  health: 0
+  agrivation: 0
+  hunger: 0
   type: 3
-  attackHitboxs: []
   canAttack: 1
   entityAnimator: {fileID: 7340305521680105861}
-  noises: []
-  noiseSource: {fileID: 7065750352517365241}
+  movementNoises: []
+  movementNoiseSource: {fileID: 0}
+  attackNoises: []
+  attackNoiseSource: {fileID: 0}
+  hurtNoises: []
+  hurtNoisesSource: {fileID: 0}
   damage: 0
   sanityMultiplier: 0
   maxAllowed: 10
   despawnDistance: 500
   entityViewDistance: 500
+  memoryOfPlayerLocationInSeconds: 0
   sightMask:
     serializedVersion: 2
     m_Bits: 65531
@@ -263,7 +277,12 @@ MonoBehaviour:
   playerCanSee: 0
   spawnChance: 0.1
   speed: 2
+  stunned: 0
+  stunTime: 0
   eyes: {fileID: 2550196510949771386}
+  entitySkin: {fileID: 0}
+  runTimeID: 
+  bloodPrefab: {fileID: 0}
   explosionEffect: {fileID: 3925061542897833910, guid: 6a2e518db0b05a74a97784bb5b449817, type: 3}
 --- !u!23 &3512871350104039503
 MeshRenderer:

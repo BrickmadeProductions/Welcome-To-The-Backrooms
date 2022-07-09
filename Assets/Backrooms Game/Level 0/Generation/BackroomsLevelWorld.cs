@@ -579,6 +579,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			if (enumerator.MoveNext())
 			{
 				KeyValuePair<string, SerealizedChunk> current = enumerator.Current;
+
 				if (current.Value.entityData.entityClusterData.ContainsKey(key))
 				{
 					current.Value.entityData.entityClusterData.TryGetValue(key, out var value);
@@ -746,75 +747,93 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public void SaveAllObjectsAndEntities()
 	{
-		KeyValuePair<string, SerealizedChunk>[] array = allChunks.ToArray();
-		for (int i = 0; i < array.Length; i++)
-		{
-			KeyValuePair<string, SerealizedChunk> keyValuePair = array[i];
-			KeyValuePair<string, SaveableEntity>[] array2 = keyValuePair.Value.entityData.entityClusterData.ToArray();
+		KeyValuePair<string, SerealizedChunk>[] serializedChunks = allChunks.ToArray();
 
-			for (int j = 0; j < array2.Length; j++)
+		for (int i = 0; i < serializedChunks.Length; i++) 
+		{
+			KeyValuePair<string, SerealizedChunk> chunkData = serializedChunks[i];
+
+			KeyValuePair<string, SaveableEntity>[] entityDataList = chunkData.Value.entityData.entityClusterData.ToArray();
+
+			for (int j = 0; j < entityDataList.Length; j++)
 			{
-				KeyValuePair<string, SaveableEntity> keyValuePair2 = array2[j];
-				if (!(keyValuePair2.Value.instance != null))
+				KeyValuePair<string, SaveableEntity> entityData = entityDataList[j];
+
+				if (entityData.Value.instance == null)
 				{
 					continue;
 				}
-				Vector3 vector = GetChunkKeyAtWorldLocation(keyValuePair2.Value.instance.transform.position);
-				string key = keyValuePair.Key;
-				string text = vector.x + "," + vector.y + "," + vector.z;
-				string key2 = keyValuePair2.Value.type.ToString() + "-" + keyValuePair2.Value.instance.runTimeID;
-				if (keyValuePair.Key != text)
+
+				Vector3 chunkLocationKey = GetChunkKeyAtWorldLocation(entityData.Value.instance.transform.position);
+
+				string chunkKey = chunkData.Key;
+
+				string chunkLocation = chunkLocationKey.x + "," + chunkLocationKey.y + "," + chunkLocationKey.z;
+
+				string entityID = entityData.Value.type.ToString() + "-" + entityData.Value.instance.runTimeID;
+
+
+				if (chunkData.Key != chunkLocation)
 				{
-					if (allChunks.ContainsKey(text))
+					if (allChunks.ContainsKey(chunkLocation))
 					{
-						allChunks[key].entityData.entityClusterData.Remove(key2);
-						allChunks[text].entityData.entityClusterData.Add(key2, keyValuePair2.Value.instance.Save());
+						allChunks[chunkKey].entityData.entityClusterData.Remove(entityID);
+
+						allChunks[chunkLocation].entityData.entityClusterData.Add(entityID, entityData.Value.instance.Save());
 					}
 					else
 					{
-						Debug.LogError("COULD NOT SAVE -> CHUNKS DOESN'T CONTAIN KEY: " + text);
+						Debug.LogError("COULD NOT SAVE -> CHUNKS DOESN'T CONTAIN KEY: " + chunkLocation);
 					}
 				}
-				else if (allChunks.ContainsKey(text))
+
+				else if (allChunks.ContainsKey(chunkLocation))
 				{
-					allChunks[text].entityData.entityClusterData[key2] = keyValuePair2.Value.instance.Save();
+					allChunks[chunkLocation].entityData.entityClusterData[entityID] = entityData.Value.instance.Save();
 				}
+
 				else
 				{
-					Debug.LogError("COULD NOT SAVE: " + keyValuePair2.Value.type.ToString() + "-" + keyValuePair2.Value.instance.runTimeID);
+					Debug.LogError("COULD NOT SAVE: " + entityData.Value.type.ToString() + "-" + entityData.Value.instance.runTimeID);
 				}
 			}
-			KeyValuePair<string, SaveableProp>[] array3 = keyValuePair.Value.propData.propClusterData.ToArray();
-			for (int j = 0; j < array3.Length; j++)
+
+			KeyValuePair<string, SaveableProp>[] serializedProps = chunkData.Value.propData.propClusterData.ToArray();
+
+			for (int j = 0; j < serializedProps.Length; j++)
 			{
-				KeyValuePair<string, SaveableProp> keyValuePair3 = array3[j];
-				if (!(keyValuePair3.Value.instance != null))
+				KeyValuePair<string, SaveableProp> propData = serializedProps[j];
+
+				if (propData.Value.instance == null)
 				{
 					continue;
 				}
-				Vector3 vector2 = GetChunkKeyAtWorldLocation(keyValuePair3.Value.instance.transform.position);
-				string key3 = keyValuePair.Key;
-				string text2 = vector2.x + "," + vector2.y + "," + vector2.z;
-				string key4 = keyValuePair3.Value.type.ToString() + "-" + keyValuePair3.Value.instance.runTimeID;
-				if (keyValuePair.Key != text2)
+
+				Vector3 location = GetChunkKeyAtWorldLocation(propData.Value.instance.transform.position);
+
+				string chunkKey = chunkData.Key;
+				string chunkLocation = location.x + "," + location.y + "," + location.z;
+				string propKey = propData.Value.type.ToString() + "-" + propData.Value.instance.runTimeID;
+
+				if (chunkData.Key != chunkLocation)
 				{
-					if (allChunks.ContainsKey(text2))
+					if (allChunks.ContainsKey(chunkLocation))
 					{
-						allChunks[key3].propData.propClusterData.Remove(key4);
-						allChunks[text2].propData.propClusterData.Add(key4, keyValuePair3.Value.instance.Save());
+						allChunks[chunkKey].propData.propClusterData.Remove(propKey);
+						allChunks[chunkLocation].propData.propClusterData.Add(propKey, propData.Value.instance.Save());
 					}
 					else
 					{
-						Debug.LogError("COULD NOT SAVE -> CHUNKS DOESN'T CONTAIN KEY: " + text2);
+						Debug.LogError("COULD NOT SAVE -> CHUNKS DOESN'T CONTAIN KEY: " + chunkLocation);
 					}
 				}
-				else if (allChunks.ContainsKey(text2))
+				else if (allChunks.ContainsKey(chunkLocation))
 				{
-					allChunks[text2].propData.propClusterData[key4] = keyValuePair3.Value.instance.Save();
+					allChunks[chunkLocation].propData.propClusterData[propKey] = propData.Value.instance.Save();
 				}
 				else
 				{
-					Debug.LogError("COULD NOT SAVE: " + keyValuePair3.Value.type.ToString() + "-" + keyValuePair3.Value.instance.runTimeID);
+					Debug.LogError("COULD NOT SAVE: " + propData.Value.type.ToString() + "-" + propData.Value.instance.runTimeID);
 				}
 			}
 		}

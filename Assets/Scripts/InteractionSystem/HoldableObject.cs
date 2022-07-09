@@ -52,13 +52,15 @@ public class HoldableObject : InteractableObject
 
 	public override void Throw(Vector3 force)
 	{
-		holdableObject.AddForceAtPosition(force, base.transform.position);
+		holdableObject.AddForceAtPosition(force, transform.position);
 	}
 
 	private IEnumerator playAnimation(string boolName, int animChosen, bool LMB)
 	{
 		GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, value: true);
+
 		animationPlaying = true;
+
 		if (LMB)
 		{
 			yield return new WaitForSeconds(LMBAnimationClips[animChosen].length);
@@ -67,7 +69,9 @@ public class HoldableObject : InteractableObject
 		{
 			yield return new WaitForSeconds(RMBAnimationClips[animChosen].length);
 		}
+
 		animationPlaying = false;
+
 		GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, value: false);
 	}
 
@@ -77,13 +81,13 @@ public class HoldableObject : InteractableObject
 		{
 			if (LMB)
 			{
-				int num = Random.Range(0, LMBAnimationBools.Count);
-				StartCoroutine(playAnimation(LMBAnimationBools[num], num, LMB));
+				int choice = Random.Range(0, LMBAnimationBools.Count);
+				StartCoroutine(playAnimation(LMBAnimationBools[choice], choice, LMB));
 			}
 			else
 			{
-				int num2 = Random.Range(0, RMBAnimationBools.Count);
-				StartCoroutine(playAnimation(RMBAnimationBools[num2], num2, LMB));
+				int choice = Random.Range(0, RMBAnimationBools.Count);
+				StartCoroutine(playAnimation(RMBAnimationBools[choice], choice, LMB));
 			}
 		}
 	}
@@ -105,15 +109,15 @@ public class HoldableObject : InteractableObject
 		}
 		else
 		{
-			if (!(base.transform.gameObject.GetComponent<AudioSource>() != null) || !playSounds || !(collision.relativeVelocity.magnitude >= 4f))
+			if (!(transform.gameObject.GetComponent<AudioSource>() != null) || !playSounds || !(collision.relativeVelocity.magnitude >= 4f))
 			{
 				return;
 			}
-			if (!base.transform.gameObject.GetComponent<AudioSource>().isPlaying && hitClips.Length != 0)
+			if (!transform.gameObject.GetComponent<AudioSource>().isPlaying && hitClips.Length != 0)
 			{
-				base.transform.gameObject.GetComponent<AudioSource>().clip = hitClips[Random.Range(0, hitClips.Length)];
-				base.transform.gameObject.GetComponent<AudioSource>().pitch = 1f + Random.Range(-0.15f, 0.15f);
-				base.transform.gameObject.GetComponent<AudioSource>().Play();
+				transform.gameObject.GetComponent<AudioSource>().clip = hitClips[Random.Range(0, hitClips.Length)];
+				transform.gameObject.GetComponent<AudioSource>().pitch = 1f + Random.Range(-0.15f, 0.15f);
+				transform.gameObject.GetComponent<AudioSource>().Play();
 			}
 			if (breakablePrefabs.Length == 0)
 			{
@@ -125,13 +129,13 @@ public class HoldableObject : InteractableObject
 			}
 			if (durability < 0f && !broken && breakClips.Length != 0)
 			{
-				AudioSource.PlayClipAtPoint(breakClips[Random.Range(0, breakClips.Length)], base.transform.position);
+				AudioSource.PlayClipAtPoint(breakClips[Random.Range(0, breakClips.Length)], transform.position);
 				GameObject[] array = breakablePrefabs;
 				for (int i = 0; i < array.Length; i++)
 				{
-					Object.Instantiate(array[i], base.transform.position, base.transform.rotation).GetComponent<Rigidbody>().velocity = GetComponent<Rigidbody>().velocity / 2f;
+					Instantiate(array[i], transform.position, transform.rotation).GetComponent<Rigidbody>().velocity = GetComponent<Rigidbody>().velocity / 2f;
 				}
-				Object.Destroy(base.gameObject);
+				Destroy(gameObject);
 				broken = true;
 			}
 		}
@@ -150,7 +154,7 @@ public class HoldableObject : InteractableObject
 				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(rMBAnimationBool, value: false);
 			}
 		}
-		base.transform.position += pushAmt;
+		transform.position += pushAmt;
 		pushAmt *= 0.95f;
 	}
 }

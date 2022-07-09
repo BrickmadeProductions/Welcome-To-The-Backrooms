@@ -66,7 +66,7 @@ public abstract class InteractableObject : MonoBehaviour
 			transform.rotation = Quaternion.identity;
 			transform.localRotation = Quaternion.identity;
 
-			if (transform.name == "HoldLocation" || transform.name == "HandLocation")
+			if (transform.parent.name == "HoldLocation" || transform.parent.name == "HandLocation")
 			{
 				Debug.Log("Reparenting To Hand...");
 				GameSettings.Instance.Player.GetComponent<PlayerController>().holding = (HoldableObject)this;

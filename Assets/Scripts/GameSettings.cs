@@ -361,7 +361,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public void ResetGame()
 	{
-		LastSavedScene = SCENE.ROOM;
+		
 		Saveable[] array = SaveMaster.GetAllSavables().ToArray();
 		foreach (Saveable saveable in array)
 		{
@@ -371,7 +371,9 @@ public class GameSettings : MonoBehaviour, ISaveable
 			}
 		}
 		SaveMaster.WriteActiveSaveToDisk();
+		LastSavedScene = SCENE.ROOM;
 		LoadScene(SCENE.HOMESCREEN);
+
 	}
 
 	public bool OnSaveCondition()
@@ -426,13 +428,13 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	private void ConnectSettings()
 	{
-		post.profile.TryGetSettings<AmbientOcclusion>(out ambientOcclusion);
-		post.profile.TryGetSettings<Vignette>(out vignette);
-		post.profile.TryGetSettings<ChromaticAberration>(out chrom);
-		post.profile.TryGetSettings<Grain>(out grain);
-		post.profile.TryGetSettings<Bloom>(out bloom);
-		post.profile.TryGetSettings<ColorGrading>(out colorGrading);
-		post.profile.TryGetSettings<MotionBlur>(out motionBlur);
+		post.profile.TryGetSettings(out ambientOcclusion);
+		post.profile.TryGetSettings(out vignette);
+		post.profile.TryGetSettings(out chrom);
+		post.profile.TryGetSettings(out grain);
+		post.profile.TryGetSettings(out bloom);
+		post.profile.TryGetSettings(out colorGrading);
+		post.profile.TryGetSettings(out motionBlur);
 	}
 
 	public void BackFromSettings()
@@ -475,6 +477,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public void GameScreen()
 	{
+		setPauseMenuOpen(tf: false);
 		setPauseMenuOpen(tf: false);
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
@@ -812,6 +815,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 		{
 			player.GetComponent<PlayerHealthSystem>().WakeUpOther();
 		}
+
 		GAME_FIRST_LOADED = false;
 		SaveMaster.SyncLoad();
 

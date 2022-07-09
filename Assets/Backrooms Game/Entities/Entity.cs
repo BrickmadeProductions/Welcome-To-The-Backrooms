@@ -143,6 +143,7 @@ public abstract class Entity : MonoBehaviour
 
 	private void Awake()
 	{
+
 	}
 
 	private void Start()
@@ -208,6 +209,7 @@ public abstract class Entity : MonoBehaviour
 
 	public void OnDestroy()
 	{
+		
 	}
 }
 

@@ -153,6 +153,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     //player parts
     public Camera playerCamera;
     public Camera animatorCamera;
+    public Camera armsCamera;
 
     public GameObject head;
     public GameObject neck;
@@ -323,7 +324,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     {
         if (playerHealth.health <= 0.0f)
         {
-            die();
+            StartCoroutine(Die());
         }
 
         // Player and Camera rotation
@@ -744,27 +745,42 @@ public class PlayerController : MonoBehaviour, ISaveable
             walkingSpeed = 3f;
         }
     }
-   
 
-    public void die()
+
+    public IEnumerator Die()
     {
-        if (!dead)
+        Instantiate(playerRagDoll).transform.position = transform.position;
+
+        bodyAnim.SetBool("isCrouching", value: false);
+        bodyAnim.SetBool("isProning", value: false);
+        bodyAnim.SetBool("isReloading", value: false);
+        bodyAnim.SetBool("isAiming", value: false);
+        bodyAnim.SetBool("isRunning", value: false);
+        bodyAnim.SetBool("isWalking", value: false);
+        bodyAnim.SetBool("isSwimming", value: false);
+
+        dead = true;
+        playerCamera.enabled = false;
+        animatorCamera.enabled = false;
+        armsCamera.enabled = false;
+        characterController.enabled = false;
+
+        float pass = 20000f;
+        bool dying = true;
+
+        while (dying && pass > 2000f)
         {
-
-            bodyAnim.SetBool("isCrouching", false);
-            bodyAnim.SetBool("isProning", false);
-            bodyAnim.SetBool("isReloading", false);
-            bodyAnim.SetBool("isAiming", false);
-            bodyAnim.SetBool("isRunning", false);
-            bodyAnim.SetBool("isWalking", false);
-            bodyAnim.SetBool("isSwimming", false);
-
-            dead = true;
-
-            GameSettings.Instance.LoadScene(GameSettings.SCENE.HOMESCREEN);
-
+            pass -= 1500f;
+            GameSettings.Instance.Master.SetFloat("cutoffFrequency", pass);
+            yield return new WaitForSeconds(0.25f);
         }
+
+        GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
+        yield return new WaitForSeconds(4f);
+        GameSettings.Instance.ResetGame();
+        GameSettings.Instance.Master.SetFloat("cutoffFrequency", 20000f);
     }
+
     void OnTriggerEnter(Collider col)
     {
         if (col.tag == "Enter0")

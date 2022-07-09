@@ -176,18 +176,27 @@ public class PlayerHealthSystem : MonoBehaviour
 	private IEnumerator WakeUpSequenceOther()
 	{
 		GameSettings.Instance.setCutScene(tf: true);
+
 		player.bodyAnim.SetBool("isSleeping", false);
 		player.bodyAnim.SetBool("isWakingOther", true);
+
 		canMoveHead = false;
+
 		player.animatorCamera.gameObject.SetActive(true);
 		player.playerCamera.gameObject.SetActive(false);
+
 		animator.speed = 1f;
-		yield return new WaitForSeconds(5f);
+
+		yield return new WaitForSeconds(2f);
+
 		player.animatorCamera.gameObject.SetActive(false);
 		player.playerCamera.gameObject.SetActive(true);
+
 		canMoveHead = true;
 		awake = true;
+
 		player.bodyAnim.SetBool("isWakingOther", false);
+
 		GameSettings.Instance.setCutScene(tf: false);
 	}
 
