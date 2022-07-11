@@ -58,7 +58,7 @@ public abstract class InteractableObject : MonoBehaviour
 		runTimeID = saveableData.runTimeID;
 		gameObject.name = type.ToString() + "-" + runTimeID;
 
-		if (saveableData.parentName != "")
+		if (saveableData.parentName != "" && GameObject.Find(saveableData.parentName) != null)
 		{
 			transform.parent = GameObject.Find(saveableData.parentName).transform;
 			transform.localPosition = Vector3.zero;
@@ -133,5 +133,6 @@ public enum OBJECT_TYPE
 	CHAIR,
 	ALMOND_WATER,
 	SCREWDRIVER,
-	SOUP
+	SOUP,
+	FLASHLIGHT
 }

@@ -204,9 +204,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b202577c3200e7144906ef6aa660e6ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 
+    location: []
+    rotationEuler: []
+    parentName: 
+    type: 0
+    instance: {fileID: 0}
+  type: 0
   playSounds: 0
-  parentScene:
-    m_Handle: 0
+  spawnChance: 0
+  runTimeID: 
   pressed: 0
   leftDoor: {fileID: 8594208624268426604}
   rightDoor: {fileID: 780381181269523427}
@@ -314,6 +322,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2027647019327725719}
+  - component: {fileID: 5962113511009380713}
   m_Layer: 0
   m_Name: Level1Elevevator
   m_TagString: Untagged
@@ -346,6 +355,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5962113511009380713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1686728438583982637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a968f7262c59324a92beb683cbfbf8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tilePos: {x: 0, y: 0}
+  entitySpawnLocations: []
+  propSpawnLocations: []
 --- !u!1 &1989149734450184540
 GameObject:
   m_ObjectHideFlags: 0

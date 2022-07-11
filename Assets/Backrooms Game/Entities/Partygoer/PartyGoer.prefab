@@ -6502,8 +6502,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6172414190686351424}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 0.7517688, z: 0, w: -0.65942675}
+  m_LocalPosition: {x: 0.021527052, y: 0.005500138, z: -0.08604121}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 264428577078894348}
@@ -6526,16 +6526,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveableData:
-    runTimeID: 
-    location: []
-    rotationEuler: []
-    type: 67
-    instance: {fileID: 0}
+    runTimeID: 479
+    location:
+    - 0.021527052
+    - 0.005500138
+    - -0.08604121
+    rotationEuler:
+    - -0
+    - 262.51233
+    - 0
+    type: 6
+    instance: {fileID: 4225260656200758192}
   maxHealth: 100
   health: 100
   agrivation: 0
   hunger: 0
-  type: 67
+  type: 6
   canAttack: 1
   entityAnimator: {fileID: 669922764369782365}
   movementNoises:
@@ -6552,23 +6558,23 @@ MonoBehaviour:
   - {fileID: 8300000, guid: c2f5719ac7f0bc247b606b24942d71fd, type: 3}
   hurtNoisesSource: {fileID: 4511183550537650033}
   damage: 10
-  sanityMultiplier: 0.99
+  sanityMultiplier: 0.95
   maxAllowed: 2
   despawnDistance: 100
   entityViewDistance: 100
-  memoryOfPlayerLocationInSeconds: 4
+  memoryOfPlayerLocationInSeconds: 5
   sightMask:
     serializedVersion: 2
     m_Bits: 61107
   canSeePlayer: 0
   playerCanSee: 0
   spawnChance: 0.005
-  speed: 400
+  speed: 275
   stunned: 0
   stunTime: 0
   eyes: {fileID: 109001933242770219}
   entitySkin: {fileID: 439210178674126766}
-  runTimeID: 
+  runTimeID: 479
   bloodPrefab: {fileID: 7958769173995355173, guid: b312d9f9b9fdd274e9c1247c10da9100, type: 3}
   grabLocation: {fileID: 7128770136166274654}
   ragDoll: {fileID: 9106987160413300465, guid: dbaccbbf15b7232458f712bf8e0eaede, type: 3}

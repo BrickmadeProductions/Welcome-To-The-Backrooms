@@ -43,24 +43,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac2cf0a5bb282784d85a1505c42a66e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  loaded: 0
-  id: 0
+  saveableData: {}
   chunkPosX: 0
   chunkPosZ: 0
   chunkPosY: 0
-  exit: {fileID: 7998624537947542715, guid: bdd7dab7f277f41488b4bac91ee7da2d, type: 3}
-  Tiles:
-  - {fileID: 7998624537947542715, guid: bdd7dab7f277f41488b4bac91ee7da2d, type: 3}
-  - {fileID: 5011649312331890240, guid: 5ed437d60b5c44947af6e436e0485bd1, type: 3}
-  entities:
-  - {fileID: 7706871903603223783, guid: b76058a6d76eb8c4c833853585c482a9, type: 3}
-  specialTiles:
-  - {fileID: 6373889918585593496, guid: 06a7b2f06405af341af924a70cf9eaf4, type: 3}
-  regTiles:
-  - {fileID: 1686728438583982637, guid: 6c395cbb0999bb345ba65938ad6e5d14, type: 3}
-  regTileSpace: 4
-  magnification: 1.05
-  sizeLength: 42
-  sizeHeight: 4
+  tile_grid: []
+  magnification: 1.1
+  tileWidth: 43.5
+  tileHeight: 2
   x_offset: -8
-  z_offset: 0
+  z_offset: -8
+  ALL_TILES_GENERATED: 0
+  ALL_OBJECTS_AND_ENTITES_LOADED: 0

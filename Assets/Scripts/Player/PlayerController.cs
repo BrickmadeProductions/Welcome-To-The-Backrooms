@@ -8,6 +8,9 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour, ISaveable
 {
+    public ReflectionProbe probe;
+    public GameObject darkShield;
+
 
     [Serializable]
     private struct PlayerSaveData
@@ -134,8 +137,6 @@ public class PlayerController : MonoBehaviour, ISaveable
     public float adrenalineSpeedMultiplier;
     float gravity = 20.0f;
 
-    public bool grabbed = false;
-
     Coroutine run = null;
     Coroutine walk = null;
     Coroutine reviveHeartRate = null;
@@ -241,18 +242,12 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     void Awake()
     {
-        
-
+        playerHealth = GetComponent<PlayerHealthSystem>();
     }
 
 
     void Start()
     {
-       
-        playerHealth = GetComponent<PlayerHealthSystem>();
-
-        
-
         ogHeadTrans = head.transform;
 
 
@@ -287,7 +282,7 @@ public class PlayerController : MonoBehaviour, ISaveable
             
 
             //animations
-            if (currentPlayerState != PLAYERSTATES.IMMOBILE && characterController.isGrounded && !grabbed)
+            if (currentPlayerState != PLAYERSTATES.IMMOBILE && characterController.isGrounded)
             {
 
                 if (Input.GetButton("Jump"))
@@ -314,17 +309,18 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     private void FixedUpdate()
     {
-  
 
+        //probe.RenderProbe();
     }
 
     
 
     void Update()
     {
-        if (playerHealth.health <= 0.0f)
+        if (!dead && playerHealth.health <= 0.0f)
         {
             StartCoroutine(Die());
+
         }
 
         // Player and Camera rotation
@@ -371,7 +367,7 @@ public class PlayerController : MonoBehaviour, ISaveable
             // Apply gravity. Gravity is multiplied by deltaTime twice (once here, and once below
             // when the moveDirection is multiplied by deltaTime). This is because gravity should be applied
             // as an acceleration (ms^-2)
-            if (!characterController.isGrounded && !grabbed && GameSettings.LEVEL_LOADED)
+            if (!characterController.isGrounded && GameSettings.LEVEL_LOADED)
             {
                 moveDirection.y -= gravity * Time.deltaTime;
             }
@@ -722,11 +718,29 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     private void PlayerLoop()
     {
-        if (!grabbed)
-            HandleFootstep();
+        if (!GameSettings.Instance.cheatSheet.noClip)
+        {
+            if (playerHealth.canWalk)
 
-        HandlePlayerStates();
-        HandleHealthSystem();
+                HandleFootstep();
+
+            HandlePlayerStates();
+        }
+        
+
+        if (!GameSettings.Instance.cheatSheet.invincible)
+
+            HandleHealthSystem();
+
+        else
+        {
+            playerHealth.health = 100;
+            playerHealth.sanity = 100;
+            playerHealth.thirst = 100;
+            playerHealth.heartRate = 80;
+            playerHealth.hunger = 100;
+            playerHealth.bodyTemperature = 98.6f;
+        }
     }
 
     private void SpeedAndFovController()
@@ -749,6 +763,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     public IEnumerator Die()
     {
+        dead = true;
         Instantiate(playerRagDoll).transform.position = transform.position;
 
         bodyAnim.SetBool("isCrouching", value: false);
@@ -759,7 +774,7 @@ public class PlayerController : MonoBehaviour, ISaveable
         bodyAnim.SetBool("isWalking", value: false);
         bodyAnim.SetBool("isSwimming", value: false);
 
-        dead = true;
+        
         playerCamera.enabled = false;
         animatorCamera.enabled = false;
         armsCamera.enabled = false;
@@ -779,6 +794,8 @@ public class PlayerController : MonoBehaviour, ISaveable
         yield return new WaitForSeconds(4f);
         GameSettings.Instance.ResetGame();
         GameSettings.Instance.Master.SetFloat("cutoffFrequency", 20000f);
+        
+        
     }
 
     void OnTriggerEnter(Collider col)

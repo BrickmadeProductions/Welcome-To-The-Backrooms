@@ -148,6 +148,27 @@ public abstract class Entity : MonoBehaviour
 
 	private void Start()
 	{
+		//correct if not on floor
+		RaycastHit[] hits;
+		float distance = 10f;
+
+		hits = Physics.RaycastAll(transform.position, Vector3.down, distance);
+
+		if (hits.Length > 0)
+		{
+			foreach (RaycastHit hit in hits)
+			{
+				//only if floor
+				if (hit.transform.gameObject.layer == 19)
+				{
+					transform.position = hit.point;
+					continue;
+				}
+
+
+			}
+
+		}
 		StartCoroutine(AI());
 		Debug.Log("Spawned " + type);
 	}
@@ -213,13 +234,13 @@ public abstract class Entity : MonoBehaviour
 	}
 }
 
-public enum ENTITY_TYPE : int
+public enum ENTITY_TYPE
 {
-    WINDOW = 2,
-    SMILER = 3,
-    DEATHMOTH = 4,
-    CLUMP = 5,
-    DULLER = 4,
-    HOUND = 8,
-    PARTYGOER = 67
+    WINDOW,
+    SMILER,
+    DEATHMOTH,
+    CLUMP,
+    DULLER,
+    HOUND,
+    PARTYGOER
 }

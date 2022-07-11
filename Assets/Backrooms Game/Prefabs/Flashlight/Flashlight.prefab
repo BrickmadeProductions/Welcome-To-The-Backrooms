@@ -63,13 +63,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27f2c7a2e2f154c4d8fe10de6023a3cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 
+    location: []
+    rotationEuler: []
+    parentName: 
+    type: 0
+    instance: {fileID: 0}
+  type: 5
+  playSounds: 1
+  spawnChance: 0
+  runTimeID: 
   durability: 0
   breakablePrefabs: []
   hitClips: []
   breakClips: []
-  playSounds: 1
-  parentScene:
-    m_Handle: 0
   inventoryWeight: 1
   holdableObject: {fileID: 0}
   large: 0
@@ -619,9 +627,9 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9124802856274038832}
-  m_LocalRotation: {x: -0.44913274, y: 0.89203143, z: 0.022752032, w: -0.045188263}
-  m_LocalPosition: {x: 1.08, y: -0.26, z: -0.2}
-  m_LocalScale: {x: 0.33333334, y: 0.3333335, z: 0.33333346}
+  m_LocalRotation: {x: -0.41892543, y: 0.8992081, z: 0.053294044, w: -0.11439372}
+  m_LocalPosition: {x: 0.106, y: -0.042, z: -0.025}
+  m_LocalScale: {x: 0.038, y: 0.038, z: 0.038}
   m_Children:
   - {fileID: 840575520464562911}
   - {fileID: 2973458890545169746}
@@ -630,7 +638,7 @@ Transform:
   - {fileID: 9042861530265711819}
   m_Father: {fileID: 503200684058123380}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 185.8, z: -53.45}
+  m_LocalEulerAnglesHint: {x: 0, y: 194.5, z: -49.96}
 --- !u!65 &8389929984296454645
 BoxCollider:
   m_ObjectHideFlags: 0

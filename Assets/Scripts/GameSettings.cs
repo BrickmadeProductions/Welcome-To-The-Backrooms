@@ -50,8 +50,11 @@ public class GameSettings : MonoBehaviour, ISaveable
 		ROOM,
 		LEVEL0,
 		LEVEL1,
-		LEVEL2
+		LEVEL2,
+		LEVELFUN
 	}
+
+	public BackroomsLevelWorld worldInstance = null;
 
 	private SaveData runtimeSaveData;
 
@@ -190,6 +193,10 @@ public class GameSettings : MonoBehaviour, ISaveable
 	[SerializeField]
 	public Slider masterVolumeSlider;
 
+	[SerializeField]
+	public GameObject cheatSheetObject;
+	public CheatSheet cheatSheet;
+
 	private float musicVolume;
 
 	private float entityVolume;
@@ -266,6 +273,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	private void Awake()
 	{
+		cheatSheet = GetComponent<CheatSheet>();
+
 		GameScreen();
 		Init();
 		player = null;
@@ -316,6 +325,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 		{
 			yield return new WaitForEndOfFrame();
 		}
+
 		runtimeSaveData = JsonConvert.DeserializeObject<SaveData>(data);
 		ConnectSettings();
 		LoadSettings(runtimeSaveData);
@@ -408,6 +418,12 @@ public class GameSettings : MonoBehaviour, ISaveable
 			smilerLogoOn = !smilerLogoOn;
 			Logo.transform.GetChild(0).gameObject.SetActive(smilerLogoOn);
 		}
+		if (Input.GetButtonDown("CheatSheet") && ActiveScene != SCENE.INTRO && ActiveScene != SCENE.HOMESCREEN)
+        {
+			cheatSheetObject.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+			CheatMenu(!cheatSheetObject.activeSelf);
+		}
+
 	}
 
 	private void LoadSettings(SaveData data)
@@ -477,7 +493,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public void GameScreen()
 	{
-		setPauseMenuOpen(tf: false);
 		setPauseMenuOpen(tf: false);
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.visible = false;
@@ -663,16 +678,36 @@ public class GameSettings : MonoBehaviour, ISaveable
 		{
 			LoadScene(LastSavedScene);
 		}
+		//LoadScene(SCENE.LEVEL1);
+	}
+
+	public void CheatMenu(bool io)
+    {
+		cheatSheetObject.SetActive(io);
+
+		if (io && !pauseMenuOpen && !cutScene)
+        {
+			Cursor.lockState = CursorLockMode.None;
+			Cursor.visible = true;
+		}
+        else
+        {
+			Cursor.lockState = CursorLockMode.Locked;
+			Cursor.visible = false;
+		}
+		
 	}
 
 	public void LoadScene(SCENE id)
 	{
-		StartCoroutine(PreLoadScene(id));
+		if (SceneManager.GetActiveScene().buildIndex != (int)id)
+			StartCoroutine(PreLoadScene(id));
 	}
 
 	public void LoadScene(int id)
 	{
-		StartCoroutine(PreLoadScene((SCENE)id));
+		if (SceneManager.GetActiveScene().buildIndex != id)
+			StartCoroutine(PreLoadScene((SCENE)id));
 	}
 
 	private IEnumerator PreLoadScene(SCENE id)
@@ -698,6 +733,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	private void PostLoadScene(SCENE id)
 	{
+		
 		if (ActiveScene != 0 && player == null)
 		{
 			player = Instantiate(playerPrefab);
@@ -705,9 +741,13 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		switch (id)
 		{
+
 			case SCENE.ROOM:
 
+				player.GetComponent<PlayerController>().darkShield.SetActive(false);
+
 				player.transform.position = new Vector3(0f, 1.1f, 0.7f);
+
 				post.profile = homeScreenRoomProfile;
 
 				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
@@ -755,6 +795,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 			case SCENE.LEVEL0:
 
+				player.GetComponent<PlayerController>().darkShield.SetActive(true);
+
 				post.profile = level0Profile;
 
 				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
@@ -769,6 +811,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 				break;
 
 			case SCENE.LEVEL1:
+
+				player.GetComponent<PlayerController>().darkShield.SetActive(true);
 
 				post.profile = level1Profile;
 
@@ -786,6 +830,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 			case SCENE.LEVEL2:
 
+				player.GetComponent<PlayerController>().darkShield.SetActive(true);
+
 				post.profile = level2Profile;
 
 				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level2Ambience;
@@ -795,6 +841,26 @@ public class GameSettings : MonoBehaviour, ISaveable
 				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level2Mixer.FindMatchingGroups("Master")[0];
 
 				master = level2Mixer;
+
+				GameScreen();
+
+				break;
+
+			case SCENE.LEVELFUN:
+
+				player.transform.position = new Vector3(0, 1, 0);
+
+				player.GetComponent<PlayerController>().darkShield.SetActive(false);
+
+				post.profile = level0Profile;
+
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+				player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+
+				master = level0Mixer;
 
 				GameScreen();
 
@@ -811,7 +877,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		LEVEL_LOADED = true;
 
-		if (ActiveScene != SCENE.ROOM)
+		if (ActiveScene != SCENE.ROOM && player != null)
 		{
 			player.GetComponent<PlayerHealthSystem>().WakeUpOther();
 		}
@@ -823,9 +889,9 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public bool AmInSavableScene()
 	{
-		if (ActiveScene != 0 && ActiveScene != SCENE.HOMESCREEN)
+		if (ActiveScene != SCENE.INTRO && ActiveScene != SCENE.HOMESCREEN && ActiveScene != SCENE.ROOM)
 		{
-			return ActiveScene != SCENE.ROOM;
+			return true;
 		}
 		return false;
 	}

@@ -10,7 +10,7 @@ public class SmilerAI : Entity
     {
         while (true)
         {
-            if (playerCanSee && canSeePlayer)
+            if (playerCanSee && canSeePlayer && GameSettings.Instance.GetComponent<CheatSheet>().AIEnabled)
             {
                 entityAnimator.SetBool("Attack", true);
             }

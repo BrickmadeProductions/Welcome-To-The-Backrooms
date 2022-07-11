@@ -33,7 +33,7 @@ public class HeadBobber : MonoBehaviour
     void Update()
     {
 
-        if (Cursor.lockState != CursorLockMode.None && !controller.grabbed && controller.currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE)
+        if (Cursor.lockState != CursorLockMode.None && controller.currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE && controller.playerHealth.canWalk)
         {
             
             //head rotation

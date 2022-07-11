@@ -29,7 +29,7 @@ public class PartygoerAI : Entity
     {
         while (true)
         {
-            if (canAttack)
+            if (canAttack && GameSettings.Instance.GetComponent<CheatSheet>().AIEnabled)
             {
 
                 Vector3 targetDirection = GameSettings.Instance.Player.transform.transform.position - transform.position;
@@ -60,7 +60,28 @@ public class PartygoerAI : Entity
                         float step = speed * Time.deltaTime;
                         transform.position = Vector3.MoveTowards(transform.position, GameSettings.Instance.Player.transform.position + new Vector3(Random.Range(-2f, 2f), 0, Random.Range(-2f, 2f)), step);
 
-                        transform.position = new Vector3(transform.position.x, 0.1f, transform.position.z);
+                        //correct floating
+                        RaycastHit[] hits;
+                        float distance = 10f;
+
+                        hits = Physics.RaycastAll(transform.position, Vector3.down, distance);
+
+                        if (hits.Length > 0)
+                        {
+                            foreach (RaycastHit hit in hits)
+                            {
+                                //only if floor
+                                if (hit.transform.gameObject.layer == 19)
+                                {
+                                    transform.position = hit.point;
+                                    continue;
+                                }
+                                    
+                                
+                            }
+                           
+                        }
+                        
 
                         transform.rotation = Quaternion.LookRotation(newDirection);
 
@@ -113,11 +134,10 @@ public class PartygoerAI : Entity
                 else if (strangling == true)
                 {
 
-
                     GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.health -= damage;
                     GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.sanity *= sanityMultiplier;
 
-                    GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.ChangeHeartRate(1.5f);
+                    GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.ChangeHeartRate(3f);
 
                     //damage per second
                     yield return new WaitForSeconds(1f);
@@ -145,11 +165,18 @@ public class PartygoerAI : Entity
     {
         GameSettings.Instance.Player.GetComponent<CharacterController>().enabled = true;
         GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Choking", false);
-        GameSettings.Instance.Player.GetComponent<PlayerController>().grabbed = false;
-        //GameSettings.Instance.Player.GetComponent<PlayerController>().rotationY = 0;
+        GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canRun = true;
+        GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = true;
+        GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canWalk = true;
+
         Debug.Log("Despawned " + type);
         GameObject ragDollInstance = Instantiate(ragDoll);
+
         ragDollInstance.transform.position = transform.position;
+        ragDollInstance.transform.rotation = transform.rotation;
+
+        GameSettings.Instance.worldInstance.RemoveEntity(ToString());
+
         Destroy(gameObject);
 
     }
@@ -164,7 +191,9 @@ public class PartygoerAI : Entity
             Vector3 targetDirection = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.transform.position - eyes.transform.position;
 
             GameSettings.Instance.Player.GetComponent<PlayerController>().transform.position = grabLocation.transform.position - new Vector3(0.05f, 1.2f, 0.1f);
-            GameSettings.Instance.Player.GetComponent<PlayerController>().grabbed = true;
+            GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canRun = false;
+            GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = false;
+            GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canWalk = false;
 
             Vector3 attackDirection = Vector3.RotateTowards(transform.forward, targetDirection, 1f, 1f);
             eyes.transform.rotation = Quaternion.LookRotation(attackDirection);

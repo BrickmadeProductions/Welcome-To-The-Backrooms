@@ -13,8 +13,8 @@ public class Ragdoll : MonoBehaviour
     IEnumerator RagDoll()
     {
 
-        yield return new WaitForSeconds(5f);
-        Destroy(this);
+        yield return new WaitForSeconds(25f);
+        Destroy(this.gameObject);
 
     }
 

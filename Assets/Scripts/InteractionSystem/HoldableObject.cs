@@ -143,6 +143,7 @@ public class HoldableObject : InteractableObject
 
 	private void FixedUpdate()
 	{
+
 		if (SceneManager.GetActiveScene().name != "HomeScreen" && SceneManager.GetActiveScene().name != "IntroSequence" && GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
 		{
 			foreach (string lMBAnimationBool in LMBAnimationBools)

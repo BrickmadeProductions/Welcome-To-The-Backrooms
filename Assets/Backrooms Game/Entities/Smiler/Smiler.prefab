@@ -74,7 +74,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 3d3e6a77a2a05464e9e49fe0fc126078, type: 3}
-  m_Color: {r: 0.8207547, g: 0.79903567, b: 0.6929957, a: 0.69411767}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.56078434}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -251,22 +251,22 @@ MonoBehaviour:
     rotationEuler: []
     type: 0
     instance: {fileID: 0}
-  maxHealth: 0
-  health: 0
+  maxHealth: 250
+  health: 250
   agrivation: 0
   hunger: 0
-  type: 3
+  type: 1
   canAttack: 1
   entityAnimator: {fileID: 7340305521680105861}
   movementNoises: []
   movementNoiseSource: {fileID: 0}
   attackNoises: []
-  attackNoiseSource: {fileID: 0}
+  attackNoiseSource: {fileID: 7065750352517365241}
   hurtNoises: []
-  hurtNoisesSource: {fileID: 0}
-  damage: 0
+  hurtNoisesSource: {fileID: 7065750352517365241}
+  damage: 15
   sanityMultiplier: 0
-  maxAllowed: 10
+  maxAllowed: 4
   despawnDistance: 500
   entityViewDistance: 500
   memoryOfPlayerLocationInSeconds: 0
