@@ -226,7 +226,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8810439832747604879}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 3.8232512, y: 2, z: -9.520702}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 6733642710144589965}
@@ -246,11 +246,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveableData:
-    runTimeID: 
-    location: []
-    rotationEuler: []
-    type: 0
-    instance: {fileID: 0}
+    runTimeID: 603
+    location:
+    - 3.8232512
+    - 2
+    - -9.520702
+    rotationEuler:
+    - -0
+    - 0
+    - 0
+    type: 1
+    instance: {fileID: 7706871903603223783}
   maxHealth: 250
   health: 250
   agrivation: 0
@@ -281,7 +287,7 @@ MonoBehaviour:
   stunTime: 0
   eyes: {fileID: 2550196510949771386}
   entitySkin: {fileID: 0}
-  runTimeID: 
+  runTimeID: 603
   bloodPrefab: {fileID: 0}
   explosionEffect: {fileID: 3925061542897833910, guid: 6a2e518db0b05a74a97784bb5b449817, type: 3}
 --- !u!23 &3512871350104039503

@@ -596,22 +596,32 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public bool RemoveEntity(string key)
 	{
-		using (Dictionary<string, SerealizedChunk>.Enumerator enumerator = allChunks.GetEnumerator())
+		foreach (KeyValuePair<string, SerealizedChunk> allChunk in allChunks)
 		{
-			if (enumerator.MoveNext())
-			{
-				KeyValuePair<string, SerealizedChunk> current = enumerator.Current;
-
-				if (current.Value.entityData.entityClusterData.ContainsKey(key))
+			foreach (KeyValuePair<string, Chunk> loadedChunk in loadedChunks)
+            {
+				if (loadedChunk.Value.saveableData.entityData.entityClusterData.ContainsKey(key))
 				{
-					current.Value.entityData.entityClusterData.TryGetValue(key, out var value);
+					loadedChunk.Value.saveableData.entityData.entityClusterData.TryGetValue(key, out var entityDataLoaded);
+					Destroy(entityDataLoaded.instance.gameObject);
+					Debug.Log(loadedChunk.Value.saveableData.entityData.entityClusterData.Remove(key));
 
-					Destroy(value.instance.gameObject);
-					Debug.Log(current.Value.entityData.entityClusterData.Remove(key));
+					return true;
+
+				}
+
+				if (allChunk.Value.entityData.entityClusterData.ContainsKey(key))
+				{
+					allChunk.Value.entityData.entityClusterData.TryGetValue(key, out var entityDataAll);
+					Destroy(entityDataAll.instance.gameObject);
+					Debug.Log(allChunk.Value.entityData.entityClusterData.Remove(key));
+
 					return true;
 				}
-				return false;
+				
 			}
+			return false;
+			
 		}
 		return false;
 	}

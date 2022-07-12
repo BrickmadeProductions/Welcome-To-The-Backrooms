@@ -169,13 +169,13 @@ public class PartygoerAI : Entity
         GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = true;
         GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canWalk = true;
 
-        Debug.Log("Despawned " + type);
+        Debug.Log("Despawned " + type.ToString() + "-" + runTimeID);
         GameObject ragDollInstance = Instantiate(ragDoll);
 
         ragDollInstance.transform.position = transform.position;
         ragDollInstance.transform.rotation = transform.rotation;
 
-        GameSettings.Instance.worldInstance.RemoveEntity(ToString());
+        GameSettings.Instance.worldInstance.RemoveEntity(type.ToString() + "-" + runTimeID);
 
         Destroy(gameObject);
 
