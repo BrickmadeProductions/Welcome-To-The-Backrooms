@@ -110,6 +110,15 @@ public class CheatSheet : MonoBehaviour
         GameSettings.Instance.worldInstance.spawnEntities = io; 
     }
 
+    public void KillAllEntities()
+    {
+        GameSettings.Instance.worldInstance.RemoveAllEntities();
+    }
+    public void RemoveAllProps()
+    {
+        GameSettings.Instance.worldInstance.RemoveAllProps();
+    }
+
     public void EntityAI(bool io)
     {
         
@@ -121,7 +130,7 @@ public class CheatSheet : MonoBehaviour
     {
         Vector3 spawnLocation = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.position + GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.forward * 5;
 
-        spawnLocation.y = 2;
+        spawnLocation.y = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.position.y;
 
         InteractableObject objectToSpawn = null;
         GameSettings.Instance.PropDatabase.TryGetValue(currentObjectTypeChoice, out objectToSpawn);
@@ -139,7 +148,7 @@ public class CheatSheet : MonoBehaviour
     {
         Vector3 spawnLocation = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.position + GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.forward * 5;
 
-        spawnLocation.y = 2;
+        spawnLocation.y = GameSettings.Instance.Player.GetComponent<PlayerController>().transform.position.y;
 
         Entity entityToSpawn = null;
         GameSettings.Instance.EntityDatabase.TryGetValue(currentEntityTypeChoice, out entityToSpawn);

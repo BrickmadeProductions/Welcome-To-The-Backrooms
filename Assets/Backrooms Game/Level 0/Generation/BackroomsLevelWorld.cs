@@ -338,7 +338,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	private IEnumerator OnLoadAsync(string data)
 	{
 		yield return new WaitUntil(() => GameSettings.LEVEL_LOADED);
-
+		
 		try
 		{
 			LoadSaveData(JsonConvert.DeserializeObject<WorldSaveData>(data));
@@ -587,6 +587,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			Entity entity = Instantiate(entityToSpawn);
 
 			entityToSpawn.Load(entityData);
+
 			chunk.saveableData.entityData.entityClusterData[entityToSpawn.type.ToString() + "-" + entityToSpawn.runTimeID] = entityToSpawn.saveableData;
 
 			return entityToSpawn;
@@ -596,34 +597,71 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public bool RemoveEntity(string key)
 	{
+		foreach (KeyValuePair<string, Chunk> loadedChunk in loadedChunks)
+		{
+
+			if (loadedChunk.Value.saveableData.entityData.entityClusterData.ContainsKey(key))
+			{
+				loadedChunk.Value.saveableData.entityData.entityClusterData.TryGetValue(key, out var entityDataLoaded);
+
+				Destroy(entityDataLoaded.instance.gameObject);
+
+				Debug.Log(loadedChunk.Value.saveableData.entityData.entityClusterData.Remove(key));
+
+				return true;
+
+			}
+
+		}
+
 		foreach (KeyValuePair<string, SerealizedChunk> allChunk in allChunks)
 		{
-			foreach (KeyValuePair<string, Chunk> loadedChunk in loadedChunks)
-            {
-				if (loadedChunk.Value.saveableData.entityData.entityClusterData.ContainsKey(key))
-				{
-					loadedChunk.Value.saveableData.entityData.entityClusterData.TryGetValue(key, out var entityDataLoaded);
-					Destroy(entityDataLoaded.instance.gameObject);
-					Debug.Log(loadedChunk.Value.saveableData.entityData.entityClusterData.Remove(key));
 
-					return true;
+			if (allChunk.Value.entityData.entityClusterData.ContainsKey(key))
+			{
+				allChunk.Value.entityData.entityClusterData.TryGetValue(key, out var entityDataAll);
 
-				}
+				Destroy(entityDataAll.instance.gameObject);
 
-				if (allChunk.Value.entityData.entityClusterData.ContainsKey(key))
-				{
-					allChunk.Value.entityData.entityClusterData.TryGetValue(key, out var entityDataAll);
-					Destroy(entityDataAll.instance.gameObject);
-					Debug.Log(allChunk.Value.entityData.entityClusterData.Remove(key));
+				Debug.Log(allChunk.Value.entityData.entityClusterData.Remove(key));
 
-					return true;
-				}
-				
+				return true;
 			}
-			return false;
 			
 		}
+
 		return false;
+	}
+
+	public void RemoveAllEntities()
+	{
+		foreach (KeyValuePair<string, Chunk> loadedChunk in loadedChunks)
+		{
+
+			foreach (KeyValuePair<string, SaveableEntity> entity in loadedChunk.Value.saveableData.entityData.entityClusterData.ToList())
+			{
+
+				RemoveEntity(entity.Key);
+
+				Debug.Log(loadedChunk.Value.saveableData.entityData.entityClusterData.Remove(entity.Key));
+
+			}
+			
+		}
+
+		foreach (KeyValuePair<string, SerealizedChunk> allChunk in allChunks)
+		{
+
+			foreach (KeyValuePair<string, SaveableEntity> entity in allChunk.Value.entityData.entityClusterData.ToList())
+			{
+
+				RemoveEntity(entity.Key);
+
+				Debug.Log(allChunk.Value.entityData.entityClusterData.Remove(entity.Key));
+
+			}
+		}
+	
 	}
 
 	public bool CheckWorldForPropKey(string key)
@@ -689,27 +727,71 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public bool RemoveProp(string key)
 	{
-		using (Dictionary<string, SerealizedChunk>.Enumerator enumerator = allChunks.GetEnumerator())
+		foreach (KeyValuePair<string, Chunk> loadedChunk in loadedChunks)
 		{
-			if (enumerator.MoveNext())
+
+			if (loadedChunk.Value.saveableData.propData.propClusterData.ContainsKey(key))
 			{
-				KeyValuePair<string, SerealizedChunk> current = enumerator.Current;
-				if (current.Value.propData.propClusterData.ContainsKey(key))
-				{
-					current.Value.propData.propClusterData.TryGetValue(key, out var value);
+				loadedChunk.Value.saveableData.propData.propClusterData.TryGetValue(key, out var propDataLoaded);
 
-					Destroy(value.instance.gameObject);
+				Destroy(propDataLoaded.instance.gameObject);
 
-					current.Value.propData.propClusterData.Remove(key);
+				Debug.Log(loadedChunk.Value.saveableData.propData.propClusterData.Remove(key));
 
-					
+				return true;
 
-					return true;
-				}
-				return false;
 			}
+
+		}
+
+		foreach (KeyValuePair<string, SerealizedChunk> allChunks in allChunks)
+		{
+
+			if (allChunks.Value.propData.propClusterData.ContainsKey(key))
+			{
+				allChunks.Value.propData.propClusterData.TryGetValue(key, out var propDataLoaded);
+
+				Destroy(propDataLoaded.instance.gameObject);
+
+				Debug.Log(allChunks.Value.propData.propClusterData.Remove(key));
+
+				return true;
+
+			}
+
 		}
 		return false;
+	}
+
+	public void RemoveAllProps()
+	{
+		foreach (KeyValuePair<string, Chunk> loadedChunk in loadedChunks)
+		{
+
+			foreach (KeyValuePair<string, SaveableProp> prop in loadedChunk.Value.saveableData.propData.propClusterData.ToList())
+			{
+
+				RemoveProp(prop.Key);
+
+				Debug.Log(loadedChunk.Value.saveableData.entityData.entityClusterData.Remove(prop.Key));
+
+			}
+
+		}
+
+		foreach (KeyValuePair<string, SerealizedChunk> allChunks in allChunks)
+		{
+
+			foreach (KeyValuePair<string, SaveableProp> prop in allChunks.Value.propData.propClusterData.ToList())
+			{
+
+				RemoveProp(prop.Key);
+
+				Debug.Log(allChunks.Value.entityData.entityClusterData.Remove(prop.Key));
+
+			}
+		}
+
 	}
 
 	public bool ChunkLocationLoaded(int x, int y, int z)

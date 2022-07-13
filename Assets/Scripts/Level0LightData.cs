@@ -68,7 +68,7 @@ public class Level0LightData : MonoBehaviour
 
     public void Activate(bool on)
     {
-
+        
         if (on)
         {
             transform.parent.GetChild(0).GetComponent<Light>().enabled = true;
@@ -92,6 +92,8 @@ public class Level0LightData : MonoBehaviour
             transform.parent.GetChild(0).GetComponent<Light>().intensity = 4f;
             transform.parent.GetChild(0).GetComponent<Light>().intensity += Random.Range(-1.5f, 2f);
         }
+        
+        
        
     }
 }

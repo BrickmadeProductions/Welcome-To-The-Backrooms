@@ -52,7 +52,7 @@ public class HoldableObject : InteractableObject
 
 	public override void Throw(Vector3 force)
 	{
-		holdableObject.AddForceAtPosition(force, transform.position);
+		//holdableObject.AddForceAtPosition(force, transform.position);
 	}
 
 	private IEnumerator playAnimation(string boolName, int animChosen, bool LMB)

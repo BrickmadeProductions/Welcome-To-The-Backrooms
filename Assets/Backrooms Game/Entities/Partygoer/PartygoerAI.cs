@@ -64,7 +64,7 @@ public class PartygoerAI : Entity
                         RaycastHit[] hits;
                         float distance = 10f;
 
-                        hits = Physics.RaycastAll(transform.position, Vector3.down, distance);
+                        hits = Physics.RaycastAll(transform.position + new Vector3(0, 2f, 0), Vector3.down, distance, sightMask);
 
                         if (hits.Length > 0)
                         {

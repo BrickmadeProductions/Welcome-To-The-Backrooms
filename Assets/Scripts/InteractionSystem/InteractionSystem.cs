@@ -86,7 +86,7 @@ public class InteractionSystem : MonoBehaviour
 		SetAllChildrenToLayer(player.holding.transform, 9);
 		player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
 		player.holding.transform.parent = null;
-		player.holding.Throw(player.head.transform.forward * 400f * player.holding.GetComponent<Rigidbody>().mass);
+		
 		player.holdLocation.GetComponent<AudioSource>().pitch = 1f + Random.Range(-0.1f, 0.1f);
 		player.holdLocation.GetComponent<AudioSource>().Play();
 		Collider[] components = player.holding.GetComponents<Collider>();
@@ -97,6 +97,9 @@ public class InteractionSystem : MonoBehaviour
 		SceneManager.MoveGameObjectToScene(player.holding.gameObject, SceneManager.GetActiveScene());
 		player.bodyAnim.SetBool((player.holding.CustomHoldAnimation != "") ? player.holding.CustomHoldAnimation : "isHoldingSmall", value: false);
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
+
+		player.holding.Throw(player.head.transform.forward * 400f * player.holding.GetComponent<Rigidbody>().mass);
+
 		player.holding = null;
 	}
 
@@ -145,28 +148,24 @@ public class InteractionSystem : MonoBehaviour
 
 	private void PickupSystem()
 	{
-		//Debug.Log(Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg));
 
 		if (player.holding == null && Input.GetButton("Hold") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
 		{
 			player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
 			SetPickup();
+			SetHolding();
 		}
-		if (Input.GetButtonDown("Throw") && player.holding != null && Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large)
+		if (Input.GetButtonDown("Throw") && player.holding != null && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
 		{
 			SetThrow();
 		}
-		else if (Input.GetButtonDown("Drop") && player.holding != null && Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large)
+		else if (Input.GetButtonDown("Drop") && player.holding != null && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
 		{
 			SetDrop();
 		}
-		else if (player.holding != null)
-		{
-			SetHolding();
-		}
 		if (currentlyLookingAt != null && currentlyLookingAt.gameObject.tag == "Usable" && Input.GetButtonDown("Hold"))
 		{
-			currentlyLookingAt.Use(this, LMB: false);
+			currentlyLookingAt.Use(this, false);
 		}
 		if (Input.GetButtonDown("Pickup") && inventorySlots.Count < inventoryLimit && currentlyLookingAt != null)
 		{
