@@ -145,7 +145,7 @@ public class InteractionSystem : MonoBehaviour
 
 	private void PickupSystem()
 	{
-		Debug.Log(Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg));
+		//Debug.Log(Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg));
 
 		if (player.holding == null && Input.GetButton("Hold") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
 		{
@@ -156,7 +156,7 @@ public class InteractionSystem : MonoBehaviour
 		{
 			SetThrow();
 		}
-		else if (Input.GetButtonDown("Drop") && player.holding != null)
+		else if (Input.GetButtonDown("Drop") && player.holding != null && Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large)
 		{
 			SetDrop();
 		}
