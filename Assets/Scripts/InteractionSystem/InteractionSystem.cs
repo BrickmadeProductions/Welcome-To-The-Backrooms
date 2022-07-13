@@ -82,6 +82,7 @@ public class InteractionSystem : MonoBehaviour
 
 	public void SetThrow()
 	{
+		
 		SetAllChildrenToLayer(player.holding.transform, 9);
 		player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
 		player.holding.transform.parent = null;
@@ -144,12 +145,14 @@ public class InteractionSystem : MonoBehaviour
 
 	private void PickupSystem()
 	{
+		Debug.Log(Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg));
+
 		if (player.holding == null && Input.GetButton("Hold") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
 		{
 			player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
 			SetPickup();
 		}
-		if (Input.GetButtonDown("Throw") && player.holding != null && (player.head.transform.localRotation.x * 57.29578f < 15f || !player.holding.GetComponent<HoldableObject>().large))
+		if (Input.GetButtonDown("Throw") && player.holding != null && Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large)
 		{
 			SetThrow();
 		}
