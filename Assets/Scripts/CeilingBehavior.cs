@@ -13,58 +13,41 @@ public class CeilingBehavior : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        float value1 = Random.value;
-        //determine if a light should spawn
-        if (value1 <= 0.6f)
+        //determine the type
+        int index = 0;
+
+        foreach (Transform lightT in lightLocations)
         {
-            //determine the type
-            float value2 = Random.value;
-            if (value2 <= 0.9f)
+            if (Random.value <= 0.3f)
             {
-                //determine where
-                float value5 = Random.value;
-                if (value5 <= 0.5f)
+                if (Random.value <= 0.5f)
                 {
-                    Instantiate(normalLight, lightLocations[0].gameObject.transform);
+                    Instantiate(normalLight, lightLocations[index]);
                 }
-                else if (value5 > 0.5f && value5 < 1f)
+
+                else
                 {
-                    Instantiate(normalLight, lightLocations[1].gameObject.transform);
+                    Instantiate(brokenLight, lightLocations[index]);
                 }
             }
-            else
-            {
-                //determine where
-                float value6 = Random.value;
-                if (value6 <= 0.5f)
-                {
-                    Instantiate(brokenLight, lightLocations[0].gameObject.transform);
-                }
-                else if (value6 > 0.5f && value6 < 1f)
-                {
-                    Instantiate(brokenLight, lightLocations[1].gameObject.transform);
-                }
-            }
+           
+            index++;
         }
-        float value3 = Random.value;
-        //determine if a vent should spawn
-        if (value3 <= 0.3f)
+
+        //determine where
+        index = 0;
+
+        foreach (Transform ventT in ventLocations)
         {
-            //determine where
-            float value4 = Random.value;
-            if (value4 <= 0.3f)
+            if (Random.value <= 0.2f)
             {
-                Instantiate(vent, ventLocations[0].gameObject.transform);
+                if (Random.value <= 0.5f)
+
+                    Instantiate(vent, ventLocations[index]);
             }
-            else if (value4 > 0.3f && value4 < 0.6f)
-            {
-                Instantiate(vent, ventLocations[1].gameObject.transform);
-            }
-            else if (value4 >= 0.6f)
-            {
-                Instantiate(vent, ventLocations[2].gameObject.transform);
-            }
+            index++;
         }
+        
 
     }
 

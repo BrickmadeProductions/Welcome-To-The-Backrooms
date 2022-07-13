@@ -18,12 +18,12 @@ RenderSettings:
   m_FogColor: {r: 0, g: 0, b: 0, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.005
-  m_LinearFogStart: 11
-  m_LinearFogEnd: 30
+  m_LinearFogStart: 25
+  m_LinearFogEnd: 40
   m_AmbientSkyColor: {r: 0.5377358, g: 0.5377358, b: 0.5377358, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 0.98
+  m_AmbientIntensity: 0.7
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.1254902, g: 0.1254902, b: 0.1254902, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 9aebd864658434e4a8a90d451e33e454, type: 2}
@@ -153,6 +153,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c30f24938df0694f8cd27203dbe755b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spawnEntities: 1
+  entityAI: 1
   gen_enabled: 1
   ThreeDimensional: 0
   isLoadingChunks: 0
@@ -161,32 +163,16 @@ MonoBehaviour:
   oldPlayerChunkLocation: {x: 0, y: 0, z: 0}
   newPlayerChunkLocation: {x: 0, y: 0, z: 0}
   level_chunkGenerator: {fileID: 4220195989476646319, guid: 9ab378b3d88ac5d419748053541cb829, type: 3}
-  chunk_width: 3
+  chunk_width: 1
   layerDistance: 1
-  viewDistance: 3
+  viewDistance: 2
   Exit: {fileID: 1468027130790313995, guid: 611490a103b094e49ae42bf3fce25277, type: 3}
   SpecialTiles: []
   Tiles:
-  - {fileID: 1500668993258839883, guid: 82871c831ff947d43b613b314240b936, type: 3}
-  - {fileID: 951711572128319385, guid: 955a0807d6739e74a958a493a640be00, type: 3}
   - {fileID: 8209230494130185599, guid: 53cc790fa15f0ba44a8a286ff24b1b3e, type: 3}
-  - {fileID: 8200912594904982171, guid: ceec923753edb414aa09a2facda71e41, type: 3}
-  - {fileID: 592779262607433856, guid: e52212ca8db524942b16bcee87ec0c85, type: 3}
-  - {fileID: 7437542324044909286, guid: fd7e58e6fe22bb14b8c995719eea06f4, type: 3}
-  - {fileID: 5355474440270252669, guid: e84158a55ba1e3f408a1159e02f3146d, type: 3}
-  - {fileID: 7208132867317714789, guid: 32ef2ea7779220d4f8343f31c0d02b11, type: 3}
-  - {fileID: 3932920042542064116, guid: 09a3cc5c0463b434f8d446c1ea0f136d, type: 3}
-  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
-  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
-  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
-  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
-  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
-  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
-  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
-  - {fileID: 861568028341993093, guid: 5c212fc7d3597334d8ff6c384c712b4c, type: 3}
   RegTiles: []
-  propsThatCanSpawnOnThisLevel: 010000000200000003000000
-  entitiesThatCanSpawnOnThisLevel: 43000000
+  propsThatCanSpawnOnThisLevel: 010000000200000007000000
+  entitiesThatCanSpawnOnThisLevel: 06000000
   regTileSpace: 0
   seed: 0
 --- !u!4 &803962858
@@ -199,6 +185,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -249,6 +236,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0

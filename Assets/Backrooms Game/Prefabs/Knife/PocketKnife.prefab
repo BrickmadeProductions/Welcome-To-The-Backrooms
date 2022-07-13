@@ -26,8 +26,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5174651667820459774}
   m_LocalRotation: {x: -0.49991274, y: 0.50008726, z: 0.49991274, w: 0.50008726}
-  m_LocalPosition: {x: -0.55, y: -0, z: -0}
+  m_LocalPosition: {x: -0.55, y: 0, z: -0.15}
   m_LocalScale: {x: 100, y: 100, z: 100}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5174651668802718681}
   m_RootOrder: 3
@@ -88,6 +89,7 @@ Transform:
   m_LocalRotation: {x: -0.49991274, y: 0.50008726, z: 0.49991274, w: 0.50008726}
   m_LocalPosition: {x: -0.55, y: -0, z: -0}
   m_LocalScale: {x: 100, y: 100, z: 100}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5174651668802718681}
   m_RootOrder: 1
@@ -111,6 +113,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -182,6 +185,7 @@ Transform:
   m_LocalRotation: {x: -0.49991274, y: 0.50008726, z: 0.49991274, w: 0.50008726}
   m_LocalPosition: {x: -0.55, y: 0, z: -0}
   m_LocalScale: {x: 100, y: 100, z: 100}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5174651668802718681}
   m_RootOrder: 2
@@ -205,6 +209,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -247,6 +252,7 @@ GameObject:
   - component: {fileID: 5174651668802718680}
   - component: {fileID: 5174651668802718683}
   - component: {fileID: 5174651668802718682}
+  - component: {fileID: 7541757214353016618}
   m_Layer: 9
   m_Name: PocketKnife
   m_TagString: Cement
@@ -264,6 +270,7 @@ Transform:
   m_LocalRotation: {x: -0.27589098, y: 0.6510639, z: 0.6510639, w: 0.27589098}
   m_LocalPosition: {x: 3.092, y: 1.827, z: -0.492}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5174651669076586196}
   - {fileID: 5174651667907069722}
@@ -341,6 +348,19 @@ MonoBehaviour:
   RMBAnimationBools:
   - Stab1
   CustomHoldAnimation: 
+--- !u!65 &7541757214353016618
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5174651668802718685}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.65, y: 8.45, z: 2.1}
+  m_Center: {x: 0, y: 1.36, z: 0}
 --- !u!1 &5174651669076586199
 GameObject:
   m_ObjectHideFlags: 0
@@ -369,6 +389,7 @@ Transform:
   m_LocalRotation: {x: -0.49991274, y: 0.50008726, z: 0.49991274, w: 0.50008726}
   m_LocalPosition: {x: -0.55, y: -0, z: -0}
   m_LocalScale: {x: 100, y: 100, z: 100}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5174651668802718681}
   m_RootOrder: 0
@@ -392,6 +413,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
