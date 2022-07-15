@@ -16,14 +16,14 @@ RenderSettings:
   serializedVersion: 9
   m_Fog: 1
   m_FogColor: {r: 0, g: 0, b: 0, a: 1}
-  m_FogMode: 1
-  m_FogDensity: 0.005
+  m_FogMode: 2
+  m_FogDensity: 0.1
   m_LinearFogStart: 25
   m_LinearFogEnd: 40
   m_AmbientSkyColor: {r: 0.5377358, g: 0.5377358, b: 0.5377358, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 0.7
+  m_AmbientIntensity: 0.8
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.1254902, g: 0.1254902, b: 0.1254902, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 9aebd864658434e4a8a90d451e33e454, type: 2}
@@ -35,10 +35,10 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 16
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 1
+  m_ReflectionIntensity: 0.2
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.25598735, g: 0.24322493, b: 0.09549384, a: 1}
+  m_IndirectSpecularColor: {r: 0.05119747, g: 0.048644986, b: 0.019098768, a: 0.2}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -171,6 +171,8 @@ MonoBehaviour:
   Tiles:
   - {fileID: 8209230494130185599, guid: 53cc790fa15f0ba44a8a286ff24b1b3e, type: 3}
   - {fileID: 5144882405261894941, guid: 28d8ad4a21302ff4e8b5da426d33af4b, type: 3}
+  - {fileID: 7076623207126011811, guid: c764dc763975a064786c50978b7fb970, type: 3}
+  - {fileID: 7392081474520821307, guid: abc7bb120413a0e4e9dc4fda4e128ef6, type: 3}
   - {fileID: 472166766898139531, guid: b2f16886182db274c893d59db1b35eda, type: 3}
   RegTiles: []
   propsThatCanSpawnOnThisLevel: 010000000200000007000000

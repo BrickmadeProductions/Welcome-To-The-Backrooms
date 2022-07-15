@@ -39,11 +39,11 @@ public abstract class InteractableObject : MonoBehaviour
 
 	public void GenerateID(BackroomsLevelWorld world)
 	{
-		runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
+		runTimeID = UnityEngine.Random.Range(0, 10000).ToString();
 
 		while (world.CheckWorldForPropKey(type.ToString() + "-" + runTimeID))
 		{
-			runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
+			runTimeID = UnityEngine.Random.Range(0, 10000).ToString();
 		}
 
 		gameObject.name = type.ToString() + "-" + runTimeID;
@@ -70,7 +70,6 @@ public abstract class InteractableObject : MonoBehaviour
 			{
 				Debug.Log("Reparenting To Hand...");
 				GameSettings.Instance.Player.GetComponent<PlayerController>().holding = (HoldableObject)this;
-				GameSettings.Instance.Player.GetComponent<InteractionSystem>().SetPickup();
 				GameSettings.Instance.Player.GetComponent<InteractionSystem>().SetHolding();
 			}
 		}
@@ -123,7 +122,9 @@ public abstract class InteractableObject : MonoBehaviour
 
 	public abstract void Use(InteractionSystem player, bool LMB);
 
-	public abstract void Grab(InteractionSystem player);
+	public abstract void AddToInv(InteractionSystem player);
+
+	public abstract void Hold(InteractionSystem player);
 }
 
 // OBJECT_TYPE
@@ -138,5 +139,7 @@ public enum OBJECT_TYPE
 	BOXCUTTER,
 	TAPE,
 	SHIV_BOXCUTTER,
-	BIGSPOON
+	LAMP,
+	BIGSPOON,
+	BIG_METAL_LADDER
 }

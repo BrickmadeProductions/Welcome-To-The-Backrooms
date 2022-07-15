@@ -52,7 +52,7 @@ public class HoldableObject : InteractableObject
 
 	public override void Throw(Vector3 force)
 	{
-		//holdableObject.AddForceAtPosition(force, transform.position);
+		holdableObject.AddForceAtPosition(force, transform.position);
 	}
 
 	private IEnumerator playAnimation(string boolName, int animChosen, bool LMB)
@@ -92,16 +92,21 @@ public class HoldableObject : InteractableObject
 		}
 	}
 
-	public override void Grab(InteractionSystem interactionSystem)
+	public override void AddToInv(InteractionSystem interactionSystem)
 	{
 		interactionSystem.inventorySlots.Add(this);
 		interactionSystem.currentlyLookingAt.gameObject.SetActive(value: false);
 		interactionSystem.currentlyLookingAt = null;
 		Debug.Log("Added Object " + base.name);
-		base.transform.SetParent(interactionSystem.inventoryObject.transform);
+		transform.SetParent(interactionSystem.inventoryObject.transform);
 	}
 
-	private void OnCollisionEnter(Collision collision)
+    public override void Hold(InteractionSystem player)
+    {
+        
+    }
+
+    private void OnCollisionEnter(Collision collision)
 	{
 		if (collision.gameObject.tag == "Player")
 		{

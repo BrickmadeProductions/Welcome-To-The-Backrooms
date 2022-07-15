@@ -6549,8 +6549,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6172414190686351424}
-  m_LocalRotation: {x: 0, y: 0.99987155, z: 0, w: -0.016027762}
-  m_LocalPosition: {x: 247.5, y: 0, z: 742.5}
+  m_LocalRotation: {x: 0, y: 0.69261265, z: 0, w: 0.7213098}
+  m_LocalPosition: {x: 275, y: 0, z: 192.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6574,14 +6574,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveableData:
-    runTimeID: 306
+    runTimeID: 4604
     location:
-    - 247.5
+    - 275
     - 0
-    - 742.5
+    - 192.5
     rotationEuler:
     - -0
-    - 181.83673
+    - 87.67455
     - 0
     type: 6
     instance: {fileID: 4225260656200758192}
@@ -6613,7 +6613,7 @@ MonoBehaviour:
   memoryOfPlayerLocationInSeconds: 5
   sightMask:
     serializedVersion: 2
-    m_Bits: 1044147
+    m_Bits: 2092723
   canSeePlayer: 0
   playerCanSee: 0
   spawnChance: 0.005
@@ -6622,7 +6622,7 @@ MonoBehaviour:
   stunTime: 0
   eyes: {fileID: 109001933242770219}
   entitySkin: {fileID: 439210178674126766}
-  runTimeID: 306
+  runTimeID: 4604
   bloodPrefab: {fileID: 7958769173995355173, guid: b312d9f9b9fdd274e9c1247c10da9100, type: 3}
   grabLocation: {fileID: 7128770136166274654}
   ragDoll: {fileID: 9106987160413300465, guid: dbaccbbf15b7232458f712bf8e0eaede, type: 3}
