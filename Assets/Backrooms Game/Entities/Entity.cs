@@ -94,11 +94,11 @@ public abstract class Entity : MonoBehaviour
 
 	public void GenerateID(BackroomsLevelWorld world)
 	{
-		runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
+		runTimeID = UnityEngine.Random.Range(0, 10000).ToString();
 
 		while (world.CheckWorldForEntityKey(type.ToString() + "-" + runTimeID))
 		{
-			runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
+			runTimeID = UnityEngine.Random.Range(0, 10000).ToString();
 		}
 
 		gameObject.name = type.ToString() + "-" + runTimeID;

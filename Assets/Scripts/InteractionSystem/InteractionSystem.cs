@@ -5,6 +5,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class InteractionSystem : MonoBehaviour
 {
@@ -20,9 +21,8 @@ public class InteractionSystem : MonoBehaviour
 
 	public Transform dropLocation;
 
-	public TextMeshProUGUI pickup;
-
-	public TextMeshProUGUI open;
+	public RawImage pickup;
+	public RawImage open;
 
 	public List<HoldableObject> inventorySlots;
 

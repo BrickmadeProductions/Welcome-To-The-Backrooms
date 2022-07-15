@@ -12,11 +12,14 @@ public class Level0LightData : MonoBehaviour
     Material emissionMat;
     Color emissionColor;
 
+    float defaultIntensity;
+
     bool on = true;
     public bool broken;
     // Start is called before the first frame update
     void Start()
     {
+        defaultIntensity = transform.parent.GetChild(0).GetComponent<Light>().intensity;
         renderer = GetComponent<Renderer>();
         emissionMat = renderer.material;
         emissionColor = emissionMat.GetColor("_EmissionColor");
@@ -77,7 +80,7 @@ public class Level0LightData : MonoBehaviour
             emissionMat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
             emissionMat.SetColor("_EmissionColor", emissionColor);
 
-            transform.parent.GetChild(0).GetComponent<Light>().intensity = 4f;
+            transform.parent.GetChild(0).GetComponent<Light>().intensity = defaultIntensity;
             transform.parent.GetChild(0).GetComponent<Light>().intensity += Random.Range(-1.5f, 2f);
 
         }
@@ -89,7 +92,7 @@ public class Level0LightData : MonoBehaviour
             emissionMat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
             emissionMat.SetColor("_EmissionColor", Color.black);
 
-            transform.parent.GetChild(0).GetComponent<Light>().intensity = 4f;
+            transform.parent.GetChild(0).GetComponent<Light>().intensity = defaultIntensity;
             transform.parent.GetChild(0).GetComponent<Light>().intensity += Random.Range(-1.5f, 2f);
         }
         

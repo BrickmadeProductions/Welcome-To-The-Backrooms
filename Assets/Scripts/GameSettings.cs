@@ -647,10 +647,10 @@ public class GameSettings : MonoBehaviour, ISaveable
 		IS_SAVING = false;
 	}
 
-	private void OnApplicationQuit()
+	/*private void OnApplicationQuit()
 	{
 		SaveAllProgress();
-	}
+	}*/
 
 	private void OnDestroy()
 	{
@@ -727,8 +727,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 		yield return SceneManager.LoadSceneAsync((int)id, LoadSceneMode.Single);
 
 		PostLoadScene(id);
-
-		SaveAllProgress();
 	}
 
 	private void PostLoadScene(SCENE id)
