@@ -21,7 +21,7 @@ public class RotateAtVelocity : MonoBehaviour
     void LateUpdate()
     {
         if (Flying) {
-            transform.right = rigidBody.velocity.normalized;
+            transform.right = -rigidBody.velocity.normalized;
         }
     }
 }

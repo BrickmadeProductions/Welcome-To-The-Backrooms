@@ -23,9 +23,4 @@ public class InteractableDoor : InteractableObject
 	public override void Init()
 	{
 	}
-
-    public override void Hold(InteractionSystem player)
-    {
-        
-    }
 }
