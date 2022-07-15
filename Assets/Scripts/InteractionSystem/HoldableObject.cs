@@ -18,6 +18,8 @@ public class HoldableObject : InteractableObject
 
 	public Rigidbody holdableObject;
 
+	public float ThrowMultiplier;
+
 	private bool broken;
 
 	public bool large;
@@ -52,7 +54,7 @@ public class HoldableObject : InteractableObject
 
 	public override void Throw(Vector3 force)
 	{
-		//holdableObject.AddForceAtPosition(force, transform.position);
+		holdableObject.AddForceAtPosition(force * ThrowMultiplier, transform.position);
 	}
 
 	private IEnumerator playAnimation(string boolName, int animChosen, bool LMB)
@@ -92,7 +94,7 @@ public class HoldableObject : InteractableObject
 		}
 	}
 
-	public override void Grab(InteractionSystem interactionSystem)
+	public override void AddToInv(InteractionSystem interactionSystem)
 	{
 		interactionSystem.inventorySlots.Add(this);
 		interactionSystem.currentlyLookingAt.gameObject.SetActive(value: false);
@@ -101,7 +103,11 @@ public class HoldableObject : InteractableObject
 		base.transform.SetParent(interactionSystem.inventoryObject.transform);
 	}
 
-	private void OnCollisionEnter(Collision collision)
+    public override void Hold(InteractionSystem player)
+    {
+
+    }
+    private void OnCollisionEnter(Collision collision)
 	{
 		if (collision.gameObject.tag == "Player")
 		{

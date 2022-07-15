@@ -68,18 +68,6 @@ public class InteractionSystem : MonoBehaviour
 		}
 	}
 
-	public void SetPickup()
-	{
-		if (player.holding.GetComponent<HoldableObject>().large)
-		{
-			SetAllChildrenToLayer(player.holding.transform, 14);
-		}
-		else
-		{
-			SetAllChildrenToLayer(player.holding.transform, 13);
-		}
-	}
-
 	public void SetThrow()
 	{
 		
@@ -105,6 +93,15 @@ public class InteractionSystem : MonoBehaviour
 
 	public void SetHolding()
 	{
+		if (player.holding.GetComponent<HoldableObject>().large)
+		{
+			SetAllChildrenToLayer(player.holding.transform, 14);
+		}
+		else
+		{
+			SetAllChildrenToLayer(player.holding.transform, 13);
+		}
+
 		Collider[] components = player.holding.GetComponents<Collider>();
 		for (int i = 0; i < components.Length; i++)
 		{
@@ -126,6 +123,8 @@ public class InteractionSystem : MonoBehaviour
 			player.bodyAnim.SetBool((player.holding.CustomHoldAnimation != "") ? player.holding.CustomHoldAnimation : "isHoldingSmall", value: true);
 		}
 		player.holding.transform.localRotation = localRotation;
+
+		player.holding.Hold(this);
 	}
 
 	public void SetDrop()
@@ -145,15 +144,18 @@ public class InteractionSystem : MonoBehaviour
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
 		player.holding = null;
 	}
-
+	
 	private void PickupSystem()
 	{
 
 		if (player.holding == null && Input.GetButton("Hold") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
 		{
 			player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
-			SetPickup();
 			SetHolding();
+		}
+		if (Input.GetButtonDown("Place"))
+		{
+			//SetPlace();
 		}
 		if (Input.GetButtonDown("Throw") && player.holding != null && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
 		{
@@ -169,7 +171,7 @@ public class InteractionSystem : MonoBehaviour
 		}
 		if (Input.GetButtonDown("Pickup") && inventorySlots.Count < inventoryLimit && currentlyLookingAt != null)
 		{
-			currentlyLookingAt.Grab(this);
+			currentlyLookingAt.AddToInv(this);
 			currentSelectedInventorySlot++;
 		}
 		if (Input.GetButtonDown("Drop") && inventorySlots.Count > 0)

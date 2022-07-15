@@ -12,7 +12,7 @@ public class ElevatorCallButton : InteractableButton
     {
         open = false;
     }
-    public override void Grab(InteractionSystem player)
+    public override void AddToInv(InteractionSystem player)
     {
         open = !open;
         if (open)

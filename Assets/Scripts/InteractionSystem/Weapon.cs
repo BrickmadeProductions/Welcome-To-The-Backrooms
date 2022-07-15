@@ -5,6 +5,7 @@ using UnityEngine;
 public class Weapon : MonoBehaviour
 {
     public float damage;
+    public bool Thrown;
     public HoldableObject connetedObject;
 
     public void OnTriggerEnter(Collider other)
@@ -14,7 +15,8 @@ public class Weapon : MonoBehaviour
          */
         Vector3 collisionPoint = other.gameObject.GetComponent<Collider>().ClosestPointOnBounds(transform.position);
 
-        if (gameObject.layer == 13 && other.gameObject.layer == 18 && connetedObject.animationPlaying) //13 is the layer the player holds items in their hand
+
+        if (gameObject.layer == 13 && other.gameObject.layer == 18 && connetedObject.animationPlaying)
         {
             //Debug.Log("Player Attack");
             AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
@@ -31,10 +33,23 @@ public class Weapon : MonoBehaviour
             
             
         }
-
-
-
+        else if (other.gameObject.layer == 18 && Thrown)
+        {
+            //Debug.Log("Player Attack");
+            AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
+            if (limb != null)
+            {
+                if (!limb.attachedEntity.stunned && limb.attachedEntity.health < limb.attachedEntity.maxHealth % 4)
+                {
+                    StartCoroutine(limb.attachedEntity.StunTimer());
+                }
+                limb.attachedEntity.health -= (damage * limb.damageMultiplier);
+                limb.PlayerStabClip();
+            }
         }
+
+
+    }
 
     public void OnTriggerExit(Collider other)
     {
