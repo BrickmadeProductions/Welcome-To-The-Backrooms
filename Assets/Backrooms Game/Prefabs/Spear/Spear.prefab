@@ -343,7 +343,6 @@ GameObject:
   - component: {fileID: 7088627852523957283}
   - component: {fileID: 7088627852523957282}
   - component: {fileID: 7088627852523957309}
-  - component: {fileID: 6476880828761605851}
   - component: {fileID: 7040348420032003241}
   m_Layer: 9
   m_Name: Spear
@@ -401,21 +400,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &6476880828761605851
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7088627852523957311}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b19a23049c0ab85468fc49ea2113a95c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Is_Tip: 0
-  rigidBody: {fileID: 7088627852523957309}
-  Flying: 1
 --- !u!114 &7040348420032003241
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -457,6 +441,10 @@ MonoBehaviour:
   RMBAnimationBools:
   - Slice
   CustomHoldAnimation: 
+  Flying: 0
+  tipLayerMask:
+    serializedVersion: 2
+    m_Bits: 2095103
 --- !u!1 &8347569921296621747
 GameObject:
   m_ObjectHideFlags: 0

@@ -273,6 +273,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 3ec90ec7ba21d9641aba6d72da0fb644, type: 3}
   inventoryWeight: 1
   holdableObject: {fileID: 0}
+  ThrowMultiplier: 0.5
   large: 1
   animationPlaying: 0
   LMBAnimationClips: []
@@ -293,6 +294,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 10
+  Thrown: 0
   connetedObject: {fileID: 3693248661749687413}
 --- !u!65 &3800208490593867724
 BoxCollider:

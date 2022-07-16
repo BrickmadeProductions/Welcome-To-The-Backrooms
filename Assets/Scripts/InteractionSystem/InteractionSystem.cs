@@ -18,6 +18,8 @@ public class InteractionSystem : MonoBehaviour
 	private PlayerController player;
 
 	public InteractableObject currentlyLookingAt;
+	public GameObject currentPlaceItemPrefab;
+	public Material TransparentForPlace;
 
 	public Transform dropLocation;
 
@@ -27,6 +29,8 @@ public class InteractionSystem : MonoBehaviour
 	public List<HoldableObject> inventorySlots;
 
 	public GameObject inventoryObject;
+
+	
 
 	private void Awake()
 	{
@@ -47,6 +51,44 @@ public class InteractionSystem : MonoBehaviour
 			else
 			{
 				item.gameObject.layer = layer;
+			}
+		}
+	}
+
+	private void DestroyAllColliders(Transform top)
+	{
+		if (top.gameObject.GetComponent<Collider>() != null)
+			Destroy(top.gameObject.GetComponent<Collider>());
+
+		foreach (Transform item in top)
+		{
+			if (item.childCount > 0 && item.gameObject.GetComponent<Collider>() != null)
+			{
+				Destroy(item.gameObject.GetComponent<Collider>());
+				DestroyAllColliders(item);
+			}
+			else
+			{
+				Destroy(item.gameObject.GetComponent<Collider>());
+			}
+		}
+	}
+
+	private void ChangeAllMeshMaterials(Transform top, Material mat)
+	{
+		if (top.gameObject.GetComponent<MeshRenderer>() != null)
+			top.gameObject.GetComponent<MeshRenderer>().material = mat;
+		
+		foreach (Transform item in top)
+		{
+			if (item.childCount > 0 && item.gameObject.GetComponent<MeshRenderer>() != null)
+			{
+				item.gameObject.GetComponent<MeshRenderer>().material = mat;
+				ChangeAllMeshMaterials(item, mat);
+			}
+			else
+			{
+				Destroy(item.gameObject.GetComponent<Collider>());
 			}
 		}
 	}
@@ -144,7 +186,27 @@ public class InteractionSystem : MonoBehaviour
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
 		player.holding = null;
 	}
-	
+
+	public void SetPlace(Vector3 location)
+	{
+		SetAllChildrenToLayer(player.holding.transform, 9);
+		player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = true;
+		player.holding.transform.parent = null;
+		player.holding.GetComponent<HoldableObject>().saveableData.instance = player.holding.GetComponent<HoldableObject>();
+		player.holding.Throw(-Vector3.up);
+		Collider[] components = player.holding.GetComponents<Collider>();
+		for (int i = 0; i < components.Length; i++)
+		{
+			components[i].enabled = true;
+		}
+		SceneManager.MoveGameObjectToScene(player.holding.gameObject, SceneManager.GetActiveScene());
+		player.bodyAnim.SetBool((player.holding.CustomHoldAnimation != "") ? player.holding.CustomHoldAnimation : "isHoldingSmall", value: false);
+		player.bodyAnim.SetBool("isHoldingLarge", value: false);
+		player.holding.transform.position = location;
+		player.holding.transform.rotation = player.transform.rotation;
+		player.holding = null;
+	}
+
 	private void PickupSystem()
 	{
 
@@ -198,33 +260,81 @@ public class InteractionSystem : MonoBehaviour
 		{
 			return;
 		}
-		Debug.DrawRay(player.playerCamera.transform.position, player.playerCamera.transform.forward * 2f, Color.red);
-		RaycastHit[] array = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 2f, -2049)
+		//0 = closest
+		RaycastHit[] raycastForGrabbing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 5f, -2049)
 							  orderby h.distance
 							  select h).ToArray();
-		if (array.Length != 0)
+
+		if (raycastForGrabbing.Length != 0)
 		{
-			if (array[0].collider.GetComponent<HoldableObject>() != null && array[0].collider.gameObject.layer == 9)
+			if (raycastForGrabbing[0].collider.GetComponent<HoldableObject>() != null && raycastForGrabbing[0].collider.gameObject.layer == 9)
 			{
-				currentlyLookingAt = array[0].collider.GetComponent<HoldableObject>();
+				currentlyLookingAt = raycastForGrabbing[0].collider.GetComponent<HoldableObject>();
 			}
-			else if (array[0].collider.GetComponent<InteractableDoor>() != null && array[0].collider.gameObject.layer == 10)
+			else if (raycastForGrabbing[0].collider.GetComponent<InteractableDoor>() != null && raycastForGrabbing[0].collider.gameObject.layer == 10)
 			{
-				currentlyLookingAt = array[0].collider.GetComponent<InteractableDoor>();
+				currentlyLookingAt = raycastForGrabbing[0].collider.GetComponent<InteractableDoor>();
 			}
-			else if (array[0].collider.GetComponent<InteractableButton>() != null && array[0].collider.gameObject.layer == 17)
+			else if (raycastForGrabbing[0].collider.GetComponent<InteractableButton>() != null && raycastForGrabbing[0].collider.gameObject.layer == 17)
 			{
-				currentlyLookingAt = array[0].collider.GetComponent<InteractableButton>();
+				currentlyLookingAt = raycastForGrabbing[0].collider.GetComponent<InteractableButton>();
 			}
 			else
 			{
 				currentlyLookingAt = null;
 			}
+
+			if (player.holding != null)
+            {
+				if (player.holding.canPlace)
+				{
+					if (currentPlaceItemPrefab == null)
+					{
+						InteractableObject heldObjectTemplate = null;
+						GameSettings.Instance.PropDatabase.TryGetValue(player.holding.type, out heldObjectTemplate);
+
+						currentPlaceItemPrefab = Instantiate(heldObjectTemplate.gameObject);
+
+						//destroy the script so it doesnt do weird shit
+
+						DestroyAllColliders(currentPlaceItemPrefab.transform);
+						ChangeAllMeshMaterials(currentPlaceItemPrefab.transform, TransparentForPlace);
+						Destroy(currentPlaceItemPrefab.GetComponent<InteractableObject>());
+					}
+					else if (currentPlaceItemPrefab != null && raycastForGrabbing.Length > 0)
+                    {
+						currentPlaceItemPrefab.transform.position = raycastForGrabbing[1].point;
+						player.holding.transform.rotation = player.transform.rotation;
+					}
+
+					else if (player.holding.canPlace && Input.GetMouseButtonUp(1) && currentPlaceItemPrefab != null)
+					{
+
+						SetPlace(raycastForGrabbing[1].point);
+						currentPlaceItemPrefab = null;
+
+					}
+				}
+				
+
+				
+			}
+			
 		}
-		else if (array.Length == 0)
+		else if (raycastForGrabbing.Length == 0)
 		{
+
 			currentlyLookingAt = null;
+
+			if (currentPlaceItemPrefab != null)
+            {
+				Destroy(currentPlaceItemPrefab);
+            }
+
+			currentPlaceItemPrefab = null;
+
 		}
+
 		if (currentlyLookingAt != null)
 		{
 			if ((bool)currentlyLookingAt.GetComponent<InteractableObject>())

@@ -3428,6 +3428,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentlyLookingAt: {fileID: 0}
+  currentPlaceItemPrefab: {fileID: 0}
+  TransparentForPlace: {fileID: 2100000, guid: 7208722cdd5a9c949a4313a43c8990a9, type: 2}
   dropLocation: {fileID: 198989868444781495}
   pickup: {fileID: 6185870980958424786}
   open: {fileID: 6185870980958424786}
@@ -3998,7 +4000,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 2056119
+    m_Bits: 2039735
   m_RenderingPath: 3
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0

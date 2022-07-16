@@ -24,6 +24,10 @@ public class HoldableObject : InteractableObject
 
 	public bool large;
 
+	//building system
+	public bool canPlace;
+	public bool isPlaced = false;
+
 	public bool animationPlaying;
 
 	public List<AnimationClip> LMBAnimationClips;
@@ -79,7 +83,7 @@ public class HoldableObject : InteractableObject
 
 	public override void Use(InteractionSystem player, bool LMB)
 	{
-		if (!animationPlaying)
+		if (!animationPlaying && LMBAnimationBools.Count > 0 && RMBAnimationBools.Count > 0)
 		{
 			if (LMB)
 			{

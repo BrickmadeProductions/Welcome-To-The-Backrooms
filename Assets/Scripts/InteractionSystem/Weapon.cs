@@ -44,7 +44,7 @@ public class Weapon : MonoBehaviour
                     StartCoroutine(limb.attachedEntity.StunTimer());
                 }
                 limb.attachedEntity.health -= (damage * limb.damageMultiplier);
-                limb.PlayerStabClip();
+                limb.Stabbed(collisionPoint);
             }
         }
 

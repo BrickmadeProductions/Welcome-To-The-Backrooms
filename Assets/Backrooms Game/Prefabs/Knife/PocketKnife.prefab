@@ -59,6 +59,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 15
+  Thrown: 0
   connetedObject: {fileID: 5174651668802718682}
 --- !u!1 &5174651667907069725
 GameObject:
@@ -337,6 +338,7 @@ MonoBehaviour:
   breakClips: []
   inventoryWeight: 1
   holdableObject: {fileID: 0}
+  ThrowMultiplier: 0.7
   large: 0
   animationPlaying: 0
   LMBAnimationClips:
