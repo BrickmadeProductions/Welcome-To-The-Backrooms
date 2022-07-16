@@ -11,6 +11,10 @@ public class InteractableButton : InteractableObject
 	{
 	}
 
+	public override void Hold(InteractionSystem player)
+	{
+	}
+
 	public override void Throw(Vector3 force)
 	{
 	}
@@ -33,9 +37,4 @@ public class InteractableButton : InteractableObject
 	public override void Init()
 	{
 	}
-
-    public override void Hold(InteractionSystem player)
-    {
-        
-    }
 }

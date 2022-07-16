@@ -144,7 +144,7 @@ public class InteractionSystem : MonoBehaviour
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
 		player.holding = null;
 	}
-
+	
 	private void PickupSystem()
 	{
 
@@ -152,6 +152,10 @@ public class InteractionSystem : MonoBehaviour
 		{
 			player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
 			SetHolding();
+		}
+		if (Input.GetButtonDown("Place"))
+		{
+			//SetPlace();
 		}
 		if (Input.GetButtonDown("Throw") && player.holding != null && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
 		{

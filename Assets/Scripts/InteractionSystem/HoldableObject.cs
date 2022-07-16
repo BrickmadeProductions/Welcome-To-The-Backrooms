@@ -18,6 +18,8 @@ public class HoldableObject : InteractableObject
 
 	public Rigidbody holdableObject;
 
+	public float ThrowMultiplier;
+
 	private bool broken;
 
 	public bool large;
@@ -52,7 +54,7 @@ public class HoldableObject : InteractableObject
 
 	public override void Throw(Vector3 force)
 	{
-		holdableObject.AddForceAtPosition(force, transform.position);
+		holdableObject.AddForceAtPosition(force * ThrowMultiplier, transform.position);
 	}
 
 	private IEnumerator playAnimation(string boolName, int animChosen, bool LMB)
@@ -98,14 +100,13 @@ public class HoldableObject : InteractableObject
 		interactionSystem.currentlyLookingAt.gameObject.SetActive(value: false);
 		interactionSystem.currentlyLookingAt = null;
 		Debug.Log("Added Object " + base.name);
-		transform.SetParent(interactionSystem.inventoryObject.transform);
+		base.transform.SetParent(interactionSystem.inventoryObject.transform);
 	}
 
     public override void Hold(InteractionSystem player)
     {
-        
-    }
 
+    }
     private void OnCollisionEnter(Collision collision)
 	{
 		if (collision.gameObject.tag == "Player")
