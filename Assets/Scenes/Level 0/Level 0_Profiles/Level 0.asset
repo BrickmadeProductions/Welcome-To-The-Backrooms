@@ -51,13 +51,13 @@ MonoBehaviour:
     defaultState: 1
   tonemapper:
     overrideState: 1
-    value: 3
+    value: 2
   toneCurveToeStrength:
     overrideState: 1
-    value: 0.46
+    value: 0.44
   toneCurveToeLength:
     overrideState: 1
-    value: 0.33
+    value: 0.619
   toneCurveShoulderStrength:
     overrideState: 1
     value: 0.89
@@ -65,11 +65,11 @@ MonoBehaviour:
     overrideState: 1
     value: 1.04
   toneCurveShoulderAngle:
-    overrideState: 1
-    value: 0.72
+    overrideState: 0
+    value: 1
   toneCurveGamma:
-    overrideState: 1
-    value: 0.76
+    overrideState: 0
+    value: 0.001
   ldrLut:
     overrideState: 0
     value: {fileID: 0}
@@ -84,8 +84,8 @@ MonoBehaviour:
     overrideState: 0
     value: 0
   colorFilter:
-    overrideState: 1
-    value: {r: 0.8018868, g: 0.8018868, b: 0.8018868, a: 1}
+    overrideState: 0
+    value: {r: 1, g: 0.514151, b: 0.514151, a: 1}
   hueShift:
     overrideState: 0
     value: 0
@@ -97,10 +97,10 @@ MonoBehaviour:
     value: 0
   postExposure:
     overrideState: 1
-    value: -0.45
+    value: 0.68
   contrast:
     overrideState: 1
-    value: -18.8
+    value: -14
   mixerRedOutRedIn:
     overrideState: 0
     value: 100
@@ -1349,15 +1349,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b94fcd11afffcb142908bfcb1e261fba, type: 3}
   m_Name: MotionBlur(Clone)
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   enabled:
     overrideState: 1
     value: 1
   shutterAngle:
-    overrideState: 0
+    overrideState: 1
     value: 360
   sampleCount:
-    overrideState: 0
+    overrideState: 1
     value: 32
 --- !u!114 &-1848911410891181099
 MonoBehaviour:
@@ -1377,22 +1377,22 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 3.05
+    value: 0.49
   threshold:
     overrideState: 1
-    value: 1.02
+    value: 0.65
   softKnee:
     overrideState: 1
-    value: 0.43
+    value: 0
   clamp:
     overrideState: 0
     value: 65472
   diffusion:
     overrideState: 1
-    value: 6.58
+    value: 8.25
   anamorphicRatio:
     overrideState: 1
-    value: 0.33
+    value: -0.27
   color:
     overrideState: 1
     value: {r: 0.945016, g: 0.9622642, b: 0.87602353, a: 1}
@@ -1401,11 +1401,11 @@ MonoBehaviour:
     value: 1
   dirtTexture:
     overrideState: 1
-    value: {fileID: 2800000, guid: 2e49155f4af2fee4987d149e51aabb56, type: 3}
+    value: {fileID: 2800000, guid: 362aa93238c5c4549ba78c816ebde402, type: 3}
     defaultState: 1
   dirtIntensity:
     overrideState: 1
-    value: 0.14
+    value: 1.1
 --- !u!114 &-112384548608980431
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -1519,7 +1519,7 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 1.2
+    value: 0.84
   color:
     overrideState: 1
     value: {r: 0, g: 0, b: 0, a: 1}

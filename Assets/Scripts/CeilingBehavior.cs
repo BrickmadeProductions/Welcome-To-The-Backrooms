@@ -20,7 +20,7 @@ public class CeilingBehavior : MonoBehaviour
         {
             if (Random.value <= 0.3f)
             {
-                if (Random.value <= 0.5f)
+                if (Random.value <= 0.7f)
                 {
                     Instantiate(normalLight, lightLocations[index]);
                 }

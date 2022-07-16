@@ -29,9 +29,10 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1396392059200382702}
-  m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 25, y: 25, z: 25}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -55,6 +56,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -113,6 +115,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 
+    location: []
+    rotationEuler: []
+    parentName: 
+    type: 0
+    instance: {fileID: 0}
+  type: 0
+  playSounds: 1
+  spawnChance: 0
+  runTimeID: 
   durability: 0
   breakablePrefabs: []
   hitClips:
@@ -120,9 +133,15 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 0e5240b5040937f46a2798f0974643d3, type: 3}
   breakClips:
   - {fileID: 8300000, guid: 3ec90ec7ba21d9641aba6d72da0fb644, type: 3}
-  playSounds: 1
   inventoryWeight: 1
   holdableObject: {fileID: 0}
+  large: 0
+  animationPlaying: 0
+  LMBAnimationClips: []
+  LMBAnimationBools: []
+  RMBAnimationClips: []
+  RMBAnimationBools: []
+  CustomHoldAnimation: 
 --- !u!82 &4678480484732374379
 AudioSource:
   m_ObjectHideFlags: 0

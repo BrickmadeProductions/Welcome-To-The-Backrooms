@@ -112,7 +112,7 @@ public class PartygoerAI : Entity
                     }
                 }
                 //attack
-                else if (strangling == false && canSeePlayer)
+                else if (!strangling && !stunned && canSeePlayer)
                 {
 
                     if (GetComponent<AudioSource>().isPlaying)
@@ -131,7 +131,8 @@ public class PartygoerAI : Entity
 
 
                 }
-                else if (strangling == true)
+
+                else if (strangling)
                 {
 
                     GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.health -= damage;
@@ -185,6 +186,11 @@ public class PartygoerAI : Entity
     {
         //Debug.DrawRay(transform.position + new Vector3(0f, 5f, 0f), transform.TransformDirection(Vector3.forward) * 10f, Color.blue);
 
+        if (stunned)
+        {
+            strangling = false;
+        }
+
         if (strangling == true)
         {
 
@@ -200,7 +206,13 @@ public class PartygoerAI : Entity
 
             GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Choking", true);
 
-
+            
+        }
+        else
+        {
+            GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = true;
+            GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canWalk = true;
+            GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Choking", false);
         }
 
 

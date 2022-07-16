@@ -7,14 +7,13 @@ public class AttackableEntityLimb : MonoBehaviour
     public Entity attachedEntity;
     public float damageMultiplier;
     
-    public void PlayerStabClip()
+    public void Stabbed(Vector3 collisionPoint)
     {
         Debug.Log("Player Attacked " + attachedEntity.gameObject.name + " " + name);
 
         if (!GetComponent<AudioSource>().isPlaying)
         {
-            GameObject blood = Instantiate(attachedEntity.bloodPrefab, transform);
-            blood.transform.rotation = Quaternion.Euler(Random.Range(-360f, 360f), Random.Range(-360f, 360f), Random.Range(-360f, 360f));
+            Instantiate(attachedEntity.bloodPrefab, collisionPoint, Quaternion.identity);
             AudioSource.PlayClipAtPoint(attachedEntity.hurtNoises[Random.Range(0, attachedEntity.hurtNoises.Length)], transform.position);
 
         }

@@ -76,6 +76,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		public abstract void DoAction();
 	}
 
+	public List<GameObject> globalBloodAndGoreObjects;
+
 	public bool spawnEntities = true;
 	public bool entityAI = true;
 
@@ -137,7 +139,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	private void Awake()
 	{
+		
+
 		GameSettings.Instance.worldInstance = this;
+
+		globalBloodAndGoreObjects = new List<GameObject>();
 
 		seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
 		Begin();
@@ -150,6 +156,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			yield return new WaitForSecondsRealtime(minutes * 60f);
 			yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
 			yield return new WaitUntil(() => !GameSettings.IS_SAVING);
+			SaveAllObjectsAndEntities();
 			GameSettings.SaveAllProgress();
 		}
 	}
@@ -324,8 +331,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public string OnSave()
 	{
-		SaveAllObjectsAndEntities();
-
+		
 		WorldSaveData worldSaveData = new WorldSaveData
 		{
 			savedSeed = seed,
@@ -453,6 +459,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				Destroy(chunk.gameObject);
 			}
 		}
+
+		SaveAllObjectsAndEntities();
 	}
 
 	private GameObject GenerateChunk(int chunkX, int chunkY, int chunkZ, bool shouldGenInstantly)
@@ -573,7 +581,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		if (entityCount < entity.maxAllowed && totalEntities <= 50)
 		{
-			Entity entityComponent = Instantiate(entity.gameObject).GetComponent<Entity>();
+			Entity entityComponent = Instantiate(entity);
 			entityComponent.GenerateID(this);
 			entityComponent.gameObject.transform.position = position;
 			chunk.saveableData.entityData.entityClusterData.Add(entityComponent.type.ToString() + "-" + entityComponent.runTimeID, entityComponent.Save());

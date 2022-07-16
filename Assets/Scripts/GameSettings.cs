@@ -19,6 +19,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 	{
 		public SCENE lastSavedScene;
 
+		public bool bloodAndGore;
+
 		public bool ao;
 
 		public bool bloom;
@@ -194,6 +196,11 @@ public class GameSettings : MonoBehaviour, ISaveable
 	public Slider masterVolumeSlider;
 
 	[SerializeField]
+	public Toggle bloodAndGoreToggle;
+
+	private bool bloodandgore = true;
+
+	[SerializeField]
 	public GameObject cheatSheetObject;
 	public CheatSheet cheatSheet;
 
@@ -264,6 +271,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 	public float Sensitivity => sensitivity;
 
 	public float MasterVolume => masterVolume;
+
+	public bool BloodAndGore => bloodandgore;
 
 	public bool IsCutScene => cutScene;
 
@@ -340,6 +349,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 		fovSlider.value = FOV;
 		masterVolumeSlider.value = MasterVolume;
 		sensitivitySlider.value = Sensitivity;
+		bloodAndGoreToggle.isOn = BloodAndGore;
 		LastSavedScene = runtimeSaveData.lastSavedScene;
 		setScreenRes(screenResIndex);
 		setFullscreen(fullScreenEnabled);
@@ -364,7 +374,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 			fullScreen = FullScreenEnabled,
 			screenResIndex = ScreenResIndex,
 			masterVolume = MasterVolume,
-			sensitivity = Sensitivity
+			sensitivity = Sensitivity,
+			bloodAndGore = bloodandgore
 		};
 		return JsonConvert.SerializeObject(runtimeSaveData);
 	}
@@ -636,21 +647,24 @@ public class GameSettings : MonoBehaviour, ISaveable
 		vSyncEnabled = io;
 	}
 
+	public void setBloodAndGore(bool io)
+    {
+		bloodandgore = io;
+
+		foreach (GameObject bloodAndGoreObject in worldInstance.globalBloodAndGoreObjects)
+        {
+			bloodAndGoreObject.SetActive(io);
+        }
+    }
 	public static void SaveAllProgress()
 	{
 		IS_SAVING = true;
 
 		SaveMaster.SyncSave();
-		SaveMaster.WriteActiveSaveToDisk();
 		Debug.Log("Saved All Data!");
 
 		IS_SAVING = false;
 	}
-
-	/*private void OnApplicationQuit()
-	{
-		SaveAllProgress();
-	}*/
 
 	private void OnDestroy()
 	{
@@ -793,6 +807,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 			case SCENE.LEVEL0:
 
+				player.transform.position = new Vector3(0f, 1.1f, 0f);
+
 				player.GetComponent<PlayerController>().darkShield.SetActive(true);
 
 				post.profile = level0Profile;
@@ -811,6 +827,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 			case SCENE.LEVEL1:
 
 				player.GetComponent<PlayerController>().darkShield.SetActive(true);
+
+				player.transform.position = new Vector3(0f, 2f, 0f);
 
 				post.profile = level1Profile;
 
