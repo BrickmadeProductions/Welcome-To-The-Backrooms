@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 5141843735686057760}
   - component: {fileID: 5694946197279239993}
   - component: {fileID: 3742688161633100252}
-  - component: {fileID: 7929730488429589183}
   m_Layer: 9
   m_Name: Ladder
   m_TagString: HoldableObject
@@ -96,19 +95,6 @@ MonoBehaviour:
   RMBAnimationClips: []
   RMBAnimationBools: []
   CustomHoldAnimation: 
---- !u!65 &7929730488429589183
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2723785746507698155}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.96002626, y: 5.4285526, z: 1.5013461}
-  m_Center: {x: 0.0051733255, y: 2.8566065, z: 0.026912093}
 --- !u!1 &4945531799288313688
 GameObject:
   m_ObjectHideFlags: 0
@@ -328,7 +314,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7654567665078881702}
   m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.378, z: 0.277}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:

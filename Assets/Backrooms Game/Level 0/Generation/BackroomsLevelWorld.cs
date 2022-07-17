@@ -140,7 +140,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	private void Awake()
 	{
 		
-
 		GameSettings.Instance.worldInstance = this;
 
 		globalBloodAndGoreObjects = new List<GameObject>();
@@ -399,7 +398,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	private void TryGenChunks()
 	{
 		newPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
-		//Debug.Log(GameSettings.Instance.Player.transform.position);
 		if (newPlayerChunkLocation != oldPlayerChunkLocation && !isLoadingChunks)
 		{
 			isLoadingChunks = true;
@@ -457,10 +455,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				loadedChunks.Remove(loadedChunk.Key);
 
 				Destroy(chunk.gameObject);
+				SaveAllObjectsAndEntities();
 			}
 		}
 
-		SaveAllObjectsAndEntities();
+		
 	}
 
 	private GameObject GenerateChunk(int chunkX, int chunkY, int chunkZ, bool shouldGenInstantly)
@@ -702,9 +701,9 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	public InteractableObject AddNewProp(Vector3 position, Quaternion rotation, InteractableObject item, Chunk chunk)
 	{
 		int propCount = 0;
-		foreach (KeyValuePair<string, SerealizedChunk> allChunk in allChunks)
+		foreach (KeyValuePair<string, Chunk> loadedChunks in loadedChunks)
 		{
-			propCount += allChunk.Value.propData.propClusterData.Count;
+			propCount += loadedChunks.Value.saveableData.propData.propClusterData.Count;
 		}
 		if (propCount <= 100)
 		{
@@ -919,7 +918,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 					{
 						allChunks[chunkKey].entityData.entityClusterData.Remove(entityID);
 
-						allChunks[chunkLocation].entityData.entityClusterData.Add(entityID, entityData.Value.instance.Save());
+						if (!allChunks[chunkLocation].entityData.entityClusterData.ContainsKey(entityID))
+							allChunks[chunkLocation].entityData.entityClusterData.Add(entityID, entityData.Value.instance.Save());
 
 						Debug.Log(chunkData.Key + " " + chunkLocation + " " + entityID);
 					}
@@ -962,7 +962,9 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 					if (allChunks.ContainsKey(chunkLocation))
 					{
 						allChunks[chunkKey].propData.propClusterData.Remove(propKey);
-						allChunks[chunkLocation].propData.propClusterData.Add(propKey, propData.Value.instance.Save());
+
+						if (!allChunks[chunkLocation].propData.propClusterData.ContainsKey(propKey))
+							allChunks[chunkLocation].propData.propClusterData.Add(propKey, propData.Value.instance.Save());
 					}
 					else
 					{

@@ -24,6 +24,10 @@ public class InteractionSystem : MonoBehaviour
 	Material transparentPlaceMaterialGood;
 	Material transparentPlaceMaterialCollision;
 
+	Quaternion buildRotationOffset = Quaternion.identity;
+	float currentRotZ = 0;
+	float currentRotX = 0;
+
 	public Transform dropLocation;
 
 	public RawImage pickup;
@@ -34,8 +38,8 @@ public class InteractionSystem : MonoBehaviour
 	public GameObject inventoryObject;
 
 	public LayerMask placingLayerMask;
+	public LayerMask grabbingLayerMask;
 
-	
 
 	private void Awake()
 	{
@@ -44,7 +48,6 @@ public class InteractionSystem : MonoBehaviour
 		inventorySlots = new List<HoldableObject>();
 		player = GetComponent<PlayerController>();
 	}
-
 	private void SetAllChildrenToLayer(Transform top, int layer)
 	{
 		top.gameObject.layer = layer;
@@ -64,26 +67,19 @@ public class InteractionSystem : MonoBehaviour
 
 	private void SetAllCollidersToTrigger(Transform top)
 	{
-		if (top.gameObject.GetComponent<Collider>() != null)
-		{
-			foreach (Collider collider in top.gameObject.GetComponents<Collider>())
-			{
-				collider.isTrigger = true;
-				
-			}
-			if (top.gameObject.GetComponent<WTTB_ExtraCollisionData>() == null)
-				top.gameObject.AddComponent<WTTB_ExtraCollisionData>();
-		}
 		foreach (Transform item in top)
 		{
 			if (item.childCount > 0)
 			{
 				if (item.gameObject.GetComponent<Collider>() != null)
 				{
-					foreach (Collider collider in item.gameObject.GetComponents<Collider>())
-					{
-						Destroy(collider);
+					foreach(Collider collider in item.gameObject.GetComponents<Collider>())
+                    {
+						collider.isTrigger = true;
 					}
+				
+					if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>() == null)
+						item.gameObject.AddComponent<WTTB_ExtraCollisionData>();
 				}
 				SetAllCollidersToTrigger(item);
 			}
@@ -93,31 +89,67 @@ public class InteractionSystem : MonoBehaviour
 				{
 					foreach (Collider collider in item.gameObject.GetComponents<Collider>())
 					{
-						Destroy(collider);
+						collider.isTrigger = true;
 					}
+
+					if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>() == null)
+						item.gameObject.AddComponent<WTTB_ExtraCollisionData>();
 				}
 			}
 		}
 	}
 
-	private bool CheckForTriggerCollision(Transform top)
+	private bool CheckForCollision(Transform trans)
 	{
-		if (top.gameObject.GetComponent<WTTB_ExtraCollisionData>() != null)
+		Debug.Log(trans.childCount);
+		Debug.Log(trans.name);
+		foreach (Transform item in trans.GetChild(0))
+		{
+			if (item.childCount > 0)
+			{
+				if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>() != null)
+				{
 
-			if (top.gameObject.GetComponent<WTTB_ExtraCollisionData>().isCollidingTrigger)
-            {
-				Debug.Log("Collision");
-				return true;
-			}	
+					if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>().isCollidingTrigger)
+					{
+						return true;
 
+
+					}
+
+					else
+                    {
+						
+						return false;
+
+                    }
+
+				}
+
+
+			}
 			else
 			{
-				return false;
+				if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>() != null)
+				{
+					if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>().isCollidingTrigger)
+					{
+						return true;
+
+					}
+
+					else
+					{
+						
+						return false;
+
+					}
+
+				}
 			}
-        else
-        {
-			return false;
-        }
+		}
+
+		return false;
 		
 	}
 
@@ -243,8 +275,9 @@ public class InteractionSystem : MonoBehaviour
 		player.holding = null;
 	}
 
-	public void SetPlace(Vector3 location)
+	public void SetPlace(Vector3 location, Quaternion rotation)
 	{
+		buildRotationOffset = Quaternion.identity;
 		SetAllChildrenToLayer(player.holding.transform, 9);
 		player.holding.transform.parent = null;
 		player.holding.GetComponent<HoldableObject>().saveableData.instance = player.holding.GetComponent<HoldableObject>();
@@ -258,7 +291,7 @@ public class InteractionSystem : MonoBehaviour
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
 		player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
 		player.holding.transform.position = location;
-		player.holding.transform.rotation = player.transform.rotation;
+		player.holding.transform.rotation = rotation;
 		player.holding = null;
 
 		if (currentPlaceItemPrefab != null)
@@ -322,7 +355,7 @@ public class InteractionSystem : MonoBehaviour
 			return;
 		}
 		//0 = closest
-		RaycastHit[] raycastForGrabbing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 2f, -2049)
+		RaycastHit[] raycastForGrabbing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 2f, grabbingLayerMask)
 							  orderby h.distance
 							  select h).ToArray();
 
@@ -332,18 +365,22 @@ public class InteractionSystem : MonoBehaviour
 
 		if (raycastForGrabbing.Length != 0)
 		{
-			if (raycastForGrabbing[0].collider.GetComponent<HoldableObject>() != null && raycastForGrabbing[0].collider.gameObject.layer == 9)
+			GameObject interactable = raycastForGrabbing[0].collider.transform.parent.parent.gameObject;
+
+			if (interactable.gameObject.layer == 9)
 			{
-				currentlyLookingAt = raycastForGrabbing[0].collider.GetComponent<HoldableObject>();
+				currentlyLookingAt = interactable.GetComponent<HoldableObject>();
 			}
-			else if (raycastForGrabbing[0].collider.GetComponent<InteractableDoor>() != null && raycastForGrabbing[0].collider.gameObject.layer == 10)
+			else if (interactable.gameObject.layer == 10)
 			{
-				currentlyLookingAt = raycastForGrabbing[0].collider.GetComponent<InteractableDoor>();
+				currentlyLookingAt = interactable.GetComponent<InteractableDoor>();
 			}
-			else if (raycastForGrabbing[0].collider.GetComponent<InteractableButton>() != null && raycastForGrabbing[0].collider.gameObject.layer == 17)
+			else if (interactable.gameObject.layer == 17)
 			{
-				currentlyLookingAt = raycastForGrabbing[0].collider.GetComponent<InteractableButton>();
+				currentlyLookingAt = interactable.GetComponent<InteractableButton>();
 			}
+			
+			
 			else
 			{
 				currentlyLookingAt = null;
@@ -376,10 +413,11 @@ public class InteractionSystem : MonoBehaviour
 				}
 				else if (currentPlaceItemPrefab != null && raycastForPlacing.Length > 0)
 				{
+
 					currentPlaceItemPrefab.transform.position = raycastForPlacing[0].point;
-					currentPlaceItemPrefab.transform.rotation = player.transform.rotation;
-					
-					if (CheckForTriggerCollision(currentPlaceItemPrefab.transform))
+					currentPlaceItemPrefab.transform.rotation = player.transform.localRotation * buildRotationOffset;
+					Debug.Log(CheckForCollision(currentPlaceItemPrefab.transform));
+					if (CheckForCollision(currentPlaceItemPrefab.transform))
                     {
 						canPlaceAtLocation = false;
 						ChangeAllMeshMaterials(currentPlaceItemPrefab.transform, transparentPlaceMaterialCollision);
@@ -392,6 +430,32 @@ public class InteractionSystem : MonoBehaviour
 						canPlaceAtLocation = true;
 						ChangeAllMeshMaterials(currentPlaceItemPrefab.transform, transparentPlaceMaterialGood);
 					}
+
+					if (Input.GetButton("RotateBuildSystemRight"))
+                    {
+						currentRotZ -= 75f * Time.deltaTime;
+						
+					}
+
+					if (Input.GetButton("RotateBuildSystemLeft"))
+					{
+						currentRotZ += 75f * Time.deltaTime;
+						
+					}
+
+					if (Input.GetButton("RotateBuildSystemUp"))
+					{
+						currentRotX += 75f * Time.deltaTime;
+
+					}
+
+					if (Input.GetButton("RotateBuildSystemDown"))
+					{
+						currentRotX -= 75f * Time.deltaTime;
+
+					}
+
+					buildRotationOffset = Quaternion.Euler(currentRotX, 1, currentRotZ);
 				}
 
 				if (player.holding.canPlace && Input.GetMouseButtonDown(1) && currentPlaceItemPrefab != null)
@@ -399,7 +463,7 @@ public class InteractionSystem : MonoBehaviour
 					if (canPlaceAtLocation)
                     {
 						Destroy(currentPlaceItemPrefab.gameObject);
-						SetPlace(currentPlaceItemPrefab.transform.position);
+						SetPlace(currentPlaceItemPrefab.transform.position, currentPlaceItemPrefab.transform.rotation);
 						currentPlaceItemPrefab = null;
 					}
 					
@@ -412,7 +476,7 @@ public class InteractionSystem : MonoBehaviour
 
 		if (currentlyLookingAt != null)
 		{
-			if ((bool)currentlyLookingAt.GetComponent<InteractableObject>())
+			if (currentlyLookingAt.GetComponent<InteractableObject>())
 			{
 				switch (currentlyLookingAt.gameObject.layer)
 				{

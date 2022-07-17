@@ -3437,6 +3437,9 @@ MonoBehaviour:
   placingLayerMask:
     serializedVersion: 2
     m_Bits: 2066431
+  grabbingLayerMask:
+    serializedVersion: 2
+    m_Bits: 132608
 --- !u!114 &6825120346040844089
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5270,14 +5273,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8372342921027870767}
-  m_LocalRotation: {x: -0.18512742, y: 0.7403421, z: 0.118788846, w: -0.63522494}
-  m_LocalPosition: {x: 0.0318, y: 0.0342, z: -0.049}
+  m_LocalRotation: {x: 0.35789368, y: -0.050937675, z: 0.08528545, w: 0.9284632}
+  m_LocalPosition: {x: 0.0992, y: -0.1005, z: -0.0369}
   m_LocalScale: {x: 0.049999967, y: 0.049999993, z: 0.049999975}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2345223243212716621}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 3.4, y: -99.5, z: 334.8}
+  m_LocalEulerAnglesHint: {x: 42.32, y: -2.6, z: 9.49}
 --- !u!82 &8577342966540820269
 AudioSource:
   m_ObjectHideFlags: 0

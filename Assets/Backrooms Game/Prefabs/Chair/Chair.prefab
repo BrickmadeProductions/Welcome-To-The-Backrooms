@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8475160849458265341}
   - component: {fileID: 3562800164901033967}
   - component: {fileID: 119591204670635341}
-  - component: {fileID: 8825423269821238562}
   m_Layer: 9
   m_Name: Mesh
   m_TagString: Wood
@@ -27,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 144859276919216511}
   m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: 0.5}
-  m_LocalPosition: {x: 0.0002999995, y: -0.0014, z: 0.0021}
+  m_LocalPosition: {x: 0.0002999995, y: 0.0033, z: 0.0056}
   m_LocalScale: {x: 1, y: 0.9, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -84,20 +83,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &8825423269821238562
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 144859276919216511}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -5495902117074765545, guid: c30a02db344693a44a88cd785f8f0c95, type: 3}
 --- !u!1 &241230107268624177
 GameObject:
   m_ObjectHideFlags: 0
@@ -111,8 +96,6 @@ GameObject:
   - component: {fileID: 6533066443745741963}
   - component: {fileID: 3693248661749687413}
   - component: {fileID: 6571218108610327320}
-  - component: {fileID: 3800208490593867724}
-  - component: {fileID: 645867160461086471}
   m_Layer: 9
   m_Name: Chair
   m_TagString: HoldableObject
@@ -128,7 +111,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 241230107268624177}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.159, z: -0.188}
   m_LocalScale: {x: 25, y: 25, z: 25}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -313,32 +296,6 @@ MonoBehaviour:
   damage: 10
   Thrown: 0
   connetedObject: {fileID: 3693248661749687413}
---- !u!65 &3800208490593867724
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 241230107268624177}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.040489912, y: 0.050840054, z: 0.012551523}
-  m_Center: {x: 0.0005665707, y: 0.063035935, z: 0.005326776}
---- !u!65 &645867160461086471
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 241230107268624177}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.041018937, y: 0.03997522, z: 0.039352406}
-  m_Center: {x: -0.00038433788, y: 0.021797545, z: -0.015619074}
 --- !u!1 &3164104811559281688
 GameObject:
   m_ObjectHideFlags: 0
@@ -383,8 +340,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.038710177, y: 0.044983752, z: 0.035589393}
-  m_Center: {x: -0.0001595807, y: 0.023446923, z: -0.0019612228}
+  m_Size: {x: 0.038859323, y: 0.046259984, z: 0.035589393}
+  m_Center: {x: -0.0026809885, y: 0.02734422, z: -0.001961224}
 --- !u!65 &8905070086517610574
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -396,8 +353,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.0069825123, y: 0.054760553, z: 0.03614609}
-  m_Center: {x: 0.021018779, y: 0.07101322, z: -0.0019269431}
+  m_Size: {x: 0.009067135, y: 0.0550981, z: 0.03614609}
+  m_Center: {x: 0.016839087, y: 0.07549116, z: -0.001926944}
 --- !u!1 &5396737855615379404
 GameObject:
   m_ObjectHideFlags: 0
@@ -422,7 +379,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5396737855615379404}
   m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: -0.0204}
+  m_LocalPosition: {x: 0, y: 0.004, z: -0.0326}
   m_LocalScale: {x: 0.9, y: 0.9, z: 0.94}
   m_ConstrainProportionsScale: 0
   m_Children:
