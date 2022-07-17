@@ -15,11 +15,14 @@ public class InteractionSystem : MonoBehaviour
 
 	private bool inventoryOpened;
 
+	private bool canPlaceAtLocation;
+
 	private PlayerController player;
 
 	public InteractableObject currentlyLookingAt;
 	public GameObject currentPlaceItemPrefab;
-	public Material TransparentForPlace;
+	Material transparentPlaceMaterialGood;
+	Material transparentPlaceMaterialCollision;
 
 	public Transform dropLocation;
 
@@ -30,10 +33,14 @@ public class InteractionSystem : MonoBehaviour
 
 	public GameObject inventoryObject;
 
+	public LayerMask placingLayerMask;
+
 	
 
 	private void Awake()
 	{
+		transparentPlaceMaterialGood = Resources.Load("Materials/TransparentPlaceMaterialGood", typeof(Material)) as Material;
+		transparentPlaceMaterialCollision = Resources.Load("Materials/TransparentPlaceMaterialCollision", typeof(Material)) as Material;
 		inventorySlots = new List<HoldableObject>();
 		player = GetComponent<PlayerController>();
 	}
@@ -55,40 +62,87 @@ public class InteractionSystem : MonoBehaviour
 		}
 	}
 
-	private void DestroyAllColliders(Transform top)
+	private void SetAllCollidersToTrigger(Transform top)
 	{
 		if (top.gameObject.GetComponent<Collider>() != null)
-			Destroy(top.gameObject.GetComponent<Collider>());
-
+		{
+			foreach (Collider collider in top.gameObject.GetComponents<Collider>())
+			{
+				collider.isTrigger = true;
+				
+			}
+			if (top.gameObject.GetComponent<WTTB_ExtraCollisionData>() == null)
+				top.gameObject.AddComponent<WTTB_ExtraCollisionData>();
+		}
 		foreach (Transform item in top)
 		{
-			if (item.childCount > 0 && item.gameObject.GetComponent<Collider>() != null)
+			if (item.childCount > 0)
 			{
-				Destroy(item.gameObject.GetComponent<Collider>());
-				DestroyAllColliders(item);
+				if (item.gameObject.GetComponent<Collider>() != null)
+				{
+					foreach (Collider collider in item.gameObject.GetComponents<Collider>())
+					{
+						Destroy(collider);
+					}
+				}
+				SetAllCollidersToTrigger(item);
 			}
 			else
 			{
-				Destroy(item.gameObject.GetComponent<Collider>());
+				if (item.gameObject.GetComponent<Collider>() != null)
+				{
+					foreach (Collider collider in item.gameObject.GetComponents<Collider>())
+					{
+						Destroy(collider);
+					}
+				}
 			}
 		}
 	}
 
+	private bool CheckForTriggerCollision(Transform top)
+	{
+		if (top.gameObject.GetComponent<WTTB_ExtraCollisionData>() != null)
+
+			if (top.gameObject.GetComponent<WTTB_ExtraCollisionData>().isCollidingTrigger)
+            {
+				Debug.Log("Collision");
+				return true;
+			}	
+
+			else
+			{
+				return false;
+			}
+        else
+        {
+			return false;
+        }
+		
+	}
+
+
 	private void ChangeAllMeshMaterials(Transform top, Material mat)
 	{
-		if (top.gameObject.GetComponent<MeshRenderer>() != null)
-			top.gameObject.GetComponent<MeshRenderer>().material = mat;
+		if (top.gameObject.GetComponent<Renderer>() != null)
+        
+			top.gameObject.GetComponent<Renderer>().material = mat;
+		
+			
 		
 		foreach (Transform item in top)
 		{
-			if (item.childCount > 0 && item.gameObject.GetComponent<MeshRenderer>() != null)
+			if (item.childCount > 0)
 			{
-				item.gameObject.GetComponent<MeshRenderer>().material = mat;
+				if (item.gameObject.GetComponent<Renderer>() != null)
+					item.gameObject.GetComponent<Renderer>().material = mat;
+
 				ChangeAllMeshMaterials(item, mat);
 			}
 			else
 			{
-				Destroy(item.gameObject.GetComponent<Collider>());
+				if (item.gameObject.GetComponent<Renderer>() != null)
+					item.gameObject.GetComponent<Renderer>().material = mat;
 			}
 		}
 	}
@@ -135,6 +189,8 @@ public class InteractionSystem : MonoBehaviour
 
 	public void SetHolding()
 	{
+		player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
+
 		if (player.holding.GetComponent<HoldableObject>().large)
 		{
 			SetAllChildrenToLayer(player.holding.transform, 14);
@@ -190,10 +246,8 @@ public class InteractionSystem : MonoBehaviour
 	public void SetPlace(Vector3 location)
 	{
 		SetAllChildrenToLayer(player.holding.transform, 9);
-		player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = true;
 		player.holding.transform.parent = null;
 		player.holding.GetComponent<HoldableObject>().saveableData.instance = player.holding.GetComponent<HoldableObject>();
-		player.holding.Throw(-Vector3.up);
 		Collider[] components = player.holding.GetComponents<Collider>();
 		for (int i = 0; i < components.Length; i++)
 		{
@@ -202,9 +256,17 @@ public class InteractionSystem : MonoBehaviour
 		SceneManager.MoveGameObjectToScene(player.holding.gameObject, SceneManager.GetActiveScene());
 		player.bodyAnim.SetBool((player.holding.CustomHoldAnimation != "") ? player.holding.CustomHoldAnimation : "isHoldingSmall", value: false);
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
+		player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
 		player.holding.transform.position = location;
 		player.holding.transform.rotation = player.transform.rotation;
 		player.holding = null;
+
+		if (currentPlaceItemPrefab != null)
+		{
+			Destroy(currentPlaceItemPrefab.gameObject);
+		}
+
+		currentPlaceItemPrefab = null;
 	}
 
 	private void PickupSystem()
@@ -212,7 +274,6 @@ public class InteractionSystem : MonoBehaviour
 
 		if (player.holding == null && Input.GetButton("Hold") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
 		{
-			player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
 			SetHolding();
 		}
 		if (Input.GetButtonDown("Place"))
@@ -261,9 +322,13 @@ public class InteractionSystem : MonoBehaviour
 			return;
 		}
 		//0 = closest
-		RaycastHit[] raycastForGrabbing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 5f, -2049)
+		RaycastHit[] raycastForGrabbing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 2f, -2049)
 							  orderby h.distance
 							  select h).ToArray();
+
+		RaycastHit[] raycastForPlacing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 10f, placingLayerMask)
+										   orderby h.distance
+										   select h).ToArray();
 
 		if (raycastForGrabbing.Length != 0)
 		{
@@ -283,57 +348,67 @@ public class InteractionSystem : MonoBehaviour
 			{
 				currentlyLookingAt = null;
 			}
-
-			if (player.holding != null)
-            {
-				if (player.holding.canPlace)
-				{
-					if (currentPlaceItemPrefab == null)
-					{
-						InteractableObject heldObjectTemplate = null;
-						GameSettings.Instance.PropDatabase.TryGetValue(player.holding.type, out heldObjectTemplate);
-
-						currentPlaceItemPrefab = Instantiate(heldObjectTemplate.gameObject);
-
-						//destroy the script so it doesnt do weird shit
-
-						DestroyAllColliders(currentPlaceItemPrefab.transform);
-						ChangeAllMeshMaterials(currentPlaceItemPrefab.transform, TransparentForPlace);
-						Destroy(currentPlaceItemPrefab.GetComponent<InteractableObject>());
-					}
-					else if (currentPlaceItemPrefab != null && raycastForGrabbing.Length > 0)
-                    {
-						currentPlaceItemPrefab.transform.position = raycastForGrabbing[1].point;
-						player.holding.transform.rotation = player.transform.rotation;
-					}
-
-					else if (player.holding.canPlace && Input.GetMouseButtonUp(1) && currentPlaceItemPrefab != null)
-					{
-
-						SetPlace(raycastForGrabbing[1].point);
-						currentPlaceItemPrefab = null;
-
-					}
-				}
-				
-
-				
-			}
 			
 		}
+		
 		else if (raycastForGrabbing.Length == 0)
 		{
 
 			currentlyLookingAt = null;
+		}
 
-			if (currentPlaceItemPrefab != null)
-            {
-				Destroy(currentPlaceItemPrefab);
-            }
+		if (raycastForPlacing.Length != 0)
+		{
+			if (player.holding != null && player.holding.canPlace)
+			{
+				if (currentPlaceItemPrefab == null)
+				{
+					InteractableObject heldObjectTemplate = null;
+					GameSettings.Instance.PropDatabase.TryGetValue(player.holding.type, out heldObjectTemplate);
 
-			currentPlaceItemPrefab = null;
+					currentPlaceItemPrefab = Instantiate(heldObjectTemplate.gameObject);
+
+					//destroy the script so it doesnt do weird shit
+
+					SetAllCollidersToTrigger(currentPlaceItemPrefab.transform);
+					SetAllChildrenToLayer(currentPlaceItemPrefab.transform, 21);
+					Destroy(currentPlaceItemPrefab.GetComponent<InteractableObject>());
+				}
+				else if (currentPlaceItemPrefab != null && raycastForPlacing.Length > 0)
+				{
+					currentPlaceItemPrefab.transform.position = raycastForPlacing[0].point;
+					currentPlaceItemPrefab.transform.rotation = player.transform.rotation;
+					
+					if (CheckForTriggerCollision(currentPlaceItemPrefab.transform))
+                    {
+						canPlaceAtLocation = false;
+						ChangeAllMeshMaterials(currentPlaceItemPrefab.transform, transparentPlaceMaterialCollision);
+
+                    }
+
+						
+					else
+					{
+						canPlaceAtLocation = true;
+						ChangeAllMeshMaterials(currentPlaceItemPrefab.transform, transparentPlaceMaterialGood);
+					}
+				}
+
+				if (player.holding.canPlace && Input.GetMouseButtonDown(1) && currentPlaceItemPrefab != null)
+				{
+					if (canPlaceAtLocation)
+                    {
+						Destroy(currentPlaceItemPrefab.gameObject);
+						SetPlace(currentPlaceItemPrefab.transform.position);
+						currentPlaceItemPrefab = null;
+					}
+					
+
+				}
+			}
 
 		}
+
 
 		if (currentlyLookingAt != null)
 		{
