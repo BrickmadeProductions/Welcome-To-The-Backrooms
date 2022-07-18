@@ -7,6 +7,8 @@ public class Weapon : MonoBehaviour
     public float damage;
     public bool Thrown;
     public HoldableObject connetedObject;
+    public Renderer WeaponBloodRenderer;
+    public float bloodAmount = 0;
 
     public void OnTriggerEnter(Collider other)
     {
@@ -28,6 +30,12 @@ public class Weapon : MonoBehaviour
                 }
                 limb.attachedEntity.health -= (damage * limb.damageMultiplier);
                 limb.Stabbed(collisionPoint);
+                if (bloodAmount > 1)
+                {
+                    bloodAmount += 0.04f;
+                    WeaponBloodRenderer.material.SetFloat("_Wetness", bloodAmount);
+                }
+                
             }
                 
             
@@ -45,6 +53,11 @@ public class Weapon : MonoBehaviour
                 }
                 limb.attachedEntity.health -= (damage * limb.damageMultiplier);
                 limb.Stabbed(collisionPoint);
+                if (bloodAmount > 1)
+                {
+                    bloodAmount += 0.04f;
+                    WeaponBloodRenderer.material.SetFloat("_Wetness", bloodAmount);
+                }
             }
         }
 

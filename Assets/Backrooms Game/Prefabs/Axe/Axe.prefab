@@ -109,7 +109,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2541270453876619993}
   m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -1.709768, y: 3.6677818, z: -1.1479467}
+  m_LocalPosition: {x: 0, y: 3.94, z: 0}
   m_LocalScale: {x: 4, y: 4, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -131,6 +131,8 @@ MonoBehaviour:
   damage: 25
   Thrown: 1
   connetedObject: {fileID: 4966944828226584158}
+  WeaponBloodRenderer: {fileID: 1940482127864138767}
+  bloodAmount: 0
 --- !u!65 &4221922569889355948
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -142,8 +144,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.40145326, y: 0.20968992, z: 0.13739178}
-  m_Center: {x: -0.33248708, y: 0.05731514, z: 0.43130413}
+  m_Size: {x: 0.2764911, y: 0.22985908, z: 0.0250945}
+  m_Center: {x: -0.11386997, y: -0.010084584, z: -0.00025343895}
 --- !u!1 &2966975447123519377
 GameObject:
   m_ObjectHideFlags: 0
@@ -303,7 +305,7 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 100466aefc8934d49b6b769cfdac0c37, type: 2}
+  - {fileID: 2100000, guid: dcc7775a7907ccd409c043ce4aef0c30, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -336,8 +338,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.04620252, y: 0.027589215, z: 0.025610138}
-  m_Center: {x: -0.00000823428, y: -0.0024663676, z: 0.00020516338}
+  m_Size: {x: 0.04620252, y: 0.025753967, z: 0.025610138}
+  m_Center: {x: -0.000008234034, y: -0.0015487504, z: 0.00020516307}
 --- !u!1 &4859266044507946077
 GameObject:
   m_ObjectHideFlags: 0
