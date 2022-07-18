@@ -261,7 +261,7 @@ GameObject:
   - component: {fileID: 7683472720911806274}
   - component: {fileID: 2004692976972809449}
   - component: {fileID: 5404452190056775359}
-  m_Layer: 12
+  m_Layer: 6
   m_Name: Profile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6550,7 +6550,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6172414190686351424}
   m_LocalRotation: {x: 0, y: 0.69261265, z: 0, w: 0.7213098}
-  m_LocalPosition: {x: 55, y: 0, z: -55}
+  m_LocalPosition: {x: 2.1903293, y: -5.1155, z: -2.1838818}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6574,11 +6574,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveableData:
-    runTimeID: 1306
+    runTimeID: 7605
     location:
-    - 55
-    - 0
-    - -55
+    - 2.1903293
+    - -5.1155
+    - -2.1838818
     rotationEuler:
     - 0
     - 87.67455
@@ -6622,7 +6622,7 @@ MonoBehaviour:
   stunTime: 2
   eyes: {fileID: 109001933242770219}
   entitySkin: {fileID: 439210178674126766}
-  runTimeID: 1306
+  runTimeID: 7605
   bloodPrefab: {fileID: 3918754750907898147, guid: b177515cfc0a14743b8a32fcf6996c55, type: 3}
   grabLocation: {fileID: 7128770136166274654}
   ragDoll: {fileID: 9106987160413300465, guid: dbaccbbf15b7232458f712bf8e0eaede, type: 3}
@@ -8126,7 +8126,7 @@ GameObject:
   - component: {fileID: 640416725769361016}
   - component: {fileID: 4581006383634730638}
   - component: {fileID: 8293038535632323280}
-  m_Layer: 12
+  m_Layer: 8
   m_Name: Profile
   m_TagString: Untagged
   m_Icon: {fileID: 0}

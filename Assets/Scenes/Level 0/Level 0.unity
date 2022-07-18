@@ -153,6 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c30f24938df0694f8cd27203dbe755b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  globalBloodAndGoreObjects: []
   spawnEntities: 1
   entityAI: 1
   gen_enabled: 1
@@ -176,7 +177,7 @@ MonoBehaviour:
   - {fileID: 472166766898139531, guid: b2f16886182db274c893d59db1b35eda, type: 3}
   - {fileID: 472166766898139531, guid: bd499ec876872cf4e9c56eceae4f96f9, type: 3}
   RegTiles: []
-  propsThatCanSpawnOnThisLevel: 010000000200000007000000
+  propsThatCanSpawnOnThisLevel: 030000000200000008000000
   entitiesThatCanSpawnOnThisLevel: 06000000
   regTileSpace: 0
   seed: 0

@@ -200,6 +200,7 @@ public class InteractionSystem : MonoBehaviour
 	{
 		
 		SetAllChildrenToLayer(player.holding.transform, 9);
+
 		player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
 		player.holding.transform.parent = null;
 		
@@ -214,6 +215,8 @@ public class InteractionSystem : MonoBehaviour
 		player.bodyAnim.SetBool((player.holding.CustomHoldAnimation != "") ? player.holding.CustomHoldAnimation : "isHoldingSmall", value: false);
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
 
+		//player.holding.transform.position += player.head.transform.forward * 1.2f;
+		player.holding.transform.rotation = Quaternion.LookRotation(transform.forward, transform.up);
 		player.holding.Throw(player.head.transform.forward * 400f * player.holding.GetComponent<Rigidbody>().mass);
 
 		player.holding = null;
@@ -221,8 +224,6 @@ public class InteractionSystem : MonoBehaviour
 
 	public void SetHolding()
 	{
-		player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
-
 		if (player.holding.GetComponent<HoldableObject>().large)
 		{
 			SetAllChildrenToLayer(player.holding.transform, 14);
@@ -277,7 +278,6 @@ public class InteractionSystem : MonoBehaviour
 
 	public void SetPlace(Vector3 location, Quaternion rotation)
 	{
-		buildRotationOffset = Quaternion.identity;
 		SetAllChildrenToLayer(player.holding.transform, 9);
 		player.holding.transform.parent = null;
 		player.holding.GetComponent<HoldableObject>().saveableData.instance = player.holding.GetComponent<HoldableObject>();
@@ -305,13 +305,11 @@ public class InteractionSystem : MonoBehaviour
 	private void PickupSystem()
 	{
 
-		if (player.holding == null && Input.GetButton("Hold") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
+		if (player.holding == null && Input.GetButton("Grab") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
 		{
+			//pickup
+			player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
 			SetHolding();
-		}
-		if (Input.GetButtonDown("Place"))
-		{
-			//SetPlace();
 		}
 		if (Input.GetButtonDown("Throw") && player.holding != null && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
 		{
@@ -321,7 +319,7 @@ public class InteractionSystem : MonoBehaviour
 		{
 			SetDrop();
 		}
-		if (currentlyLookingAt != null && currentlyLookingAt.gameObject.tag == "Usable" && Input.GetButtonDown("Hold"))
+		if (currentlyLookingAt != null && currentlyLookingAt.gameObject.tag == "Usable" && Input.GetButtonDown("Grab"))
 		{
 			currentlyLookingAt.Use(this, false);
 		}
@@ -455,7 +453,7 @@ public class InteractionSystem : MonoBehaviour
 
 					}
 
-					buildRotationOffset = Quaternion.Euler(currentRotX, 1, currentRotZ);
+					buildRotationOffset = Quaternion.Euler(currentRotX, 0, currentRotZ);
 				}
 
 				if (player.holding.canPlace && Input.GetMouseButtonDown(1) && currentPlaceItemPrefab != null)
@@ -464,6 +462,9 @@ public class InteractionSystem : MonoBehaviour
                     {
 						Destroy(currentPlaceItemPrefab.gameObject);
 						SetPlace(currentPlaceItemPrefab.transform.position, currentPlaceItemPrefab.transform.rotation);
+						currentRotX = 0;
+						currentRotZ = 0;
+						buildRotationOffset = Quaternion.identity;
 						currentPlaceItemPrefab = null;
 					}
 					

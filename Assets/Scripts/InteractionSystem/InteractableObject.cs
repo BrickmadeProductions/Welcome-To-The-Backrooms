@@ -131,6 +131,7 @@ public abstract class InteractableObject : MonoBehaviour
 public enum OBJECT_TYPE
 {
 	KNIFE,
+	AXE,
 	CHAIR,
 	ALMOND_WATER,
 	SCREWDRIVER,
@@ -141,5 +142,7 @@ public enum OBJECT_TYPE
 	SHIV_BOXCUTTER,
 	BIGSPOON,
 	SPEAR,
-	METAL_LADDER
+	METAL_LADDER,
+	ROPE_COIL,
+	ROPE_TIED
 }

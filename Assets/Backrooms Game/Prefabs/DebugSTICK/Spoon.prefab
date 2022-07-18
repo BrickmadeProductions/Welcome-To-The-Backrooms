@@ -29,6 +29,7 @@ Transform:
   m_LocalRotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: -0.02, y: 0.2, z: 0.094}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8046710371330247938}
   m_Father: {fileID: 0}
@@ -69,7 +70,7 @@ MonoBehaviour:
     parentName: 
     type: 0
     instance: {fileID: 0}
-  type: 6
+  type: 10
   playSounds: 0
   spawnChance: 0
   runTimeID: 
@@ -79,7 +80,10 @@ MonoBehaviour:
   breakClips: []
   inventoryWeight: 1
   holdableObject: {fileID: 0}
+  ThrowMultiplier: 0
   large: 0
+  canPlace: 0
+  isPlaced: 0
   animationPlaying: 0
   LMBAnimationClips:
   - {fileID: 1221074250055787942, guid: c3da10c4a15ca9244bab8ba9a82842e0, type: 3}
@@ -133,6 +137,7 @@ Transform:
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 0.39}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6758846232974650792}
   m_RootOrder: 0
@@ -156,6 +161,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -212,4 +218,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 1000
+  Thrown: 0
   connetedObject: {fileID: 2191815337994174661}

@@ -83,14 +83,14 @@ public class HoldableObject : InteractableObject
 
 	public override void Use(InteractionSystem player, bool LMB)
 	{
-		if (!animationPlaying && LMBAnimationBools.Count > 0 && RMBAnimationBools.Count > 0)
+		if (!animationPlaying)
 		{
-			if (LMB)
+			if (LMB && LMBAnimationBools.Count > 0)
 			{
 				int choice = Random.Range(0, LMBAnimationBools.Count);
 				StartCoroutine(playAnimation(LMBAnimationBools[choice], choice, LMB));
 			}
-			else
+			else if (!LMB && RMBAnimationBools.Count > 0)
 			{
 				int choice = Random.Range(0, RMBAnimationBools.Count);
 				StartCoroutine(playAnimation(RMBAnimationBools[choice], choice, LMB));

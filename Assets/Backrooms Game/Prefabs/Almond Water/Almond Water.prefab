@@ -451,7 +451,7 @@ MonoBehaviour:
     parentName: 
     type: 0
     instance: {fileID: 0}
-  type: 2
+  type: 3
   playSounds: 1
   spawnChance: 0.05
   runTimeID: 
@@ -467,7 +467,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 5112c95477f193b4b9fe637b9d43eafe, type: 3}
   inventoryWeight: 1
   holdableObject: {fileID: 0}
+  ThrowMultiplier: 0
   large: 0
+  canPlace: 0
+  isPlaced: 0
   animationPlaying: 0
   LMBAnimationClips:
   - {fileID: -1785242027413151391, guid: c3da10c4a15ca9244bab8ba9a82842e0, type: 3}
