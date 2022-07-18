@@ -30,7 +30,7 @@ public class Weapon : MonoBehaviour
                 }
                 limb.attachedEntity.health -= (damage * limb.damageMultiplier);
                 limb.Stabbed(collisionPoint);
-                if (bloodAmount > 1)
+                if (bloodAmount < 1)
                 {
                     bloodAmount += 0.04f;
                     WeaponBloodRenderer.material.SetFloat("_Wetness", bloodAmount);
@@ -53,7 +53,7 @@ public class Weapon : MonoBehaviour
                 }
                 limb.attachedEntity.health -= (damage * limb.damageMultiplier);
                 limb.Stabbed(collisionPoint);
-                if (bloodAmount > 1)
+                if (bloodAmount < 1)
                 {
                     bloodAmount += 0.04f;
                     WeaponBloodRenderer.material.SetFloat("_Wetness", bloodAmount);

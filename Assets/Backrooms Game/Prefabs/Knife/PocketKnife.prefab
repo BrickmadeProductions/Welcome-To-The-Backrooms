@@ -108,9 +108,9 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3112293390807234616}
-  m_LocalRotation: {x: -0.05992544, y: -0.011323735, z: -0.0639094, w: 0.99609053}
-  m_LocalPosition: {x: 0.021, y: 0.058, z: -0.007}
-  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_LocalRotation: {x: -0.059925497, y: -0.011323735, z: -0.0639094, w: 0.9960906}
+  m_LocalPosition: {x: 0.020999914, y: 0.058000006, z: -0.0069999755}
+  m_LocalScale: {x: 9.999998, y: 9.999998, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4039173832119317758}
@@ -451,4 +451,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damage: 15
   Thrown: 0
-  connetedObject: {fileID: 0}
+  connetedObject: {fileID: 5174651668802718682}
+  WeaponBloodRenderer: {fileID: 2147181769708924259}
+  bloodAmount: 0

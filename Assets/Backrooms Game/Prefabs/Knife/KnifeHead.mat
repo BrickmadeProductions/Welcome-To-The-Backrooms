@@ -2,14 +2,18 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: KnifeHead
   m_Shader: {fileID: 4800000, guid: ae8f8cbbb959d0845a3c6127cc533cb4, type: 3}
-  m_ShaderKeywords: _DETAIL_MULX2 _METALLICGLOSSMAP _NORMALMAP
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _DETAIL_MULX2
+  - _METALLICGLOSSMAP
+  - _NORMALMAP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -73,8 +77,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _WetMap:
         m_Texture: {fileID: 2800000, guid: 917fdae2901dfe14b99ba7680e8f88a6, type: 3}
-        m_Scale: {x: 2, y: 2}
-        m_Offset: {x: 0, y: 0}
+        m_Scale: {x: 1.99, y: 0.73}
+        m_Offset: {x: 0.03, y: 0.6}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -87,6 +91,7 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - _AlphaClip: 0
     - _Blend: 0
@@ -115,9 +120,9 @@ Material:
     - _SrcBlend: 1
     - _Surface: 0
     - _UVSec: 0
-    - _WetMetallic: 0.9
-    - _WetSmoothness: 0.77
-    - _Wetness: 0.4
+    - _WetMetallic: 0.917
+    - _WetSmoothness: 0.811
+    - _Wetness: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
@@ -125,7 +130,7 @@ Material:
     - _Color: {r: 0.31132078, g: 0.31132078, b: 0.31132078, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.74612856, g: 0.74612856, b: 0.764151, a: 1}
-    - _WetColor: {r: 0.3018868, g: 0.2973202, b: 0.25774297, a: 1}
+    - _WetColor: {r: 0.4528302, g: 0, b: 0.042320468, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &3311774729747653272
 MonoBehaviour:
