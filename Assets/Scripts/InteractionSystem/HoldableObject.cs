@@ -58,7 +58,8 @@ public class HoldableObject : InteractableObject
 
 	public override void Throw(Vector3 force)
 	{
-		holdableObject.AddForceAtPosition(force * ThrowMultiplier, transform.position);
+		holdableObject.velocity = force * ThrowMultiplier;
+		//holdableObject.AddForce();
 	}
 
 	private IEnumerator playAnimation(string boolName, int animChosen, bool LMB)

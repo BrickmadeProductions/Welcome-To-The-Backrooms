@@ -11,7 +11,7 @@ public class ThrowWeapon : HoldableObject
 
     public void OnTriggerEnter(Collider hit)
     {
-        if (hit.gameObject.layer != 11)
+        if (hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6)
         {
             stuckInWall = true;
         }
@@ -19,7 +19,7 @@ public class ThrowWeapon : HoldableObject
 
     public void OnTriggerStay(Collider hit)
     {
-        if (hit.gameObject.layer != 11 && stuckInWall)
+        if (hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6 && stuckInWall)
         {
             Flying = false;
             holdableObject.isKinematic = true;
@@ -48,7 +48,8 @@ public class ThrowWeapon : HoldableObject
     public override void Throw(Vector3 force)
     {
         base.Throw(force);
-        holdableObject.AddForceAtPosition(force * rotationAmount, transform.up * 2);
+        holdableObject.angularVelocity = holdableObject.transform.right * rotationAmount;
+        //holdableObject.AddForceAtPosition(, transform.up * 2);
         Flying = true;
         holdableObject.isKinematic = false;
         //Debug.Log("Gran And Set To False");

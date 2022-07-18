@@ -24,7 +24,7 @@ public class Weapon : MonoBehaviour
 
             if (limb != null)
             {
-                if (!limb.attachedEntity.stunned)
+                if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.3f)
                 {
                     StartCoroutine(limb.attachedEntity.StunTimer());
                 }
@@ -47,7 +47,7 @@ public class Weapon : MonoBehaviour
             AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
             if (limb != null)
             {
-                if (!limb.attachedEntity.stunned && limb.attachedEntity.health < limb.attachedEntity.maxHealth % 4)
+                if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.3f)
                 {
                     StartCoroutine(limb.attachedEntity.StunTimer());
                 }

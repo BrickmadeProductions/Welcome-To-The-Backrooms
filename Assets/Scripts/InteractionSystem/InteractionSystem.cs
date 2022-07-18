@@ -217,7 +217,7 @@ public class InteractionSystem : MonoBehaviour
 
 		//player.holding.transform.position += player.head.transform.forward * 1.2f;
 		player.holding.transform.rotation = Quaternion.LookRotation(transform.forward, transform.up);
-		player.holding.Throw(player.head.transform.forward * 400f * player.holding.GetComponent<Rigidbody>().mass);
+		player.holding.Throw(player.head.transform.forward * player.holding.ThrowMultiplier * player.holding.GetComponent<Rigidbody>().mass);
 
 		player.holding = null;
 	}
