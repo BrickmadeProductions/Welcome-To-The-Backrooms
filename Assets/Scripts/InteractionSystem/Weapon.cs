@@ -17,19 +17,24 @@ public class Weapon : MonoBehaviour
          */
         Vector3 collisionPoint = other.gameObject.GetComponent<Collider>().ClosestPointOnBounds(transform.position);
 
-
+        //melee attacks
         if (gameObject.layer == 13 && other.gameObject.layer == 18 && connetedObject.animationPlaying)
         {
             AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
 
             if (limb != null)
             {
-                if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.3f)
+                Entity entityHit = limb.attachedEntity;
+
+                if (!entityHit.stunned && Random.Range(0f, 1f) < 0.3f)
                 {
-                    StartCoroutine(limb.attachedEntity.StunTimer());
+                    StartCoroutine(entityHit.StunTimer());
                 }
-                limb.attachedEntity.health -= (damage * limb.damageMultiplier);
+
+                entityHit.health -= (damage * limb.damageMultiplier);
+
                 limb.Stabbed(collisionPoint);
+
                 if (bloodAmount < 1)
                 {
                     bloodAmount += 0.04f;
@@ -41,18 +46,24 @@ public class Weapon : MonoBehaviour
             
             
         }
-        else if (other.gameObject.layer == 18 && Thrown)
+        //thrown attacks
+        else if (gameObject.layer == 9 && other.gameObject.layer == 18 && Thrown)
         {
             //Debug.Log("Player Attack");
             AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
             if (limb != null)
             {
-                if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.3f)
+                Entity entityHit = limb.attachedEntity;
+
+                if (!entityHit.stunned && Random.Range(0f, 1f) < 0.6f)
                 {
-                    StartCoroutine(limb.attachedEntity.StunTimer());
+                    StartCoroutine(entityHit.StunTimer());
                 }
-                limb.attachedEntity.health -= (damage * limb.damageMultiplier);
+
+                //add more for thrown attacks
+                entityHit.health -= (damage * limb.damageMultiplier * 1.5f);
                 limb.Stabbed(collisionPoint);
+
                 if (bloodAmount < 1)
                 {
                     bloodAmount += 0.04f;

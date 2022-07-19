@@ -162,21 +162,19 @@ public class PartygoerAI : Entity
 
         }
     }
-    public override void Despawn()
+    public override void Kill()
     {
         GameSettings.Instance.Player.GetComponent<CharacterController>().enabled = true;
         GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Choking", false);
         GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canRun = true;
         GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = true;
         GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canWalk = true;
+        GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canCrouch = true;
 
-        Debug.Log("Despawned " + type.ToString() + "-" + runTimeID);
         GameObject ragDollInstance = Instantiate(ragDoll);
 
         ragDollInstance.transform.position = transform.position;
         ragDollInstance.transform.rotation = transform.rotation;
-
-        GameSettings.Instance.worldInstance.RemoveEntity(type.ToString() + "-" + runTimeID);
 
         Destroy(gameObject);
 
@@ -200,6 +198,7 @@ public class PartygoerAI : Entity
             GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canRun = false;
             GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = false;
             GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canWalk = false;
+            GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canCrouch = false;
 
             Vector3 attackDirection = Vector3.RotateTowards(transform.forward, targetDirection, 1f, 1f);
             eyes.transform.rotation = Quaternion.LookRotation(attackDirection);
@@ -212,6 +211,8 @@ public class PartygoerAI : Entity
         {
             GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = true;
             GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canWalk = true;
+            GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canCrouch = true;
+
             GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Choking", false);
         }
 

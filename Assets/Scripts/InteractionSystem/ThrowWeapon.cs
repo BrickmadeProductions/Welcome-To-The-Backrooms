@@ -8,30 +8,38 @@ public class ThrowWeapon : HoldableObject
     public LayerMask tipLayerMask;
     public float rotationAmount;
     public bool stuckInWall;
+    public AudioClip[] stuckSounds;
+
 
     public void OnTriggerEnter(Collider hit)
     {
-        if (hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6)
+        
+        if (hit.gameObject.layer != 13 && hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6 && !stuckInWall && Flying)
         {
+            Debug.Log(hit.name);
+            AudioSource.PlayClipAtPoint(stuckSounds[Random.Range(0, stuckSounds.Length)], hit.transform.position);
+
+            Flying = false;
+
+            holdableObject.constraints = RigidbodyConstraints.FreezeAll;
+
             stuckInWall = true;
         }
     }
 
-    public void OnTriggerStay(Collider hit)
+/*    public void OnTriggerStay(Collider hit)
     {
         if (hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6 && stuckInWall)
         {
-            Flying = false;
-            holdableObject.isKinematic = true;
+            
         }
-    }
+    }*/
     public void OnTriggerExit(Collider hit)
     { 
-        if (transform.parent == null)
-        {
-            holdableObject.isKinematic = false;
-            stuckInWall = false;
-        }
+        
+        holdableObject.constraints = RigidbodyConstraints.None;
+        stuckInWall = false;
+        
         
 
     }

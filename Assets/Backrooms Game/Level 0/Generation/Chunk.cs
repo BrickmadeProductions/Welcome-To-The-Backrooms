@@ -78,7 +78,7 @@ public class Chunk : MonoBehaviour
 		}
 		else
 		{
-			StartCoroutine(GenerateRandomMap(3));
+			StartCoroutine(GenerateRandomMap(2));
 		}
 	}
 
@@ -90,6 +90,7 @@ public class Chunk : MonoBehaviour
 
 	internal void UpdateChunkData()
 	{
+
 	}
 
 	private void CreateTileset(List<GameObject> tiles)

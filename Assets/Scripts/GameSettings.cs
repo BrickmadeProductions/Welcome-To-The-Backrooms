@@ -477,10 +477,18 @@ public class GameSettings : MonoBehaviour, ISaveable
 		}
 	}
 
-	public void ExitGame()
+	public IEnumerator ExitGame()
 	{
+		SaveAllProgress();
+		yield return new WaitUntil(() => !IS_SAVING);
+		Debug.Log("All Data Saved Before Quit");
 		Application.Quit();
 	}
+
+	void OnApplicationQuit()
+    {
+		StartCoroutine(ExitGame());
+    }
 
 	public void HomeScreen()
 	{
@@ -656,9 +664,11 @@ public class GameSettings : MonoBehaviour, ISaveable
 			bloodAndGoreObject.SetActive(io);
         }
     }
-	public static void SaveAllProgress()
+	public void SaveAllProgress()
 	{
 		IS_SAVING = true;
+		/*if (worldInstance != null)
+		worldInstance.SaveAllObjectsAndEntities();*/
 
 		SaveMaster.SyncSave();
 		Debug.Log("Saved All Data!");
@@ -893,7 +903,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		LEVEL_LOADED = true;
 
-		if (ActiveScene != SCENE.ROOM && player != null)
+		if (ActiveScene != SCENE.ROOM && player != null && player.GetComponent<PlayerHealthSystem>() != null)
 		{
 			player.GetComponent<PlayerHealthSystem>().WakeUpOther();
 		}

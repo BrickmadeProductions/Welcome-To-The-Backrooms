@@ -17,6 +17,8 @@ public class InteractionSystem : MonoBehaviour
 
 	private bool canPlaceAtLocation;
 
+	bool buildOn;
+
 	private PlayerController player;
 
 	public InteractableObject currentlyLookingAt;
@@ -43,6 +45,7 @@ public class InteractionSystem : MonoBehaviour
 
 	private void Awake()
 	{
+		buildOn = false;
 		transparentPlaceMaterialGood = Resources.Load("Materials/TransparentPlaceMaterialGood", typeof(Material)) as Material;
 		transparentPlaceMaterialCollision = Resources.Load("Materials/TransparentPlaceMaterialCollision", typeof(Material)) as Material;
 		inventorySlots = new List<HoldableObject>();
@@ -67,6 +70,8 @@ public class InteractionSystem : MonoBehaviour
 
 	private void SetAllCollidersToTrigger(Transform top)
 	{
+		//Destroy(top.GetComponent<Rigidbody>());
+
 		foreach (Transform item in top)
 		{
 			if (item.childCount > 0)
@@ -101,8 +106,8 @@ public class InteractionSystem : MonoBehaviour
 
 	private bool CheckForCollision(Transform trans)
 	{
-		Debug.Log(trans.childCount);
-		Debug.Log(trans.name);
+		//Debug.Log(trans.childCount);
+		//Debug.Log(trans.name);
 		foreach (Transform item in trans.GetChild(0))
 		{
 			if (item.childCount > 0)
@@ -217,11 +222,14 @@ public class InteractionSystem : MonoBehaviour
 
 		//player.holding.transform.position += player.head.transform.forward * 1.2f;
 		player.holding.transform.rotation = Quaternion.LookRotation(transform.forward, transform.up);
-		player.holding.Throw(player.head.transform.forward * player.holding.ThrowMultiplier * player.holding.GetComponent<Rigidbody>().mass);
+		player.holding.Throw(player.head.transform.forward * ((player.GetComponent<CharacterController>().velocity.magnitude / 10) + 1) * player.holding.ThrowMultiplier * player.holding.GetComponent<Rigidbody>().mass);
 
 		player.holding = null;
+
+	    //player.bodyAnim.SetBool("isThrowing", false);
 	}
 
+	//raycast can go through multiple objects
 	public void SetHolding()
 	{
 		if (player.holding.GetComponent<HoldableObject>().large)
@@ -304,21 +312,42 @@ public class InteractionSystem : MonoBehaviour
 
 	private void PickupSystem()
 	{
-
-		if (player.holding == null && Input.GetButton("Grab") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
+		if (Input.GetButton("Grab") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
 		{
 			//pickup
 			player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
 			SetHolding();
 		}
-		if (Input.GetButtonDown("Throw") && player.holding != null && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
-		{
-			SetThrow();
+
+		if (player.holding != null)
+        {
+
+			if (Input.GetMouseButton(1) && !player.bodyAnim.GetBool("isPreparingThrow") && !player.bodyAnim.GetBool("isThrowing"))
+			{
+				player.bodyAnim.SetBool("isPreparingThrow", true);
+			}
+
+			/*if (Input.GetButtonDown("Throw") && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
+			{
+				SetThrow();
+			}*/
+			if (Input.GetMouseButtonUp(1))
+			{
+				//Debug.Log("Throw");
+				
+				player.bodyAnim.SetBool("isPreparingThrow", false);
+				player.bodyAnim.SetTrigger("isThrowing");
+				SetThrow();
+			}
+
+			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
+			{
+				SetDrop();
+			}
 		}
-		else if (Input.GetButtonDown("Drop") && player.holding != null && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
-		{
-			SetDrop();
-		}
+
+		
+
 		if (currentlyLookingAt != null && currentlyLookingAt.gameObject.tag == "Usable" && Input.GetButtonDown("Grab"))
 		{
 			currentlyLookingAt.Use(this, false);
@@ -340,10 +369,10 @@ public class InteractionSystem : MonoBehaviour
 				player.holding.Use(this, LMB: true);
 			}
 		}
-		else if (Input.GetMouseButtonDown(1) && player.holding != null)
+		/*else if (Input.GetMouseButtonDown(1) && player.holding != null)
 		{
 			player.holding.Use(this, LMB: false);
-		}
+		}*/
 	}
 
 	private void Update()
@@ -394,11 +423,12 @@ public class InteractionSystem : MonoBehaviour
 
 		if (raycastForPlacing.Length != 0)
 		{
-			if (player.holding != null && player.holding.canPlace)
+			if (player.holding != null)
 			{
 				if (currentPlaceItemPrefab == null)
 				{
 					InteractableObject heldObjectTemplate = null;
+
 					GameSettings.Instance.PropDatabase.TryGetValue(player.holding.type, out heldObjectTemplate);
 
 					currentPlaceItemPrefab = Instantiate(heldObjectTemplate.gameObject);
@@ -414,7 +444,9 @@ public class InteractionSystem : MonoBehaviour
 
 					currentPlaceItemPrefab.transform.position = raycastForPlacing[0].point;
 					currentPlaceItemPrefab.transform.rotation = player.transform.localRotation * buildRotationOffset;
-					Debug.Log(CheckForCollision(currentPlaceItemPrefab.transform));
+
+					//Debug.Log(CheckForCollision(currentPlaceItemPrefab.transform));
+
 					if (CheckForCollision(currentPlaceItemPrefab.transform))
                     {
 						canPlaceAtLocation = false;
@@ -455,8 +487,13 @@ public class InteractionSystem : MonoBehaviour
 
 					buildRotationOffset = Quaternion.Euler(currentRotX, 0, currentRotZ);
 				}
+				if (Input.GetButtonDown("ToggleBuilding"))
+                {
+					buildOn = !buildOn;
+                }
+					
 
-				if (player.holding.canPlace && Input.GetMouseButtonDown(1) && currentPlaceItemPrefab != null)
+				if (Input.GetMouseButtonDown(1) && currentPlaceItemPrefab != null && buildOn)
 				{
 					if (canPlaceAtLocation)
                     {
@@ -467,11 +504,19 @@ public class InteractionSystem : MonoBehaviour
 						buildRotationOffset = Quaternion.identity;
 						currentPlaceItemPrefab = null;
 					}
-					
 
 				}
 			}
 
+		}
+
+		if ((player.holding == null || !buildOn) && currentPlaceItemPrefab != null)
+		{
+			Destroy(currentPlaceItemPrefab.gameObject);
+			currentRotX = 0;
+			currentRotZ = 0;
+			buildRotationOffset = Quaternion.identity;
+			currentPlaceItemPrefab = null;
 		}
 
 

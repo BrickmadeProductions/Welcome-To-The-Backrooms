@@ -185,10 +185,10 @@ public abstract class Entity : MonoBehaviour
 	{
 		UpdateEntity();
 
-		if ((Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > (float)despawnDistance && !isDespawned) || health <= 0f)
+		if ((Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > despawnDistance && !isDespawned) || health <= 0f)
 		{
-			Despawn();
 			isDespawned = true;
+			GameSettings.Instance.worldInstance.RemoveEntity(type.ToString() + "-" + runTimeID);
 			return;
 		}
 		Vector3 position = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.position;
@@ -226,11 +226,14 @@ public abstract class Entity : MonoBehaviour
 
 	public abstract IEnumerator AI();
 
-	public abstract void Despawn();
+	public abstract void Kill();
 
 	public void OnDestroy()
 	{
-		
+		Debug.Log("Despawned " + type.ToString() + "-" + runTimeID);
+
+		//GameSettings.Instance.worldInstance.RemoveEntity(type.ToString() + "-" + runTimeID);
+
 	}
 }
 

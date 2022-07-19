@@ -120,7 +120,9 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     public bool OnSaveCondition()
     {
+        
         return GameSettings.Instance.AmInSavableScene();
+
     }
 
     public GameObject playerRagDoll;
@@ -172,6 +174,8 @@ public class PlayerController : MonoBehaviour, ISaveable
     public AudioClip woodFootStep;
     public AudioClip metalFootStep;
 
+    //swing noises
+    public AudioClip[] swingSounds;
 
     //fov editingi
     private float _FOVOFFSET;
@@ -289,7 +293,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
                     moveDirection.y = jumpSpeed;
 
-                if (Input.GetButton("Crouch"))
+                if (Input.GetButton("Crouch") && playerHealth.canCrouch)
                 {
 
                     Crouch();
@@ -309,8 +313,6 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     private void FixedUpdate()
     {
-
-        //probe.RenderProbe();
     }
 
     

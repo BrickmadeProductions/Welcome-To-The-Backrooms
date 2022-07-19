@@ -139,24 +139,23 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	private void Awake()
 	{
-		
-		GameSettings.Instance.worldInstance = this;
-
 		globalBloodAndGoreObjects = new List<GameObject>();
 
 		seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
 		Begin();
 	}
-
-	public IEnumerator SaveDataEveryXMinutes(float minutes)
+    private void Start()
+    {
+		GameSettings.Instance.worldInstance = this;
+	}
+    public IEnumerator SaveDataEveryXMinutes(float minutes)
 	{
 		while (true)
 		{
 			yield return new WaitForSecondsRealtime(minutes * 60f);
 			yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
 			yield return new WaitUntil(() => !GameSettings.IS_SAVING);
-			SaveAllObjectsAndEntities();
-			GameSettings.SaveAllProgress();
+			GameSettings.Instance.SaveAllProgress();
 		}
 	}
 
@@ -292,32 +291,34 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			foreach (KeyValuePair<string, SaveableProp> propClusterData in serealizedChunks.Value.propData.propClusterData)
 			{
-				propsFromOtherScenes.Add(propClusterData.Key, propClusterData.Value);
+				if (!propsFromOtherScenes.ContainsKey(propClusterData.Key))
+
+					propsFromOtherScenes.Add(propClusterData.Key, propClusterData.Value);
 			}
 		}
 
 		//load in objets brought from other scenes
 		foreach (InteractableObject iObject in FindObjectsOfType<InteractableObject>())
 		{
-			if (!propsFromOtherScenes.ContainsKey(iObject.saveableData.type.ToString() + "-" + iObject.saveableData.runTimeID))
+			if (!propsFromOtherScenes.ContainsKey(iObject.saveableData.type + "-" + iObject.saveableData.runTimeID))
 			{
 				iObject.GenerateID(this);
 
-				Vector3 position = GetChunkKeyAtWorldLocation(iObject.transform.position);
+				Vector3Int position = GetChunkKeyAtWorldLocation(iObject.transform.position);
 
 				string key = position.x + "," + position.y + "," + position.z;
 
-				string key2 = iObject.type.ToString() + "-" + iObject.runTimeID;
+				string key2 = iObject.type + "-" + iObject.runTimeID;
 
 				allChunks[key].propData.propClusterData.Add(key2, iObject.saveableData);
 
-				Debug.Log("Loaded over a " + iObject.type.ToString() + " From other scene..");
+				Debug.Log("Loaded over a " + iObject.type + " From other scene..");
 			}
 		}
 
 		GameSettings.LEVEL_SAVE_LOADED = true;
 
-		StartCoroutine(SaveDataEveryXMinutes(0.05f));
+		StartCoroutine(SaveDataEveryXMinutes(1f));
 		StartCoroutine(TrySpawnEntityEveryFrame());
 
 		Debug.Log("Done With Spawn Region");
@@ -330,7 +331,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public string OnSave()
 	{
-		
 		WorldSaveData worldSaveData = new WorldSaveData
 		{
 			savedSeed = seed,
@@ -455,6 +455,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				loadedChunks.Remove(loadedChunk.Key);
 
 				Destroy(chunk.gameObject);
+
 				SaveAllObjectsAndEntities();
 			}
 		}
@@ -580,12 +581,13 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		if (entityCount < entity.maxAllowed && totalEntities <= 50)
 		{
-			Entity entityComponent = Instantiate(entity);
-			entityComponent.GenerateID(this);
-			entityComponent.gameObject.transform.position = position;
-			chunk.saveableData.entityData.entityClusterData.Add(entityComponent.type.ToString() + "-" + entityComponent.runTimeID, entityComponent.Save());
+			Entity newEntity = Instantiate(entity.gameObject).GetComponent<Entity>();
 
-			return entityComponent;
+			newEntity.GenerateID(this);
+			newEntity.gameObject.transform.position = position;
+			chunk.saveableData.entityData.entityClusterData.Add(newEntity.type.ToString() + "-" + newEntity.runTimeID, newEntity.Save());
+
+			return newEntity;
 		}
 		return null;
 	}
@@ -599,11 +601,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			GameSettings.Instance.EntityDatabase.TryGetValue(entityData.type, out entityToSpawn);
 
-			Entity entity = Instantiate(entityToSpawn);
+			Entity entity = Instantiate(entityToSpawn.gameObject).GetComponent<Entity>();
 
-			entityToSpawn.Load(entityData);
+			entity.Load(entityData);
 
-			chunk.saveableData.entityData.entityClusterData[entityToSpawn.type.ToString() + "-" + entityToSpawn.runTimeID] = entityToSpawn.saveableData;
+			chunk.saveableData.entityData.entityClusterData[entity.type.ToString() + "-" + entity.runTimeID] = entity.saveableData;
 
 			return entityToSpawn;
 
@@ -620,7 +622,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			{
 				loadedChunk.Value.saveableData.entityData.entityClusterData.TryGetValue(key, out var entityDataLoaded);
 
-				Destroy(entityDataLoaded.instance.gameObject);
+				entityDataLoaded.instance.Kill();
 
 				Debug.Log(loadedChunk.Value.saveableData.entityData.entityClusterData.Remove(key));
 
@@ -637,7 +639,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			{
 				allChunk.Value.entityData.entityClusterData.TryGetValue(key, out var entityDataAll);
 
-				Destroy(entityDataAll.instance.gameObject);
+				entityDataAll.instance.Kill();
 
 				Debug.Log(allChunk.Value.entityData.entityClusterData.Remove(key));
 
@@ -715,7 +717,9 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			prop.gameObject.transform.rotation = rotation;
 
-			chunk.saveableData.propData.propClusterData.Add(prop.type.ToString() + "-" + prop.runTimeID, prop.Save());
+			if (!chunk.saveableData.propData.propClusterData.ContainsKey(prop.type.ToString() + "-" + prop.runTimeID))
+
+				chunk.saveableData.propData.propClusterData.Add(prop.type.ToString() + "-" + prop.runTimeID, prop.Save());
 
 			return prop;
 		}
@@ -726,11 +730,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	{
 		if (GameSettings.Instance.PropDatabase.ContainsKey(savedObjectData.type))
 		{
-			InteractableObject databaseObject = null;
+			InteractableObject databaseObject;
 
 			GameSettings.Instance.PropDatabase.TryGetValue(savedObjectData.type, out databaseObject);
 
-			InteractableObject spawnedObject = Instantiate(databaseObject);
+			InteractableObject spawnedObject = Instantiate(databaseObject.gameObject).GetComponent<InteractableObject>();
 
 			spawnedObject.Load(savedObjectData);
 
@@ -767,11 +771,14 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			{
 				allChunks.Value.propData.propClusterData.TryGetValue(key, out var propDataLoaded);
 
-				Destroy(propDataLoaded.instance.gameObject);
+				//most likely in loaded chunks and was removed already
+				if (propDataLoaded.instance.gameObject != null)
+                {
+					Destroy(propDataLoaded.instance.gameObject);
 
-				Debug.Log(allChunks.Value.propData.propClusterData.Remove(key));
-
-				return true;
+					Debug.Log(allChunks.Value.propData.propClusterData.Remove(key));
+					return true;
+				}
 
 			}
 
@@ -983,9 +990,12 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		}
 		Debug.Log("Saved All World Data...");
 	}
-
-	private void OnApplicationQuit()
-	{
-		Debug.Log("Shutting Down");
-	}
+	void OnApplicationQuit()
+    {
+		SaveAllObjectsAndEntities();
+    }
+	void OnDestroy()
+    {
+		SaveAllObjectsAndEntities();
+    }
 }
