@@ -272,7 +272,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			{
 				for (int y = (ThreeDimensional ? (newPlayerChunkLocation.y - layerDistance) : 0); y < ((!ThreeDimensional) ? 1 : (newPlayerChunkLocation.y + layerDistance)); y++)
 				{
-					GameObject chunk = GenerateChunk(x, y, z, shouldGenInstantly: true);
+					Chunk chunk = LoadInChunk(x, y, z, shouldGenInstantly: true);
 
 					if (chunk != null)
 					{
@@ -323,10 +323,10 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		Debug.Log("Done With Spawn Region");
 	}
 
-	private void Update()
+	/*private void Update()
 	{
-		UpdateChunks();
-	}
+		//UpdateChunks();
+	}*/
 
 	public string OnSave()
 	{
@@ -395,37 +395,41 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		return false;
 	}
 
-	private void TryGenChunks()
+	private void UpdateChunks()
 	{
 		newPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
+
 		if (newPlayerChunkLocation != oldPlayerChunkLocation && !isLoadingChunks)
 		{
 			isLoadingChunks = true;
 
-			for (int i = newPlayerChunkLocation.x - viewDistance; i < newPlayerChunkLocation.x + viewDistance; i++)
+			for (int x = newPlayerChunkLocation.x - viewDistance; x < newPlayerChunkLocation.x + viewDistance; x++)
 			{
-				for (int j = newPlayerChunkLocation.z - viewDistance; j < newPlayerChunkLocation.z + viewDistance; j++)
+				for (int z = newPlayerChunkLocation.z - viewDistance; z < newPlayerChunkLocation.z + viewDistance; z++)
 				{
-					for (int k = (ThreeDimensional ? (newPlayerChunkLocation.y - layerDistance) : 0); k < ((!ThreeDimensional) ? 1 : (newPlayerChunkLocation.y + layerDistance)); k++)
+					for (int y = (ThreeDimensional ? (newPlayerChunkLocation.y - layerDistance) : 0); y < ((!ThreeDimensional) ? 1 : (newPlayerChunkLocation.y + layerDistance)); y++)
 					{
-						if (GenerateChunk(i, k, j, shouldGenInstantly: false) != null)
+						Chunk chunk = LoadInChunk(x, y, z, shouldGenInstantly: false);
+						
+						if (chunk != null)
 						{
+							foreach (Tile tile in chunk.tile_grid)
+                            {
+								tile.SpawnPresetProps();
+                            }
 							currentChunkNumber++;
 						}
 					}
 				}
 			}
-			ManageLoadedChunks();
+			UnloadChunks();
 			isLoadingChunks = false;
 		}
+
 		oldPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
 	}
 
-	/*if (RJC.CanSee(Wahoo)){
-		return UglyAssHeadass;
-	}*/
-
-	public void ManageLoadedChunks()
+	public void UnloadChunks()
 	{
 		foreach (KeyValuePair<string, Chunk> loadedChunk in loadedChunks.ToArray())
 		{
@@ -455,6 +459,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				loadedChunks.Remove(loadedChunk.Key);
 
 				Destroy(chunk.gameObject);
+
 				SaveAllObjectsAndEntities();
 			}
 		}
@@ -462,10 +467,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		
 	}
 
-	private GameObject GenerateChunk(int chunkX, int chunkY, int chunkZ, bool shouldGenInstantly)
+	private Chunk LoadInChunk(int chunkX, int chunkY, int chunkZ, bool shouldGenInstantly)
 	{
-		
-
 		if (!ChunkLocationLoaded(chunkX, chunkY, chunkZ))
 		{
 			Debug.Log("Chunk Gen");
@@ -482,7 +485,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			StartCoroutine(LoadInObjectsAndEntities(chunk));
 
-			return chunk.gameObject;
+			return chunk;
 		}
 		return null;
 	}
@@ -519,19 +522,19 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			Tile tile = chunk.tile_grid[tileIndex];
 
-			foreach (Transform propSpawnLocation in tile.propSpawnLocations)
+			foreach (Transform propSpawnLocation in tile.randomPropSpawnLocations)
 			{
 				float spawnChanceSelection = UnityEngine.Random.Range(0f, 1.01f);
 
 				foreach (KeyValuePair<OBJECT_TYPE, InteractableObject> prop in levelPropDatabase.ToArray())
 				{
-					UnityEngine.Random.Range(0, tile.propSpawnLocations.Count);
+					UnityEngine.Random.Range(0, tile.randomPropSpawnLocations.Count);
 
-					if (prop.Value.spawnChance < spawnChanceSelection && tile.propSpawnLocations.Count > 0)
+					if (prop.Value.spawnChance < spawnChanceSelection && tile.randomPropSpawnLocations.Count > 0)
 					{
-						int spawnLocationChoice = UnityEngine.Random.Range(0, tile.propSpawnLocations.Count);
+						int spawnLocationChoice = UnityEngine.Random.Range(0, tile.randomPropSpawnLocations.Count);
 
-						AddNewProp(tile.propSpawnLocations[spawnLocationChoice].position, tile.propSpawnLocations[spawnLocationChoice].rotation, prop.Value, chunk);
+						AddNewProp(tile.randomPropSpawnLocations[spawnLocationChoice].position, tile.randomPropSpawnLocations[spawnLocationChoice].rotation, prop.Value, chunk);
 						break;
 					}
 				
@@ -540,6 +543,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			allChunks.Add(chunkKey, chunk.saveableData);
 		}
+		
 
 		chunk.ALL_OBJECTS_AND_ENTITES_LOADED = true;
 	}
@@ -842,7 +846,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	{
 		return level_chunkGenerator.GetComponent<Chunk>().tileWidth;
 	}
-
 	public Vector3Int GetChunkKeyAtWorldLocation(Vector3 worldPos)
 	{
 		int y = 0;
@@ -869,8 +872,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		}
 		return null;
 	}
-
-	public void UpdateChunks()
+	public void Update()
+    {
+		UpdateWorld();
+    }
+	public void UpdateWorld()
 	{
 		if ((!GameSettings.LEVEL_LOADED && !GameSettings.LEVEL_SAVE_LOADED && !GameSettings.LEVEL_GENERATED) || GameSettings.Instance.Player == null)
 		{
@@ -878,7 +884,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		}
 		else if (gen_enabled)
 		{
-			TryGenChunks();
+			UpdateChunks();
 		}
 	}
 

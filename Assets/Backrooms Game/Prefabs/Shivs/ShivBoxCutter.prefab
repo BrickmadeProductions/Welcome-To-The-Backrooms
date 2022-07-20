@@ -131,6 +131,8 @@ MonoBehaviour:
   damage: 8
   Thrown: 0
   connetedObject: {fileID: 1345254682099846511}
+  WeaponBloodRenderer: {fileID: 0}
+  bloodAmount: 0
 --- !u!65 &4798014422870614306
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -199,7 +201,7 @@ MonoBehaviour:
     parentName: 
     type: 0
     instance: {fileID: 0}
-  type: 9
+  type: 10
   playSounds: 0
   spawnChance: 0
   runTimeID: 

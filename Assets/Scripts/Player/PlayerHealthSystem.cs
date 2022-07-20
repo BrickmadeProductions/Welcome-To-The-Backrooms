@@ -50,6 +50,8 @@ public class PlayerHealthSystem : MonoBehaviour
 
 	public bool canJump = true;
 
+	public bool canCrouch = true;
+
 	public bool canMoveHead = true;
 
 	public bool awake;

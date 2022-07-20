@@ -7,5 +7,15 @@ public class Tile : MonoBehaviour
 
 	public List<Transform> entitySpawnLocations;
 
-	public List<Transform> propSpawnLocations;
+	public List<Transform> randomPropSpawnLocations;
+
+	public List<SpawnItemOfType> setPropSpawnLocations;
+
+    public void SpawnPresetProps()
+    {
+        foreach (SpawnItemOfType spawnLocation in setPropSpawnLocations)
+        {
+            spawnLocation.SpawnItem();
+        }
+    }
 }

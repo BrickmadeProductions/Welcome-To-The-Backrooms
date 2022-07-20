@@ -13,10 +13,9 @@ public class PartygoerAI : Entity
     bool AvoidObsticles()
     {
         RaycastHit hitData;
-        if (Physics.Raycast(transform.position + new Vector3(0f, 5f, 0f), transform.TransformDirection(Vector3.forward), out hitData, 10f))
+        if (Physics.Raycast(transform.position, transform.forward, out hitData, 10f, sightMask))
         {
-            transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y + 90f, transform.rotation.eulerAngles.z);
-            AvoidObsticles();
+            
         }
         else
         {
