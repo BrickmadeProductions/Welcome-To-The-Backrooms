@@ -362,6 +362,8 @@ MonoBehaviour:
   damage: 25
   Thrown: 1
   connetedObject: {fileID: 7040348420032003241}
+  WeaponBloodRenderer: {fileID: 0}
+  bloodAmount: 0
 --- !u!1 &7088627852523957311
 GameObject:
   m_ObjectHideFlags: 0
@@ -448,7 +450,7 @@ MonoBehaviour:
     parentName: 
     type: 10
     instance: {fileID: 7040348420032003241}
-  type: 11
+  type: 12
   playSounds: 1
   spawnChance: 0
   runTimeID: 
@@ -477,3 +479,5 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4192255
   rotationAmount: 0
+  stuckInWall: 0
+  stuckSounds: []

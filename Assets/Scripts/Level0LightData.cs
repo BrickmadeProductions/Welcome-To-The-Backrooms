@@ -16,6 +16,7 @@ public class Level0LightData : MonoBehaviour
 
     bool on = true;
     public bool broken;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -44,7 +45,7 @@ public class Level0LightData : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    /*void FixedUpdate()
     {
         
         if (broken)
@@ -67,7 +68,7 @@ public class Level0LightData : MonoBehaviour
        
         
         
-    }
+    }*/
 
     public void Activate(bool on)
     {

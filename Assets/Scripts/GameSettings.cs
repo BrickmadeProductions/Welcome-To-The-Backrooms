@@ -728,6 +728,9 @@ public class GameSettings : MonoBehaviour, ISaveable
 	{
 		SaveAllProgress();
 
+		if (ActiveScene != SCENE.INTRO)
+			SceneManager.LoadSceneAsync(7, LoadSceneMode.Additive);
+
 		yield return new WaitUntil(() => !IS_SAVING);
 
 		LEVEL_LOADED = false;

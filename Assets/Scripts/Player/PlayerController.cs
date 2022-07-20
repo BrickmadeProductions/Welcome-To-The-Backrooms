@@ -120,7 +120,9 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     public bool OnSaveCondition()
     {
+        
         return GameSettings.Instance.AmInSavableScene();
+
     }
 
     public GameObject playerRagDoll;
@@ -172,6 +174,8 @@ public class PlayerController : MonoBehaviour, ISaveable
     public AudioClip woodFootStep;
     public AudioClip metalFootStep;
 
+    //swing noises
+    public AudioClip[] swingSounds;
 
     //fov editingi
     private float _FOVOFFSET;
@@ -261,7 +265,6 @@ public class PlayerController : MonoBehaviour, ISaveable
         SaveMaster.AddListener(component);
         SaveMaster.SyncLoad();
     }
-
     public void Crouch()
     {
         head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition - new Vector3(0, 15, 0), Time.deltaTime);
@@ -289,7 +292,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
                     moveDirection.y = jumpSpeed;
 
-                if (Input.GetButton("Crouch"))
+                if (Input.GetButton("Crouch") && playerHealth.canCrouch)
                 {
 
                     Crouch();
@@ -309,8 +312,6 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     private void FixedUpdate()
     {
-
-        //probe.RenderProbe();
     }
 
     
@@ -866,7 +867,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     }
     void OnDestroy()
     {
-        //SaveMaster.RemoveListener(GetComponent<Saveable>());
+        SaveMaster.RemoveListener(GetComponent<Saveable>());
     }
     
 }

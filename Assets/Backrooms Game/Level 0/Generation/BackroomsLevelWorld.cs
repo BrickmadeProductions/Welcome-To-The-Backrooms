@@ -184,11 +184,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 						if (tile.entitySpawnLocations.Count > 0)
 						{
-							AddNewEntity(tile.entitySpawnLocations[UnityEngine.Random.Range(0, tile.entitySpawnLocations.Count)].position, entity.Value, chunk);
+							AddNewEntity(tile.entitySpawnLocations[UnityEngine.Random.Range(0, tile.entitySpawnLocations.Count)].position, entity.Value.gameObject, chunk);
 						}
 						else
 						{
-							AddNewEntity(new Vector3((float)tile.tilePos.x * chunk.tileWidth + (float)(chunk.chunkPosX * chunk_width) * chunk.tileWidth, 0f, (float)tile.tilePos.y * chunk.tileWidth + (float)(chunk.chunkPosZ * chunk_width) * chunk.tileWidth), entity.Value, chunk);
+							AddNewEntity(new Vector3((float)tile.tilePos.x * chunk.tileWidth + (float)(chunk.chunkPosX * chunk_width) * chunk.tileWidth, 0f, (float)tile.tilePos.y * chunk.tileWidth + (float)(chunk.chunkPosZ * chunk_width) * chunk.tileWidth), entity.Value.gameObject, chunk);
 						}
 
 						allChunks[key] = chunk.saveableData;
@@ -272,7 +272,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			{
 				for (int y = (ThreeDimensional ? (newPlayerChunkLocation.y - layerDistance) : 0); y < ((!ThreeDimensional) ? 1 : (newPlayerChunkLocation.y + layerDistance)); y++)
 				{
-					GameObject chunk = GenerateChunk(x, y, z, shouldGenInstantly: true);
+					Chunk chunk = LoadInChunk(x, y, z, shouldGenInstantly: true);
 
 					if (chunk != null)
 					{
@@ -292,7 +292,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			foreach (KeyValuePair<string, SaveableProp> propClusterData in serealizedChunks.Value.propData.propClusterData)
 			{
-				propsFromOtherScenes.Add(propClusterData.Key, propClusterData.Value);
+				if (!propsFromOtherScenes.ContainsKey(propClusterData.Key))
+                {
+					propsFromOtherScenes.Add(propClusterData.Key, propClusterData.Value);
+				}
+				
 			}
 		}
 
@@ -323,16 +327,17 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		Debug.Log("Done With Spawn Region");
 	}
 
-	private void Update()
+	/*private void Update()
 	{
-		UpdateChunks();
-	}
+		//UpdateChunks();
+	}*/
 
 	public string OnSave()
 	{
 		
 		WorldSaveData worldSaveData = new WorldSaveData
 		{
+
 			savedSeed = seed,
 			savedChunks = allChunks
 		};
@@ -395,37 +400,37 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		return false;
 	}
 
-	private void TryGenChunks()
+	private void UpdateChunks()
 	{
 		newPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
+
 		if (newPlayerChunkLocation != oldPlayerChunkLocation && !isLoadingChunks)
 		{
 			isLoadingChunks = true;
 
-			for (int i = newPlayerChunkLocation.x - viewDistance; i < newPlayerChunkLocation.x + viewDistance; i++)
+			for (int x = newPlayerChunkLocation.x - viewDistance; x < newPlayerChunkLocation.x + viewDistance; x++)
 			{
-				for (int j = newPlayerChunkLocation.z - viewDistance; j < newPlayerChunkLocation.z + viewDistance; j++)
+				for (int z = newPlayerChunkLocation.z - viewDistance; z < newPlayerChunkLocation.z + viewDistance; z++)
 				{
-					for (int k = (ThreeDimensional ? (newPlayerChunkLocation.y - layerDistance) : 0); k < ((!ThreeDimensional) ? 1 : (newPlayerChunkLocation.y + layerDistance)); k++)
+					for (int y = (ThreeDimensional ? (newPlayerChunkLocation.y - layerDistance) : 0); y < ((!ThreeDimensional) ? 1 : (newPlayerChunkLocation.y + layerDistance)); y++)
 					{
-						if (GenerateChunk(i, k, j, shouldGenInstantly: false) != null)
+						Chunk chunk = LoadInChunk(x, y, z, shouldGenInstantly: false);
+						
+						if (chunk != null)
 						{
 							currentChunkNumber++;
 						}
 					}
 				}
 			}
-			ManageLoadedChunks();
+			UnloadChunks();
 			isLoadingChunks = false;
 		}
+
 		oldPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
 	}
 
-	/*if (RJC.CanSee(Wahoo)){
-		return UglyAssHeadass;
-	}*/
-
-	public void ManageLoadedChunks()
+	public void UnloadChunks()
 	{
 		foreach (KeyValuePair<string, Chunk> loadedChunk in loadedChunks.ToArray())
 		{
@@ -455,6 +460,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				loadedChunks.Remove(loadedChunk.Key);
 
 				Destroy(chunk.gameObject);
+
 				SaveAllObjectsAndEntities();
 			}
 		}
@@ -462,10 +468,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		
 	}
 
-	private GameObject GenerateChunk(int chunkX, int chunkY, int chunkZ, bool shouldGenInstantly)
+	private Chunk LoadInChunk(int chunkX, int chunkY, int chunkZ, bool shouldGenInstantly)
 	{
-		
-
 		if (!ChunkLocationLoaded(chunkX, chunkY, chunkZ))
 		{
 			Debug.Log("Chunk Gen");
@@ -474,15 +478,31 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			chunk.name = chunkX + "," + chunkY + "," + chunkZ;
 
-			chunk.GetComponent<Chunk>().CreateChunk(chunkX, chunkY, chunkZ, this, shouldGenInstantly);
+			if (!allChunks.ContainsKey(chunk.name))
+            {
+				chunk.GetComponent<Chunk>().CreateChunk(chunkX, chunkY, chunkZ, this, shouldGenInstantly, new List<int>(0));
+			}
+
+            else
+            {
+
+				chunk.GetComponent<Chunk>().CreateChunk(chunkX, chunkY, chunkZ, this, shouldGenInstantly, allChunks[chunk.name].tile_gridData);
+			}
+
 
 			chunk.transform.position = new Vector3(chunkX * ChunkSize(), chunkY * ChunkHeight(), chunkZ * ChunkSize());
 
 			loadedChunks.Add(chunkX + "," + chunkY + "," + chunkZ, chunk);
 
+			foreach (Tile tile in chunk.tile_grid)
+			{
+				Debug.Log("Spawning Prop");
+				tile.SpawnPresetProps();
+			}
+
 			StartCoroutine(LoadInObjectsAndEntities(chunk));
 
-			return chunk.gameObject;
+			return chunk;
 		}
 		return null;
 	}
@@ -491,6 +511,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	{
 		yield return new WaitUntil(() => chunk.ALL_TILES_GENERATED);
 
+		//Debug.Log(chunk.tile_grid.Count);
+		
 		string chunkKey = chunk.chunkPosX + "," + chunk.chunkPosY + "," + chunk.chunkPosZ;
 
 		//load
@@ -519,27 +541,28 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			Tile tile = chunk.tile_grid[tileIndex];
 
-			foreach (Transform propSpawnLocation in tile.propSpawnLocations)
+			foreach (Transform propSpawnLocation in tile.randomPropSpawnLocations)
 			{
 				float spawnChanceSelection = UnityEngine.Random.Range(0f, 1.01f);
 
 				foreach (KeyValuePair<OBJECT_TYPE, InteractableObject> prop in levelPropDatabase.ToArray())
 				{
-					UnityEngine.Random.Range(0, tile.propSpawnLocations.Count);
+					UnityEngine.Random.Range(0, tile.randomPropSpawnLocations.Count);
 
-					if (prop.Value.spawnChance < spawnChanceSelection && tile.propSpawnLocations.Count > 0)
+					if (prop.Value.spawnChance < spawnChanceSelection && tile.randomPropSpawnLocations.Count > 0)
 					{
-						int spawnLocationChoice = UnityEngine.Random.Range(0, tile.propSpawnLocations.Count);
+						int spawnLocationChoice = UnityEngine.Random.Range(0, tile.randomPropSpawnLocations.Count);
 
-						AddNewProp(tile.propSpawnLocations[spawnLocationChoice].position, tile.propSpawnLocations[spawnLocationChoice].rotation, prop.Value, chunk);
+						AddNewProp(tile.randomPropSpawnLocations[spawnLocationChoice].position, tile.randomPropSpawnLocations[spawnLocationChoice].rotation, prop.Value.gameObject, chunk);
 						break;
 					}
 				
 				}
 			}
-
+			chunk.SaveChunkTileGrid();
 			allChunks.Add(chunkKey, chunk.saveableData);
 		}
+		
 
 		chunk.ALL_OBJECTS_AND_ENTITES_LOADED = true;
 	}
@@ -562,7 +585,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		return false;
 	}
 
-	public Entity AddNewEntity(Vector3 position, Entity entity, Chunk chunk)
+	public Entity AddNewEntity(Vector3 position, GameObject entity, Chunk chunk)
 	{
 		int entityCount = 0;
 		int totalEntities = 0;
@@ -570,7 +593,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			foreach (KeyValuePair<string, SaveableEntity> entityClusterData in loadedChunk.Value.saveableData.entityData.entityClusterData)
 			{
-				if (entityClusterData.Value.type == entity.type)
+				if (entityClusterData.Value.type == entity.GetComponent<Entity>().type)
 				{
 					entityCount++;
 				}
@@ -578,9 +601,9 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			totalEntities += loadedChunk.Value.saveableData.entityData.entityClusterData.Count;
 		}
 
-		if (entityCount < entity.maxAllowed && totalEntities <= 50)
+		if (entityCount < entity.GetComponent<Entity>().maxAllowed && totalEntities <= 50)
 		{
-			Entity entityComponent = Instantiate(entity);
+			Entity entityComponent = Instantiate(entity).GetComponent<Entity>();
 			entityComponent.GenerateID(this);
 			entityComponent.gameObject.transform.position = position;
 			chunk.saveableData.entityData.entityClusterData.Add(entityComponent.type.ToString() + "-" + entityComponent.runTimeID, entityComponent.Save());
@@ -595,17 +618,13 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		if (GameSettings.Instance.EntityDatabase.ContainsKey(entityData.type))
 		{
 
-			Entity entityToSpawn = null;
+			GameObject entityToSpawn = Instantiate(GameSettings.Instance.EntityDatabase[entityData.type].gameObject);
 
-			GameSettings.Instance.EntityDatabase.TryGetValue(entityData.type, out entityToSpawn);
+			entityToSpawn.GetComponent<Entity>().Load(entityData);
 
-			Entity entity = Instantiate(entityToSpawn);
+			chunk.saveableData.entityData.entityClusterData[entityToSpawn.GetComponent<Entity>().type.ToString() + "-" + entityToSpawn.GetComponent<Entity>().runTimeID] = entityToSpawn.GetComponent<Entity>().saveableData;
 
-			entityToSpawn.Load(entityData);
-
-			chunk.saveableData.entityData.entityClusterData[entityToSpawn.type.ToString() + "-" + entityToSpawn.runTimeID] = entityToSpawn.saveableData;
-
-			return entityToSpawn;
+			return entityToSpawn.GetComponent<Entity>();
 
 		}
 		return null;
@@ -618,11 +637,9 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			if (loadedChunk.Value.saveableData.entityData.entityClusterData.ContainsKey(key))
 			{
-				loadedChunk.Value.saveableData.entityData.entityClusterData.TryGetValue(key, out var entityDataLoaded);
+				Destroy(loadedChunk.Value.saveableData.entityData.entityClusterData[key].instance.gameObject);
 
-				Destroy(entityDataLoaded.instance.gameObject);
-
-				Debug.Log(loadedChunk.Value.saveableData.entityData.entityClusterData.Remove(key));
+				loadedChunk.Value.saveableData.entityData.entityClusterData.Remove(key);
 
 				return true;
 
@@ -635,11 +652,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			if (allChunk.Value.entityData.entityClusterData.ContainsKey(key))
 			{
-				allChunk.Value.entityData.entityClusterData.TryGetValue(key, out var entityDataAll);
 
-				Destroy(entityDataAll.instance.gameObject);
-
-				Debug.Log(allChunk.Value.entityData.entityClusterData.Remove(key));
+				allChunk.Value.entityData.entityClusterData.Remove(key);
 
 				return true;
 			}
@@ -659,7 +673,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 				RemoveEntity(entity.Key);
 
-				Debug.Log(loadedChunk.Value.saveableData.entityData.entityClusterData.Remove(entity.Key));
+				loadedChunk.Value.saveableData.entityData.entityClusterData.Remove(entity.Key);
 
 			}
 			
@@ -673,7 +687,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 				RemoveEntity(entity.Key);
 
-				Debug.Log(allChunk.Value.entityData.entityClusterData.Remove(entity.Key));
+				allChunk.Value.entityData.entityClusterData.Remove(entity.Key);
 
 			}
 		}
@@ -698,7 +712,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		return false;
 	}
 
-	public InteractableObject AddNewProp(Vector3 position, Quaternion rotation, InteractableObject item, Chunk chunk)
+	public InteractableObject AddNewProp(Vector3 position, Quaternion rotation, GameObject item, Chunk chunk)
 	{
 		int propCount = 0;
 		foreach (KeyValuePair<string, Chunk> loadedChunks in loadedChunks)
@@ -707,14 +721,14 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		}
 		if (propCount <= 100)
 		{
-			InteractableObject prop = Instantiate(item.gameObject).GetComponent<InteractableObject>();
+			InteractableObject prop = Instantiate(item).GetComponent<InteractableObject>();
 
 			prop.GenerateID(this);
 
 			prop.gameObject.transform.position = position;
 
 			prop.gameObject.transform.rotation = rotation;
-
+			
 			chunk.saveableData.propData.propClusterData.Add(prop.type.ToString() + "-" + prop.runTimeID, prop.Save());
 
 			return prop;
@@ -726,17 +740,13 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	{
 		if (GameSettings.Instance.PropDatabase.ContainsKey(savedObjectData.type))
 		{
-			InteractableObject databaseObject = null;
+			GameObject spawnedObject = Instantiate(GameSettings.Instance.PropDatabase[savedObjectData.type].gameObject);
 
-			GameSettings.Instance.PropDatabase.TryGetValue(savedObjectData.type, out databaseObject);
+			spawnedObject.GetComponent<InteractableObject>().Load(savedObjectData);
 
-			InteractableObject spawnedObject = Instantiate(databaseObject);
+			chunk.saveableData.propData.propClusterData[spawnedObject.GetComponent<InteractableObject>().type.ToString() + "-" + spawnedObject.GetComponent<InteractableObject>().runTimeID] = spawnedObject.GetComponent<InteractableObject>().saveableData;
 
-			spawnedObject.Load(savedObjectData);
-
-			chunk.saveableData.propData.propClusterData[spawnedObject.type.ToString() + "-" + spawnedObject.runTimeID] = spawnedObject.saveableData;
-
-			return spawnedObject;
+			return spawnedObject.GetComponent<InteractableObject>();
 		}
 		return null;
 	}
@@ -748,11 +758,9 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			if (loadedChunk.Value.saveableData.propData.propClusterData.ContainsKey(key))
 			{
-				loadedChunk.Value.saveableData.propData.propClusterData.TryGetValue(key, out var propDataLoaded);
+				Destroy(loadedChunk.Value.saveableData.propData.propClusterData[key].instance.gameObject);
 
-				Destroy(propDataLoaded.instance.gameObject);
-
-				Debug.Log(loadedChunk.Value.saveableData.propData.propClusterData.Remove(key));
+				loadedChunk.Value.saveableData.propData.propClusterData.Remove(key);
 
 				return true;
 
@@ -760,16 +768,12 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		}
 
-		foreach (KeyValuePair<string, SerealizedChunk> allChunks in allChunks)
+		foreach (KeyValuePair<string, SerealizedChunk> allChunk in allChunks)
 		{
 
-			if (allChunks.Value.propData.propClusterData.ContainsKey(key))
+			if (allChunk.Value.propData.propClusterData.ContainsKey(key))
 			{
-				allChunks.Value.propData.propClusterData.TryGetValue(key, out var propDataLoaded);
-
-				Destroy(propDataLoaded.instance.gameObject);
-
-				Debug.Log(allChunks.Value.propData.propClusterData.Remove(key));
+				allChunk.Value.propData.propClusterData.Remove(key);
 
 				return true;
 
@@ -789,7 +793,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 				RemoveProp(prop.Key);
 
-				Debug.Log(loadedChunk.Value.saveableData.entityData.entityClusterData.Remove(prop.Key));
+				Debug.Log(loadedChunk.Value.saveableData.propData.propClusterData.Remove(prop.Key));
 
 			}
 
@@ -803,7 +807,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 				RemoveProp(prop.Key);
 
-				Debug.Log(allChunks.Value.entityData.entityClusterData.Remove(prop.Key));
+				Debug.Log(allChunks.Value.propData.propClusterData.Remove(prop.Key));
 
 			}
 		}
@@ -842,7 +846,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	{
 		return level_chunkGenerator.GetComponent<Chunk>().tileWidth;
 	}
-
 	public Vector3Int GetChunkKeyAtWorldLocation(Vector3 worldPos)
 	{
 		int y = 0;
@@ -869,8 +872,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		}
 		return null;
 	}
-
-	public void UpdateChunks()
+	public void Update()
+    {
+		UpdateWorld();
+    }
+	public void UpdateWorld()
 	{
 		if ((!GameSettings.LEVEL_LOADED && !GameSettings.LEVEL_SAVE_LOADED && !GameSettings.LEVEL_GENERATED) || GameSettings.Instance.Player == null)
 		{
@@ -878,7 +884,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		}
 		else if (gen_enabled)
 		{
-			TryGenChunks();
+			UpdateChunks();
 		}
 	}
 
