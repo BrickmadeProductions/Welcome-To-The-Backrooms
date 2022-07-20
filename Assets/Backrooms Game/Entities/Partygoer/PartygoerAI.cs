@@ -177,7 +177,7 @@ public class PartygoerAI : Entity
 
         GameSettings.Instance.worldInstance.RemoveEntity(type.ToString() + "-" + runTimeID);
 
-        Destroy(gameObject);
+        //Destroy(gameObject);
 
     }
 

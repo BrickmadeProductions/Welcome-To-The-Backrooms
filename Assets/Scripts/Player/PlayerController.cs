@@ -265,7 +265,6 @@ public class PlayerController : MonoBehaviour, ISaveable
         SaveMaster.AddListener(component);
         SaveMaster.SyncLoad();
     }
-
     public void Crouch()
     {
         head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition - new Vector3(0, 15, 0), Time.deltaTime);
@@ -868,7 +867,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     }
     void OnDestroy()
     {
-        //SaveMaster.RemoveListener(GetComponent<Saveable>());
+        SaveMaster.RemoveListener(GetComponent<Saveable>());
     }
     
 }

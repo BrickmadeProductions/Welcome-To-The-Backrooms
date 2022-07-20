@@ -230,8 +230,10 @@ public class InteractionSystem : MonoBehaviour
 	}
 
 	//raycast can go through multiple objects
-	public void SetHolding()
+	public void SetHolding(InteractableObject holdableObject)
 	{
+		player.holding = (HoldableObject)holdableObject;
+
 		if (player.holding.GetComponent<HoldableObject>().large)
 		{
 			SetAllChildrenToLayer(player.holding.transform, 14);
@@ -312,11 +314,10 @@ public class InteractionSystem : MonoBehaviour
 
 	private void PickupSystem()
 	{
-		if (Input.GetButton("Grab") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
+		if (Input.GetButton("Grab") && currentlyLookingAt != null && player.holding == null && currentlyLookingAt.gameObject.tag != "Usable")
 		{
 			//pickup
-			player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
-			SetHolding();
+			SetHolding(currentlyLookingAt.GetComponent<HoldableObject>());
 		}
 
 		if (player.holding != null)
@@ -508,6 +509,7 @@ public class InteractionSystem : MonoBehaviour
 
 		}
 
+		//destroy building indicator prefab
 		if ((player.holding == null || !buildOn) && currentPlaceItemPrefab != null)
 		{
 			Destroy(currentPlaceItemPrefab.gameObject);

@@ -18,16 +18,17 @@ public class CeilingBehavior : MonoBehaviour
 
         foreach (Transform lightT in lightLocations)
         {
-            if (Random.value <= 0.3f)
+            if (Random.value <= 0.35f)
             {
                 if (Random.value <= 0.7f)
                 {
-                    Instantiate(normalLight, lightLocations[index]);
+                    lightLocations[index].gameObject.SetActive(true);
                 }
 
                 else
                 {
-                    Instantiate(brokenLight, lightLocations[index]);
+                    //broken
+                    lightLocations[index].gameObject.SetActive(true);
                 }
             }
            
@@ -43,7 +44,7 @@ public class CeilingBehavior : MonoBehaviour
             {
                 if (Random.value <= 0.5f)
 
-                    Instantiate(vent, ventLocations[index]);
+                    ventLocations[index].gameObject.SetActive(true);
             }
             index++;
         }

@@ -69,8 +69,7 @@ public abstract class InteractableObject : MonoBehaviour
 			if (transform.parent.name == "HoldLocation" || transform.parent.name == "HandLocation")
 			{
 				Debug.Log("Reparenting To Hand...");
-				GameSettings.Instance.Player.GetComponent<PlayerController>().holding = (HoldableObject)this;
-				GameSettings.Instance.Player.GetComponent<InteractionSystem>().SetHolding();
+				GameSettings.Instance.Player.GetComponent<InteractionSystem>().SetHolding((HoldableObject)this);
 			}
 		}
 		else
