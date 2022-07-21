@@ -53,7 +53,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 		LEVEL0,
 		LEVEL1,
 		LEVEL2,
-		LEVELFUN
+		LEVELFUN,
+		LEVELRUN
 	}
 
 	public BackroomsLevelWorld worldInstance = null;
@@ -121,6 +122,12 @@ public class GameSettings : MonoBehaviour, ISaveable
 	public PostProcessProfile level2Profile;
 
 	public AudioClip level2Ambience;
+
+	public AudioMixer levelRunMixer;
+
+	public PostProcessProfile levelRunProfile;
+
+	public AudioClip levelRunAmbience;
 
 	public GameObject playerPrefab;
 
@@ -729,7 +736,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 		SaveAllProgress();
 
 		if (ActiveScene != SCENE.INTRO)
-			SceneManager.LoadSceneAsync(7, LoadSceneMode.Additive);
+			SceneManager.LoadSceneAsync(8, LoadSceneMode.Additive);
 
 		yield return new WaitUntil(() => !IS_SAVING);
 
@@ -872,6 +879,26 @@ public class GameSettings : MonoBehaviour, ISaveable
 				player.GetComponent<PlayerController>().darkShield.SetActive(false);
 
 				post.profile = level0Profile;
+
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+				player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+
+				master = level0Mixer;
+
+				GameScreen();
+
+				break;
+
+			case SCENE.LEVELRUN:
+
+				player.transform.position = new Vector3(0, 1, 0);
+
+				player.GetComponent<PlayerController>().darkShield.SetActive(true);
+
+				post.profile = levelRunProfile;
 
 				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
 				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();

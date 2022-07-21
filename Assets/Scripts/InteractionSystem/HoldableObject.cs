@@ -107,7 +107,7 @@ public class HoldableObject : InteractableObject
 		Debug.Log("Added Object " + base.name);
 		base.transform.SetParent(interactionSystem.inventoryObject.transform);
 	}
-
+  
     public override void Hold(InteractionSystem player)
     {
 

@@ -80,7 +80,7 @@ public class Chunk : MonoBehaviour
 			}
 			else
 			{
-				StartCoroutine(GenerateRandomMap(3));
+				StartCoroutine(GenerateRandomMap(2));
 			}
         }
         else
@@ -91,7 +91,7 @@ public class Chunk : MonoBehaviour
 			}
 			else
 			{
-				StartCoroutine(GenerateMapFromGrid(3, tile_grid));
+				StartCoroutine(GenerateMapFromGrid(2, tile_grid));
 			}
 		}
 		
@@ -135,7 +135,7 @@ public class Chunk : MonoBehaviour
 			{
 				for (int i = 0; i < framesPerTile; i++)
 				{
-					yield return new WaitForEndOfFrame();
+					yield return null;
 				}
 				int idUsingPerlin = GetIdUsingPerlin(x, z);
 				CreateTile(idUsingPerlin, x, chunkPosY, z);
@@ -166,7 +166,7 @@ public class Chunk : MonoBehaviour
 			{
 				for (int i = 0; i < framesPerTile; i++)
 				{
-					yield return new WaitForEndOfFrame();
+					yield return null;
 				}
 				
 				CreateTile(grid[tilesCreated], x, chunkPosY, z);

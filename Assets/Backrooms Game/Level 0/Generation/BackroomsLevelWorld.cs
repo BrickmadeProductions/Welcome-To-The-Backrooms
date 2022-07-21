@@ -472,7 +472,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	{
 		if (!ChunkLocationLoaded(chunkX, chunkY, chunkZ))
 		{
-			Debug.Log("Chunk Gen");
+			//Debug.Log("Chunk Gen");
 
 			Chunk chunk = Instantiate(level_chunkGenerator).GetComponent<Chunk>();
 
@@ -496,7 +496,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			foreach (Tile tile in chunk.tile_grid)
 			{
-				Debug.Log("Spawning Prop");
+				//Debug.Log("Spawning Prop");
 				tile.SpawnPresetProps();
 			}
 
@@ -987,7 +987,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				}
 			}
 		}
-		Debug.Log("Saved All World Data...");
+		//Debug.Log("Saved All World Data...");
 	}
 
 	private void OnApplicationQuit()

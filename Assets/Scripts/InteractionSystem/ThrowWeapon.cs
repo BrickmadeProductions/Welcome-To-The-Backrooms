@@ -16,7 +16,7 @@ public class ThrowWeapon : HoldableObject
         
         if (hit.gameObject.layer != 13 && hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6 && !stuckInWall && Flying)
         {
-            Debug.Log(hit.name);
+            //Debug.Log(hit.name);
             AudioSource.PlayClipAtPoint(stuckSounds[Random.Range(0, stuckSounds.Length)], hit.transform.position);
 
             Flying = false;
