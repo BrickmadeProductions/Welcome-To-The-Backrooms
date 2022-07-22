@@ -34,9 +34,9 @@ public class HoldableObject : InteractableObject
 
 	public List<string> LMBAnimationBools;
 
-	public List<AnimationClip> RMBAnimationClips;
+	/*public List<AnimationClip> RMBAnimationClips;
 
-	public List<string> RMBAnimationBools;
+	public List<string> RMBAnimationBools;*/
 
 	public string CustomHoldAnimation = "";
 
@@ -72,10 +72,10 @@ public class HoldableObject : InteractableObject
 		{
 			yield return new WaitForSeconds(LMBAnimationClips[animChosen].length);
 		}
-		else
+		/*else
 		{
 			yield return new WaitForSeconds(RMBAnimationClips[animChosen].length);
-		}
+		}*/
 
 		animationPlaying = false;
 
@@ -91,11 +91,11 @@ public class HoldableObject : InteractableObject
 				int choice = Random.Range(0, LMBAnimationBools.Count);
 				StartCoroutine(playAnimation(LMBAnimationBools[choice], choice, LMB));
 			}
-			else if (!LMB && RMBAnimationBools.Count > 0)
+			/*else if (!LMB && RMBAnimationBools.Count > 0)
 			{
 				int choice = Random.Range(0, RMBAnimationBools.Count);
 				StartCoroutine(playAnimation(RMBAnimationBools[choice], choice, LMB));
-			}
+			}*/
 		}
 	}
 
@@ -161,10 +161,10 @@ public class HoldableObject : InteractableObject
 			{
 				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(lMBAnimationBool, value: false);
 			}
-			foreach (string rMBAnimationBool in RMBAnimationBools)
+			/*foreach (string rMBAnimationBool in RMBAnimationBools)
 			{
 				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(rMBAnimationBool, value: false);
-			}
+			}*/
 		}
 		transform.position += pushAmt;
 		pushAmt *= 0.95f;

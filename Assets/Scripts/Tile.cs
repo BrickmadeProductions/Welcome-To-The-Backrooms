@@ -17,6 +17,7 @@ public class Tile : MonoBehaviour
     {
         foreach (SpawnItemOfType spawnLocation in setPropSpawnLocations)
         {
+
             spawnLocation.SpawnItem();
         }
     }

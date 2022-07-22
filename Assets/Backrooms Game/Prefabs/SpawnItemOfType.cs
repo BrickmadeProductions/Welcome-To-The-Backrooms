@@ -12,13 +12,12 @@ public class SpawnItemOfType : MonoBehaviour
         string chunkKey = chunkVector.x + "," + chunkVector.y + "," + chunkVector.z;
         GameSettings.Instance.worldInstance.loadedChunks.TryGetValue(chunkKey, out Chunk chunk);
 
-        if (!GameSettings.Instance.worldInstance.allChunks.ContainsKey(chunkKey))
-        {
+        
+        Debug.Log("Spawning Prop");
+        GameObject objectToSpawn = GameSettings.Instance.PropDatabase[typeToSpawn].gameObject;
 
-            GameObject objectToSpawn = GameSettings.Instance.PropDatabase[typeToSpawn].gameObject;
-
-            GameSettings.Instance.worldInstance.AddNewProp(transform.position, transform.localRotation, objectToSpawn, chunk);
-        }
+        GameSettings.Instance.worldInstance.AddNewProp(transform.position, transform.localRotation, objectToSpawn, chunk);
+        
            
     }
 }

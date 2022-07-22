@@ -334,14 +334,13 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public string OnSave()
 	{
-		
+
 		WorldSaveData worldSaveData = new WorldSaveData
 		{
 
 			savedSeed = seed,
 			savedChunks = allChunks
 		};
-
 		return JsonConvert.SerializeObject(worldSaveData);
 	}
 
@@ -482,7 +481,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
             {
 				chunk.GetComponent<Chunk>().CreateChunk(chunkX, chunkY, chunkZ, this, shouldGenInstantly, new List<int>(0));
 			}
-
             else
             {
 
@@ -493,12 +491,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			chunk.transform.position = new Vector3(chunkX * ChunkSize(), chunkY * ChunkHeight(), chunkZ * ChunkSize());
 
 			loadedChunks.Add(chunkX + "," + chunkY + "," + chunkZ, chunk);
-
-			foreach (Tile tile in chunk.tile_grid)
-			{
-				//Debug.Log("Spawning Prop");
-				tile.SpawnPresetProps();
-			}
 
 			StartCoroutine(LoadInObjectsAndEntities(chunk));
 
@@ -559,6 +551,9 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				
 				}
 			}
+
+			tile.SpawnPresetProps();
+
 			chunk.SaveChunkTileGrid();
 			allChunks.Add(chunkKey, chunk.saveableData);
 		}

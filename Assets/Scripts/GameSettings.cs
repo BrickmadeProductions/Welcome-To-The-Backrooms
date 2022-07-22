@@ -308,7 +308,8 @@ public class GameSettings : MonoBehaviour, ISaveable
     private void Start()
     {
 		SaveMaster.SyncLoad();
-    }
+		
+	}
 
     private void Init()
 	{
@@ -436,11 +437,11 @@ public class GameSettings : MonoBehaviour, ISaveable
 			smilerLogoOn = !smilerLogoOn;
 			Logo.transform.GetChild(0).gameObject.SetActive(smilerLogoOn);
 		}
-		if (Input.GetButtonDown("CheatSheet") && ActiveScene != SCENE.INTRO && ActiveScene != SCENE.HOMESCREEN)
+		/*if (Input.GetButtonDown("CheatSheet") && ActiveScene != SCENE.INTRO && ActiveScene != SCENE.HOMESCREEN)
         {
 			cheatSheetObject.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
 			CheatMenu(!cheatSheetObject.activeSelf);
-		}
+		}*/
 
 	}
 
@@ -748,14 +749,14 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		PLAYER_DATA_LOADED_IN_SCENE = false;
 
+		/*if (Instance.worldInstance != null)
+			yield return new WaitUntil(() => LEVEL_GENERATED);*/
+
 		yield return SceneManager.LoadSceneAsync((int)id, LoadSceneMode.Single);
 
-		PostLoadScene(id);
-	}
 
-	private void PostLoadScene(SCENE id)
-	{
-		
+		//post load
+
 		if (ActiveScene != 0 && player == null)
 		{
 			player = Instantiate(playerPrefab);
@@ -805,7 +806,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 				player.transform.GetChild(0).GetComponent<AudioSource>().Play();
 
-				post.profile = homeScreenProfile;
+				post.profile = homeScreenRoomProfile;
 				master = level0Mixer;
 
 				LEVEL_SAVE_LOADED = true;
@@ -912,8 +913,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 				break;
 		}
-		
-
+		ConnectSettings();
 		ActiveScene = id;
 
 		if (AmInSavableScene())
@@ -923,15 +923,18 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		LEVEL_LOADED = true;
 
-		if (ActiveScene != SCENE.ROOM && player != null)
+		if (ActiveScene != SCENE.ROOM && player.GetComponent<PlayerHealthSystem>() != null)
 		{
 			player.GetComponent<PlayerHealthSystem>().WakeUpOther();
 		}
 
 		GAME_FIRST_LOADED = false;
+		
 		SaveMaster.SyncLoad();
 
+
 	}
+
 
 	public bool AmInSavableScene()
 	{

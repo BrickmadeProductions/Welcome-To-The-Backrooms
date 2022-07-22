@@ -86,6 +86,10 @@ public class InteractionSystem : MonoBehaviour
 					if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>() == null)
 						item.gameObject.AddComponent<WTTB_ExtraCollisionData>();
 				}
+				if (item.gameObject.GetComponent<Weapon>() != null)
+                {
+					Destroy(item.gameObject.GetComponent<Weapon>());
+                }
 				SetAllCollidersToTrigger(item);
 			}
 			else
@@ -99,6 +103,10 @@ public class InteractionSystem : MonoBehaviour
 
 					if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>() == null)
 						item.gameObject.AddComponent<WTTB_ExtraCollisionData>();
+				}
+				if (item.gameObject.GetComponent<Weapon>() != null)
+				{
+					Destroy(item.gameObject.GetComponent<Weapon>());
 				}
 			}
 		}
@@ -221,8 +229,10 @@ public class InteractionSystem : MonoBehaviour
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
 
 		//player.holding.transform.position += player.head.transform.forward * 1.2f;
-		player.holding.transform.rotation = Quaternion.LookRotation(transform.forward, transform.up);
-		player.holding.Throw(player.head.transform.forward * ((player.GetComponent<CharacterController>().velocity.magnitude / 10) + 1) * player.holding.ThrowMultiplier * player.holding.GetComponent<Rigidbody>().mass);
+
+		player.holding.transform.rotation = Quaternion.LookRotation(player.playerCamera.transform.forward, player.playerCamera.transform.up);
+		player.holding.Throw(player.head.transform.forward.normalized * ((player.GetComponent<CharacterController>().velocity.magnitude / 10) + 1) * player.holding.ThrowMultiplier );
+		
 
 		player.holding = null;
 
@@ -312,8 +322,183 @@ public class InteractionSystem : MonoBehaviour
 		currentPlaceItemPrefab = null;
 	}
 
-	private void PickupSystem()
+
+	private void Update()
 	{
+		if (GameSettings.Instance.PauseMenuOpen)
+		{
+			return;
+		}
+		if (Input.GetButtonDown("ToggleBuilding") && !Input.GetMouseButtonDown(1))
+		{
+			buildOn = !buildOn;
+		}
+		//0 = closest
+		RaycastHit[] raycastForGrabbing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 2f, grabbingLayerMask)
+							  orderby h.distance
+							  select h).ToArray();
+
+		RaycastHit[] raycastForPlacing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 6f, placingLayerMask)
+										   orderby h.distance
+										   select h).ToArray();
+		//update currently looking at
+		if (raycastForGrabbing.Length > 0 && raycastForGrabbing[0].collider.transform.parent.parent.gameObject != null)
+		{
+			GameObject interactable = raycastForGrabbing[0].collider.transform.parent.parent.gameObject;
+
+			if (interactable.gameObject.layer == 9)
+			{
+				currentlyLookingAt = interactable.GetComponent<HoldableObject>();
+			}
+			else if (interactable.gameObject.layer == 10)
+			{
+				currentlyLookingAt = interactable.GetComponent<InteractableDoor>();
+			}
+			else if (interactable.gameObject.layer == 17)
+			{
+				currentlyLookingAt = interactable.GetComponent<InteractableButton>();
+			}
+			
+			
+			else
+			{
+				currentlyLookingAt = null;
+			}
+			
+		}
+		
+		else if (raycastForGrabbing.Length == 0)
+		{
+
+			currentlyLookingAt = null;
+		}
+
+		if (raycastForPlacing.Length > 0)
+		{
+			if (player.holding != null && buildOn)
+			{
+				//add in indicator prefab
+				if (currentPlaceItemPrefab == null)
+				{
+					InteractableObject heldObjectTemplate = null;
+
+					GameSettings.Instance.PropDatabase.TryGetValue(player.holding.type, out heldObjectTemplate);
+
+					currentPlaceItemPrefab = Instantiate(heldObjectTemplate.gameObject);
+
+					//destroy the script so it doesnt do weird shit
+
+					SetAllCollidersToTrigger(currentPlaceItemPrefab.transform);
+					SetAllChildrenToLayer(currentPlaceItemPrefab.transform, 21);
+					Destroy(currentPlaceItemPrefab.GetComponent<InteractableObject>());
+				}
+				//handle updating placing indicator
+				else if (currentPlaceItemPrefab != null)
+				{
+
+					currentPlaceItemPrefab.transform.position = raycastForPlacing[0].point;
+					currentPlaceItemPrefab.transform.rotation = player.transform.localRotation * buildRotationOffset;
+
+					//Debug.Log(CheckForCollision(currentPlaceItemPrefab.transform));
+
+					if (CheckForCollision(currentPlaceItemPrefab.transform))
+					{
+						canPlaceAtLocation = false;
+						ChangeAllMeshMaterials(currentPlaceItemPrefab.transform, transparentPlaceMaterialCollision);
+
+					}
+
+
+					else
+					{
+						canPlaceAtLocation = true;
+						ChangeAllMeshMaterials(currentPlaceItemPrefab.transform, transparentPlaceMaterialGood);
+					}
+
+					if (Input.GetButton("RotateBuildSystemRight"))
+					{
+						currentRotZ -= 75f * Time.deltaTime;
+
+					}
+
+					if (Input.GetButton("RotateBuildSystemLeft"))
+					{
+						currentRotZ += 75f * Time.deltaTime;
+
+					}
+
+					if (Input.GetButton("RotateBuildSystemUp"))
+					{
+						currentRotX += 75f * Time.deltaTime;
+
+					}
+
+					if (Input.GetButton("RotateBuildSystemDown"))
+					{
+						currentRotX -= 75f * Time.deltaTime;
+
+					}
+
+					buildRotationOffset = Quaternion.Euler(currentRotX, 0, currentRotZ);
+				}
+
+				//destroy if placed
+				if (Input.GetMouseButtonDown(1) && currentPlaceItemPrefab != null && buildOn)
+				{
+					if (canPlaceAtLocation)
+					{
+						Destroy(currentPlaceItemPrefab.gameObject);
+						SetPlace(currentPlaceItemPrefab.transform.position, currentPlaceItemPrefab.transform.rotation);
+						currentRotX = 0;
+						currentRotZ = 0;
+						buildRotationOffset = Quaternion.identity;
+						currentPlaceItemPrefab = null;
+					}
+
+				}
+			}
+
+		}
+
+		//destroy building indicator prefab
+		if (((player.holding == null || !buildOn) && currentPlaceItemPrefab != null) || raycastForPlacing.Length == 0 && currentPlaceItemPrefab != null)
+		{
+			Destroy(currentPlaceItemPrefab.gameObject);
+			currentRotX = 0;
+			currentRotZ = 0;
+			buildRotationOffset = Quaternion.identity;
+			currentPlaceItemPrefab = null;
+		}
+
+
+
+		if (currentlyLookingAt != null)
+		{
+			if (currentlyLookingAt.GetComponent<InteractableObject>())
+			{
+				switch (currentlyLookingAt.gameObject.layer)
+				{
+					case 9:
+						pickup.gameObject.SetActive(value: true);
+						break;
+					case 10:
+						open.gameObject.SetActive(value: true);
+						break;
+					case 17:
+						open.gameObject.SetActive(value: true);
+						break;
+				}
+			}
+		}
+		
+		else
+		{
+			pickup.gameObject.SetActive(value: false);
+			open.gameObject.SetActive(value: false);
+		}
+
+		//throwing and dropping
+
 		if (Input.GetButton("Grab") && currentlyLookingAt != null && player.holding == null && currentlyLookingAt.gameObject.tag != "Usable")
 		{
 			//pickup
@@ -321,9 +506,9 @@ public class InteractionSystem : MonoBehaviour
 		}
 
 		if (player.holding != null)
-        {
+		{
 
-			if (Input.GetMouseButton(1) && !player.bodyAnim.GetBool("isPreparingThrow") && !player.bodyAnim.GetBool("isThrowing"))
+			if (Input.GetMouseButton(1) && !player.bodyAnim.GetBool("isPreparingThrow") && !player.bodyAnim.GetBool("isThrowing") && (!buildOn || raycastForPlacing.Length == 0))
 			{
 				player.bodyAnim.SetBool("isPreparingThrow", true);
 			}
@@ -332,10 +517,10 @@ public class InteractionSystem : MonoBehaviour
 			{
 				SetThrow();
 			}*/
-			if (Input.GetMouseButtonUp(1))
+			if (Input.GetMouseButtonUp(1) && (!buildOn || raycastForPlacing.Length == 0))
 			{
 				//Debug.Log("Throw");
-				
+
 				player.bodyAnim.SetBool("isPreparingThrow", false);
 				player.bodyAnim.SetTrigger("isThrowing");
 				SetThrow();
@@ -372,178 +557,6 @@ public class InteractionSystem : MonoBehaviour
 		{
 			player.holding.Use(this, LMB: false);
 		}*/
-	}
-
-	private void Update()
-	{
-		if (GameSettings.Instance.PauseMenuOpen)
-		{
-			return;
-		}
-		//0 = closest
-		RaycastHit[] raycastForGrabbing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 2f, grabbingLayerMask)
-							  orderby h.distance
-							  select h).ToArray();
-
-		RaycastHit[] raycastForPlacing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 6f, placingLayerMask)
-										   orderby h.distance
-										   select h).ToArray();
-
-		if (raycastForGrabbing.Length > 0 && raycastForGrabbing[0].collider.transform.parent.parent.gameObject != null)
-		{
-			GameObject interactable = raycastForGrabbing[0].collider.transform.parent.parent.gameObject;
-
-			if (interactable.gameObject.layer == 9)
-			{
-				currentlyLookingAt = interactable.GetComponent<HoldableObject>();
-			}
-			else if (interactable.gameObject.layer == 10)
-			{
-				currentlyLookingAt = interactable.GetComponent<InteractableDoor>();
-			}
-			else if (interactable.gameObject.layer == 17)
-			{
-				currentlyLookingAt = interactable.GetComponent<InteractableButton>();
-			}
-			
-			
-			else
-			{
-				currentlyLookingAt = null;
-			}
-			
-		}
-		
-		else if (raycastForGrabbing.Length == 0)
-		{
-
-			currentlyLookingAt = null;
-		}
-
-		if (raycastForPlacing.Length != 0)
-		{
-			if (player.holding != null)
-			{
-				if (currentPlaceItemPrefab == null)
-				{
-					InteractableObject heldObjectTemplate = null;
-
-					GameSettings.Instance.PropDatabase.TryGetValue(player.holding.type, out heldObjectTemplate);
-
-					currentPlaceItemPrefab = Instantiate(heldObjectTemplate.gameObject);
-
-					//destroy the script so it doesnt do weird shit
-
-					SetAllCollidersToTrigger(currentPlaceItemPrefab.transform);
-					SetAllChildrenToLayer(currentPlaceItemPrefab.transform, 21);
-					Destroy(currentPlaceItemPrefab.GetComponent<InteractableObject>());
-				}
-				else if (currentPlaceItemPrefab != null && raycastForPlacing.Length > 0)
-				{
-
-					currentPlaceItemPrefab.transform.position = raycastForPlacing[0].point;
-					currentPlaceItemPrefab.transform.rotation = player.transform.localRotation * buildRotationOffset;
-
-					//Debug.Log(CheckForCollision(currentPlaceItemPrefab.transform));
-
-					if (CheckForCollision(currentPlaceItemPrefab.transform))
-                    {
-						canPlaceAtLocation = false;
-						ChangeAllMeshMaterials(currentPlaceItemPrefab.transform, transparentPlaceMaterialCollision);
-
-                    }
-
-						
-					else
-					{
-						canPlaceAtLocation = true;
-						ChangeAllMeshMaterials(currentPlaceItemPrefab.transform, transparentPlaceMaterialGood);
-					}
-
-					if (Input.GetButton("RotateBuildSystemRight"))
-                    {
-						currentRotZ -= 75f * Time.deltaTime;
-						
-					}
-
-					if (Input.GetButton("RotateBuildSystemLeft"))
-					{
-						currentRotZ += 75f * Time.deltaTime;
-						
-					}
-
-					if (Input.GetButton("RotateBuildSystemUp"))
-					{
-						currentRotX += 75f * Time.deltaTime;
-
-					}
-
-					if (Input.GetButton("RotateBuildSystemDown"))
-					{
-						currentRotX -= 75f * Time.deltaTime;
-
-					}
-
-					buildRotationOffset = Quaternion.Euler(currentRotX, 0, currentRotZ);
-				}
-				if (Input.GetButtonDown("ToggleBuilding"))
-                {
-					buildOn = !buildOn;
-                }
-					
-
-				if (Input.GetMouseButtonDown(1) && currentPlaceItemPrefab != null && buildOn)
-				{
-					if (canPlaceAtLocation)
-                    {
-						Destroy(currentPlaceItemPrefab.gameObject);
-						SetPlace(currentPlaceItemPrefab.transform.position, currentPlaceItemPrefab.transform.rotation);
-						currentRotX = 0;
-						currentRotZ = 0;
-						buildRotationOffset = Quaternion.identity;
-						currentPlaceItemPrefab = null;
-					}
-
-				}
-			}
-
-		}
-
-		//destroy building indicator prefab
-		if ((player.holding == null || !buildOn) && currentPlaceItemPrefab != null)
-		{
-			Destroy(currentPlaceItemPrefab.gameObject);
-			currentRotX = 0;
-			currentRotZ = 0;
-			buildRotationOffset = Quaternion.identity;
-			currentPlaceItemPrefab = null;
-		}
-
-
-		if (currentlyLookingAt != null)
-		{
-			if (currentlyLookingAt.GetComponent<InteractableObject>())
-			{
-				switch (currentlyLookingAt.gameObject.layer)
-				{
-					case 9:
-						pickup.gameObject.SetActive(value: true);
-						break;
-					case 10:
-						open.gameObject.SetActive(value: true);
-						break;
-					case 17:
-						open.gameObject.SetActive(value: true);
-						break;
-				}
-			}
-		}
-		else
-		{
-			pickup.gameObject.SetActive(value: false);
-			open.gameObject.SetActive(value: false);
-		}
-		PickupSystem();
 	}
 
 	private IEnumerator DropObjectAtCorrectTime()

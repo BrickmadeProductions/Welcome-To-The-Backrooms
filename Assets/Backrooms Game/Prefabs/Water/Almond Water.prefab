@@ -31,7 +31,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4880497483411444554}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &2124873852441223668
 MeshFilter:
@@ -114,7 +114,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4880497483411444554}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &675385804125130872
 MeshFilter:
@@ -197,7 +197,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4880497483411444554}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3464940989919862559
 MeshFilter:
@@ -272,18 +272,19 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5407322144296238747}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.08, y: 0.51, z: -0}
+  m_LocalRotation: {x: 0.0625136, y: -0.0013967975, z: 0.022294614, w: 0.99779415}
+  m_LocalPosition: {x: -0.13, y: 0.491, z: 0}
   m_LocalScale: {x: 18, y: 19.2, z: 18}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 4900336263499038570}
   - {fileID: 5874080631936476748}
   - {fileID: 8960332611485665160}
   - {fileID: 1520998438508266782}
   - {fileID: 4096810162693124568}
   m_Father: {fileID: 8189078796972353778}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 7.17, y: 0, z: 2.56}
 --- !u!1 &7069587474581249788
 GameObject:
   m_ObjectHideFlags: 0
@@ -315,7 +316,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4880497483411444554}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5828890130283735261
 MeshFilter:
@@ -367,6 +368,52 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &7717350239391216990
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4900336263499038570}
+  - component: {fileID: 4680317116037200796}
+  m_Layer: 9
+  m_Name: HitBox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4900336263499038570
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7717350239391216990}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4880497483411444554}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &4680317116037200796
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7717350239391216990}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.025
+  m_Height: 0.14436106
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.016353177, z: 0}
 --- !u!1 &8858197199751230024
 GameObject:
   m_ObjectHideFlags: 0
@@ -377,7 +424,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8189078796972353778}
   - component: {fileID: 5731310799800252581}
-  - component: {fileID: 5895338581994988498}
   - component: {fileID: 6461271711412109696}
   - component: {fileID: 2216274278999694209}
   m_Layer: 9
@@ -419,19 +465,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!65 &5895338581994988498
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8858197199751230024}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1.0218611, y: 2.5549781, z: 0.9}
-  m_Center: {x: 0.060930476, y: 0.8246131, z: 0}
 --- !u!114 &6461271711412109696
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -472,12 +505,9 @@ MonoBehaviour:
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimationClips:
-  - {fileID: -1785242027413151391, guid: c3da10c4a15ca9244bab8ba9a82842e0, type: 3}
+  LMBAnimationClips: []
   LMBAnimationBools:
   - isDrinking
-  RMBAnimationClips: []
-  RMBAnimationBools: []
   CustomHoldAnimation: 
 --- !u!82 &2216274278999694209
 AudioSource:

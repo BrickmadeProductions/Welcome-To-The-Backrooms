@@ -13,8 +13,8 @@ public class ThrowWeapon : HoldableObject
 
     public void OnTriggerEnter(Collider hit)
     {
-        
-        if (hit.gameObject.layer != 13 && hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6 && !stuckInWall && Flying)
+        Debug.Log(holdableObject.velocity.magnitude);   
+        if (hit.gameObject.layer != 13 && hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6 && !stuckInWall && Flying )
         {
             //Debug.Log(hit.name);
             AudioSource.PlayClipAtPoint(stuckSounds[Random.Range(0, stuckSounds.Length)], hit.transform.position);
@@ -59,16 +59,16 @@ public class ThrowWeapon : HoldableObject
         holdableObject.angularVelocity = holdableObject.transform.right * rotationAmount;
         //holdableObject.AddForceAtPosition(, transform.up * 2);
         Flying = true;
-        holdableObject.isKinematic = false;
+        holdableObject.constraints = RigidbodyConstraints.None;
         //Debug.Log("Gran And Set To False");
-        
+
     }
 
     public override void Hold(InteractionSystem player)
     {
         base.Hold(player);
         Flying = false;
-        holdableObject.isKinematic = true;
+        holdableObject.constraints = RigidbodyConstraints.FreezeAll;
     }
 
 }
