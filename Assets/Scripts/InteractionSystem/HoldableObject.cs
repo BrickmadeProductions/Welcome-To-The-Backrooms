@@ -155,18 +155,18 @@ public class HoldableObject : InteractableObject
 	private void FixedUpdate()
 	{
 
-		if (SceneManager.GetActiveScene().name != "HomeScreen" && SceneManager.GetActiveScene().name != "IntroSequence" && GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
+		/*if (SceneManager.GetActiveScene().name != "HomeScreen" && SceneManager.GetActiveScene().name != "IntroSequence" && GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
 		{
 			foreach (string lMBAnimationBool in LMBAnimationBools)
 			{
 				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(lMBAnimationBool, value: false);
 			}
-			/*foreach (string rMBAnimationBool in RMBAnimationBools)
+			*//*foreach (string rMBAnimationBool in RMBAnimationBools)
 			{
 				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(rMBAnimationBool, value: false);
-			}*/
+			}*//*
 		}
 		transform.position += pushAmt;
-		pushAmt *= 0.95f;
+		pushAmt *= 0.95f;*/
 	}
 }

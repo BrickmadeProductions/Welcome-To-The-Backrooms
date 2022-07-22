@@ -321,7 +321,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		GameSettings.LEVEL_SAVE_LOADED = true;
 
-		StartCoroutine(SaveDataEveryXMinutes(0.05f));
+		StartCoroutine(SaveDataEveryXMinutes(1f));
 		StartCoroutine(TrySpawnEntityEveryFrame());
 
 		Debug.Log("Done With Spawn Region");

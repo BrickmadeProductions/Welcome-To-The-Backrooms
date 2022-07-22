@@ -329,7 +329,7 @@ public class InteractionSystem : MonoBehaviour
 		{
 			return;
 		}
-		if (Input.GetButtonDown("ToggleBuilding") && !Input.GetMouseButtonDown(1))
+		if (Input.GetButtonDown("ToggleBuilding") && !Input.GetMouseButton(1))
 		{
 			buildOn = !buildOn;
 		}

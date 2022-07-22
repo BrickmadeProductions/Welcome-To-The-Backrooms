@@ -49,7 +49,7 @@ public class SmilerAI : Entity
         {
             GameObject explosion = Instantiate(explosionEffect.gameObject);
             explosion.transform.position = transform.position + new Vector3(0, 1.44f, 0);
-            Kill();
+            Despawn();
         }
     }
 
@@ -58,7 +58,7 @@ public class SmilerAI : Entity
 
     }
 
-    public override void Kill()
+    public override void Despawn()
     {
         Destroy(gameObject);
     }

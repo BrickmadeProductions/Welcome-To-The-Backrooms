@@ -94,6 +94,7 @@ GameObject:
   - component: {fileID: 2891958640714419772}
   - component: {fileID: 4494756353391914056}
   - component: {fileID: 1723580405266850514}
+  - component: {fileID: 3157790954629069949}
   m_Layer: 9
   m_Name: Cylinder
   m_TagString: Untagged
@@ -166,6 +167,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!136 &3157790954629069949
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5089581174438468109}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 1.11
+  m_Height: 3.24
+  m_Direction: 2
+  m_Center: {x: -0.0000000055879354, y: 0.000000011920929, z: 0.3}
 --- !u!1 &6239185709313815323
 GameObject:
   m_ObjectHideFlags: 0
@@ -336,8 +351,6 @@ MonoBehaviour:
   animationPlaying: 0
   LMBAnimationClips: []
   LMBAnimationBools: []
-  RMBAnimationClips: []
-  RMBAnimationBools: []
   CustomHoldAnimation: 
 --- !u!82 &6768213791637214978
 AudioSource:
@@ -444,7 +457,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8061674248412037536}
-  - component: {fileID: 269350652760207602}
   m_Layer: 9
   m_Name: SoupContainer
   m_TagString: Untagged
@@ -470,16 +482,3 @@ Transform:
   m_Father: {fileID: 8327791197747540966}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 8, y: 35.699, z: -3.71}
---- !u!65 &269350652760207602
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8778324714230605287}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.0659778, y: 2.9096558, z: 2.1108634}
-  m_Center: {x: 0.014641663, y: 0.5985877, z: -0.12113277}

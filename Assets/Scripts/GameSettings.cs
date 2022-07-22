@@ -81,6 +81,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public static volatile bool PLAYER_DATA_LOADED_IN_SCENE = false;
 
+	public Animator saveIcon;
+
 	private PostProcessVolume post;
 
 	private Vignette vignette;
@@ -502,6 +504,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public void SettingsScreen()
 	{
+		SaveAllProgress();
+
 		setPauseMenuOpen(true);
 		Cursor.lockState = CursorLockMode.None;
 		Cursor.visible = true;
@@ -666,12 +670,19 @@ public class GameSettings : MonoBehaviour, ISaveable
     }
 	public static void SaveAllProgress()
 	{
+		//Instance.saveIcon.gameObject.SetActive(true);
 		IS_SAVING = true;
+
+		Instance.saveIcon.SetTrigger("Save");
 
 		SaveMaster.SyncSave();
 		Debug.Log("Saved All Data!");
 
+		
+		Instance.saveIcon.SetTrigger("StopSave");
+		//Instance.saveIcon.gameObject.SetActive(false);
 		IS_SAVING = false;
+
 	}
 
 	private void OnDestroy()

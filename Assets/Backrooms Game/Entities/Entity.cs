@@ -188,7 +188,7 @@ public abstract class Entity : MonoBehaviour
 		if ((Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > despawnDistance && !isDespawned) || health <= 0f)
 		{
 			isDespawned = true;
-			GameSettings.Instance.worldInstance.RemoveEntity(type.ToString() + "-" + runTimeID);
+			Despawn();
 			return;
 		}
 		Vector3 position = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.position;
@@ -226,7 +226,7 @@ public abstract class Entity : MonoBehaviour
 
 	public abstract IEnumerator AI();
 
-	public abstract void Kill();
+	public abstract void Despawn();
 
 	public void OnDestroy()
 	{
