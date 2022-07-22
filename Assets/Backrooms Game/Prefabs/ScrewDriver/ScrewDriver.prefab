@@ -97,7 +97,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &7088627852523957308
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -127,7 +127,7 @@ MonoBehaviour:
   breakClips: []
   inventoryWeight: 1
   holdableObject: {fileID: 7088627852523957309}
-  ThrowMultiplier: 1
+  ThrowMultiplier: 1.5
   large: 0
   canPlace: 0
   isPlaced: 0
@@ -136,8 +136,6 @@ MonoBehaviour:
   - {fileID: -1232988704551948498, guid: c3da10c4a15ca9244bab8ba9a82842e0, type: 3}
   LMBAnimationBools:
   - Stab1
-  RMBAnimationClips: []
-  RMBAnimationBools: []
   CustomHoldAnimation: 
 --- !u!1 &7088627852977277467
 GameObject:
@@ -392,5 +390,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 15
-  Thrown: 0
   connetedObject: {fileID: 7088627852523957308}
+  WeaponBloodRenderer: {fileID: 0}
+  bloodAmount: 0

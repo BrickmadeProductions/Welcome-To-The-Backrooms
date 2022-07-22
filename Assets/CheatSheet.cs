@@ -132,8 +132,8 @@ public class CheatSheet : MonoBehaviour
 
         spawnLocation.y = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.position.y;
 
-        InteractableObject objectToSpawn = null;
-        GameSettings.Instance.PropDatabase.TryGetValue(currentObjectTypeChoice, out objectToSpawn);
+        GameObject objectToSpawn = GameSettings.Instance.PropDatabase[currentObjectTypeChoice].gameObject;
+        
 
         GameSettings.Instance.worldInstance.AddNewProp(
         spawnLocation,
@@ -141,7 +141,7 @@ public class CheatSheet : MonoBehaviour
         objectToSpawn,
         GameSettings.Instance.worldInstance.GetLoadedChunkAtPlayerLocation());
 
-        Debug.Log("| CHEATSHEET | Successfully Spawned: " + objectToSpawn.type);
+        Debug.Log("| CHEATSHEET | Successfully Spawned: " + objectToSpawn.GetComponent<InteractableObject>().type);
     }
 
     public void SpawnCheatedEntity()
@@ -150,17 +150,16 @@ public class CheatSheet : MonoBehaviour
 
         spawnLocation.y = GameSettings.Instance.Player.GetComponent<PlayerController>().transform.position.y;
 
-        Entity entityToSpawn = null;
-        GameSettings.Instance.EntityDatabase.TryGetValue(currentEntityTypeChoice, out entityToSpawn);
+        GameObject entityToSpawn = GameSettings.Instance.EntityDatabase[currentEntityTypeChoice].gameObject;
 
-        Debug.Log(entityToSpawn.type);
+        //Debug.Log(entityToSpawn.type);
 
         GameSettings.Instance.worldInstance.AddNewEntity(
         spawnLocation,
         entityToSpawn,
         GameSettings.Instance.worldInstance.GetLoadedChunkAtPlayerLocation());
 
-        Debug.Log("| CHEATSHEET | Successfully Spawned: " + entityToSpawn.type);
+        Debug.Log("| CHEATSHEET | Successfully Spawned: " + entityToSpawn.GetComponent<Entity>().type);
     }
 
     public void SetCurrentObjectChoice(OBJECT_TYPE type)

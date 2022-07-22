@@ -25,6 +25,7 @@ public class HoldableObject : InteractableObject
 	public bool large;
 
 	//building system
+	public bool canPlace;
 	public bool isPlaced = false;
 
 	public bool animationPlaying;
@@ -33,9 +34,9 @@ public class HoldableObject : InteractableObject
 
 	public List<string> LMBAnimationBools;
 
-	public List<AnimationClip> RMBAnimationClips;
+	/*public List<AnimationClip> RMBAnimationClips;
 
-	public List<string> RMBAnimationBools;
+	public List<string> RMBAnimationBools;*/
 
 	public string CustomHoldAnimation = "";
 
@@ -58,18 +59,23 @@ public class HoldableObject : InteractableObject
 	public override void Throw(Vector3 force)
 	{
 		holdableObject.velocity = force * ThrowMultiplier;
+		//holdableObject.AddForce();
 	}
 
 	private IEnumerator playAnimation(string boolName, int animChosen, bool LMB)
 	{
-		yield return null;
-
 		GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, value: true);
 
 		animationPlaying = true;
 
-		//Debug.Log(GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(0).normalizedTime);
-		yield return new WaitUntil(() => GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 2f);
+		if (LMB)
+		{
+			yield return new WaitForSeconds(LMBAnimationClips[animChosen].length);
+		}
+		/*else
+		{
+			yield return new WaitForSeconds(RMBAnimationClips[animChosen].length);
+		}*/
 
 		animationPlaying = false;
 
@@ -82,24 +88,14 @@ public class HoldableObject : InteractableObject
 		{
 			if (LMB && LMBAnimationBools.Count > 0)
 			{
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[2].clip = player.GetComponent<PlayerController>().swingSounds[Random.Range(0, player.GetComponent<PlayerController>().swingSounds.Length)];
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[2].pitch = Random.Range(0.9f, 1.1f);
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[2].Stop();
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[2].Play();
-
 				int choice = Random.Range(0, LMBAnimationBools.Count);
 				StartCoroutine(playAnimation(LMBAnimationBools[choice], choice, LMB));
 			}
-			else if (!LMB && RMBAnimationBools.Count > 0)
+			/*else if (!LMB && RMBAnimationBools.Count > 0)
 			{
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[2].clip = player.GetComponent<PlayerController>().swingSounds[Random.Range(0, player.GetComponent<PlayerController>().swingSounds.Length)];
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[2].pitch = Random.Range(0.9f, 1.1f);
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[2].Stop();
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[2].Play();
-
 				int choice = Random.Range(0, RMBAnimationBools.Count);
 				StartCoroutine(playAnimation(RMBAnimationBools[choice], choice, LMB));
-			}
+			}*/
 		}
 	}
 
@@ -108,10 +104,10 @@ public class HoldableObject : InteractableObject
 		interactionSystem.inventorySlots.Add(this);
 		interactionSystem.currentlyLookingAt.gameObject.SetActive(value: false);
 		interactionSystem.currentlyLookingAt = null;
-		Debug.Log("Added Object " + name);
-		transform.SetParent(interactionSystem.inventoryObject.transform);
+		Debug.Log("Added Object " + base.name);
+		base.transform.SetParent(interactionSystem.inventoryObject.transform);
 	}
-
+  
     public override void Hold(InteractionSystem player)
     {
 
@@ -165,10 +161,10 @@ public class HoldableObject : InteractableObject
 			{
 				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(lMBAnimationBool, value: false);
 			}
-			foreach (string rMBAnimationBool in RMBAnimationBools)
+			/*foreach (string rMBAnimationBool in RMBAnimationBools)
 			{
 				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(rMBAnimationBool, value: false);
-			}
+			}*/
 		}
 		transform.position += pushAmt;
 		pushAmt *= 0.95f;

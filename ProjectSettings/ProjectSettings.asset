@@ -137,7 +137,13 @@ PlayerSettings:
     16:9: 1
     Others: 1
   bundleVersion: 1
-  preloadedAssets: []
+  preloadedAssets:
+  - {fileID: 7392081474520821307, guid: abc7bb120413a0e4e9dc4fda4e128ef6, type: 3}
+  - {fileID: 472166766898139531, guid: b2f16886182db274c893d59db1b35eda, type: 3}
+  - {fileID: 472166766898139531, guid: bd499ec876872cf4e9c56eceae4f96f9, type: 3}
+  - {fileID: 8209230494130185599, guid: 53cc790fa15f0ba44a8a286ff24b1b3e, type: 3}
+  - {fileID: 5144882405261894941, guid: 28d8ad4a21302ff4e8b5da426d33af4b, type: 3}
+  - {fileID: 7076623207126011811, guid: c764dc763975a064786c50978b7fb970, type: 3}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -146,9 +152,9 @@ PlayerSettings:
   vrSettings:
     enable360StereoCapture: 0
   isWsaHolographicRemotingEnabled: 0
-  enableFrameTimingStats: 1
-  enableOpenGLProfilerGPURecorders: 1
-  useHDRDisplay: 0
+  enableFrameTimingStats: 0
+  enableOpenGLProfilerGPURecorders: 0
+  useHDRDisplay: 1
   D3DHDRBitDepth: 0
   m_ColorGamuts: 00000000
   targetPixelDensity: 30

@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 4824086819898984443}
   - component: {fileID: 3035513702425716336}
   - component: {fileID: 869247385304841261}
-  - component: {fileID: 7288792685679461229}
   m_Layer: 9
   m_Name: Flashlight
   m_TagString: Cement
@@ -27,7 +26,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 986405930481796814}
-  m_LocalRotation: {x: 1, y: 0, z: 0, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -35,7 +34,7 @@ Transform:
   - {fileID: 8496638241458309770}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 180, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &4824086819898984443
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -71,7 +70,7 @@ MonoBehaviour:
     parentName: 
     type: 0
     instance: {fileID: 0}
-  type: 6
+  type: 7
   playSounds: 1
   spawnChance: 0
   runTimeID: 
@@ -88,8 +87,6 @@ MonoBehaviour:
   animationPlaying: 0
   LMBAnimationClips: []
   LMBAnimationBools: []
-  RMBAnimationClips: []
-  RMBAnimationBools: []
   CustomHoldAnimation: isHoldingFlashlight
   emission: {fileID: 0}
   flashLight: {fileID: 8493413208097835615, guid: 1524594750d88a6488b6305b104387ef, type: 3}
@@ -189,19 +186,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!65 &7288792685679461229
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 986405930481796814}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.40827164, y: 0.39226818, z: 0.27967772}
-  m_Center: {x: -0.032229915, y: 0.08670676, z: 0.04612465}
 --- !u!1 &1826176479901806868
 GameObject:
   m_ObjectHideFlags: 0
@@ -296,6 +280,7 @@ GameObject:
   - component: {fileID: 3340003521954395984}
   - component: {fileID: 4042204522441364772}
   - component: {fileID: 1266423751906663358}
+  - component: {fileID: 3408919739209662641}
   m_Layer: 9
   m_Name: Cylinder
   m_TagString: Untagged
@@ -368,6 +353,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &3408919739209662641
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4672921749458330465}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.8826983, y: 2.8826976, z: 21.921127}
+  m_Center: {x: -0.000000019938199, y: 0.00000024126243, z: 9.960563}
 --- !u!1 &6053728050245596012
 GameObject:
   m_ObjectHideFlags: 0
@@ -626,7 +624,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8496638241458309770}
-  - component: {fileID: 8389929984296454645}
   m_Layer: 9
   m_Name: Flashlight
   m_TagString: Untagged
@@ -641,8 +638,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9124802856274038832}
-  m_LocalRotation: {x: -0.41892543, y: 0.8992081, z: 0.053294044, w: -0.11439372}
-  m_LocalPosition: {x: 0.106, y: -0.042, z: -0.025}
+  m_LocalRotation: {x: -0.32273448, y: 0.5704313, z: 0.37191853, w: -0.65736383}
+  m_LocalPosition: {x: -0.016, y: -0.029, z: -0.105}
   m_LocalScale: {x: 0.038, y: 0.038, z: 0.038}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -653,17 +650,4 @@ Transform:
   - {fileID: 9042861530265711819}
   m_Father: {fileID: 503200684058123380}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 194.5, z: -49.96}
---- !u!65 &8389929984296454645
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9124802856274038832}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 3.2265294, y: 9.764166, z: 3.3878143}
-  m_Center: {x: -0.1572617, y: 4.38201, z: -0.011301215}
+  m_LocalEulerAnglesHint: {x: 0, y: 278.1, z: -59}

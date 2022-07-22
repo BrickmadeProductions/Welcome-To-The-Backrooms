@@ -12,6 +12,8 @@ public struct SerealizedChunk
 
 	public PropCluster propData;
 
+	public List<int> tile_gridData;
+
 	[NonSerialized]
 	public Chunk instance;
 }
@@ -28,8 +30,6 @@ public class Chunk : MonoBehaviour
 	public int chunkPosY;
 
 	private Dictionary<int, GameObject> tileset;
-
-	private List<List<int>> noise_grid;
 
 	public List<Tile> tile_grid;
 
@@ -49,7 +49,7 @@ public class Chunk : MonoBehaviour
 
 	public bool ALL_OBJECTS_AND_ENTITES_LOADED;
 
-	public void CreateChunk(int posX, int posY, int posZ, BackroomsLevelWorld parentGenerator, bool shouldGenerateInstantly)
+	public void CreateChunk(int posX, int posY, int posZ, BackroomsLevelWorld parentGenerator, bool shouldGenerateInstantly, List<int> tile_grid)
 	{
 		saveableData = new SerealizedChunk
 		{
@@ -72,25 +72,50 @@ public class Chunk : MonoBehaviour
 
 		CreateTileset(parentGenerator.Tiles);
 
-		if (shouldGenerateInstantly)
-		{
-			GenerateRandomMap();
+		if (tile_grid.Count == 0)
+        {
+			if (shouldGenerateInstantly)
+			{
+				GenerateRandomMap();
+			}
+			else
+			{
+				StartCoroutine(GenerateRandomMap(2));
+			}
+        }
+        else
+        {
+			if (shouldGenerateInstantly)
+			{
+				GenerateMapFromGrid(tile_grid);
+			}
+			else
+			{
+				StartCoroutine(GenerateMapFromGrid(2, tile_grid));
+			}
 		}
-		else
-		{
-			StartCoroutine(GenerateRandomMap(2));
-		}
+		
 	}
 
 	private void Awake()
 	{
-		noise_grid = new List<List<int>>();
 		tile_grid = new List<Tile>();
 	}
 
+	public void SaveChunkTileGrid()
+    {
+		List<int> tile_grid_save = new List<int>(tile_grid.Count);
+
+		foreach (Tile tile in tile_grid)
+        {
+			tile_grid_save.Add(tile.id);
+        }
+
+		saveableData.tile_gridData = tile_grid_save;
+    }
+
 	internal void UpdateChunkData()
 	{
-
 	}
 
 	private void CreateTileset(List<GameObject> tiles)
@@ -106,15 +131,13 @@ public class Chunk : MonoBehaviour
 	{
 		for (int x = 0; x < parentGenerator.chunk_width; x++)
 		{
-			noise_grid.Add(new List<int>());
 			for (int z = 0; z < parentGenerator.chunk_width; z++)
 			{
 				for (int i = 0; i < framesPerTile; i++)
 				{
-					yield return new WaitForEndOfFrame();
+					yield return null;
 				}
 				int idUsingPerlin = GetIdUsingPerlin(x, z);
-				noise_grid[x].Add(idUsingPerlin);
 				CreateTile(idUsingPerlin, x, chunkPosY, z);
 			}
 		}
@@ -125,12 +148,43 @@ public class Chunk : MonoBehaviour
 	{
 		for (int i = 0; i < parentGenerator.chunk_width; i++)
 		{
-			noise_grid.Add(new List<int>());
 			for (int j = 0; j < parentGenerator.chunk_width; j++)
 			{
 				int idUsingPerlin = GetIdUsingPerlin(i, j);
-				noise_grid[i].Add(idUsingPerlin);
 				CreateTile(idUsingPerlin, i, chunkPosY, j);
+			}
+		}
+		ALL_TILES_GENERATED = true;
+	}
+
+	private IEnumerator GenerateMapFromGrid(int framesPerTile, List<int> grid)
+	{
+		int tilesCreated = 0;
+		for (int x = 0; x < parentGenerator.chunk_width; x++)
+		{
+			for (int z = 0; z < parentGenerator.chunk_width; z++)
+			{
+				for (int i = 0; i < framesPerTile; i++)
+				{
+					yield return null;
+				}
+				
+				CreateTile(grid[tilesCreated], x, chunkPosY, z);
+				tilesCreated++;
+			}
+		}
+		ALL_TILES_GENERATED = true;
+	}
+
+	private void GenerateMapFromGrid(List<int> grid)
+	{
+		int tilesCreated = 0;
+		for (int i = 0; i < parentGenerator.chunk_width; i++)
+		{
+			for (int j = 0; j < parentGenerator.chunk_width; j++)
+			{
+				CreateTile(grid[tilesCreated], i, chunkPosY, j);
+				tilesCreated++;
 			}
 		}
 		ALL_TILES_GENERATED = true;
@@ -149,7 +203,18 @@ public class Chunk : MonoBehaviour
 
 	private void CreateTile(int tile_id, int x, int y, int z)
 	{
-		GameObject tileToSpawn = tileset[tile_id];
+		GameObject tileToSpawn;
+
+		if (tile_id > tileset.Count - 1)
+		{
+			tileToSpawn = tileset[0];
+		}
+        else
+        {
+			tileToSpawn = tileset[tile_id];
+		}
+
+		
 
 		GameObject createdTile = null;
 
@@ -167,6 +232,8 @@ public class Chunk : MonoBehaviour
 		createdTile.name = $"tile_x{x + chunkPosX}_y{y + chunkPosY}_z{z + chunkPosZ}";
 
 		createdTile.transform.localPosition = new Vector3(x * tileWidth, 0f, z * tileWidth);
+
+		createdTile.GetComponent<Tile>().id = tile_id;
 
 		tile_grid.Add(createdTile.GetComponent<Tile>());
 

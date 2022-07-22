@@ -376,19 +376,16 @@ MonoBehaviour:
   hitClips: []
   breakClips: []
   inventoryWeight: 1
-  holdableObject: {fileID: 0}
-  ThrowMultiplier: 1.2
+  holdableObject: {fileID: 5174651668802718680}
+  ThrowMultiplier: 1.5
   large: 0
+  canPlace: 0
   isPlaced: 0
   animationPlaying: 0
   LMBAnimationClips:
   - {fileID: 1221074250055787942, guid: c3da10c4a15ca9244bab8ba9a82842e0, type: 3}
   LMBAnimationBools:
   - Slice
-  RMBAnimationClips:
-  - {fileID: -1232988704551948498, guid: c3da10c4a15ca9244bab8ba9a82842e0, type: 3}
-  RMBAnimationBools:
-  - Stab1
   CustomHoldAnimation: 
 --- !u!1 &7724259818419893475
 GameObject:
@@ -449,7 +446,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 15
-  Thrown: 0
   connetedObject: {fileID: 5174651668802718682}
   WeaponBloodRenderer: {fileID: 2147181769708924259}
   bloodAmount: 0

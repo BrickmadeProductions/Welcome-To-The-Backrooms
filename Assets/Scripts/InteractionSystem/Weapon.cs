@@ -5,7 +5,6 @@ using UnityEngine;
 public class Weapon : MonoBehaviour
 {
     public float damage;
-    public bool Thrown;
     public HoldableObject connetedObject;
     public Renderer WeaponBloodRenderer;
     public float bloodAmount = 0;
@@ -17,24 +16,19 @@ public class Weapon : MonoBehaviour
          */
         Vector3 collisionPoint = other.gameObject.GetComponent<Collider>().ClosestPointOnBounds(transform.position);
 
-        //melee attacks
-        if (gameObject.layer == 13 && other.gameObject.layer == 18 && connetedObject.animationPlaying)
+        Debug.Log(connetedObject.animationPlaying);
+        if (gameObject.layer == 13 && other.gameObject.layer == 18 && other.gameObject.layer != 11 && connetedObject.animationPlaying)
         {
             AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
 
             if (limb != null)
             {
-                Entity entityHit = limb.attachedEntity;
-
-                if (!entityHit.stunned && Random.Range(0f, 1f) < 0.3f)
+                if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.3f)
                 {
-                    StartCoroutine(entityHit.StunTimer());
+                    StartCoroutine(limb.attachedEntity.StunTimer());
                 }
-
-                entityHit.health -= (damage * limb.damageMultiplier);
-
+                limb.attachedEntity.health -= (damage * limb.damageMultiplier);
                 limb.Stabbed(collisionPoint);
-
                 if (bloodAmount < 1)
                 {
                     bloodAmount += 0.04f;
@@ -46,31 +40,29 @@ public class Weapon : MonoBehaviour
             
             
         }
-        //thrown attacks
-        else if (gameObject.layer == 9 && other.gameObject.layer == 18 && Thrown)
+        else if (connetedObject.GetComponent<ThrowWeapon>() != null)
         {
-            //Debug.Log("Player Attack");
-            AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
-            if (limb != null)
+            if (other.gameObject.layer == 18 && other.gameObject.layer != 11 && (connetedObject.GetComponent<ThrowWeapon>().Flying || connetedObject.GetComponent<ThrowWeapon>().stuckInWall))
             {
-                Entity entityHit = limb.attachedEntity;
-
-                if (!entityHit.stunned && Random.Range(0f, 1f) < 0.6f)
+                //Debug.Log("Player Attack");
+                AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
+                if (limb != null)
                 {
-                    StartCoroutine(entityHit.StunTimer());
-                }
-
-                //add more for thrown attacks
-                entityHit.health -= (damage * limb.damageMultiplier * 1.5f);
-                limb.Stabbed(collisionPoint);
-
-                if (bloodAmount < 1)
-                {
-                    bloodAmount += 0.04f;
-                    WeaponBloodRenderer.material.SetFloat("_Wetness", bloodAmount);
+                    if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.3f)
+                    {
+                        StartCoroutine(limb.attachedEntity.StunTimer());
+                    }
+                    limb.attachedEntity.health -= (damage * limb.damageMultiplier);
+                    limb.Stabbed(collisionPoint);
+                    if (bloodAmount < 1)
+                    {
+                        bloodAmount += 0.04f;
+                        WeaponBloodRenderer.material.SetFloat("_Wetness", bloodAmount);
+                    }
                 }
             }
         }
+        
 
 
     }

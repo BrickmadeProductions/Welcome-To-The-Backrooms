@@ -40,7 +40,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b94fcd11afffcb142908bfcb1e261fba, type: 3}
   m_Name: MotionBlur(Clone)
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   enabled:
     overrideState: 1
     value: 1
@@ -97,10 +97,10 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 0.21
+    value: 0.33
   color:
     overrideState: 1
-    value: {r: 0, g: 0, b: 0, a: 1}
+    value: {r: 0.16981131, g: 0.13052012, b: 0.06648272, a: 1}
   ambientOnly:
     overrideState: 1
     value: 0
@@ -199,7 +199,7 @@ MonoBehaviour:
     value: 1.09
   contrast:
     overrideState: 1
-    value: 2.84
+    value: -14
   mixerRedOutRedIn:
     overrideState: 0
     value: 95.19
@@ -1487,7 +1487,7 @@ MonoBehaviour:
     value: 8
   maximumMarchDistance:
     overrideState: 1
-    value: 83.85
+    value: 22.35
   distanceFade:
     overrideState: 1
     value: 0
@@ -1512,7 +1512,7 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 1.58
+    value: 0.95
   threshold:
     overrideState: 1
     value: 0.64
@@ -1568,10 +1568,10 @@ MonoBehaviour:
     value: {x: 0.5, y: 0.5}
   intensity:
     overrideState: 1
-    value: 0.38
+    value: 0.412
   smoothness:
     overrideState: 1
-    value: 0.391
+    value: 0.373
   roundness:
     overrideState: 1
     value: 1

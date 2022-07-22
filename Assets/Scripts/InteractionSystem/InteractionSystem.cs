@@ -86,6 +86,10 @@ public class InteractionSystem : MonoBehaviour
 					if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>() == null)
 						item.gameObject.AddComponent<WTTB_ExtraCollisionData>();
 				}
+				if (item.gameObject.GetComponent<Weapon>() != null)
+                {
+					Destroy(item.gameObject.GetComponent<Weapon>());
+                }
 				SetAllCollidersToTrigger(item);
 			}
 			else
@@ -99,6 +103,10 @@ public class InteractionSystem : MonoBehaviour
 
 					if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>() == null)
 						item.gameObject.AddComponent<WTTB_ExtraCollisionData>();
+				}
+				if (item.gameObject.GetComponent<Weapon>() != null)
+				{
+					Destroy(item.gameObject.GetComponent<Weapon>());
 				}
 			}
 		}
@@ -221,8 +229,10 @@ public class InteractionSystem : MonoBehaviour
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
 
 		//player.holding.transform.position += player.head.transform.forward * 1.2f;
-		player.holding.transform.rotation = Quaternion.LookRotation(transform.forward, transform.up);
-		player.holding.Throw(player.head.transform.forward * ((player.GetComponent<CharacterController>().velocity.magnitude / 10) + 1) * player.holding.ThrowMultiplier * player.holding.GetComponent<Rigidbody>().mass);
+
+		player.holding.transform.rotation = Quaternion.LookRotation(player.playerCamera.transform.forward, player.playerCamera.transform.up);
+		player.holding.Throw(player.head.transform.forward.normalized * ((player.GetComponent<CharacterController>().velocity.magnitude / 10) + 1) * player.holding.ThrowMultiplier );
+		
 
 		player.holding = null;
 
@@ -230,8 +240,10 @@ public class InteractionSystem : MonoBehaviour
 	}
 
 	//raycast can go through multiple objects
-	public void SetHolding()
+	public void SetHolding(InteractableObject holdableObject)
 	{
+		player.holding = (HoldableObject)holdableObject;
+
 		if (player.holding.GetComponent<HoldableObject>().large)
 		{
 			SetAllChildrenToLayer(player.holding.transform, 14);
@@ -310,70 +322,6 @@ public class InteractionSystem : MonoBehaviour
 		currentPlaceItemPrefab = null;
 	}
 
-	private void PickupSystem()
-	{
-		if (Input.GetButton("Grab") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable")
-		{
-			//pickup
-			player.holding = currentlyLookingAt.GetComponent<HoldableObject>();
-			SetHolding();
-		}
-
-		if (player.holding != null)
-        {
-
-			if (Input.GetMouseButton(1) && !player.bodyAnim.GetBool("isPreparingThrow") && !player.bodyAnim.GetBool("isThrowing"))
-			{
-				player.bodyAnim.SetBool("isPreparingThrow", true);
-			}
-
-			/*if (Input.GetButtonDown("Throw") && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
-			{
-				SetThrow();
-			}*/
-			if (Input.GetMouseButtonUp(1))
-			{
-				//Debug.Log("Throw");
-				
-				player.bodyAnim.SetBool("isPreparingThrow", false);
-				player.bodyAnim.SetTrigger("isThrowing");
-				SetThrow();
-			}
-
-			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
-			{
-				SetDrop();
-			}
-		}
-
-		
-
-		if (currentlyLookingAt != null && currentlyLookingAt.gameObject.tag == "Usable" && Input.GetButtonDown("Grab"))
-		{
-			currentlyLookingAt.Use(this, false);
-		}
-		if (Input.GetButtonDown("Pickup") && inventorySlots.Count < inventoryLimit && currentlyLookingAt != null)
-		{
-			currentlyLookingAt.AddToInv(this);
-			currentSelectedInventorySlot++;
-		}
-		if (Input.GetButtonDown("Drop") && inventorySlots.Count > 0)
-		{
-			SetAllChildrenToLayer(inventoryObject.transform.GetChild(currentSelectedInventorySlot), 9);
-			DropInventoryObject();
-		}
-		if (Input.GetMouseButtonDown(0))
-		{
-			if (player.holding != null)
-			{
-				player.holding.Use(this, LMB: true);
-			}
-		}
-		/*else if (Input.GetMouseButtonDown(1) && player.holding != null)
-		{
-			player.holding.Use(this, LMB: false);
-		}*/
-	}
 
 	private void Update()
 	{
@@ -381,16 +329,20 @@ public class InteractionSystem : MonoBehaviour
 		{
 			return;
 		}
+		if (Input.GetButtonDown("ToggleBuilding") && !Input.GetMouseButtonDown(1))
+		{
+			buildOn = !buildOn;
+		}
 		//0 = closest
 		RaycastHit[] raycastForGrabbing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 2f, grabbingLayerMask)
 							  orderby h.distance
 							  select h).ToArray();
 
-		RaycastHit[] raycastForPlacing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 10f, placingLayerMask)
+		RaycastHit[] raycastForPlacing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 6f, placingLayerMask)
 										   orderby h.distance
 										   select h).ToArray();
-
-		if (raycastForGrabbing.Length != 0)
+		//update currently looking at
+		if (raycastForGrabbing.Length > 0 && raycastForGrabbing[0].collider.transform.parent.parent.gameObject != null)
 		{
 			GameObject interactable = raycastForGrabbing[0].collider.transform.parent.parent.gameObject;
 
@@ -421,10 +373,11 @@ public class InteractionSystem : MonoBehaviour
 			currentlyLookingAt = null;
 		}
 
-		if (raycastForPlacing.Length != 0)
+		if (raycastForPlacing.Length > 0)
 		{
-			if (player.holding != null)
+			if (player.holding != null && buildOn)
 			{
+				//add in indicator prefab
 				if (currentPlaceItemPrefab == null)
 				{
 					InteractableObject heldObjectTemplate = null;
@@ -439,7 +392,8 @@ public class InteractionSystem : MonoBehaviour
 					SetAllChildrenToLayer(currentPlaceItemPrefab.transform, 21);
 					Destroy(currentPlaceItemPrefab.GetComponent<InteractableObject>());
 				}
-				else if (currentPlaceItemPrefab != null && raycastForPlacing.Length > 0)
+				//handle updating placing indicator
+				else if (currentPlaceItemPrefab != null)
 				{
 
 					currentPlaceItemPrefab.transform.position = raycastForPlacing[0].point;
@@ -448,13 +402,13 @@ public class InteractionSystem : MonoBehaviour
 					//Debug.Log(CheckForCollision(currentPlaceItemPrefab.transform));
 
 					if (CheckForCollision(currentPlaceItemPrefab.transform))
-                    {
+					{
 						canPlaceAtLocation = false;
 						ChangeAllMeshMaterials(currentPlaceItemPrefab.transform, transparentPlaceMaterialCollision);
 
-                    }
+					}
 
-						
+
 					else
 					{
 						canPlaceAtLocation = true;
@@ -462,15 +416,15 @@ public class InteractionSystem : MonoBehaviour
 					}
 
 					if (Input.GetButton("RotateBuildSystemRight"))
-                    {
+					{
 						currentRotZ -= 75f * Time.deltaTime;
-						
+
 					}
 
 					if (Input.GetButton("RotateBuildSystemLeft"))
 					{
 						currentRotZ += 75f * Time.deltaTime;
-						
+
 					}
 
 					if (Input.GetButton("RotateBuildSystemUp"))
@@ -487,16 +441,12 @@ public class InteractionSystem : MonoBehaviour
 
 					buildRotationOffset = Quaternion.Euler(currentRotX, 0, currentRotZ);
 				}
-				if (Input.GetButtonDown("ToggleBuilding"))
-                {
-					buildOn = !buildOn;
-                }
-					
 
+				//destroy if placed
 				if (Input.GetMouseButtonDown(1) && currentPlaceItemPrefab != null && buildOn)
 				{
 					if (canPlaceAtLocation)
-                    {
+					{
 						Destroy(currentPlaceItemPrefab.gameObject);
 						SetPlace(currentPlaceItemPrefab.transform.position, currentPlaceItemPrefab.transform.rotation);
 						currentRotX = 0;
@@ -510,7 +460,8 @@ public class InteractionSystem : MonoBehaviour
 
 		}
 
-		if ((player.holding == null || !buildOn) && currentPlaceItemPrefab != null)
+		//destroy building indicator prefab
+		if (((player.holding == null || !buildOn) && currentPlaceItemPrefab != null) || raycastForPlacing.Length == 0 && currentPlaceItemPrefab != null)
 		{
 			Destroy(currentPlaceItemPrefab.gameObject);
 			currentRotX = 0;
@@ -518,6 +469,7 @@ public class InteractionSystem : MonoBehaviour
 			buildRotationOffset = Quaternion.identity;
 			currentPlaceItemPrefab = null;
 		}
+
 
 
 		if (currentlyLookingAt != null)
@@ -538,12 +490,73 @@ public class InteractionSystem : MonoBehaviour
 				}
 			}
 		}
+		
 		else
 		{
 			pickup.gameObject.SetActive(value: false);
 			open.gameObject.SetActive(value: false);
 		}
-		PickupSystem();
+
+		//throwing and dropping
+
+		if (Input.GetButton("Grab") && currentlyLookingAt != null && player.holding == null && currentlyLookingAt.gameObject.tag != "Usable")
+		{
+			//pickup
+			SetHolding(currentlyLookingAt.GetComponent<HoldableObject>());
+		}
+
+		if (player.holding != null)
+		{
+
+			if (Input.GetMouseButton(1) && !player.bodyAnim.GetBool("isPreparingThrow") && !player.bodyAnim.GetBool("isThrowing") && (!buildOn || raycastForPlacing.Length == 0))
+			{
+				player.bodyAnim.SetBool("isPreparingThrow", true);
+			}
+
+			/*if (Input.GetButtonDown("Throw") && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
+			{
+				SetThrow();
+			}*/
+			if (Input.GetMouseButtonUp(1) && (!buildOn || raycastForPlacing.Length == 0))
+			{
+				//Debug.Log("Throw");
+
+				player.bodyAnim.SetBool("isPreparingThrow", false);
+				player.bodyAnim.SetTrigger("isThrowing");
+				SetThrow();
+			}
+
+			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
+			{
+				SetDrop();
+			}
+		}
+
+		if (currentlyLookingAt != null && currentlyLookingAt.gameObject.tag == "Usable" && Input.GetButtonDown("Grab"))
+		{
+			currentlyLookingAt.Use(this, false);
+		}
+		if (Input.GetButtonDown("Pickup") && inventorySlots.Count < inventoryLimit && currentlyLookingAt != null)
+		{
+			currentlyLookingAt.AddToInv(this);
+			currentSelectedInventorySlot++;
+		}
+		if (Input.GetButtonDown("Drop") && inventorySlots.Count > 0)
+		{
+			SetAllChildrenToLayer(inventoryObject.transform.GetChild(currentSelectedInventorySlot), 9);
+			DropInventoryObject();
+		}
+		if (Input.GetMouseButtonDown(0))
+		{
+			if (player.holding != null)
+			{
+				player.holding.Use(this, LMB: true);
+			}
+		}
+		/*else if (Input.GetMouseButtonDown(1) && player.holding != null)
+		{
+			player.holding.Use(this, LMB: false);
+		}*/
 	}
 
 	private IEnumerator DropObjectAtCorrectTime()

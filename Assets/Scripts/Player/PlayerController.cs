@@ -76,44 +76,52 @@ public class PlayerController : MonoBehaviour, ISaveable
     private IEnumerator OnLoadNoDataAsync()
     {
         Debug.Log("Player Data Doesnt Exist");
-        yield return new WaitUntil(() => GameSettings.Instance.AmInSavableScene());
+        if (GameSettings.Instance.worldInstance != null)
+        {
 
-        characterController.enabled = false;
-
-        yield return new WaitUntil(() => GameSettings.LEVEL_LOADED);
-
-        GameSettings.PLAYER_DATA_LOADED_IN_SCENE = true;
-
-        yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
-        yield return new WaitUntil(() => GameSettings.LEVEL_GENERATED);
         
+            yield return new WaitUntil(() => GameSettings.Instance.AmInSavableScene());
+
+            characterController.enabled = false;
+
+            yield return new WaitUntil(() => GameSettings.LEVEL_LOADED);
+
+            GameSettings.PLAYER_DATA_LOADED_IN_SCENE = true;
+
+            yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
+            yield return new WaitUntil(() => GameSettings.LEVEL_GENERATED);
+        
+            
+        }
         characterController.enabled = true;
         Debug.Log("Player Data Finished Loading");
     }
 
     private IEnumerator OnLoadAsync(string data)
     {
-        Debug.Log("Player Data Loading");
+        if (GameSettings.Instance.worldInstance != null)
+        {
+            Debug.Log("Player Data Loading");
 
-        PlayerSaveData saveData = JsonUtility.FromJson<PlayerSaveData>(data);
+            PlayerSaveData saveData = JsonUtility.FromJson<PlayerSaveData>(data);
 
-        yield return new WaitUntil(() => GameSettings.Instance.AmInSavableScene());
+            yield return new WaitUntil(() => GameSettings.Instance.AmInSavableScene());
 
-        characterController.enabled = false;
+            characterController.enabled = false;
 
-        yield return new WaitUntil(() => GameSettings.LEVEL_LOADED);
+            yield return new WaitUntil(() => GameSettings.LEVEL_LOADED);
 
-        transform.position = new Vector3(saveData.savedPosition[0], saveData.savedPosition[1], saveData.savedPosition[2]);
-        transform.rotation = Quaternion.Euler(saveData.savedBodyRotationEuler[0], saveData.savedBodyRotationEuler[1], saveData.savedBodyRotationEuler[2]);
-        head.transform.rotation = Quaternion.Euler(saveData.savedHeadRotationEuler[0], saveData.savedHeadRotationEuler[1], saveData.savedHeadRotationEuler[2]);
-        rotationX = saveData.savedRotationX;
-        rotationY = saveData.savedRotationY;
+            transform.position = new Vector3(saveData.savedPosition[0], saveData.savedPosition[1], saveData.savedPosition[2]);
+            transform.rotation = Quaternion.Euler(saveData.savedBodyRotationEuler[0], saveData.savedBodyRotationEuler[1], saveData.savedBodyRotationEuler[2]);
+            head.transform.rotation = Quaternion.Euler(saveData.savedHeadRotationEuler[0], saveData.savedHeadRotationEuler[1], saveData.savedHeadRotationEuler[2]);
+            rotationX = saveData.savedRotationX;
+            rotationY = saveData.savedRotationY;
 
-        GameSettings.PLAYER_DATA_LOADED_IN_SCENE = true;
+            GameSettings.PLAYER_DATA_LOADED_IN_SCENE = true;
 
-        yield return new WaitUntil(() => GameSettings.LEVEL_GENERATED);
-        yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
-
+            yield return new WaitUntil(() => GameSettings.LEVEL_GENERATED);
+            yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
+        }
         characterController.enabled = true;
         Debug.Log("Player Data Finished Loading");
     }
@@ -265,7 +273,6 @@ public class PlayerController : MonoBehaviour, ISaveable
         SaveMaster.AddListener(component);
         SaveMaster.SyncLoad();
     }
-
     public void Crouch()
     {
         head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition - new Vector3(0, 15, 0), Time.deltaTime);
@@ -319,6 +326,9 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     void Update()
     {
+        /*if (holding != null)
+        Debug.Log(holding.animationPlaying);*/
+
         if (!dead && playerHealth.health <= 0.0f)
         {
             StartCoroutine(Die());
@@ -868,7 +878,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     }
     void OnDestroy()
     {
-        //SaveMaster.RemoveListener(GetComponent<Saveable>());
+        SaveMaster.RemoveListener(GetComponent<Saveable>());
     }
     
 }
