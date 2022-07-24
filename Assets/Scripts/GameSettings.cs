@@ -86,7 +86,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 	public string activeUser;
 
 	public Animator saveIcon;
-
+	
 >>>>>>> Stashed changes
 	private PostProcessVolume post;
 

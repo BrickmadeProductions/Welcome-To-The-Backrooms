@@ -369,12 +369,11 @@ public class InteractionSystem : MonoBehaviour
 		{
 			return;
 		}
-<<<<<<< Updated upstream
+
 		if (Input.GetButtonDown("ToggleBuilding") && !Input.GetMouseButtonDown(1))
-=======
+
 		
 		if (Input.GetButtonDown("ToggleBuilding") && !Input.GetMouseButton(1))
->>>>>>> Stashed changes
 		{
 			buildOn = !buildOn;
 		}
