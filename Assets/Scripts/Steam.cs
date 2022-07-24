@@ -1,4 +1,3 @@
-using Steamworks;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,14 +7,23 @@ public class Steam : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        /*if (!SteamManager.Initialized)
+
+    #if !DISABLESTEAMWORKS
+
+        if (!SteamManager.Initialized)
         {
-            return;
+            GameSettings.Instance.activeUser = "Guest";
         }
         else
         {
-            string name = SteamFriends.GetPersonaName();
-            Debug.Log(name);
-        }*/
+            CSteamID name = SteamUser.GetSteamID();
+
+            GameSettings.Instance.activeUser = name.ToString();
+
+        }
+
+    #endif
+
+        GameSettings.Instance.activeUser = "Guest";
     }
 }

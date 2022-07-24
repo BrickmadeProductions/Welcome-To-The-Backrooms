@@ -2,6 +2,7 @@
 using Lowscope.Saving.Components;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -36,9 +37,9 @@ public class PlayerController : MonoBehaviour, ISaveable
         };
         float[] savedHeadRotationEuler = new float[3]
         {
-            head.transform.rotation.eulerAngles.x,
-            head.transform.rotation.eulerAngles.y,
-            head.transform.rotation.eulerAngles.z
+            neck.transform.rotation.eulerAngles.x,
+            neck.transform.rotation.eulerAngles.y,
+            neck.transform.rotation.eulerAngles.z
         };
         float[] savedBodyRotationEuler = new float[3]
         {
@@ -76,9 +77,9 @@ public class PlayerController : MonoBehaviour, ISaveable
     private IEnumerator OnLoadNoDataAsync()
     {
         Debug.Log("Player Data Doesnt Exist");
+
         if (GameSettings.Instance.worldInstance != null)
         {
-
         
             yield return new WaitUntil(() => GameSettings.Instance.AmInSavableScene());
 
@@ -99,6 +100,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     private IEnumerator OnLoadAsync(string data)
     {
+
         if (GameSettings.Instance.worldInstance != null)
         {
             Debug.Log("Player Data Loading");
@@ -113,7 +115,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             transform.position = new Vector3(saveData.savedPosition[0], saveData.savedPosition[1], saveData.savedPosition[2]);
             transform.rotation = Quaternion.Euler(saveData.savedBodyRotationEuler[0], saveData.savedBodyRotationEuler[1], saveData.savedBodyRotationEuler[2]);
-            head.transform.rotation = Quaternion.Euler(saveData.savedHeadRotationEuler[0], saveData.savedHeadRotationEuler[1], saveData.savedHeadRotationEuler[2]);
+            neck.transform.rotation = Quaternion.Euler(saveData.savedHeadRotationEuler[0], saveData.savedHeadRotationEuler[1], saveData.savedHeadRotationEuler[2]);
             rotationX = saveData.savedRotationX;
             rotationY = saveData.savedRotationY;
 
@@ -138,6 +140,8 @@ public class PlayerController : MonoBehaviour, ISaveable
     public PlayerHealthSystem playerHealth;
     public DistanceChecker distance;
 
+
+    bool headReset = false;
     //movement
     float walkingSpeed = 3f;
     float runningSpeed = 6f;
@@ -160,14 +164,14 @@ public class PlayerController : MonoBehaviour, ISaveable
     public HoldableObject holding;
 
     public GameObject arms;
+    public Renderer playerSkin;
 
     //player parts
     public Camera playerCamera;
-    public Camera animatorCamera;
     public Camera armsCamera;
 
-    public GameObject head;
     public GameObject neck;
+    public GameObject head;
     public GameObject feet;
     public GameObject death;
     Transform ogHeadTrans;
@@ -260,38 +264,42 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     void Start()
     {
-        ogHeadTrans = head.transform;
+        ogHeadTrans = neck.transform;
 
 
         characterController = GetComponent<CharacterController>();
 
         DontDestroyOnLoad(gameObject);
         Saveable component = gameObject.AddComponent<Saveable>();
-        component.SaveIdentification = "RJC-f88ss";
+        component.SaveIdentification = GameSettings.Instance.activeUser;
         component.AddSaveableComponent("PlayerData", this, true);
 
         SaveMaster.AddListener(component);
         SaveMaster.SyncLoad();
+
+        AudioListener[] audioListeners = FindObjectsOfType<AudioListener>();
+        foreach (AudioListener foundListener in audioListeners)
+        {
+            Debug.Log(foundListener.name);
+        }
+        
     }
     public void Crouch()
     {
-        head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition - new Vector3(0, 15, 0), Time.deltaTime);
+        //head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition - new Vector3(0, 15, 0), Time.deltaTime);
     }
 
     public void UnCrouch()
     {
-        head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition, Time.deltaTime);
+        //head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition, Time.deltaTime);
 
-        head.transform.localRotation = Quaternion.Lerp(head.transform.localRotation, ogHeadTrans.localRotation, Time.deltaTime);
+        //head.transform.localRotation = Quaternion.Lerp(head.transform.localRotation, ogHeadTrans.localRotation, Time.deltaTime);
 
     }
     private void LateUpdate()
     {
         if (!dead && !GameSettings.Instance.PauseMenuOpen)
         {
-
-            
-
             //animations
             if (currentPlayerState != PLAYERSTATES.IMMOBILE && characterController.isGrounded)
             {
@@ -305,9 +313,15 @@ public class PlayerController : MonoBehaviour, ISaveable
 
                     Crouch();
                 }
-                else
+                else if (playerHealth.canCrouch)
                 {
                     UnCrouch();                    
+                }
+                else
+                {
+                    neck.transform.localPosition = ogHeadTrans.localPosition;
+
+                    neck.transform.localRotation = ogHeadTrans.localRotation;
                 }
 
 
@@ -345,13 +359,30 @@ public class PlayerController : MonoBehaviour, ISaveable
 
 
             rotationX += -Input.GetAxis("Mouse Y") * GameSettings.Instance.Sensitivity / 2;
-            rotationX = Mathf.Clamp(rotationX, -lookXLimitBottom, lookXLimitTop);
+            rotationX = Mathf.Clamp(rotationX, holding != null ? -lookXLimitBottom - 90 : -lookXLimitBottom, holding != null ? lookXLimitTop - 90 : lookXLimitTop);
 
             rotationY = Input.GetAxis("Mouse X") * GameSettings.Instance.Sensitivity;
 
             transform.rotation *= Quaternion.Euler(0, rotationY, 0);
 
-            head.transform.rotation = Quaternion.Euler(rotationX, head.transform.rotation.eulerAngles.y, head.transform.rotation.eulerAngles.z);
+            if (holding != null)
+            {
+                neck.transform.rotation = Quaternion.Euler(neck.transform.rotation.eulerAngles.x, neck.transform.rotation.eulerAngles.y, rotationX);
+
+                headReset = true;
+            }
+            if (headReset)
+            {
+                head.transform.localRotation = Quaternion.Euler(90, head.transform.localRotation.eulerAngles.y, head.transform.localRotation.eulerAngles.z);
+
+                headReset = false;
+            }
+            else
+            {
+                head.transform.rotation = Quaternion.Euler(rotationX, head.transform.rotation.eulerAngles.y, head.transform.rotation.eulerAngles.z);
+               
+
+            }
             //player movement
 
             PlayerLoop();
@@ -776,7 +807,13 @@ public class PlayerController : MonoBehaviour, ISaveable
     public IEnumerator Die()
     {
         dead = true;
-        Instantiate(playerRagDoll).transform.position = transform.position;
+        playerSkin.enabled = false;
+
+        GameObject ragDoll = Instantiate(playerRagDoll);
+
+        ragDoll.transform.position = transform.position;
+        ragDoll.transform.rotation = transform.rotation;
+
 
         bodyAnim.SetBool("isCrouching", value: false);
         bodyAnim.SetBool("isProning", value: false);
@@ -788,9 +825,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
         
         playerCamera.enabled = false;
-        animatorCamera.enabled = false;
         armsCamera.enabled = false;
-        characterController.enabled = false;
 
         float pass = 20000f;
         bool dying = true;

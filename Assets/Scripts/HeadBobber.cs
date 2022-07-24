@@ -33,7 +33,7 @@ public class HeadBobber : MonoBehaviour
     void Update()
     {
 
-        if (Cursor.lockState != CursorLockMode.None && controller.currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE && controller.playerHealth.canWalk)
+        if (Cursor.lockState != CursorLockMode.None && controller.currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE && controller.playerHealth.canWalk && controller.playerHealth.canMoveHead && !controller.bodyAnim.GetBool("Watch"))
         {
             
             //head rotation
@@ -97,16 +97,19 @@ public class HeadBobber : MonoBehaviour
             }
             else
             {
+                if (controller.playerHealth.canMoveHead && !controller.bodyAnim.GetBool("Watch"))
+                {
+                    //Idle
+                    timer += Time.deltaTime * walkingBobbingSpeed;
 
-                //Idle
-                timer += Time.deltaTime * walkingBobbingSpeed;
 
+                    if (!Input.GetButton("LeanLeft") && !Input.GetButton("LeanRight"))
+                        transform.localPosition = new Vector3(Mathf.Lerp(prevPosX, defaultPosX + Mathf.Sin(timer / 10) * horizontalBobbingAmount, Time.deltaTime * 10), Mathf.Lerp(transform.localPosition.y, defaultPosY, Time.deltaTime * walkingBobbingSpeed), transform.localPosition.z);
 
-                if (!Input.GetButton("LeanLeft") && !Input.GetButton("LeanRight"))
-                    transform.localPosition = new Vector3(Mathf.Lerp(prevPosX, defaultPosX + Mathf.Sin(timer / 10) * horizontalBobbingAmount, Time.deltaTime * 10), Mathf.Lerp(transform.localPosition.y, defaultPosY, Time.deltaTime * walkingBobbingSpeed), transform.localPosition.z);
-               
-                prevPosX = transform.localPosition.x;
-              
+                    prevPosX = transform.localPosition.x;
+
+                }
+
             }
         }
        

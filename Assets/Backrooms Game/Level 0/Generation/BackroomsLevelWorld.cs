@@ -139,7 +139,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	private void Awake()
 	{
-		
 		GameSettings.Instance.worldInstance = this;
 
 		globalBloodAndGoreObjects = new List<GameObject>();
@@ -206,6 +205,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			return;
 		}
 
+		
 
 		levelPropDatabase = new Dictionary<OBJECT_TYPE, InteractableObject>();
 		levelEntityDatabase = new Dictionary<ENTITY_TYPE, Entity>();

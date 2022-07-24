@@ -81,6 +81,13 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public static volatile bool PLAYER_DATA_LOADED_IN_SCENE = false;
 
+<<<<<<< Updated upstream
+=======
+	public string activeUser;
+
+	public Animator saveIcon;
+
+>>>>>>> Stashed changes
 	private PostProcessVolume post;
 
 	private Vignette vignette;
@@ -289,6 +296,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	private void Awake()
 	{
+		
 		cheatSheet = GetComponent<CheatSheet>();
 
 		GameScreen();
@@ -304,6 +312,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 		}
 		m_instance = this;
 		DontDestroyOnLoad(gameObject);
+
+
 	}
     private void Start()
     {
@@ -437,11 +447,11 @@ public class GameSettings : MonoBehaviour, ISaveable
 			smilerLogoOn = !smilerLogoOn;
 			Logo.transform.GetChild(0).gameObject.SetActive(smilerLogoOn);
 		}
-		/*if (Input.GetButtonDown("CheatSheet") && ActiveScene != SCENE.INTRO && ActiveScene != SCENE.HOMESCREEN)
+		if (Input.GetButtonDown("CheatSheet") && ActiveScene != SCENE.INTRO && ActiveScene != SCENE.HOMESCREEN)
         {
 			cheatSheetObject.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
 			CheatMenu(!cheatSheetObject.activeSelf);
-		}*/
+		}
 
 	}
 
@@ -502,10 +512,16 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public void SettingsScreen()
 	{
+<<<<<<< Updated upstream
+=======
+		if (worldInstance != null)
+			SaveAllProgress();
+
+>>>>>>> Stashed changes
 		setPauseMenuOpen(true);
 		Cursor.lockState = CursorLockMode.None;
 		Cursor.visible = true;
-		Time.timeScale = 0f;
+		//Time.timeScale = 0f;
 		settingsScreen.transform.gameObject.SetActive(true);
 		mainScreen.transform.gameObject.SetActive(false);
 	}
@@ -666,12 +682,27 @@ public class GameSettings : MonoBehaviour, ISaveable
     }
 	public static void SaveAllProgress()
 	{
+<<<<<<< Updated upstream
+=======
+		Instance.saveIcon.SetBool("StopSave", false);
+		//Instance.saveIcon.gameObject.SetActive(true);
+>>>>>>> Stashed changes
 		IS_SAVING = true;
 
 		SaveMaster.SyncSave();
 		Debug.Log("Saved All Data!");
 
+<<<<<<< Updated upstream
 		IS_SAVING = false;
+=======
+		
+		
+		//Instance.saveIcon.gameObject.SetActive(false);
+		IS_SAVING = false;
+
+		Instance.saveIcon.SetBool("StopSave", true);
+
+>>>>>>> Stashed changes
 	}
 
 	private void OnDestroy()
@@ -769,7 +800,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 				player.GetComponent<PlayerController>().darkShield.SetActive(false);
 
-				player.transform.position = new Vector3(0f, 1.1f, 0.7f);
+				//player.transform.position = new Vector3(0f, 1.1f, 0.7f);
+				player.transform.position = new Vector3(0f, 3f, 0.7f);
 
 				post.profile = homeScreenRoomProfile;
 
@@ -818,7 +850,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 			case SCENE.LEVEL0:
 
-				player.transform.position = new Vector3(0f, 1.1f, 0f);
+				player.transform.position = new Vector3(0f, 2.5f, 0f);
 
 				player.GetComponent<PlayerController>().darkShield.SetActive(true);
 

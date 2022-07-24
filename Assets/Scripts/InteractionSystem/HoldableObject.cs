@@ -64,7 +64,7 @@ public class HoldableObject : InteractableObject
 
 	private IEnumerator playAnimation(string boolName, int animChosen, bool LMB)
 	{
-		GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, value: true);
+		GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetTrigger(boolName);
 
 		animationPlaying = true;
 
@@ -79,14 +79,13 @@ public class HoldableObject : InteractableObject
 
 		animationPlaying = false;
 
-		GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, value: false);
 	}
 
 	public override void Use(InteractionSystem player, bool LMB)
 	{
-		if (!animationPlaying)
+		if (!animationPlaying && LMBAnimationBools.Count > 0)
 		{
-			if (LMB && LMBAnimationBools.Count > 0)
+			if (LMB)
 			{
 				int choice = Random.Range(0, LMBAnimationBools.Count);
 				StartCoroutine(playAnimation(LMBAnimationBools[choice], choice, LMB));

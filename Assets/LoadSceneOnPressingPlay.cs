@@ -6,7 +6,7 @@ using System.Collections;
 public static class LoadSceneOnPressingPlay
 {
 
-    [SerializeField]
+    /*[SerializeField]
     public static string oldScene;
 
     static LoadSceneOnPressingPlay()
@@ -33,6 +33,6 @@ public static class LoadSceneOnPressingPlay
                 Application.LoadLevel(0);
             }
         }
-    }
+    }*/
 }
 #endif

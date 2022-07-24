@@ -106,8 +106,8 @@ public class PlayerHealthSystem : MonoBehaviour
 	{
 		if (!awake)
 		{
-			StartCoroutine(GetComponent<Blinking>().WakeUpRoom());
-			waking = StartCoroutine(WakeUpSequenceRoom());
+			//StartCoroutine(GetComponent<Blinking>().WakeUpRoom());
+			//waking = StartCoroutine(WakeUpSequenceRoom());
 		}
 	}
 
@@ -115,8 +115,8 @@ public class PlayerHealthSystem : MonoBehaviour
 	{
 		if (!awake)
 		{
-			StartCoroutine(GetComponent<Blinking>().WakeUpOther());
-			waking = StartCoroutine(WakeUpSequenceOther());
+			//StartCoroutine(GetComponent<Blinking>().WakeUpOther());
+			//waking = StartCoroutine(WakeUpSequenceOther());
 		}
 	}
 
@@ -161,13 +161,11 @@ public class PlayerHealthSystem : MonoBehaviour
 		animator.SetBool("isSleeping", false);
 		animator.SetBool("isWakingRoom", true);
 		canMoveHead = false;
-		player.animatorCamera.gameObject.SetActive(true);
 		player.playerCamera.gameObject.SetActive(false);
 		yield return new WaitForSeconds(8.61315f);
 		animator.speed = 1f;
 		yield return new WaitForSeconds(1.1f);
 		player.gameObject.transform.position = new Vector3(2.668f, 2.997f, 1.12f);
-		player.animatorCamera.gameObject.SetActive(false);
 		player.playerCamera.gameObject.SetActive(true);
 		canMoveHead = true;
 		awake = true;
@@ -185,14 +183,12 @@ public class PlayerHealthSystem : MonoBehaviour
 
 		canMoveHead = false;
 
-		player.animatorCamera.gameObject.SetActive(true);
 		player.playerCamera.gameObject.SetActive(false);
 
 		animator.speed = 1f;
 
 		yield return new WaitForSeconds(2f);
 
-		player.animatorCamera.gameObject.SetActive(false);
 		player.playerCamera.gameObject.SetActive(true);
 
 		canMoveHead = true;
@@ -208,11 +204,9 @@ public class PlayerHealthSystem : MonoBehaviour
 		animator.SetBool("isSleeping", true);
 		animator.SetBool("isWaking", false);
 		canMoveHead = false;
-		player.animatorCamera.gameObject.SetActive(true);
 		player.playerCamera.gameObject.SetActive(false);
 		yield return new WaitForSeconds(4.417f);
 		player.gameObject.transform.position = new Vector3(2.668f, 2.997f, 1.12f);
-		player.animatorCamera.gameObject.SetActive(false);
 		player.playerCamera.gameObject.SetActive(true);
 		canMoveHead = true;
 		awake = false;

@@ -17,7 +17,7 @@ public class Weapon : MonoBehaviour
         Vector3 collisionPoint = other.gameObject.GetComponent<Collider>().ClosestPointOnBounds(transform.position);
 
         Debug.Log(connetedObject.animationPlaying);
-        if (gameObject.layer == 13 && other.gameObject.layer == 18 && other.gameObject.layer != 11 && connetedObject.animationPlaying)
+        if (gameObject.layer == 23 && other.gameObject.layer == 18 && other.gameObject.layer != 11 && connetedObject.animationPlaying)
         {
             AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
 
