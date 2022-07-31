@@ -739,7 +739,7 @@ Light:
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 16183
+    m_Bits: 14647095
   m_RenderingLayerMask: 1
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
@@ -1034,11 +1034,11 @@ MonoBehaviour:
   holdableObject: {fileID: 323101437}
   ThrowMultiplier: 0
   large: 0
+  autoSwing: 0
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimationClips: []
-  LMBAnimationBools: []
+  LMBAnimations: []
   CustomHoldAnimation: 
 --- !u!65 &323101436
 BoxCollider:
@@ -4469,6 +4469,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Axe
       objectReference: {fileID: 0}
+    - target: {fileID: 4966944828226584158, guid: 01143d6056d1af34e87221a4f264afcb, type: 3}
+      propertyPath: LMBAnimations.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4966944828226584158, guid: 01143d6056d1af34e87221a4f264afcb, type: 3}
+      propertyPath: LMBAnimations.Array.data[0]
+      value: Slice
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 01143d6056d1af34e87221a4f264afcb, type: 3}
 --- !u!1 &1550845902
@@ -6074,7 +6082,7 @@ Light:
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 540535
+    m_Bits: 16547703
   m_RenderingLayerMask: 1
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
@@ -8631,11 +8639,11 @@ MonoBehaviour:
   holdableObject: {fileID: 0}
   ThrowMultiplier: 0
   large: 0
+  autoSwing: 0
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimationClips: []
-  LMBAnimationBools: []
+  LMBAnimations: []
   CustomHoldAnimation: 
 --- !u!54 &902484728694933887
 Rigidbody:
@@ -56932,6 +56940,8 @@ GameObject:
   - component: {fileID: 6191283471366332804}
   - component: {fileID: 1782997881806103240}
   - component: {fileID: 7143358388072461029}
+  - component: {fileID: 8806883309955999311}
+  - component: {fileID: 8806883309955999310}
   - component: {fileID: 8806883309955999309}
   m_Layer: 0
   m_Name: Metal
@@ -56940,8 +56950,8 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!64 &8806883309955999309
-MeshCollider:
+--- !u!65 &8806883309955999309
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -56950,10 +56960,35 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 4496885475859389300, guid: 57205d241e6151d41969ab1995513554, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.015888644, y: 0.01734395, z: 0.008826965}
+  m_Center: {x: 0.0000018586713, y: 0.0005796718, z: 0.026081497}
+--- !u!65 &8806883309955999310
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8806883309955999308}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.028612731, y: 0.028612725, z: 0.0077680154}
+  m_Center: {x: 9.934107e-10, y: -4.7655708e-17, z: 0.008021482}
+--- !u!65 &8806883309955999311
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8806883309955999308}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.0033799566, y: 0.0039623776, z: 0.010958363}
+  m_Center: {x: 0.00001459519, y: 0.00036288312, z: 0.016897649}
 --- !u!1 &8821623530470197185
 GameObject:
   m_ObjectHideFlags: 0

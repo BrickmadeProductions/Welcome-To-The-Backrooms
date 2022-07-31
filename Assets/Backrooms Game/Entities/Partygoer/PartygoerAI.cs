@@ -9,6 +9,7 @@ public class PartygoerAI : Entity
     bool strangling = false;
     public GameObject grabLocation;
     public GameObject ragDoll;
+    int currentWalkPhase = 1; 
 
     bool AvoidObsticles()
     {
@@ -37,7 +38,6 @@ public class PartygoerAI : Entity
 
                 Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetDirection, singleStep, 0.0f);
 
-                int twitchPhase = Random.Range(0, 3);
                 int twitchNoise = Random.Range(0, movementNoises.Length);
 
                 //only twitch towards player if farther than 4 units
@@ -89,14 +89,29 @@ public class PartygoerAI : Entity
                         movementNoiseSource.pitch = Random.Range(0.9f, 1.1f);
                         movementNoiseSource.Play();
 
-                        entityAnimator.SetBool("Twitch" + twitchPhase, true);
+                        if (currentWalkPhase == 1)
+                        {
+                            entityAnimator.SetBool("Twitch" + 3, true);
+                            currentWalkPhase = 3;
+                        }
+                            
+                        else
+                        {
+                            entityAnimator.SetBool("Twitch" + 1, true);
+                            currentWalkPhase = 1;
+                        }
 
-                        yield return new WaitForSeconds(0.55f);
+                        yield return new WaitForSeconds(Random.Range(0.15f, 0.5f));
 
                         //ambient
                         GetComponent<AudioSource>().pitch = Random.Range(0.5f, 1.2f);
 
-                        entityAnimator.SetBool("Twitch" + twitchPhase, false);
+                        if (entityAnimator.GetBool("Twitch" + 1))
+                            entityAnimator.SetBool("Twitch" + 1, false);
+                        else
+                        {
+                            entityAnimator.SetBool("Twitch" + 3, false);
+                        }
                     }
                     else
                     {
@@ -104,8 +119,8 @@ public class PartygoerAI : Entity
                         if (!GetComponent<AudioSource>().isPlaying)
                             GetComponent<AudioSource>().Play();
 
-                        if (attackNoiseSource.isPlaying)
-                            attackNoiseSource.Stop();
+                        /*if (attackNoiseSource.isPlaying)
+                            attackNoiseSource.Stop();*/
 
                         yield return new WaitForSeconds(1f);
                     }
@@ -119,9 +134,9 @@ public class PartygoerAI : Entity
 
                     strangling = true;
 
-                    entityAnimator.SetBool("Twitch0", false);
                     entityAnimator.SetBool("Twitch1", false);
                     entityAnimator.SetBool("Twitch2", false);
+                    entityAnimator.SetBool("Twitch3", false);
 
                     entityAnimator.SetBool("Attack", true);
                     
@@ -145,7 +160,7 @@ public class PartygoerAI : Entity
                 else
                 {
                     
-                    yield return new WaitForSeconds(3f);
+                    yield return new WaitForSeconds(3);
                 }
 
                 //ambient
@@ -192,6 +207,7 @@ public class PartygoerAI : Entity
 
         if (strangling == true)
         {
+            GameSettings.Instance.Player.GetComponent<PlayerController>().deathCase = DEATH_CASE.ENTITY;
 
             Vector3 targetDirection = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.transform.position - eyes.transform.position;
 
@@ -209,6 +225,8 @@ public class PartygoerAI : Entity
         }
         else
         {
+            GameSettings.Instance.Player.GetComponent<PlayerController>().deathCase = DEATH_CASE.UNKNOWN;
+
             GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = true;
             GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canWalk = true;
             GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Choking", false);

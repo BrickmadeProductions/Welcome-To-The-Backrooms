@@ -27,6 +27,8 @@ public class SaveMaster : MonoBehaviour
 
 	private static bool isQuittingGame;
 
+	public static bool isDoneSaving = false;
+
 	private static SaveGame activeSaveGame = null;
 
 	private static int activeSlot = -1;
@@ -345,7 +347,9 @@ public class SaveMaster : MonoBehaviour
 
 	public static void WriteActiveSaveToDisk()
 	{
+		isDoneSaving = false;
 		OnWritingToDiskBegin(activeSlot);
+		
 		if (activeSaveGame != null)
 		{
 			for (int i = 0; i < saveables.Count; i++)
@@ -358,7 +362,9 @@ public class SaveMaster : MonoBehaviour
 		{
 			UnityEngine.Debug.Log("No save game is currently loaded... So we cannot save it");
 		}
+		
 		OnWritingToDiskDone(activeSlot);
+		isDoneSaving = true;
 	}
 
 	public static void WipeSceneData(string name, bool clearSceneSaveables = true)

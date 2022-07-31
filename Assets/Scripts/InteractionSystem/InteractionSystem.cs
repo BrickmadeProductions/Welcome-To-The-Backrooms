@@ -42,6 +42,11 @@ public class InteractionSystem : MonoBehaviour
 	public LayerMask placingLayerMask;
 	public LayerMask grabbingLayerMask;
 
+	public void AnimationFinished()
+    {
+		player.holding.animationPlaying = false;
+    }
+
 
 	private void Awake()
 	{
@@ -547,6 +552,7 @@ public class InteractionSystem : MonoBehaviour
 		if (Input.GetButton("Grab") && currentlyLookingAt != null && player.holding == null && currentlyLookingAt.gameObject.tag != "Usable")
 		{
 			//pickup
+			
 			player.bodyAnim.SetTrigger("isGrabbing");
 			StartCoroutine(waitForAnimationToHold(currentlyLookingAt.GetComponent<HoldableObject>()));
 		}

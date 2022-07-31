@@ -5,13 +5,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum DEATH_CASE
+{
+    UNKNOWN,
+    PLAYER,
+    ENTITY,
+    FALL_DAMAGE
+}
+
 [RequireComponent(typeof(CharacterController))]
 
 public class PlayerController : MonoBehaviour, ISaveable
 {
     public ReflectionProbe probe;
     public GameObject darkShield;
+    public GameObject headTarget;
 
+    public DEATH_CASE deathCase;
 
     [Serializable]
     private struct PlayerSaveData
@@ -219,6 +229,7 @@ public class PlayerController : MonoBehaviour, ISaveable
         CROUCH = 2,
         RUN = 3,
         JUMP = 4,
+        PRONE = 5,
         IMMOBILE = 6
     }
 
@@ -298,6 +309,48 @@ public class PlayerController : MonoBehaviour, ISaveable
     }
     private void LateUpdate()
     {
+        if (characterController.isGrounded && !bodyAnim.GetBool("hitGround"))
+        {
+            bodyAnim.SetBool("hitGround", true);
+        }
+        else
+        {
+            bodyAnim.SetBool("hitGround", false);
+        }
+
+        if (!dead && Cursor.lockState != CursorLockMode.None && playerHealth.canMoveHead)
+        {
+
+            rotationX += -Input.GetAxis("Mouse Y") * GameSettings.Instance.Sensitivity / 2;
+            rotationX = Mathf.Clamp(rotationX, -lookXLimitBottom, lookXLimitTop);
+
+            rotationX = Mathf.Clamp(rotationX, -lookXLimitBottom + 4, lookXLimitTop - 4);
+
+            rotationY = Input.GetAxis("Mouse X") * GameSettings.Instance.Sensitivity;
+
+            if (holding != null)
+            {
+                neck.transform.rotation = Quaternion.Euler(neck.transform.rotation.eulerAngles.x, neck.transform.rotation.eulerAngles.y, bodyAnim.GetBool("isProne") ? rotationX - 90 : rotationX - 90);
+                head.transform.rotation = Quaternion.Euler(bodyAnim.GetBool("isProne") ? rotationX : rotationX, head.transform.rotation.eulerAngles.y, 0);
+
+                headReset = true;
+            }
+            else if (headReset)
+            {
+                head.transform.rotation = Quaternion.Euler(90, head.transform.rotation.eulerAngles.y, 0);
+
+                headReset = false;
+            }
+            else
+            {
+                head.transform.rotation = Quaternion.Euler(rotationX, head.transform.rotation.eulerAngles.y, 0);
+
+            }
+
+            head.transform.position = Vector3.Lerp(head.transform.position, headTarget.transform.position, 75f * Time.deltaTime);
+            //head.transform.rotation = Quaternion.Lerp(head.transform.rotation, headTarget.transform.rotation, 10f * Time.deltaTime);
+        }
+
         if (!dead && !GameSettings.Instance.PauseMenuOpen)
         {
             //animations
@@ -305,8 +358,12 @@ public class PlayerController : MonoBehaviour, ISaveable
             {
 
                 if (Input.GetButton("Jump"))
-
+                {
                     moveDirection.y = jumpSpeed;
+                    bodyAnim.SetTrigger("isJumping");
+                }
+
+                    
 
                 if (Input.GetButton("Crouch") && playerHealth.canCrouch)
                 {
@@ -332,20 +389,18 @@ public class PlayerController : MonoBehaviour, ISaveable
     }
 
 
-    private void FixedUpdate()
-    {
-    }
-
     
 
     void Update()
     {
+        //Debug.Log(headTarget.transform.position);
+        
         /*if (holding != null)
         Debug.Log(holding.animationPlaying);*/
 
         if (!dead && playerHealth.health <= 0.0f)
         {
-            StartCoroutine(Die());
+            StartCoroutine(Die(deathCase));
 
         }
 
@@ -357,32 +412,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
                 SpeedAndFovController();
 
-
-            rotationX += -Input.GetAxis("Mouse Y") * GameSettings.Instance.Sensitivity / 2;
-            rotationX = Mathf.Clamp(rotationX, holding != null ? -lookXLimitBottom - 90 : -lookXLimitBottom, holding != null ? lookXLimitTop - 90 : lookXLimitTop);
-
-            rotationY = Input.GetAxis("Mouse X") * GameSettings.Instance.Sensitivity;
-
             transform.rotation *= Quaternion.Euler(0, rotationY, 0);
-
-            if (holding != null)
-            {
-                neck.transform.rotation = Quaternion.Euler(neck.transform.rotation.eulerAngles.x, neck.transform.rotation.eulerAngles.y, rotationX);
-
-                headReset = true;
-            }
-            if (headReset)
-            {
-                head.transform.localRotation = Quaternion.Euler(90, head.transform.localRotation.eulerAngles.y, head.transform.localRotation.eulerAngles.z);
-
-                headReset = false;
-            }
-            else
-            {
-                head.transform.rotation = Quaternion.Euler(rotationX, head.transform.rotation.eulerAngles.y, head.transform.rotation.eulerAngles.z);
-               
-
-            }
             //player movement
 
             PlayerLoop();
@@ -393,9 +423,12 @@ public class PlayerController : MonoBehaviour, ISaveable
             // Press Left Shift to run
 
 
-            float curSpeedX = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") * adrenalineSpeedMultiplier : 0;
-            float curSpeedY = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") * adrenalineSpeedMultiplier : 0;
-                
+            float curSpeedX = currentPlayerState != PLAYERSTATES.IMMOBILE || holding.animationPlaying ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") * adrenalineSpeedMultiplier : 0;
+            float curSpeedY = currentPlayerState != PLAYERSTATES.IMMOBILE || holding.animationPlaying ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") * adrenalineSpeedMultiplier : 0;
+
+            bodyAnim.SetFloat("xWalk", curSpeedX / 2);
+            bodyAnim.SetFloat("yWalk", curSpeedY / 2);
+
             if (currentPlayerState == PLAYERSTATES.CROUCH)
             {
                 curSpeedX *= crouchingSpeed;
@@ -457,11 +490,13 @@ public class PlayerController : MonoBehaviour, ISaveable
         if (!characterController.isGrounded)
             currentPlayerState = PLAYERSTATES.JUMP;
 
+        //all but prone
         if (Mathf.Abs(moveDirection.x) > 0.1f || Mathf.Abs(moveDirection.z) > 0.1f)
         {
 
-            if ((Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("D")) && Input.GetButton("Run") && playerHealth.canRun)
+            if ((Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("D")) && Input.GetButton("Run") && playerHealth.canRun && !bodyAnim.GetBool("Prone"))
             {
+                bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
                 bodyAnim.SetBool("isCrouching", false);
                 bodyAnim.SetBool("isWalking", false);
                 bodyAnim.SetBool("isRunning", true);
@@ -473,7 +508,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             else if ((Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("S") || Input.GetButton("D")) && playerHealth.canWalk)
             {
-
+                bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 1, Time.deltaTime * 10));
                 bodyAnim.SetBool("isWalking", true);
                 bodyAnim.SetBool("isRunning", false);
                 bodyAnim.SetBool("isIdle", false);
@@ -485,6 +520,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             if (Input.GetButton("Crouch") && playerHealth.canWalk && currentPlayerState != PLAYERSTATES.RUN)
             {
+                bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
                 bodyAnim.SetBool("isCrouching", true);
                 bodyAnim.SetBool("isWalking", false);
                 bodyAnim.SetBool("isRunning", false);
@@ -510,14 +546,32 @@ public class PlayerController : MonoBehaviour, ISaveable
         //idle
         else
         {
+            
+            bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 1, Time.deltaTime * 10));
             bodyAnim.SetBool("isCrouching", false);
             bodyAnim.SetBool("isRunning", false);
             bodyAnim.SetBool("isWalking", false);
-            bodyAnim.SetBool("Watch", false);
-            bodyAnim.SetBool("isIdle", true);
             
-
+            
+ 
             currentPlayerState = PLAYERSTATES.IDLE;
+
+        }
+
+        if (Input.GetButtonDown("Prone") && currentPlayerState != PLAYERSTATES.JUMP)
+        {
+            if (!bodyAnim.GetBool("isProne"))
+            {
+                bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
+                bodyAnim.SetBool("isProne", true);
+                bodyAnim.SetBool("isCrouching", false);
+                bodyAnim.SetBool("isWalking", false);
+                bodyAnim.SetBool("isRunning", false);
+            }
+            else
+            {
+                bodyAnim.SetBool("isProne", false);
+            }
 
         }
 
@@ -532,7 +586,7 @@ public class PlayerController : MonoBehaviour, ISaveable
         }
 
         //controll player stamina volume indicator
-        playerNoises.volume = 0.2f + ((100 - playerHealth.stamina) / 100) / 2;
+        playerNoises.volume = 0.25f + ((100 - playerHealth.stamina) / 100) / 2;
 
         switch (currentPlayerState)
         {
@@ -635,8 +689,8 @@ public class PlayerController : MonoBehaviour, ISaveable
 
                 removeStamina = null;
 
-                GetComponent<CharacterController>().height = 2.5f;
-                GetComponent<CharacterController>().center = new Vector3(0, 0.2f, 0);
+                //GetComponent<CharacterController>().height = 2.5f;
+                //GetComponent<CharacterController>().center = new Vector3(0, 0.2f, 0);
 
                 if (!playerNoises.isPlaying || playerNoises.clip == breathingRunning)
                 {
@@ -658,8 +712,8 @@ public class PlayerController : MonoBehaviour, ISaveable
 
         if (currentPlayerState != PLAYERSTATES.CROUCH)
         {
-            GetComponent<CharacterController>().height = height;
-            GetComponent<CharacterController>().center = new Vector3(0, center, 0);
+            //GetComponent<CharacterController>().height = height;
+            //GetComponent<CharacterController>().center = new Vector3(0, center, 0);
         }
     }
 
@@ -804,8 +858,13 @@ public class PlayerController : MonoBehaviour, ISaveable
     }
 
 
-    public IEnumerator Die()
+    public IEnumerator Die(DEATH_CASE deathCase)
     {
+        if (deathCase == DEATH_CASE.ENTITY)
+        {
+            Steam.AddAchievment("MEAT_CRAYON");
+        }
+
         dead = true;
         playerSkin.enabled = false;
 
@@ -833,14 +892,14 @@ public class PlayerController : MonoBehaviour, ISaveable
         while (dying && pass > 2000f)
         {
             pass -= 1500f;
-            GameSettings.Instance.Master.SetFloat("cutoffFrequency", pass);
+            GameSettings.Instance.audioHandler.master.SetFloat("cutoffFrequency", pass);
             yield return new WaitForSeconds(0.25f);
         }
 
         GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", value: true);
         yield return new WaitForSeconds(4f);
         GameSettings.Instance.ResetGame();
-        GameSettings.Instance.Master.SetFloat("cutoffFrequency", 20000f);
+        GameSettings.Instance.audioHandler.master.SetFloat("cutoffFrequency", 20000f);
         
         
     }
@@ -868,7 +927,7 @@ public class PlayerController : MonoBehaviour, ISaveable
                 break;
 
             case PLAYERSTATES.WALK:
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.4f);
                 feetSource.volume = UnityEngine.Random.Range(0.06f, 0.11f);
                 break;
 

@@ -28,8 +28,20 @@ public class DistanceChecker : MonoBehaviour
     }
     void Update()
     {
+        if (metersTraveled >= 1)
+        {
+            Steam.AddAchievment("WALK_1");
+        }
+        if (metersTraveled >= 5000)
+        {
+            Steam.AddAchievment("WALK_5000");
+        }
+        if (metersTraveled >= 10000)
+        {
+            Steam.AddAchievment("WALK_10000");
+        }
 
-        if (GameSettings.LEVEL_LOADED && SceneManager.GetActiveScene().name != "RoomHomeScreen")
+        if (GameSettings.LEVEL_LOADED && GameSettings.Instance.ActiveScene != GameSettings.SCENE.ROOM)
         {
             distanceTraveled += (lastPosition - tx.position).magnitude;
             timePassed += Time.deltaTime;

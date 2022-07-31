@@ -43,7 +43,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7088627852523957283}
-  - component: {fileID: 7088627852523957282}
   - component: {fileID: 7088627852523957309}
   - component: {fileID: 7088627852523957308}
   m_Layer: 9
@@ -69,19 +68,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: -223.88, z: -152.775}
---- !u!65 &7088627852523957282
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7088627852523957311}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.45361745, y: 4.183837, z: 0.39786914}
-  m_Center: {x: -0.04361674, y: 1.2702335, z: -0.009369987}
 --- !u!54 &7088627852523957309
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -129,12 +115,11 @@ MonoBehaviour:
   holdableObject: {fileID: 7088627852523957309}
   ThrowMultiplier: 1.5
   large: 0
+  autoSwing: 0
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimationClips:
-  - {fileID: -1232988704551948498, guid: c3da10c4a15ca9244bab8ba9a82842e0, type: 3}
-  LMBAnimationBools:
+  LMBAnimations:
   - Stab1
   CustomHoldAnimation: 
 --- !u!1 &7088627852977277467

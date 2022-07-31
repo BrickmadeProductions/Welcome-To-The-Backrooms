@@ -152,6 +152,7 @@ public class SteamManager : MonoBehaviour {
 	// Because the SteamManager should be persistent and never disabled or destroyed we can shutdown the SteamAPI here.
 	// Thus it is not recommended to perform any Steamworks work in other OnDestroy functions as the order of execution can not be garenteed upon Shutdown. Prefer OnDisable().
 	protected virtual void OnDestroy() {
+
 		if (s_instance != this) {
 			return;
 		}

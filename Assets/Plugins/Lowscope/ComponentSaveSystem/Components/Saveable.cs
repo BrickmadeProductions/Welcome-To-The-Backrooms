@@ -403,6 +403,7 @@ namespace Lowscope.Saving.Components
                 }
             }
 
+            
             hasStateReset = false;
         }
 

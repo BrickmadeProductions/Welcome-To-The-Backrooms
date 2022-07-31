@@ -252,7 +252,7 @@ public class PlayerHealthSystem : MonoBehaviour
 			if (pass > 1500f)
 			{
 				pass -= 1500f;
-				GameSettings.Instance.Master.SetFloat("cutoffFrequency", pass);
+				GameSettings.Instance.audioHandler.master.SetFloat("cutoffFrequency", pass);
 			}
 			if (heartRate >= 150)
 			{
@@ -268,13 +268,13 @@ public class PlayerHealthSystem : MonoBehaviour
 	public IEnumerator AdrenalineCooldown()
 	{
 		bool freqFix = true;
-		GameSettings.Instance.Master.GetFloat("cutoffFrequency", out var pass);
+		GameSettings.Instance.audioHandler.master.GetFloat("cutoffFrequency", out var pass);
 		while (freqFix)
 		{
 			if (pass < 20000f)
 			{
 				pass += 1500f;
-				GameSettings.Instance.Master.SetFloat("cutoffFrequency", pass);
+				GameSettings.Instance.audioHandler.master.SetFloat("cutoffFrequency", pass);
 			}
 			else
 			{

@@ -143,11 +143,14 @@ public abstract class Entity : MonoBehaviour
 
 	private void Awake()
 	{
-
+		hurtNoisesSource.outputAudioMixerGroup = GameSettings.Instance.audioHandler.master.FindMatchingGroups("Master")[0];
+		attackNoiseSource.outputAudioMixerGroup = GameSettings.Instance.audioHandler.master.FindMatchingGroups("Master")[0];
+		movementNoiseSource.outputAudioMixerGroup = GameSettings.Instance.audioHandler.master.FindMatchingGroups("Master")[0];
 	}
 
 	private void Start()
 	{
+
 		//correct if not on floor
 		RaycastHit[] hits;
 		float distance = 10f;
