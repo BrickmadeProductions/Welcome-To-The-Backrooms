@@ -25,7 +25,7 @@ public class ItemSway : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        if (SceneManager.GetActiveScene().name != "HomeScreen")
+        if (SceneManager.GetActiveScene().name != "HomeScreen" && GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canMoveHead)
 
             if (GameSettings.Instance.Player.GetComponent<PlayerController>().currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE 
                 && GameSettings.Instance.Player.GetComponent<PlayerController>().holding != null)

@@ -139,7 +139,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	private void Awake()
 	{
-		
 		GameSettings.Instance.worldInstance = this;
 
 		globalBloodAndGoreObjects = new List<GameObject>();
@@ -154,17 +153,15 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			yield return new WaitForSecondsRealtime(minutes * 60f);
 			yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
-			yield return new WaitUntil(() => !GameSettings.IS_SAVING);
-			SaveAllObjectsAndEntities();
-			GameSettings.SaveAllProgress();
+			StartCoroutine(GameSettings.SaveAllProgress());
 		}
 	}
 
 	public IEnumerator TrySpawnEntityEveryFrame()
 	{
-		while (true && GameSettings.Instance.ActiveScene != GameSettings.SCENE.INTRO && GameSettings.Instance.ActiveScene != GameSettings.SCENE.HOMESCREEN && spawnEntities)
+		while (GameSettings.Instance.ActiveScene != GameSettings.SCENE.INTRO && GameSettings.Instance.ActiveScene != GameSettings.SCENE.HOMESCREEN && spawnEntities)
 		{
-			yield return new WaitForSecondsRealtime(0.05f);
+			yield return new WaitForSecondsRealtime(0.1f);
 
 			foreach (KeyValuePair<ENTITY_TYPE, Entity> entity in GameSettings.Instance.EntityDatabase)
 			{
@@ -206,6 +203,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			return;
 		}
 
+		
 
 		levelPropDatabase = new Dictionary<OBJECT_TYPE, InteractableObject>();
 		levelEntityDatabase = new Dictionary<ENTITY_TYPE, Entity>();
@@ -321,7 +319,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		GameSettings.LEVEL_SAVE_LOADED = true;
 
-		StartCoroutine(SaveDataEveryXMinutes(1f));
+		StartCoroutine(SaveDataEveryXMinutes(0.5f));
 		StartCoroutine(TrySpawnEntityEveryFrame());
 
 		Debug.Log("Done With Spawn Region");

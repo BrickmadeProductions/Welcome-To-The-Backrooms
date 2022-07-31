@@ -18,12 +18,15 @@ public class Level0LightData : MonoBehaviour
     public bool broken;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         defaultIntensity = transform.parent.GetChild(0).GetComponent<Light>().intensity;
         renderer = GetComponent<Renderer>();
         emissionMat = renderer.material;
         emissionColor = emissionMat.GetColor("_EmissionColor");
+
+        broken = Random.Range(0f, 1f) < 0.1f ? true : false;
+        StartCoroutine(randomIO());
 
         if (broken)
         {
@@ -43,14 +46,13 @@ public class Level0LightData : MonoBehaviour
             Activate(true);
         }
     }
-
-    // Update is called once per frame
-    /*void FixedUpdate()
+    IEnumerator randomIO()
     {
-        
-        if (broken)
+        while (true)
         {
-            if (Random.value >= 0.99)
+            yield return new WaitForSeconds(Random.Range(0.025f, 2f));
+
+            if (broken)
             {
                 on = !on;
 
@@ -62,13 +64,11 @@ public class Level0LightData : MonoBehaviour
                 {
                     Activate(false);
                 }
-
             }
         }
        
-        
-        
-    }*/
+
+    }
 
     public void Activate(bool on)
     {

@@ -19,7 +19,6 @@ public class FPSCounter : MonoBehaviour
     private void Update()
     {
         
-
         if (!GameSettings.Instance.PauseMenuOpen)
         {
             //Change smoothDeltaTime to deltaTime or fixedDeltaTime to see the difference

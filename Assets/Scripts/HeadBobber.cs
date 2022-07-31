@@ -21,19 +21,18 @@ public class HeadBobber : MonoBehaviour
     float prevRotZ;
     float timer = 0;
 
-
     // Start is called before the first frame update
     void Start()
     {
-        defaultPosY = transform.localPosition.y;
-        defaultPosX = transform.localPosition.x;
+        defaultPosY = camera.localPosition.y;
+        defaultPosX = camera.localPosition.x;
     }
 
     // Update is called once per frame
     void Update()
     {
 
-        if (Cursor.lockState != CursorLockMode.None && controller.currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE && controller.playerHealth.canWalk)
+        if (Cursor.lockState != CursorLockMode.None && controller.currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE && controller.playerHealth.canWalk && controller.playerHealth.canMoveHead && !controller.bodyAnim.GetBool("Watch"))
         {
             
             //head rotation
@@ -50,10 +49,8 @@ public class HeadBobber : MonoBehaviour
             if (Input.GetButton("D"))
                 strafeRotation = Mathf.Lerp(prevRotZ, -2f, Time.deltaTime * 5);
 
-            camera.localRotation = new Quaternion(camera.localRotation.x, 0, Mathf.Lerp(camera.localRotation.z, 0, Time.deltaTime), camera.localRotation.w);
-
             camera.localRotation = new Quaternion(camera.localRotation.x, 0, Mathf.Clamp(camera.localRotation.z, Mathf.Deg2Rad * -1f, Mathf.Deg2Rad * 1f) + Mathf.Deg2Rad * strafeRotation, camera.localRotation.w);
-
+            
             prevRotZ = camera.localRotation.z;
             
 
@@ -64,11 +61,11 @@ public class HeadBobber : MonoBehaviour
                 {
                     //Player is moving
                     timer += Time.deltaTime * runningBobbingSpeed;
-                    transform.localPosition = new Vector3(Mathf.Lerp(prevPosX, defaultPosX + Mathf.Sin(timer / 2) * horizontalBobbingAmount * 2, Time.deltaTime * 10), defaultPosY + Mathf.Sin(timer) * bobbingAmount, transform.localPosition.z);
+                    camera.localPosition = new Vector3(Mathf.Lerp(prevPosX, defaultPosX + Mathf.Sin(timer / 2) * horizontalBobbingAmount * 2, Time.deltaTime * 10), defaultPosY + Mathf.Sin(timer) * bobbingAmount, camera.localPosition.z);
 
                     camera.localRotation = new Quaternion(Mathf.Lerp(prevRotX, Mathf.Sin(timer) * horizontalBobbingAmount / 4, Time.deltaTime * 10), 0, Mathf.Lerp(prevRotZ, Mathf.Sin(timer / 2) * horizontalBobbingAmount / 8, Time.deltaTime * 10), camera.localRotation.w);
 
-                    prevPosX = transform.localPosition.x;
+                    prevPosX = camera.localPosition.x;
 
                     prevRotX = camera.localRotation.x;
                 }
@@ -76,20 +73,22 @@ public class HeadBobber : MonoBehaviour
                 else if (controller.currentPlayerState == PlayerController.PLAYERSTATES.CROUCH && controller.currentPlayerState != PlayerController.PLAYERSTATES.JUMP)
                 {
                     timer += Time.deltaTime * walkingBobbingSpeed;
-                    //transform.localPosition = new Vector3(0, transform.localPosition.y, transform.localPosition.z);
-                    transform.localPosition = new Vector3(0, Mathf.Lerp(transform.localPosition.y, defaultPosY, Time.deltaTime * walkingBobbingSpeed), transform.localPosition.z);
-                    prevPosX = transform.localPosition.x;
+                    //camera.localPosition = new Vector3(0, camera.localPosition.y, camera.localPosition.z);
+                    camera.localPosition = new Vector3(0, Mathf.Lerp(camera.localPosition.y, defaultPosY, Time.deltaTime * walkingBobbingSpeed), camera.localPosition.z);
+                    prevPosX = camera.localPosition.x;
+
+                    prevRotX = camera.localPosition.x;
                 }
 
                 else
                 {
                     //Player is moving
                     timer += Time.deltaTime * walkingBobbingSpeed;
-                    transform.localPosition = new Vector3(Mathf.Lerp(prevPosX, defaultPosX + Mathf.Sin(timer / 2) * horizontalBobbingAmount, Time.deltaTime * 10), Mathf.Lerp(transform.localPosition.y, defaultPosY + Mathf.Sin(timer) * bobbingAmount, Time.deltaTime * walkingBobbingSpeed), transform.localPosition.z);
+                    camera.localPosition = new Vector3(Mathf.Lerp(prevPosX, defaultPosX + Mathf.Sin(timer / 2) * horizontalBobbingAmount, Time.deltaTime * 10), Mathf.Lerp(camera.localPosition.y, defaultPosY + Mathf.Sin(timer) * bobbingAmount, Time.deltaTime * walkingBobbingSpeed), camera.localPosition.z);
 
                     camera.localRotation = new Quaternion(Mathf.Lerp(prevRotX, Mathf.Sin(timer / 2.2f) * horizontalBobbingAmount / 10, Time.deltaTime * 10), camera.localRotation.y, camera.localRotation.z, camera.localRotation.w);
 
-                    prevPosX = transform.localPosition.x;
+                    prevPosX = camera.localPosition.x;
 
                     prevRotX = camera.localRotation.x;
                 }
@@ -97,18 +96,26 @@ public class HeadBobber : MonoBehaviour
             }
             else
             {
+                if (controller.playerHealth.canMoveHead)
+                {
+                    //Idle
+                    timer += Time.deltaTime * walkingBobbingSpeed;
 
-                //Idle
-                timer += Time.deltaTime * walkingBobbingSpeed;
 
+                    if (!Input.GetButton("LeanLeft") && !Input.GetButton("LeanRight"))
+                        camera.localPosition = new Vector3(camera.localRotation.x, Mathf.Lerp(camera.localPosition.y, defaultPosY, Time.deltaTime * walkingBobbingSpeed), Mathf.Lerp(prevPosX, defaultPosX + Mathf.Sin(timer / 10) * horizontalBobbingAmount, Time.deltaTime * 10));
 
-                if (!Input.GetButton("LeanLeft") && !Input.GetButton("LeanRight"))
-                    transform.localPosition = new Vector3(Mathf.Lerp(prevPosX, defaultPosX + Mathf.Sin(timer / 10) * horizontalBobbingAmount, Time.deltaTime * 10), Mathf.Lerp(transform.localPosition.y, defaultPosY, Time.deltaTime * walkingBobbingSpeed), transform.localPosition.z);
-               
-                prevPosX = transform.localPosition.x;
-              
+                    prevPosX = camera.localPosition.x;
+
+                }
+
             }
+
+            
         }
-       
+
+        camera.localRotation = new Quaternion(camera.localRotation.x, Mathf.Lerp(camera.localRotation.y, 0, Time.deltaTime), Mathf.Lerp(camera.localRotation.z, 0, Time.deltaTime), Mathf.Lerp(camera.localRotation.w, 1, Time.deltaTime));
+        //Debug.Log(camera.localRotation);
+        //Debug.Log(transform.localRotation);
     }
 }

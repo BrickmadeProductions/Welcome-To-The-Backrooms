@@ -226,14 +226,13 @@ MonoBehaviour:
   holdableObject: {fileID: 0}
   ThrowMultiplier: 4.5
   large: 0
+  autoSwing: 0
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimationClips:
-  - {fileID: 1221074250055787942, guid: c1e8bd0d62c40e542afd5c8a45e37b05, type: 3}
-  LMBAnimationBools:
+  LMBAnimations:
   - Slice
-  CustomHoldAnimation: 
+  CustomHoldAnimation: isHoldingAxe
   Flying: 0
   tipLayerMask:
     serializedVersion: 2
@@ -363,7 +362,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4859266044507946077}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.0011, y: -0.451, z: 0.099}
+  m_LocalPosition: {x: 0.0011, y: -0.474, z: 0.099}
   m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 0
   m_Children:

@@ -24,15 +24,15 @@ public class HoldableObject : InteractableObject
 
 	public bool large;
 
+	public bool autoSwing;
+
 	//building system
 	public bool canPlace;
 	public bool isPlaced = false;
 
 	public bool animationPlaying;
 
-	public List<AnimationClip> LMBAnimationClips;
-
-	public List<string> LMBAnimationBools;
+	public List<string> LMBAnimations;
 
 	/*public List<AnimationClip> RMBAnimationClips;
 
@@ -41,6 +41,8 @@ public class HoldableObject : InteractableObject
 	public string CustomHoldAnimation = "";
 
 	private Vector3 pushAmt;
+
+	private int currentAnimChoice = 0;
 
 	private IEnumerator waitToPlaySound()
 	{
@@ -62,34 +64,54 @@ public class HoldableObject : InteractableObject
 		//holdableObject.AddForce();
 	}
 
-	private IEnumerator playAnimation(string boolName, int animChosen, bool LMB)
+	private IEnumerator playAnimation()
 	{
-		GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, value: true);
+		//yield return new WaitUntil(() => !animationPlaying);
 
-		animationPlaying = true;
+		if (autoSwing)
 
-		if (LMB)
-		{
-			yield return new WaitForSeconds(LMBAnimationClips[animChosen].length);
+			while (Input.GetMouseButton(0))
+			{
+				currentAnimChoice = Random.Range(0, LMBAnimations.Count);
+
+				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(LMBAnimations[currentAnimChoice], true);
+
+				animationPlaying = true;
+
+				yield return new WaitUntil(() => GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(LMBAnimations[currentAnimChoice]));
+
+				yield return new WaitForSeconds(GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).length / GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).speed);
+
+				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(LMBAnimations[currentAnimChoice], false);
+
+				
+			}
+
+        else
+        {
+			currentAnimChoice = Random.Range(0, LMBAnimations.Count);
+
+			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(LMBAnimations[currentAnimChoice], true);
+
+			animationPlaying = true;
+
+			yield return new WaitUntil(() => !animationPlaying);
+
+			
+
+			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(LMBAnimations[currentAnimChoice], false);
+
+			animationPlaying = false;
 		}
-		/*else
-		{
-			yield return new WaitForSeconds(RMBAnimationClips[animChosen].length);
-		}*/
-
-		animationPlaying = false;
-
-		GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(boolName, value: false);
 	}
 
 	public override void Use(InteractionSystem player, bool LMB)
 	{
-		if (!animationPlaying)
+		if (LMBAnimations.Count > 0)
 		{
-			if (LMB && LMBAnimationBools.Count > 0)
+			if (LMB && !animationPlaying)
 			{
-				int choice = Random.Range(0, LMBAnimationBools.Count);
-				StartCoroutine(playAnimation(LMBAnimationBools[choice], choice, LMB));
+				StartCoroutine(playAnimation());
 			}
 			/*else if (!LMB && RMBAnimationBools.Count > 0)
 			{
@@ -155,18 +177,7 @@ public class HoldableObject : InteractableObject
 	private void FixedUpdate()
 	{
 
-		/*if (SceneManager.GetActiveScene().name != "HomeScreen" && SceneManager.GetActiveScene().name != "IntroSequence" && GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
-		{
-			foreach (string lMBAnimationBool in LMBAnimationBools)
-			{
-				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(lMBAnimationBool, value: false);
-			}
-			*//*foreach (string rMBAnimationBool in RMBAnimationBools)
-			{
-				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(rMBAnimationBool, value: false);
-			}*//*
-		}
 		transform.position += pushAmt;
-		pushAmt *= 0.95f;*/
+		pushAmt *= 0.95f;
 	}
 }

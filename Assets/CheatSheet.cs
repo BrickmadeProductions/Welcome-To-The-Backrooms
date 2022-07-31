@@ -26,6 +26,10 @@ public class CheatSheet : MonoBehaviour
         LoadAllItemTypesToDropDown();
     }
 
+    public void ResetSteamStats()
+    {
+        Steam.ClearAllSteamStats();
+    }
     public void LevelTeleport()
     {
         Debug.Log(currentLevelChoice);
@@ -42,6 +46,7 @@ public class CheatSheet : MonoBehaviour
         objectList.Remove("INTRO");
         objectList.Remove("HOMESCREEN");
         objectList.Remove("ROOM");
+        objectList.Remove("LOADING");
 
         levelDropdown.AddOptions(objectList);
     }
@@ -66,7 +71,7 @@ public class CheatSheet : MonoBehaviour
     {
         //excempt the first 3
         
-        currentLevelChoice = (GameSettings.SCENE)(index + 3);
+        currentLevelChoice = (GameSettings.SCENE)(index + 4);
         
     }
 

@@ -13,7 +13,7 @@ public class ThrowWeapon : HoldableObject
 
     public void OnTriggerEnter(Collider hit)
     {
-        Debug.Log(holdableObject.velocity.magnitude);   
+        //Debug.Log(holdableObject.velocity.magnitude);   
         if (hit.gameObject.layer != 13 && hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6 && !stuckInWall && Flying )
         {
             //Debug.Log(hit.name);

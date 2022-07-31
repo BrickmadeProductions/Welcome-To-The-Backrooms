@@ -28,6 +28,7 @@ public class SteamManager : MonoBehaviour {
 	protected static SteamManager Instance {
 		get {
 			if (s_instance == null) {
+
 				return new GameObject("SteamManager").AddComponent<SteamManager>();
 			}
 			else {
@@ -96,7 +97,7 @@ public class SteamManager : MonoBehaviour {
 			// Once you get a Steam AppID assigned by Valve, you need to replace AppId_t.Invalid with it and
 			// remove steam_appid.txt from the game depot. eg: "(AppId_t)480" or "new AppId_t(480)".
 			// See the Valve documentation for more information: https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
-			if (SteamAPI.RestartAppIfNecessary(AppId_t.Invalid)) {
+			if (SteamAPI.RestartAppIfNecessary((AppId_t)2007010)) {
 				Debug.Log("[Steamworks.NET] Shutting down because RestartAppIfNecessary returned true. Steam will restart the application.");
 
 				Application.Quit();
@@ -151,6 +152,7 @@ public class SteamManager : MonoBehaviour {
 	// Because the SteamManager should be persistent and never disabled or destroyed we can shutdown the SteamAPI here.
 	// Thus it is not recommended to perform any Steamworks work in other OnDestroy functions as the order of execution can not be garenteed upon Shutdown. Prefer OnDisable().
 	protected virtual void OnDestroy() {
+
 		if (s_instance != this) {
 			return;
 		}

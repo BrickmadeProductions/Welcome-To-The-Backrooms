@@ -8,6 +8,7 @@ public class Intro : MonoBehaviour
 {
     Coroutine introC = null;
     public TextMeshProUGUI skip;
+    bool hasClicked = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -18,9 +19,9 @@ public class Intro : MonoBehaviour
     private void Update()
     {
       
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown("Jump") && !hasClicked)
         {
-            
+            hasClicked = true;
             StopCoroutine(introC);
             GameSettings.Instance.LoadScene(GameSettings.SCENE.HOMESCREEN);
             GameSettings.Instance.setCutScene(false);
@@ -32,9 +33,9 @@ public class Intro : MonoBehaviour
     {
         GameSettings.Instance.setCutScene(true);
 
-        yield return new WaitForSeconds(9.5f);
+        yield return new WaitForSecondsRealtime(9.5f);
         skip.gameObject.SetActive(false);
-        yield return new WaitForSeconds(9f);
+        yield return new WaitForSecondsRealtime(8f);
         GameSettings.Instance.LoadScene(GameSettings.SCENE.HOMESCREEN);
 
         GameSettings.Instance.setCutScene(false);

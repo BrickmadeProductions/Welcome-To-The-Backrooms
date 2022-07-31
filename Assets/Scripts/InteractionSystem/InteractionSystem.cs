@@ -9,15 +9,15 @@ using UnityEngine.UI;
 
 public class InteractionSystem : MonoBehaviour
 {
-	private int inventoryLimit = 2;
+	List<ContainerObject> containersObjectsHeld;
 
-	private int currentSelectedInventorySlot = -1;
-
-	private bool inventoryOpened;
-
-	private bool canPlaceAtLocation;
+	private bool inventoryOpened = false;
 
 	bool buildOn;
+
+	public GameObject inventoryUI;
+
+	private bool canPlaceAtLocation;
 
 	private PlayerController player;
 
@@ -41,6 +41,11 @@ public class InteractionSystem : MonoBehaviour
 
 	public LayerMask placingLayerMask;
 	public LayerMask grabbingLayerMask;
+
+	public void AnimationFinished()
+    {
+		player.holding.animationPlaying = false;
+    }
 
 
 	private void Awake()
@@ -192,22 +197,22 @@ public class InteractionSystem : MonoBehaviour
 		}
 	}
 
-	private void InventoryManager()
+	/*private void InventoryManager()
 	{
 		if (Input.GetButtonDown("Inventory"))
 		{
 			if (inventoryOpened)
 			{
-				player.Crouch();
+				//player.Crouch();
 				inventoryOpened = false;
 			}
 			else
 			{
-				player.UnCrouch();
+				//player.UnCrouch();
 				inventoryOpened = true;
 			}
 		}
-	}
+	}*/
 
 	public void SetThrow()
 	{
@@ -231,7 +236,7 @@ public class InteractionSystem : MonoBehaviour
 		//player.holding.transform.position += player.head.transform.forward * 1.2f;
 
 		player.holding.transform.rotation = Quaternion.LookRotation(player.playerCamera.transform.forward, player.playerCamera.transform.up);
-		player.holding.Throw(player.head.transform.forward.normalized * ((player.GetComponent<CharacterController>().velocity.magnitude / 10) + 1) * player.holding.ThrowMultiplier );
+		player.holding.Throw(player.neck.transform.forward.normalized * ((player.GetComponent<CharacterController>().velocity.magnitude / 10) + 1) * player.holding.ThrowMultiplier );
 		
 
 		player.holding = null;
@@ -239,6 +244,12 @@ public class InteractionSystem : MonoBehaviour
 	    //player.bodyAnim.SetBool("isThrowing", false);
 	}
 
+	IEnumerator waitForAnimationToHold(HoldableObject holdableObject)
+    {
+		player.holding = holdableObject;
+		yield return new WaitForSeconds(0.4f);
+		SetHolding(holdableObject);
+	}
 	//raycast can go through multiple objects
 	public void SetHolding(InteractableObject holdableObject)
 	{
@@ -250,7 +261,7 @@ public class InteractionSystem : MonoBehaviour
 		}
 		else
 		{
-			SetAllChildrenToLayer(player.holding.transform, 13);
+			SetAllChildrenToLayer(player.holding.transform, 23);
 		}
 
 		Collider[] components = player.holding.GetComponents<Collider>();
@@ -258,10 +269,12 @@ public class InteractionSystem : MonoBehaviour
 		{
 			components[i].enabled = false;
 		}
+
 		player.holding.GetComponent<HoldableObject>().holdableObject.isKinematic = true;
 		player.holding.transform.parent = (player.holding.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.handLocation.transform);
 		player.holding.transform.position = (player.holding.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.handLocation.transform.position);
-		Quaternion localRotation = Quaternion.Euler(player.head.transform.localRotation.x / 2f, player.head.transform.localRotation.y, player.head.transform.localRotation.z);
+		Quaternion localRotation = Quaternion.Euler(player.neck.transform.localRotation.x / 2f, player.neck.transform.localRotation.y, player.neck.transform.localRotation.z);
+
 
 		if (player.holding.GetComponent<HoldableObject>().large)
 		{
@@ -277,7 +290,34 @@ public class InteractionSystem : MonoBehaviour
 
 		player.holding.Hold(this);
 	}
+	public void SetInventory()
+    {
+		if (!GameSettings.Instance.PauseMenuOpen)
 
+			//inventory is opening
+			if (!inventoryOpened)
+            {
+				Cursor.lockState = CursorLockMode.Confined;
+				Cursor.visible = true;
+				inventoryOpened = true;
+				GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canMoveHead = false;
+				GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canCrouch = false;
+				buildOn = false;
+				inventoryUI.SetActive(true);
+				inventoryUI.GetComponent<Animator>().SetTrigger("OpenINV");
+
+			}
+			//inventory is closing
+			else
+			{
+				GameSettings.Instance.GameScreen();
+				inventoryOpened = false;
+				GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canMoveHead = true;
+				GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canCrouch = true;
+				inventoryUI.GetComponent<Animator>().SetTrigger("CloseINV");
+				//inventoryUI.SetActive(false);
+			}
+    }
 	public void SetDrop()
 	{
 		SetAllChildrenToLayer(player.holding.transform, 9);
@@ -325,19 +365,28 @@ public class InteractionSystem : MonoBehaviour
 
 	private void Update()
 	{
-		if (GameSettings.Instance.PauseMenuOpen)
+		if (Input.GetButtonDown("Inventory"))
+		{
+			SetInventory();
+
+		}
+		if (GameSettings.Instance.PauseMenuOpen || GameSettings.Instance.IsCutScene || inventoryOpened)
 		{
 			return;
 		}
+
+		if (Input.GetButtonDown("ToggleBuilding") && !Input.GetMouseButtonDown(1))
+
+		
 		if (Input.GetButtonDown("ToggleBuilding") && !Input.GetMouseButton(1))
 		{
 			buildOn = !buildOn;
 		}
 		//0 = closest
-		RaycastHit[] raycastForGrabbing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 2f, grabbingLayerMask)
+		RaycastHit[] raycastForGrabbing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 3f, grabbingLayerMask)
 							  orderby h.distance
 							  select h).ToArray();
-
+		Debug.DrawRay(player.playerCamera.transform.position, player.playerCamera.transform.forward * 6f, Color.red);
 		RaycastHit[] raycastForPlacing = (from h in Physics.RaycastAll(new Ray(player.playerCamera.transform.position, player.playerCamera.transform.forward), 6f, placingLayerMask)
 										   orderby h.distance
 										   select h).ToArray();
@@ -453,6 +502,7 @@ public class InteractionSystem : MonoBehaviour
 						currentRotZ = 0;
 						buildRotationOffset = Quaternion.identity;
 						currentPlaceItemPrefab = null;
+						buildOn = false;
 					}
 
 				}
@@ -502,7 +552,9 @@ public class InteractionSystem : MonoBehaviour
 		if (Input.GetButton("Grab") && currentlyLookingAt != null && player.holding == null && currentlyLookingAt.gameObject.tag != "Usable")
 		{
 			//pickup
-			SetHolding(currentlyLookingAt.GetComponent<HoldableObject>());
+			
+			player.bodyAnim.SetTrigger("isGrabbing");
+			StartCoroutine(waitForAnimationToHold(currentlyLookingAt.GetComponent<HoldableObject>()));
 		}
 
 		if (player.holding != null)
@@ -513,10 +565,6 @@ public class InteractionSystem : MonoBehaviour
 				player.bodyAnim.SetBool("isPreparingThrow", true);
 			}
 
-			/*if (Input.GetButtonDown("Throw") && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
-			{
-				SetThrow();
-			}*/
 			if (Input.GetMouseButtonUp(1) && (!buildOn || raycastForPlacing.Length == 0))
 			{
 				//Debug.Log("Throw");
@@ -526,7 +574,7 @@ public class InteractionSystem : MonoBehaviour
 				SetThrow();
 			}
 
-			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.head.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
+			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.neck.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
 			{
 				SetDrop();
 			}
@@ -536,6 +584,7 @@ public class InteractionSystem : MonoBehaviour
 		{
 			currentlyLookingAt.Use(this, false);
 		}
+		/*
 		if (Input.GetButtonDown("Pickup") && inventorySlots.Count < inventoryLimit && currentlyLookingAt != null)
 		{
 			currentlyLookingAt.AddToInv(this);
@@ -545,7 +594,7 @@ public class InteractionSystem : MonoBehaviour
 		{
 			SetAllChildrenToLayer(inventoryObject.transform.GetChild(currentSelectedInventorySlot), 9);
 			DropInventoryObject();
-		}
+		}*/
 		if (Input.GetMouseButtonDown(0))
 		{
 			if (player.holding != null)
@@ -562,12 +611,12 @@ public class InteractionSystem : MonoBehaviour
 	private IEnumerator DropObjectAtCorrectTime()
 	{
 		yield return new WaitForSeconds(0.5f);
-		inventorySlots[currentSelectedInventorySlot].gameObject.SetActive(value: true);
+		/*inventorySlots[currentSelectedInventorySlot].gameObject.SetActive(value: true);
 		inventorySlots[currentSelectedInventorySlot].gameObject.transform.parent = null;
 		inventorySlots[currentSelectedInventorySlot].gameObject.transform.position = player.handLocation.transform.position;
 		inventorySlots[currentSelectedInventorySlot].gameObject.transform.rotation = player.handLocation.transform.rotation;
 		inventorySlots.RemoveAt(currentSelectedInventorySlot);
-		currentSelectedInventorySlot--;
+		currentSelectedInventorySlot--;*/
 		player.bodyAnim.SetBool("DropItem", value: false);
 	}
 

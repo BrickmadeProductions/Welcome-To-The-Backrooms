@@ -11,6 +11,9 @@ using UnityEngine.Audio;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Steamworks;
+
+
 
 public class GameSettings : MonoBehaviour, ISaveable
 {
@@ -49,13 +52,20 @@ public class GameSettings : MonoBehaviour, ISaveable
 	{
 		INTRO,
 		HOMESCREEN,
+		LOADING,
 		ROOM,
 		LEVEL0,
 		LEVEL1,
 		LEVEL2,
 		LEVELFUN,
-		LEVELRUN
+		LEVELRUN,
+		FOURKEYS_CLIPPINGZONE
 	}
+
+	public TextMeshProUGUI teamMemberMode;
+
+	//BrickmadeProductions, king, wahoo, RJC, Constant
+	public static readonly List<ulong> teamMemberSteamIDs = new List<ulong> { 76561199226044925, 76561198017133391, 76561198139743119, 76561198109625129 };
 
 	public BackroomsLevelWorld worldInstance = null;
 
@@ -81,7 +91,11 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public static volatile bool PLAYER_DATA_LOADED_IN_SCENE = false;
 
+	public string activeUser;
+
 	public Animator saveIcon;
+
+	public AudioHandler audioHandler;
 
 	private PostProcessVolume post;
 
@@ -99,37 +113,20 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	private MotionBlur motionBlur;
 
-	private AudioMixer master;
-
 	public Texture2D cursor;
 
 	public PostProcessProfile homeScreenRoomProfile;
 
 	public PostProcessProfile homeScreenProfile;
 
-	public AudioMixer level0Mixer;
-
 	public PostProcessProfile level0Profile;
-
-	public AudioClip level0Ambience;
-
-	public AudioMixer level1Mixer;
-
 	public PostProcessProfile level1Profile;
-
-	public AudioClip level1Ambience;
-
-	public AudioMixer level2Mixer;
 
 	public PostProcessProfile level2Profile;
 
-	public AudioClip level2Ambience;
-
-	public AudioMixer levelRunMixer;
-
 	public PostProcessProfile levelRunProfile;
 
-	public AudioClip levelRunAmbience;
+	public PostProcessProfile clippingZonesProfile;
 
 	public GameObject playerPrefab;
 
@@ -144,8 +141,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 	private int sY = 1080;
 
 	private int textureRes;
-
-	public static bool IS_SAVING = false;
 
 	private int screenResIndex = 2;
 
@@ -253,8 +248,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public MotionBlur MotionBlur => motionBlur;
 
-	public AudioMixer Master => master;
-
 	public GameObject Player => player;
 
 	public int ScreenResIndex => screenResIndex;
@@ -291,30 +284,40 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	private void Awake()
 	{
-		cheatSheet = GetComponent<CheatSheet>();
+		
 
 		GameScreen();
+
 		Init();
+
 		player = null;
+
 		positionOffset = new Vector2((float)cursor.width / 2f - 40f, (float)cursor.height / 2f - 100f);
+
 		Cursor.SetCursor(cursor, positionOffset, CursorMode.Auto);
+
 		m_referenceCount++;
+
 		if (m_referenceCount > 1)
 		{
 			DestroyImmediate(gameObject);
 			return;
 		}
+
 		m_instance = this;
+
 		DontDestroyOnLoad(gameObject);
+
+
 	}
     private void Start()
     {
 		SaveMaster.SyncLoad();
-		
 	}
 
     private void Init()
 	{
+
 		post = GetComponent<PostProcessVolume>();
 		PropDatabase = new Dictionary<OBJECT_TYPE, InteractableObject>();
 
@@ -329,8 +332,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 		{
 			EntityDatabase.Add(item2.type, item2);
 		}
-		level0Mixer = Resources.Load<AudioMixer>("Audio/Level0");
-		level1Mixer = Resources.Load<AudioMixer>("Audio/Level1");
+
 	}
 
 	public void OnLoad(string data)
@@ -401,7 +403,9 @@ public class GameSettings : MonoBehaviour, ISaveable
 				SaveMaster.WipeSaveable(saveable);
 			}
 		}
+
 		SaveMaster.WriteActiveSaveToDisk();
+
 		LastSavedScene = SCENE.ROOM;
 		LoadScene(SCENE.HOMESCREEN);
 
@@ -439,11 +443,11 @@ public class GameSettings : MonoBehaviour, ISaveable
 			smilerLogoOn = !smilerLogoOn;
 			Logo.transform.GetChild(0).gameObject.SetActive(smilerLogoOn);
 		}
-		/*if (Input.GetButtonDown("CheatSheet") && ActiveScene != SCENE.INTRO && ActiveScene != SCENE.HOMESCREEN)
+		if (Input.GetButtonDown("CheatSheet") && ActiveScene != SCENE.INTRO && ActiveScene != SCENE.HOMESCREEN && teamMemberSteamIDs.Contains(SteamUser.GetSteamID().m_SteamID))
         {
 			cheatSheetObject.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
 			CheatMenu(!cheatSheetObject.activeSelf);
-		}*/
+		}
 
 	}
 
@@ -504,12 +508,13 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public void SettingsScreen()
 	{
-		SaveAllProgress();
+		if (worldInstance != null)
+			StartCoroutine(SaveAllProgress());
 
 		setPauseMenuOpen(true);
 		Cursor.lockState = CursorLockMode.None;
 		Cursor.visible = true;
-		Time.timeScale = 0f;
+		//Time.timeScale = 0f;
 		settingsScreen.transform.gameObject.SetActive(true);
 		mainScreen.transform.gameObject.SetActive(false);
 	}
@@ -584,7 +589,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 	{
 		ConnectSettings();
 		masterVolume = volume;
-		master.SetFloat("MasterVolume", Mathf.Log10(masterVolume) * 20f);
+		audioHandler.master.SetFloat("MasterVolume", Mathf.Log10(masterVolume) * 20f);
 	}
 
 	public void setAmbientOcclusion(bool io)
@@ -668,20 +673,24 @@ public class GameSettings : MonoBehaviour, ISaveable
 			bloodAndGoreObject.SetActive(io);
         }
     }
-	public static void SaveAllProgress()
+	public static IEnumerator SaveAllProgress()
 	{
-		//Instance.saveIcon.gameObject.SetActive(true);
-		IS_SAVING = true;
-
+		Instance.saveIcon.SetBool("StopSave", false);
 		Instance.saveIcon.SetTrigger("Save");
 
+		if (Instance.worldInstance != null)
+        {
+			Instance.worldInstance.SaveAllObjectsAndEntities();
+		}
+
 		SaveMaster.SyncSave();
+		SaveMaster.WriteActiveSaveToDisk();
+
+		yield return new WaitUntil(() => SaveMaster.isDoneSaving);
+
 		Debug.Log("Saved All Data!");
 
-		
-		Instance.saveIcon.SetTrigger("StopSave");
-		//Instance.saveIcon.gameObject.SetActive(false);
-		IS_SAVING = false;
+		Instance.saveIcon.SetBool("StopSave", true);
 
 	}
 
@@ -706,12 +715,19 @@ public class GameSettings : MonoBehaviour, ISaveable
 				Debug.LogError("LASTSAVEDSCENEERROR");
 				LoadScene(SCENE.ROOM);
 				break;
+			case SCENE.LOADING:
+				Debug.LogError("LASTSAVEDSCENEERROR");
+				LoadScene(SCENE.LOADING);
+				break;
 		}
-		if (LastSavedScene != 0 && LastSavedScene != SCENE.HOMESCREEN)
+		if (LastSavedScene != SCENE.INTRO && LastSavedScene != SCENE.HOMESCREEN && LastSavedScene != SCENE.LOADING)
 		{
 			LoadScene(LastSavedScene);
 		}
-		//LoadScene(SCENE.LEVEL1);
+        else
+        {
+			LoadScene(SCENE.ROOM);
+		}
 	}
 
 	public void CheatMenu(bool io)
@@ -745,12 +761,12 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	private IEnumerator PreLoadScene(SCENE id)
 	{
-		SaveAllProgress();
-
+		
 		if (ActiveScene != SCENE.INTRO)
-			SceneManager.LoadSceneAsync(8, LoadSceneMode.Additive);
-
-		yield return new WaitUntil(() => !IS_SAVING);
+        {
+			SaveAllProgress();
+			//SceneManager.LoadSceneAsync(2, LoadSceneMode.Additive);
+		}
 
 		LEVEL_LOADED = false;
 
@@ -780,17 +796,10 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 				player.GetComponent<PlayerController>().darkShield.SetActive(false);
 
-				player.transform.position = new Vector3(0f, 1.1f, 0.7f);
+				//player.transform.position = new Vector3(0f, 1.1f, 0.7f);
+				player.transform.position = new Vector3(0f, 3f, 0.7f);
 
 				post.profile = homeScreenRoomProfile;
-
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-				player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-
-				master = level0Mixer;
 
 				LEVEL_SAVE_LOADED = true;
 				PLAYER_DATA_LOADED_IN_SCENE = true;
@@ -818,7 +827,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 				player.transform.GetChild(0).GetComponent<AudioSource>().Play();
 
 				post.profile = homeScreenRoomProfile;
-				master = level0Mixer;
 
 				LEVEL_SAVE_LOADED = true;
 				PLAYER_DATA_LOADED_IN_SCENE = true;
@@ -829,19 +837,12 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 			case SCENE.LEVEL0:
 
-				player.transform.position = new Vector3(0f, 1.1f, 0f);
+				player.transform.position = new Vector3(0f, 2.5f, 0f);
 
 				player.GetComponent<PlayerController>().darkShield.SetActive(true);
 
 				post.profile = level0Profile;
 
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-				player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-
-				master = level0Mixer;
 				GameScreen();
 
 				break;
@@ -854,13 +855,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 				post.profile = level1Profile;
 
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level1Ambience;
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
-				player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level1Mixer.FindMatchingGroups("Master")[0];
-
-				master = level1Mixer;
 
 				GameScreen();
 
@@ -871,15 +865,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 				player.GetComponent<PlayerController>().darkShield.SetActive(true);
 
 				post.profile = level2Profile;
-
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level2Ambience;
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level2Mixer.FindMatchingGroups("Master")[0];
-				player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level2Mixer.FindMatchingGroups("Master")[0];
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level2Mixer.FindMatchingGroups("Master")[0];
-
-				master = level2Mixer;
-
 				GameScreen();
 
 				break;
@@ -891,14 +876,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 				player.GetComponent<PlayerController>().darkShield.SetActive(false);
 
 				post.profile = level0Profile;
-
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-				player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-
-				master = level0Mixer;
 
 				GameScreen();
 
@@ -912,23 +889,31 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 				post.profile = levelRunProfile;
 
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].clip = level0Ambience;
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].Play();
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-				player.GetComponent<PlayerController>().feet.GetComponents<AudioSource>()[0].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
-				player.GetComponent<PlayerController>().head.GetComponents<AudioSource>()[1].outputAudioMixerGroup = level0Mixer.FindMatchingGroups("Master")[0];
+				GameScreen();
 
-				master = level0Mixer;
+				break;
+
+			case SCENE.FOURKEYS_CLIPPINGZONE:
+
+				player.transform.position = new Vector3(0, 1, 0);
+
+				player.GetComponent<PlayerController>().darkShield.SetActive(true);
+
+				post.profile = clippingZonesProfile;
 
 				GameScreen();
 
 				break;
 		}
+			
+
 		ConnectSettings();
+
 		ActiveScene = id;
 
 		if (AmInSavableScene())
 		{
+			audioHandler.SetUpAudio(id);
 			LastSavedScene = ActiveScene;
 		}
 
@@ -949,7 +934,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public bool AmInSavableScene()
 	{
-		if (ActiveScene != SCENE.INTRO && ActiveScene != SCENE.HOMESCREEN && ActiveScene != SCENE.ROOM)
+		if (ActiveScene != SCENE.INTRO && ActiveScene != SCENE.HOMESCREEN && ActiveScene != SCENE.ROOM && ActiveScene != SCENE.LOADING)
 		{
 			return true;
 		}

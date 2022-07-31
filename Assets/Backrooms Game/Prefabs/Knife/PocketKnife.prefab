@@ -191,7 +191,7 @@ Transform:
   m_GameObject: {fileID: 3566674971456181440}
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0.7071068, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_LocalScale: {x: 9, y: 9, z: 9}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3453204332779128588}
@@ -324,7 +324,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5174651668802718685}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.092, y: 1.827, z: -0.492}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -379,13 +379,13 @@ MonoBehaviour:
   holdableObject: {fileID: 5174651668802718680}
   ThrowMultiplier: 1.5
   large: 0
+  autoSwing: 1
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimationClips:
-  - {fileID: -1232988704551948498, guid: c1e8bd0d62c40e542afd5c8a45e37b05, type: 3}
-  LMBAnimationBools:
-  - Slice
+  LMBAnimations:
+  - SliceVar1
+  - SliceVar2
   CustomHoldAnimation: 
 --- !u!1 &7724259818419893475
 GameObject:

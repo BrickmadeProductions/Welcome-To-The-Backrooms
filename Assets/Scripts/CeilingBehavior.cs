@@ -5,8 +5,7 @@ using UnityEngine;
 public class CeilingBehavior : MonoBehaviour
 {
 
-    public GameObject normalLight;
-    public GameObject brokenLight;
+    public GameObject light;
     public GameObject vent;
     public Transform[] ventLocations;
     public Transform[] lightLocations;
