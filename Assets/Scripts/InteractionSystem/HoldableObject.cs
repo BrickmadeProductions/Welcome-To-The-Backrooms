@@ -69,7 +69,7 @@ public class HoldableObject : InteractableObject
 		//yield return new WaitUntil(() => !animationPlaying);
 
 		if (autoSwing)
-
+        {
 			while (Input.GetMouseButton(0))
 			{
 				currentAnimChoice = Random.Range(0, LMBAnimations.Count);
@@ -80,14 +80,17 @@ public class HoldableObject : InteractableObject
 
 				yield return new WaitUntil(() => GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(LMBAnimations[currentAnimChoice]));
 
-				yield return new WaitForSeconds(GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).length / GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).speed);
+				yield return new WaitForSecondsRealtime(GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).length / GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).speed - 0.25f);
 
 				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(LMBAnimations[currentAnimChoice], false);
 
-				
+				animationPlaying = false;
 			}
 
-        else
+			
+		}
+
+		else if (!animationPlaying)
         {
 			currentAnimChoice = Random.Range(0, LMBAnimations.Count);
 
@@ -95,14 +98,15 @@ public class HoldableObject : InteractableObject
 
 			animationPlaying = true;
 
-			yield return new WaitUntil(() => !animationPlaying);
+			//yield return new WaitUntil(() => GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(LMBAnimations[currentAnimChoice]));
 
-			
+			yield return new WaitForSecondsRealtime(GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).length / GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).speed - 0.25f);
 
 			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(LMBAnimations[currentAnimChoice], false);
 
 			animationPlaying = false;
 		}
+
 	}
 
 	public override void Use(InteractionSystem player, bool LMB)
@@ -176,7 +180,7 @@ public class HoldableObject : InteractableObject
 
 	private void FixedUpdate()
 	{
-
+		
 		transform.position += pushAmt;
 		pushAmt *= 0.95f;
 	}

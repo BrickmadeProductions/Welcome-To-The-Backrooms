@@ -233,10 +233,10 @@ public class InteractionSystem : MonoBehaviour
 		player.bodyAnim.SetBool((player.holding.CustomHoldAnimation != "") ? player.holding.CustomHoldAnimation : "isHoldingSmall", value: false);
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
 
-		//player.holding.transform.position += player.head.transform.forward * 1.2f;
+		player.holding.transform.position = player.handLocation.transform.position;
 
 		player.holding.transform.rotation = Quaternion.LookRotation(player.playerCamera.transform.forward, player.playerCamera.transform.up);
-		player.holding.Throw(player.neck.transform.forward.normalized * ((player.GetComponent<CharacterController>().velocity.magnitude / 10) + 1) * player.holding.ThrowMultiplier );
+		player.holding.Throw(player.playerCamera.transform.forward.normalized * ((player.GetComponent<CharacterController>().velocity.magnitude / 10) + 1) * player.holding.ThrowMultiplier );
 		
 
 		player.holding = null;
@@ -571,7 +571,7 @@ public class InteractionSystem : MonoBehaviour
 
 				player.bodyAnim.SetBool("isPreparingThrow", false);
 				player.bodyAnim.SetTrigger("isThrowing");
-				SetThrow();
+				
 			}
 
 			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.neck.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.holding.GetComponent<HoldableObject>().large))
