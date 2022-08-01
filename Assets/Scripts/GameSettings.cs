@@ -65,7 +65,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 	public TextMeshProUGUI teamMemberMode;
 
 	//BrickmadeProductions, king, wahoo, RJC, Constant
-	public static readonly List<ulong> teamMemberSteamIDs = new List<ulong> { 76561199226044925, 76561198017133391, 76561198139743119, 76561198109625129 };
+	public static readonly List<ulong> teamMemberSteamIDs = new List<ulong> { 76561199226044925, 76561198017133391, 76561198139743119, 76561198109625129, 76561198968340030 };
 
 	public BackroomsLevelWorld worldInstance = null;
 

@@ -330,17 +330,19 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             if (holding != null)
             {
-                neck.transform.rotation = Quaternion.Euler(neck.transform.rotation.eulerAngles.x, neck.transform.rotation.eulerAngles.y, bodyAnim.GetBool("isProne") ? rotationX - 90 : rotationX - 90);
+                neck.transform.rotation = Quaternion.Euler(neck.transform.rotation.eulerAngles.x, neck.transform.rotation.eulerAngles.y, (bodyAnim.GetBool("isProne") ? rotationX - 90 : rotationX - 90));
+                //neck.transform.parent.parent.rotation = Quaternion.Euler(neck.transform.rotation.eulerAngles.x, neck.transform.rotation.eulerAngles.y, (bodyAnim.GetBool("isProne") ? rotationX - 90 : rotationX - 90) / 3);
+                
                 head.transform.rotation = Quaternion.Euler(bodyAnim.GetBool("isProne") ? rotationX : rotationX, head.transform.rotation.eulerAngles.y, 0);
 
                 headReset = true;
             }
-            else if (headReset)
+/*            else if (headReset)
             {
                 head.transform.rotation = Quaternion.Euler(90, head.transform.rotation.eulerAngles.y, 0);
 
                 headReset = false;
-            }
+            }*/
             else
             {
                 head.transform.rotation = Quaternion.Euler(rotationX, head.transform.rotation.eulerAngles.y, 0);
@@ -426,8 +428,7 @@ public class PlayerController : MonoBehaviour, ISaveable
             float curSpeedX = currentPlayerState != PLAYERSTATES.IMMOBILE || holding.animationPlaying ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") * adrenalineSpeedMultiplier : 0;
             float curSpeedY = currentPlayerState != PLAYERSTATES.IMMOBILE || holding.animationPlaying ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") * adrenalineSpeedMultiplier : 0;
 
-            bodyAnim.SetFloat("xWalk", curSpeedX / 2);
-            bodyAnim.SetFloat("yWalk", curSpeedY / 2);
+            
 
             if (currentPlayerState == PLAYERSTATES.CROUCH)
             {
@@ -450,6 +451,12 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             // Move the controller
             characterController.Move(moveDirection * Time.deltaTime);
+
+          /*  float smoothedSpeedX = Mathf.Lerp(0, curSpeedX, 2 * Time.deltaTime);
+            float smoothedSpeedY = Mathf.Lerp(0, curSpeedY, 2 * Time.deltaTime);*/
+
+            bodyAnim.SetFloat("xWalk", curSpeedX);
+            bodyAnim.SetFloat("yWalk", curSpeedY);
 
         }
 
@@ -518,29 +525,8 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             }
 
-            if (Input.GetButton("Crouch") && playerHealth.canWalk && currentPlayerState != PLAYERSTATES.RUN)
-            {
-                bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
-                bodyAnim.SetBool("isCrouching", true);
-                bodyAnim.SetBool("isWalking", false);
-                bodyAnim.SetBool("isRunning", false);
-                bodyAnim.SetBool("isIdle", false);
-
-                currentPlayerState = PLAYERSTATES.CROUCH;
-                
-            }
 
 
-        }
-
-        else if (Input.GetButton("Crouch") && currentPlayerState != PLAYERSTATES.JUMP)
-        {
-
-            bodyAnim.SetBool("isCrouching", true);
-            bodyAnim.SetBool("isRunning", false);
-
-            currentPlayerState = PLAYERSTATES.CROUCH;
-       
         }
 
         //idle
@@ -556,6 +542,23 @@ public class PlayerController : MonoBehaviour, ISaveable
  
             currentPlayerState = PLAYERSTATES.IDLE;
 
+        }
+
+        if (Input.GetButton("Crouch") && currentPlayerState != PLAYERSTATES.JUMP && playerHealth.canWalk)
+        {
+
+            bodyAnim.SetBool("isCrouching", true);
+            bodyAnim.SetBool("isRunning", false);
+            bodyAnim.SetBool("isWalking", false);
+            bodyAnim.SetBool("isRunning", false);
+            bodyAnim.SetBool("isIdle", false);
+
+            currentPlayerState = PLAYERSTATES.CROUCH;
+
+        }
+        else
+        {
+            bodyAnim.SetBool("isCrouching", false);
         }
 
         if (Input.GetButtonDown("Prone") && currentPlayerState != PLAYERSTATES.JUMP)
@@ -574,6 +577,8 @@ public class PlayerController : MonoBehaviour, ISaveable
             }
 
         }
+
+
 
         if (Input.GetButton("Watch"))
         {
