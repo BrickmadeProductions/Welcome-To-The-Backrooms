@@ -17,7 +17,7 @@ public class AudioHandler : MonoBehaviour
 {
     Coroutine randomlyPlayTracks = null;
 
-    Dictionary<GameSettings.SCENE, SceneMusicData> sceneMusicDictionary;
+    Dictionary<SCENE, SceneMusicData> sceneMusicDictionary;
 
     public AudioMixer master;
 
@@ -72,7 +72,7 @@ public class AudioHandler : MonoBehaviour
     public AudioClip[] clippingZoneTracks;
 
     //microphone
-    public int audioSampleRate = 44100 / 15;
+    public int audioSampleRate = 44100;
     public string microphone;
 
     private List<string> micDevices = new List<string>();
@@ -109,50 +109,51 @@ public class AudioHandler : MonoBehaviour
 
     public void PopulateMusicData()
     {
-        sceneMusicDictionary = new Dictionary<GameSettings.SCENE, SceneMusicData>();
+        sceneMusicDictionary = new Dictionary<SCENE, SceneMusicData>();
 
         level0Mixer = Resources.Load<AudioMixer>("Audio/Level0").FindMatchingGroups("Master")[0];
         level1Mixer = Resources.Load<AudioMixer>("Audio/Level1").FindMatchingGroups("Master")[0];
         level2Mixer = Resources.Load<AudioMixer>("Audio/Level2").FindMatchingGroups("Master")[0];
         levelFUNMixer = Resources.Load<AudioMixer>("Audio/LevelFUN").FindMatchingGroups("Master")[0];
+        levelRUNMixer = Resources.Load<AudioMixer>("Audio/LevelRUN").FindMatchingGroups("Master")[0];
         clippingZoneMixer = Resources.Load<AudioMixer>("Audio/ClippingZone").FindMatchingGroups("Master")[0];
 
-        sceneMusicDictionary.Add(GameSettings.SCENE.LEVEL0, new SceneMusicData()
+        sceneMusicDictionary.Add(SCENE.LEVEL0, new SceneMusicData()
         {
             ambience = ambience0Track,
             levelMixer = level0Mixer,
             soundTracks = new AudioClip[] { sound0Track },
         });
 
-        sceneMusicDictionary.Add(GameSettings.SCENE.LEVEL1, new SceneMusicData()
+        sceneMusicDictionary.Add(SCENE.LEVEL1, new SceneMusicData()
         {
             ambience = ambience1Track,
             levelMixer = level1Mixer,
             soundTracks = new AudioClip[] { sound1Track },
         });
 
-        sceneMusicDictionary.Add(GameSettings.SCENE.LEVEL2, new SceneMusicData()
+        sceneMusicDictionary.Add(SCENE.LEVEL2, new SceneMusicData()
         {
             ambience = ambience2Track,
             levelMixer = level2Mixer,
             soundTracks = new AudioClip[] { sound2Track },
         });
 
-        sceneMusicDictionary.Add(GameSettings.SCENE.LEVELFUN, new SceneMusicData()
+        sceneMusicDictionary.Add(SCENE.LEVELFUN, new SceneMusicData()
         {
             ambience = ambienceFUNTrack,
             levelMixer = levelFUNMixer,
             soundTracks = new AudioClip[] { soundFUNTrack },
         }); ;
 
-        sceneMusicDictionary.Add(GameSettings.SCENE.LEVELRUN, new SceneMusicData()
+        sceneMusicDictionary.Add(SCENE.LEVELRUN, new SceneMusicData()
         {
             ambience = ambienceRUNTrack,
             levelMixer = levelRUNMixer,
             soundTracks = new AudioClip[] { soundRUNTrack },
         });
 
-        sceneMusicDictionary.Add(GameSettings.SCENE.FOURKEYS_CLIPPINGZONE, new SceneMusicData()
+        sceneMusicDictionary.Add(SCENE.FOURKEYS_CLIPPINGZONE, new SceneMusicData()
         {
             ambience = ambienceRUNTrack,
             levelMixer = clippingZoneMixer,
@@ -161,7 +162,7 @@ public class AudioHandler : MonoBehaviour
         });
     }
     //play intro, wait, then play a random level track every 5 to 10 miunutes
-    public IEnumerator playSceneSoundTrack(GameSettings.SCENE scene)
+    public IEnumerator playSceneSoundTrack(SCENE scene)
     {
         GetComponent<AudioSource>().Stop();
         
@@ -222,7 +223,7 @@ public class AudioHandler : MonoBehaviour
 
     }
 
-    public void SetUpAudio(GameSettings.SCENE scene)
+    public void SetUpAudio(SCENE scene)
     {
         //setup audio data
         SceneMusicData data;
@@ -233,14 +234,20 @@ public class AudioHandler : MonoBehaviour
 
             foreach (AudioSource source in FindObjectsOfType<AudioSource>())
             {
-                if (source.GetComponents<AudioSource>().Length > 0)
+                //casset player is excluded
+                if (source.gameObject.GetComponent<CassetPlayer>() == null)
                 {
-                    foreach (AudioSource mSource in source.GetComponents<AudioSource>())
+                    if (source.gameObject.GetComponents<AudioSource>().Length > 0)
                     {
-                        mSource.outputAudioMixerGroup = sceneMusicDictionary[scene].levelMixer;
+                        foreach (AudioSource mSource in source.GetComponents<AudioSource>())
+                        {
+                            mSource.outputAudioMixerGroup = sceneMusicDictionary[scene].levelMixer;
+                        }
                     }
+
+                    source.outputAudioMixerGroup = sceneMusicDictionary[scene].levelMixer;
                 }
-                source.outputAudioMixerGroup = sceneMusicDictionary[scene].levelMixer;
+                
             }
 
             master = sceneMusicDictionary[scene].levelMixer.audioMixer;

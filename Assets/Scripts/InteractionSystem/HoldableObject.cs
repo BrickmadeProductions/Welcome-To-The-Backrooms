@@ -1,11 +1,15 @@
 ﻿// HoldableObject
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
 
 public class HoldableObject : InteractableObject
 {
+	//general
 	public float durability;
 
 	public GameObject[] breakablePrefabs;
@@ -13,8 +17,6 @@ public class HoldableObject : InteractableObject
 	public AudioClip[] hitClips;
 
 	public AudioClip[] breakClips;
-
-	public int inventoryWeight = 1;
 
 	public Rigidbody holdableObject;
 
@@ -26,23 +28,28 @@ public class HoldableObject : InteractableObject
 
 	public bool autoSwing;
 
+	//inventory
+	public int inventoryWeight;
+	public Texture inventoryIcon;
+
 	//building system
 	public bool canPlace;
 	public bool isPlaced = false;
 
+	//animations
 	public bool animationPlaying;
 
-	public List<string> LMBAnimations;
+	public string StartUseAnimation;
 
-	/*public List<AnimationClip> RMBAnimationClips;
-
-	public List<string> RMBAnimationBools;*/
+	public List<string> UseAnimations;
 
 	public string CustomHoldAnimation = "";
 
+	private int currentAnimChoice = 0;
+
 	private Vector3 pushAmt;
 
-	private int currentAnimChoice = 0;
+	public List<string> ItemObjectAnimations;
 
 	private IEnumerator waitToPlaySound()
 	{
@@ -52,37 +59,56 @@ public class HoldableObject : InteractableObject
 
 	public override void Init()
 	{
+
+		if (GetComponent<Animator>() != null)
+		{
+			StartCoroutine(playItemAnimation("Close"));
+		}
+
 		playSounds = false;
 		broken = false;
 		holdableObject = GetComponent<Rigidbody>();
 		StartCoroutine(waitToPlaySound());
 	}
-
 	public override void Throw(Vector3 force)
 	{
-		holdableObject.velocity = force * ThrowMultiplier;
-		//holdableObject.AddForce();
+		holdableObject.velocity = force * ThrowMultiplier * ThrowMultiplier;
+		if (GetComponent<Animator>() != null)
+		{
+			StartCoroutine(playItemAnimation("Close"));
+		}
+
+
 	}
 
-	private IEnumerator playAnimation()
+	public IEnumerator playPlayerAnimation()
 	{
-		//yield return new WaitUntil(() => !animationPlaying);
+		//starting animation when using
+		if (StartUseAnimation != "")
+        {
+			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetTrigger(StartUseAnimation);
+
+			yield return new WaitUntil(() => GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(StartUseAnimation));
+
+		}
 
 		if (autoSwing)
         {
+			//GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.ResetTrigger(StartUseAnimation);
+
 			while (Input.GetMouseButton(0))
 			{
-				currentAnimChoice = Random.Range(0, LMBAnimations.Count);
+				currentAnimChoice = UnityEngine.Random.Range(0, UseAnimations.Count);
 
-				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(LMBAnimations[currentAnimChoice], true);
+				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(UseAnimations[currentAnimChoice], true);
 
 				animationPlaying = true;
 
-				yield return new WaitUntil(() => GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(LMBAnimations[currentAnimChoice]));
+				yield return new WaitUntil(() => GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(UseAnimations[currentAnimChoice]));
 
 				yield return new WaitForSecondsRealtime(GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).length / GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).speed - 0.25f);
 
-				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(LMBAnimations[currentAnimChoice], false);
+				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(UseAnimations[currentAnimChoice], false);
 
 				animationPlaying = false;
 			}
@@ -92,30 +118,46 @@ public class HoldableObject : InteractableObject
 
 		else if (!animationPlaying)
         {
-			currentAnimChoice = Random.Range(0, LMBAnimations.Count);
+			currentAnimChoice = UnityEngine.Random.Range(0, UseAnimations.Count);
 
-			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(LMBAnimations[currentAnimChoice], true);
+			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetTrigger(UseAnimations[currentAnimChoice]);
 
 			animationPlaying = true;
 
-			//yield return new WaitUntil(() => GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(LMBAnimations[currentAnimChoice]));
+			yield return new WaitUntil(() => GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(UseAnimations[currentAnimChoice]));
 
 			yield return new WaitForSecondsRealtime(GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).length / GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).speed - 0.25f);
 
-			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(LMBAnimations[currentAnimChoice], false);
+			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.ResetTrigger(UseAnimations[currentAnimChoice]);
 
 			animationPlaying = false;
 		}
 
+		GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.ResetTrigger(StartUseAnimation);
+	}
+
+	public IEnumerator playItemAnimation(string animation)
+	{
+		if (GetComponent<Animator>() != null)
+		{
+			GetComponent<Animator>().SetTrigger(animation);
+
+			yield return new WaitUntil(() => GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(animation));
+
+			yield return new WaitForSecondsRealtime(GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length / GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).speed);
+
+			GetComponent<Animator>().ResetTrigger(animation);
+		}
+		
 	}
 
 	public override void Use(InteractionSystem player, bool LMB)
 	{
-		if (LMBAnimations.Count > 0)
+		if (UseAnimations.Count > 0)
 		{
 			if (LMB && !animationPlaying)
 			{
-				StartCoroutine(playAnimation());
+				StartCoroutine(playPlayerAnimation());
 			}
 			/*else if (!LMB && RMBAnimationBools.Count > 0)
 			{
@@ -124,20 +166,22 @@ public class HoldableObject : InteractableObject
 			}*/
 		}
 	}
-
-	public override void AddToInv(InteractionSystem interactionSystem)
-	{
-		interactionSystem.inventorySlots.Add(this);
-		interactionSystem.currentlyLookingAt.gameObject.SetActive(value: false);
-		interactionSystem.currentlyLookingAt = null;
-		Debug.Log("Added Object " + base.name);
-		base.transform.SetParent(interactionSystem.inventoryObject.transform);
-	}
-  
-    public override void Hold(InteractionSystem player)
+	
+    public override void Hold(InteractionSystem player, bool RightHand)
     {
+		
+		if (RightHand)
 
-    }
+			StartCoroutine(playItemAnimation("Open"));
+
+		else
+		{
+			StartCoroutine(playItemAnimation("Close"));
+		}
+		
+		
+
+	}
     private void OnCollisionEnter(Collision collision)
 	{
 		if (collision.gameObject.tag == "Player")
@@ -152,8 +196,8 @@ public class HoldableObject : InteractableObject
 			}
 			if (!transform.gameObject.GetComponent<AudioSource>().isPlaying && hitClips.Length != 0)
 			{
-				transform.gameObject.GetComponent<AudioSource>().clip = hitClips[Random.Range(0, hitClips.Length)];
-				transform.gameObject.GetComponent<AudioSource>().pitch = 1f + Random.Range(-0.15f, 0.15f);
+				transform.gameObject.GetComponent<AudioSource>().clip = hitClips[UnityEngine.Random.Range(0, hitClips.Length)];
+				transform.gameObject.GetComponent<AudioSource>().pitch = 1f + UnityEngine.Random.Range(-0.15f, 0.15f);
 				transform.gameObject.GetComponent<AudioSource>().Play();
 			}
 			if (breakablePrefabs.Length == 0)
@@ -166,7 +210,7 @@ public class HoldableObject : InteractableObject
 			}
 			if (durability < 0f && !broken && breakClips.Length != 0)
 			{
-				AudioSource.PlayClipAtPoint(breakClips[Random.Range(0, breakClips.Length)], transform.position);
+				AudioSource.PlayClipAtPoint(breakClips[UnityEngine.Random.Range(0, breakClips.Length)], transform.position);
 				GameObject[] array = breakablePrefabs;
 				for (int i = 0; i < array.Length; i++)
 				{

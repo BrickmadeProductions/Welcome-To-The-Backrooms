@@ -27,8 +27,10 @@ public class Weapon : MonoBehaviour
                 {
                     StartCoroutine(limb.attachedEntity.StunTimer());
                 }
+
                 limb.attachedEntity.health -= (damage * limb.damageMultiplier);
                 limb.Stabbed(collisionPoint);
+
                 if (bloodAmount < 1)
                 {
                     bloodAmount += 0.04f;

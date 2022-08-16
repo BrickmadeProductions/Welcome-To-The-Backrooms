@@ -12,22 +12,6 @@ public class ElevatorCallButton : InteractableButton
     {
         open = false;
     }
-    public override void AddToInv(InteractionSystem player)
-    {
-        open = !open;
-        if (open)
-        {
-            leftDoor.transform.position = new Vector3(leftDoor.transform.position.x, leftDoor.transform.position.y, leftDoor.transform.position.z + 1.5f);
-            rightDoor.transform.position = new Vector3(rightDoor.transform.position.x, rightDoor.transform.position.y, rightDoor.transform.position.z - 1.5f);
-        }
-        else
-        {
-            leftDoor.transform.position = new Vector3(leftDoor.transform.position.x, leftDoor.transform.position.y, leftDoor.transform.position.z - 1.5f);
-            rightDoor.transform.position = new Vector3(rightDoor.transform.position.x, rightDoor.transform.position.y, rightDoor.transform.position.z + 1.5f);
-        }
-        
-        
-    }
 
     public override void Throw(Vector3 force)
     {

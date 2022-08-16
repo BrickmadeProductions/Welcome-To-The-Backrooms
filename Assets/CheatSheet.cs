@@ -12,7 +12,7 @@ public class CheatSheet : MonoBehaviour
 
     ENTITY_TYPE currentEntityTypeChoice;
     OBJECT_TYPE currentObjectTypeChoice;
-    GameSettings.SCENE currentLevelChoice;
+    SCENE currentLevelChoice;
 
     public bool AIEnabled = true;
     public bool invincible = false;
@@ -39,7 +39,7 @@ public class CheatSheet : MonoBehaviour
 
     public void LoadAllLevelsToDropDown()
     {
-        string[] objects = Enum.GetNames(typeof(GameSettings.SCENE));
+        string[] objects = Enum.GetNames(typeof(SCENE));
         List<string> objectList = new List<string>(objects);
 
         //remove scenes that dont involve levels
@@ -71,7 +71,7 @@ public class CheatSheet : MonoBehaviour
     {
         //excempt the first 3
         
-        currentLevelChoice = (GameSettings.SCENE)(index + 4);
+        currentLevelChoice = (SCENE)(index + 4);
         
     }
 

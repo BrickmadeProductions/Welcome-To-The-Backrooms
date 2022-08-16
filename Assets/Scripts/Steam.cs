@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Steamworks;
-
+using System;
 
 public class Steam : MonoBehaviour
 {
@@ -10,6 +10,90 @@ public class Steam : MonoBehaviour
     void Start()
     {
         GetSteamDevAccessData();
+
+    }
+
+    public static void UpdateRichPresence()
+    {
+        
+
+        switch (GameSettings.Instance.ActiveScene)
+        {
+            case SCENE.ROOM:
+
+                SteamFriends.SetRichPresence("steam_display", "#AtHome");
+
+                break;
+            case SCENE.HOMESCREEN:
+
+                SteamFriends.SetRichPresence("steam_display", "#MainScreen");
+                break;
+            case SCENE.LEVEL0:
+
+                SteamFriends.SetRichPresence("roamingstatus", "Level 0");
+                SteamFriends.SetRichPresence("steam_display", "#Roaming");
+
+                break;
+            case SCENE.LEVEL1:
+
+                SteamFriends.SetRichPresence("roamingstatus", "Level 1");
+                SteamFriends.SetRichPresence("steam_display", "#Roaming");
+
+                break;
+            case SCENE.LEVEL2:
+
+                SteamFriends.SetRichPresence("roamingstatus", "Level 2");
+                SteamFriends.SetRichPresence("steam_display", "#Roaming");
+
+                break;
+            case SCENE.FOURKEYS_CLIPPINGZONE:
+
+                SteamFriends.SetRichPresence("steam_display", "Lost in the Clipping Zones");
+
+                break;
+
+            case SCENE.LEVELFUN:
+
+                SteamFriends.SetRichPresence("roamingstatus", "Level =)");
+                break;
+
+            case SCENE.LEVELRUN:
+
+                SteamFriends.SetRichPresence("roamingstatus", "Level !");
+                break;
+        }
+
+
+        
+    }
+    public static void IncrementStat(string statName, float amount)
+    {
+        float currentStat;
+        SteamUserStats.GetStat(statName, out currentStat);
+        SteamUserStats.SetStat(statName, currentStat + amount);
+        SteamUserStats.StoreStats();
+    }
+    public static void IncrementStat(string statName, int amount)
+    {
+        int currentStat;
+        SteamUserStats.GetStat(statName, out currentStat);
+        SteamUserStats.SetStat(statName, currentStat + amount);
+        SteamUserStats.StoreStats();
+    }
+    public static void DecrementStat(string statName, float amount)
+    {
+        float currentStat;
+        SteamUserStats.GetStat(statName, out currentStat);
+        SteamUserStats.SetStat(statName, currentStat - amount);
+        SteamUserStats.StoreStats();
+    }
+
+    public static void DecrementStat(string statName, int amount)
+    {
+        int currentStat;
+        SteamUserStats.GetStat(statName, out currentStat);
+        SteamUserStats.SetStat(statName, currentStat - amount);
+        SteamUserStats.StoreStats();
 
     }
     public static void AddAchievment(string achievment)

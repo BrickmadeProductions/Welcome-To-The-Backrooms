@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3742688161633100252}
   m_Layer: 9
   m_Name: Ladder
-  m_TagString: HoldableObject
+  m_TagString: Metal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -70,24 +70,23 @@ MonoBehaviour:
     type: 0
     instance: {fileID: 3742688161633100252}
   type: 13
-  playSounds: 1
+  playSounds: 0
   spawnChance: 0
   runTimeID: 3829
   durability: 0
   breakablePrefabs: []
   hitClips: []
   breakClips: []
-  inventoryWeight: 1
   holdableObject: {fileID: 5694946197279239993}
   ThrowMultiplier: 0
   large: 1
+  autoSwing: 0
+  invImage: {fileID: 0}
+  inventoryWeight: 1
   canPlace: 1
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimationClips: []
-  LMBAnimationBools: []
-  RMBAnimationClips: []
-  RMBAnimationBools: []
+  LMBAnimations: []
   CustomHoldAnimation: 
 --- !u!1 &4945531799288313688
 GameObject:
@@ -103,7 +102,7 @@ GameObject:
   - component: {fileID: 5348225228635232914}
   m_Layer: 9
   m_Name: Plastic
-  m_TagString: HoldableObject
+  m_TagString: Metal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -200,7 +199,7 @@ GameObject:
   - component: {fileID: 6709635026843152132}
   m_Layer: 9
   m_Name: Metal
-  m_TagString: HoldableObject
+  m_TagString: Metal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -295,7 +294,7 @@ GameObject:
   - component: {fileID: 2648506571951718843}
   m_Layer: 9
   m_Name: Ladder
-  m_TagString: Untagged
+  m_TagString: Metal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -308,7 +307,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7654567665078881702}
   m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0.378, z: 0.277}
+  m_LocalPosition: {x: 0, y: 0.501, z: 0.277}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:

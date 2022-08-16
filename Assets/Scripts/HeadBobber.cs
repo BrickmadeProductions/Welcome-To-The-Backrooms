@@ -52,10 +52,9 @@ public class HeadBobber : MonoBehaviour
             camera.localRotation = new Quaternion(camera.localRotation.x, 0, Mathf.Clamp(camera.localRotation.z, Mathf.Deg2Rad * -1f, Mathf.Deg2Rad * 1f) + Mathf.Deg2Rad * strafeRotation, camera.localRotation.w);
             
             prevRotZ = camera.localRotation.z;
-            
 
             //head bobbing
-            if (Mathf.Abs(controller.moveDirection.x) > 0.1f || Mathf.Abs(controller.moveDirection.z) > 0.1f && controller.GetComponent<CharacterController>().isGrounded)
+            if (Mathf.Abs(controller.bodyAnim.GetFloat("xWalk")) > 0.1f || Mathf.Abs(controller.bodyAnim.GetFloat("YWalk")) > 0.1f && controller.GetComponent<CharacterController>().isGrounded)
             {
                 if (controller.currentPlayerState == PlayerController.PLAYERSTATES.RUN && controller.currentPlayerState != PlayerController.PLAYERSTATES.JUMP)
                 {

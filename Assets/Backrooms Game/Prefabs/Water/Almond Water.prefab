@@ -514,16 +514,19 @@ MonoBehaviour:
   - {fileID: 8300000, guid: cc2036b5a64bd3646ac68f2e42e79b2b, type: 3}
   - {fileID: 8300000, guid: d19e1b1a6ada2bc45a23c463accfb0ec, type: 3}
   - {fileID: 8300000, guid: 5112c95477f193b4b9fe637b9d43eafe, type: 3}
-  inventoryWeight: 1
   holdableObject: {fileID: 0}
   ThrowMultiplier: 0
   large: 0
-  autoSwing: 0
+  autoSwing: 1
+  inventoryWeight: 1
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimations: []
+  StartUseAnimation: StartDrinking
+  UseAnimations:
+  - isDrinking
   CustomHoldAnimation: 
+  ItemObjectAnimations: []
 --- !u!82 &2216274278999694209
 AudioSource:
   m_ObjectHideFlags: 0

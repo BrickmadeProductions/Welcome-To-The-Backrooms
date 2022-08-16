@@ -222,17 +222,19 @@ MonoBehaviour:
   breakablePrefabs: []
   hitClips: []
   breakClips: []
-  inventoryWeight: 1
   holdableObject: {fileID: 0}
   ThrowMultiplier: 4.5
   large: 0
   autoSwing: 0
+  inventoryWeight: 1
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimations:
+  StartUseAnimation: 
+  UseAnimations:
   - isSwingingAxe
   CustomHoldAnimation: isHoldingAxe
+  ItemObjectAnimations: []
   Flying: 0
   tipLayerMask:
     serializedVersion: 2

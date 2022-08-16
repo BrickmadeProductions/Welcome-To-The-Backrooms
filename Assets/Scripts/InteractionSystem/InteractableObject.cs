@@ -66,11 +66,22 @@ public abstract class InteractableObject : MonoBehaviour
 			transform.rotation = Quaternion.identity;
 			transform.localRotation = Quaternion.identity;
 
-			if (transform.parent.name == "HoldLocation" || transform.parent.name == "HandLocation")
+			if (transform.parent.name == "HoldLocation" || transform.parent.name == "RHandLocation" || transform.parent.name == "LHandLocation")
 			{
 				Debug.Log("Reparenting To Hand...");
-				GameSettings.Instance.Player.GetComponent<InteractionSystem>().SetHolding((HoldableObject)this);
+
+				if (transform.parent.name == "RHandLocation")
+                {
+					GameSettings.Instance.Player.GetComponent<InteractionSystem>().SetHolding((HoldableObject)this);
+				}
+
 			}
+
+			//it was in an inventory
+			if (transform.parent.name.Contains("SLOT"))
+            {
+				transform.parent.GetComponent<InventorySlot>().SwitchObjectToThisSlot((HoldableObject)this);
+            }
 		}
 		else
 		{
@@ -121,9 +132,7 @@ public abstract class InteractableObject : MonoBehaviour
 
 	public abstract void Use(InteractionSystem player, bool LMB);
 
-	public abstract void AddToInv(InteractionSystem player);
-
-	public abstract void Hold(InteractionSystem player);
+	public abstract void Hold(InteractionSystem player, bool RightHand);
 }
 
 // OBJECT_TYPE

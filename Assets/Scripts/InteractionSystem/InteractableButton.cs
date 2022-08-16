@@ -7,11 +7,7 @@ public class InteractableButton : InteractableObject
 
 	private bool justPressed;
 
-	public override void AddToInv(InteractionSystem player)
-	{
-	}
-
-	public override void Hold(InteractionSystem player)
+	public override void Hold(InteractionSystem player, bool RightHand)
 	{
 	}
 

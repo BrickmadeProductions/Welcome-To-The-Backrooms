@@ -14,7 +14,19 @@ using UnityEngine.UI;
 using Steamworks;
 
 
-
+public enum SCENE
+{
+	INTRO,
+	HOMESCREEN,
+	LOADING,
+	ROOM,
+	LEVEL0,
+	LEVEL1,
+	LEVEL2,
+	LEVELFUN,
+	LEVELRUN,
+	FOURKEYS_CLIPPINGZONE
+}
 public class GameSettings : MonoBehaviour, ISaveable
 {
 	[Serializable]
@@ -47,21 +59,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 		public float masterVolume;
 
 	}
-
-	public enum SCENE
-	{
-		INTRO,
-		HOMESCREEN,
-		LOADING,
-		ROOM,
-		LEVEL0,
-		LEVEL1,
-		LEVEL2,
-		LEVELFUN,
-		LEVELRUN,
-		FOURKEYS_CLIPPINGZONE
-	}
-
 	public TextMeshProUGUI teamMemberMode;
 
 	//BrickmadeProductions, king, wahoo, RJC, Constant
@@ -89,7 +86,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public static volatile bool LEVEL_LOADED = false;
 
-	public static volatile bool PLAYER_DATA_LOADED_IN_SCENE = false;
+	public static volatile bool PLAYER_DATA_LOADED = false;
 
 	public string activeUser;
 
@@ -675,7 +672,10 @@ public class GameSettings : MonoBehaviour, ISaveable
     }
 	public static IEnumerator SaveAllProgress()
 	{
+		Instance.Player.GetComponent<PlayerController>().distance.SetMetersTraveledStats();
+
 		Instance.saveIcon.SetBool("StopSave", false);
+
 		Instance.saveIcon.SetTrigger("Save");
 
 		if (Instance.worldInstance != null)
@@ -757,16 +757,23 @@ public class GameSettings : MonoBehaviour, ISaveable
 	{
 		if (SceneManager.GetActiveScene().buildIndex != id)
 			StartCoroutine(PreLoadScene((SCENE)id));
+
 	}
 
 	private IEnumerator PreLoadScene(SCENE id)
 	{
 		
-		if (ActiveScene != SCENE.INTRO)
+
+		if (worldInstance != null)
         {
-			SaveAllProgress();
-			//SceneManager.LoadSceneAsync(2, LoadSceneMode.Additive);
+			StartCoroutine(SaveAllProgress());
+
+			SceneManager.LoadSceneAsync(2, LoadSceneMode.Additive);
+
+			yield return new WaitUntil(() => SaveMaster.isDoneSaving);
 		}
+
+		
 
 		LEVEL_LOADED = false;
 
@@ -774,7 +781,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		LEVEL_GENERATED = false;
 
-		PLAYER_DATA_LOADED_IN_SCENE = false;
+		PLAYER_DATA_LOADED = false;
 
 		/*if (Instance.worldInstance != null)
 			yield return new WaitUntil(() => LEVEL_GENERATED);*/
@@ -802,7 +809,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 				post.profile = homeScreenRoomProfile;
 
 				LEVEL_SAVE_LOADED = true;
-				PLAYER_DATA_LOADED_IN_SCENE = true;
+				PLAYER_DATA_LOADED = true;
 
 				GameScreen();
 
@@ -829,7 +836,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 				post.profile = homeScreenRoomProfile;
 
 				LEVEL_SAVE_LOADED = true;
-				PLAYER_DATA_LOADED_IN_SCENE = true;
+				PLAYER_DATA_LOADED = true;
 
 				HomeScreen();
 
@@ -928,9 +935,9 @@ public class GameSettings : MonoBehaviour, ISaveable
 		
 		SaveMaster.SyncLoad();
 
+		Steam.UpdateRichPresence();
 
 	}
-
 
 	public bool AmInSavableScene()
 	{

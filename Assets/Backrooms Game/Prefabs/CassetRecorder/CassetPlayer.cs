@@ -74,7 +74,7 @@ public class CassetPlayer : HoldableObject
 
     private void Update()
     {
-        if (Input.GetMouseButtonUp(0) && !finishedAddingToList)
+        if (Input.GetMouseButtonUp(0) && !finishedAddingToList && !animationPlaying)
         {
             ProcessClip();
         }

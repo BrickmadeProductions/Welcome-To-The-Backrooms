@@ -62,8 +62,4 @@ public class FlashLight : HoldableObject
         
     }
 
-    public override void AddToInv(InteractionSystem player)
-    {
-        
-    }
 }
