@@ -178,7 +178,6 @@ public class PartygoerAI : Entity
     }
     public override void Despawn()
     {
-        GameSettings.Instance.Player.GetComponent<CharacterController>().enabled = true;
         GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Choking", false);
         GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canRun = true;
         GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = true;

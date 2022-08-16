@@ -74,6 +74,7 @@ public class PlayerHealthSystem : MonoBehaviour
 	{
 		player = GetComponent<PlayerController>();
 		StartCoroutine(UpdateHealth());
+		StartCoroutine(NaturalRegen());
 	}
 
 	private void Update()
@@ -146,14 +147,23 @@ public class PlayerHealthSystem : MonoBehaviour
 
 	public IEnumerator NaturalRegen()
 	{
-		while (health < 100f)
-		{
-			health += 1f;
-			yield return new WaitForSeconds(0.25f);
+		while (true)
+        {
+			if (health < 100f)
+			{
+				health += 0.5f;
+				yield return new WaitForSeconds(0.25f);
+			}
+			else
+			{
+				health = 100f;
+				yield return null;
+			}
 		}
+		
 	}
 
-	private IEnumerator WakeUpSequenceRoom()
+	/*private IEnumerator WakeUpSequenceRoom()
 	{
 		GameSettings.Instance.setCutScene(tf: true);
 		animator.speed = 0.3f;
@@ -197,7 +207,7 @@ public class PlayerHealthSystem : MonoBehaviour
 		player.bodyAnim.SetBool("isWakingOther", false);
 
 		GameSettings.Instance.setCutScene(tf: false);
-	}
+	}*/
 
 	private IEnumerator SleepSequence()
 	{
@@ -216,7 +226,9 @@ public class PlayerHealthSystem : MonoBehaviour
 	{
 		while (true)
 		{
-			hunger -= 0.5f;
+			hunger -= 0.04f;
+			thirst -= 0.07f;
+
 			if (SceneManager.GetActiveScene().name != "RoomHomeScreen" && sanity > 0f)
 			{
 				sanity -= 0.1f;
@@ -243,8 +255,9 @@ public class PlayerHealthSystem : MonoBehaviour
 	{
 		adrenalineAudio.Play();
 		adrenalineActive = true;
-		player.adrenalineSpeedMultiplier = 1.35f;
+		player.adrenalineSpeedMultiplier = 1.45f;
 		float pass = 20000f;
+
 		while (adrenalineActive)
 		{
 			ChangeHeartRate(Random.Range(2f, 4f));
@@ -261,6 +274,7 @@ public class PlayerHealthSystem : MonoBehaviour
 			}
 			yield return new WaitForSeconds(0.5f);
 		}
+
 		canUseAdrenaline = false;
 		adrenalineCoolDownActive = true;
 	}
@@ -297,9 +311,9 @@ public class PlayerHealthSystem : MonoBehaviour
 		}
 	}
 
-	public void Spook()
+	public void DecreaseSanity(float amount)
 	{
-		sanity -= 2f;
+		sanity -= amount;
 	}
 
 	public IEnumerator RandomHeartRate()

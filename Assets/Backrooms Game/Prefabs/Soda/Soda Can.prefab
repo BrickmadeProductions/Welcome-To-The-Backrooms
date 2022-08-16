@@ -62,18 +62,19 @@ MonoBehaviour:
   hitClips:
   - {fileID: 8300000, guid: 4864f038af1762b40a1008058d45dce4, type: 3}
   breakClips: []
-  inventoryWeight: 1
   holdableObject: {fileID: 0}
   ThrowMultiplier: 0
   large: 0
+  autoSwing: 0
+  inventoryWeight: 1
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimationClips: []
-  LMBAnimationBools: []
-  RMBAnimationClips: []
-  RMBAnimationBools: []
+  StartUseAnimation: StartDrinking
+  UseAnimations:
+  - isDrinking
   CustomHoldAnimation: 
+  ItemObjectAnimations: []
 --- !u!54 &1133317485373953308
 Rigidbody:
   m_ObjectHideFlags: 0

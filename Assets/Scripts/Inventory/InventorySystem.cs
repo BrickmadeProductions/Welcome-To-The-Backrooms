@@ -11,8 +11,6 @@ public class InventorySystem : MonoBehaviour
 
     //you can find backpacks in relevant locations (10 extra slots)
 
-    //no concrete UI
-
     //each item has a weight that prevents you from placing a lot of large items in the backpack, certain items like chairs have to be broken down to fit in the backpack
 
     //find backpacks in crates in level 1
@@ -21,89 +19,198 @@ public class InventorySystem : MonoBehaviour
 
     //each item has a specific type of way it is crafted, such as pouring bottles into eachother
 
+    public bool inventoryOpened = false;
 
-    int inventoryLimit = 5;
-    int currentSelectedInventorySlot = 0;
-    List<HoldableObject> inventorySlots;
-    HoldableObject currentlyLookingAt;
-    public GameObject pickup;
+    public List<ContainerObject> containerObjectsHeld;
 
-    public Transform dropLocation;
-    // Update is called once per frame
+    public GameObject inventory;
+
+/*
+    public List<InventorySlot> pocketHandLocations;
+
+    public LayerMask InventorySlotLayerMask;
+
+    public InventorySlot currentlySelectedSlot;*/
+
 
     private void Awake()
     {
-        inventorySlots = new List<HoldableObject>();
+        
     }
-    void Update()
+
+    public ContainerObject GetNextContainerObjectNotFull()
     {
-       /* if (currentlyLookingAt != null)
-        Debug.Log(currentlyLookingAt.name);
-        Debug.DrawRay(transform.parent.GetChild(0).transform.position, transform.parent.GetChild(0).transform.forward * 3, new Color(14,23,132));*/
-
-        RaycastHit[] hits = Physics.RaycastAll(new Ray(transform.parent.GetChild(0).transform.position, transform.parent.GetChild(0).transform.forward), 3f);
-
-        currentlyLookingAt = null;
-
-        foreach (RaycastHit hit in hits)
+        foreach (ContainerObject container in containerObjectsHeld)
         {
-
-            if (hit.collider.GetComponent<HoldableObject>() != null)
+            if (!container.isAtMaxWeight())
             {
-                currentlyLookingAt = hit.collider.GetComponent<HoldableObject>();
-                
-                break;
-               
+                return container;
             }
 
         }
 
-        if (currentlyLookingAt == null)
+        return null;
+    }
+
+    public void HandleSelecting()
+    {
+        if (inventoryOpened)
         {
-            pickup.gameObject.SetActive(false);
+           /* InventorySlot lastSelectedSlot = currentlySelectedSlot;
+
+            RaycastHit hit;
+
+            Ray ray = GameSettings.Instance.Player.GetComponent<PlayerController>().playerCamera.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out hit, 1f, InventorySlotLayerMask))
+            {
+                currentlySelectedSlot = hit.transform.gameObject.GetComponent<InventorySlot>();
+
+                //slot contains items
+                if (currentlySelectedSlot.objectInSlot != null)
+                {
+                    if (!currentlySelectedSlot.selected)
+                    {
+                        currentlySelectedSlot.objectInSlot.transform.localPosition = new Vector3(0.05f, 0, 0);
+                        currentlySelectedSlot.selected = true;
+                    }
+
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        currentlySelectedSlot.SwitchHandAndSlot();
+                        ToggleContainer("OpenPocket");
+
+                    }
+                }
+                
+                    
+
+            }
+            else if (currentlySelectedSlot != null)
+            {
+                if (currentlySelectedSlot.objectInSlot != null)
+                {
+                    currentlySelectedSlot.objectInSlot.transform.localPosition = Vector3.zero;
+                    currentlySelectedSlot.selected = false;
+                    currentlySelectedSlot = null;
+                }
+                
+                
+                
+            }
+            if (lastSelectedSlot != null)
+            {
+                if (lastSelectedSlot != currentlySelectedSlot)
+                {
+                    if (lastSelectedSlot.objectInSlot != null)
+                    {
+                        lastSelectedSlot.objectInSlot.transform.localPosition = Vector3.zero;
+                        lastSelectedSlot.selected = false;
+                    }
+                }
+            }*/
+           
+
+
         }
        
+        
+    }
+
+    public void ToggleContainer(string type)
+    {
+        inventoryOpened = !inventoryOpened;
+
+        //GetComponent<PlayerController>().bodyAnim.SetBool(type, inventoryOpened);
+
+        if (!inventoryOpened)
+        {
+            GetComponent<PlayerController>().playerHealth.canMoveHead = true;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+
+        }
+
         else
         {
-            pickup.gameObject.SetActive(true);
+            GetComponent<PlayerController>().playerHealth.canMoveHead = false;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
 
-            if (Input.GetButtonDown("Pickup") && inventorySlots.Count < inventoryLimit)
+
+        }
+
+        switch (type)
+        {
+            case "OpenPocket":
+
+                if (inventoryOpened)
+                {
+                    // int index = 0;
+
+
+                    inventory.SetActive(true);
+                    //move hand slot first
+
+                    /*//pockets
+                    foreach (InventorySlot slot in containerObjectsHeld[0].storageSlots)
+                    {
+                        pocketHandLocations[index].SwitchOtherSlotToThisSlot(slot);
+                        index++;
+                    }
+
+                    foreach (InventorySlot slot in containerObjectsHeld[1].storageSlots)
+                    {
+                        pocketHandLocations[index].SwitchOtherSlotToThisSlot(slot);
+                        index++;
+                    }*/
+                }
+                else
+                {
+                    inventory.SetActive(false);
+                    /*int index = 0;
+                    //pockets
+                    foreach (InventorySlot slot in containerObjectsHeld[0].storageSlots)
+                    {
+                        slot.SwitchOtherSlotToThisSlot(pocketHandLocations[index]);
+                        index++;
+                    }
+
+                    foreach (InventorySlot slot in containerObjectsHeld[1].storageSlots)
+                    {
+                        slot.SwitchOtherSlotToThisSlot(pocketHandLocations[index]);
+                        index++;
+                    }*/
+                }
+               
+
+                break;
+        }
+    }
+
+    void Update()
+    {
+        ManageInventoryInput();
+        HandleSelecting();
+    }
+
+    public void ManageInventoryInput()
+    {
+        if (!GameSettings.Instance.PauseMenuOpen)
+        {
+
+            if (Input.GetButtonDown("OpenPocket"))
             {
-                
-                    pickupObject();
+                ToggleContainer("OpenPocket");
+
+
             }
         }
 
-        //if (Input.GetButtonDown("Drop") && inventorySlots.Count > 0)
-        if (Input.GetButtonDown("Drop") && inventorySlots.Count > 0)
-        {
-
-            dropObject();
-        }
+            
     }
 
-    private void pickupObject()
-    {
-
-        currentlyLookingAt.gameObject.SetActive(false);
-        
-        inventorySlots.Add(currentlyLookingAt);
-
-        currentlyLookingAt.transform.SetParent(gameObject.transform);
-
-        Debug.Log("Added Object " + currentlyLookingAt.name);
-        currentlyLookingAt = null;
-        
-
-    }
-
-    private void dropObject()
-    {
-        inventorySlots[currentSelectedInventorySlot].gameObject.SetActive(true);
-        inventorySlots[currentSelectedInventorySlot].gameObject.transform.parent = null;
-        inventorySlots[currentSelectedInventorySlot].gameObject.transform.position = dropLocation.transform.position;
-        inventorySlots.RemoveAt(currentSelectedInventorySlot);
-
-
-    }
 }
+
+
+

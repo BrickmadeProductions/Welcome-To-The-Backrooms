@@ -24,11 +24,32 @@ public struct WorldSaveData
 {
 	public int savedSeed;
 
+	public PlayerLocationData playerData;
+
 	public Dictionary<string, SerealizedChunk> savedChunks;
+}
+
+
+[Serializable]
+public struct PlayerLocationData
+{
+	public float[] savedPosition;
+
+	public float[] savedNeckRotationEuler;
+
+	public float[] savedHeadRotationEuler;
+
+	public float[] savedBodyRotationEuler;
+
+	public float savedRotationX;
+
+	public float savedRotationY;
 }
 
 public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 {
+	public PlayerLocationData playerLocationData;
+
 	private class ThreadedActionManager
 	{
 		public bool doActions;
@@ -76,9 +97,12 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		public abstract void DoAction();
 	}
 
+	[HideInInspector]
 	public List<GameObject> globalBloodAndGoreObjects;
 
+	[HideInInspector]
 	public bool spawnEntities = true;
+	[HideInInspector]
 	public bool entityAI = true;
 
 	public bool gen_enabled;
@@ -114,8 +138,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	public int viewDistance;
 
 	[Header("Chunk Information")]
-	[SerializeField]
-	public GameObject Exit;
 
 	[SerializeField]
 	public List<GameObject> SpecialTiles;
@@ -144,6 +166,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		globalBloodAndGoreObjects = new List<GameObject>();
 
 		seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+
 		Begin();
 	}
 
@@ -159,7 +182,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public IEnumerator TrySpawnEntityEveryFrame()
 	{
-		while (GameSettings.Instance.ActiveScene != GameSettings.SCENE.INTRO && GameSettings.Instance.ActiveScene != GameSettings.SCENE.HOMESCREEN && spawnEntities)
+		while (GameSettings.Instance.ActiveScene != SCENE.INTRO && GameSettings.Instance.ActiveScene != SCENE.HOMESCREEN && spawnEntities)
 		{
 			yield return new WaitForSecondsRealtime(0.1f);
 
@@ -202,9 +225,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			return;
 		}
-
-		
-
 		levelPropDatabase = new Dictionary<OBJECT_TYPE, InteractableObject>();
 		levelEntityDatabase = new Dictionary<ENTITY_TYPE, Entity>();
 
@@ -248,16 +268,18 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		yield return new WaitUntil(() => GameSettings.LEVEL_LOADED);
 
-		Debug.Log("Waiting For Player Data To Load Before Loading Chunks");
-
-		yield return new WaitUntil(() => GameSettings.PLAYER_DATA_LOADED_IN_SCENE);
-
-		Debug.Log("Player Data save loaded");
+		Debug.Log("Waiting For Player Data To Load Before Loading Chunks");	
 
 		yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
 		//yield return new WaitUntil(() => GameSettings.Instance.Player != null);
 
 		Debug.Log("Level save loaded");
+
+		StartCoroutine(GameSettings.Instance.Player.GetComponent<PlayerController>().LoadDataFromWorld());
+
+		yield return new WaitUntil(() => GameSettings.PLAYER_DATA_LOADED);
+
+		Debug.Log("Player Data save loaded");
 
 		newPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
 
@@ -332,10 +354,50 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public string OnSave()
 	{
+		if (GameSettings.Instance != null)
+		if (GameSettings.Instance.Player != null)
+        {
+			PlayerController player = GameSettings.Instance.Player.GetComponent<PlayerController>();
+
+			float[] savedPosition = new float[3]
+			{
+			player.transform.position.x,
+			player.transform.position.y,
+			player.transform.position.z
+			};
+			float[] savedNeckRotationEuler = new float[3]
+			{
+			player.neck.transform.rotation.eulerAngles.x,
+			player.neck.transform.rotation.eulerAngles.y,
+			player.neck.transform.rotation.eulerAngles.z
+			};
+			float[] savedHeadRotationEuler = new float[3]
+			{
+			player.head.transform.rotation.eulerAngles.x,
+			player.head.transform.rotation.eulerAngles.y,
+			player.head.transform.rotation.eulerAngles.z
+			};
+			float[] savedBodyRotationEuler = new float[3]
+			{
+			player.transform.rotation.eulerAngles.x,
+			player.transform.rotation.eulerAngles.y,
+			player.transform.rotation.eulerAngles.z
+			};
+			playerLocationData = new PlayerLocationData()
+			{
+				savedPosition = savedPosition,
+				savedNeckRotationEuler = savedNeckRotationEuler,
+				savedHeadRotationEuler = savedHeadRotationEuler,
+				savedBodyRotationEuler = savedBodyRotationEuler,
+				savedRotationX = player.rotationX,
+				savedRotationY = player.rotationY
+			};
+		}
+		
 
 		WorldSaveData worldSaveData = new WorldSaveData
 		{
-
+			playerData = playerLocationData,
 			savedSeed = seed,
 			savedChunks = allChunks
 		};
@@ -362,6 +424,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	private void LoadSaveData(WorldSaveData saveData)
 	{
 		seed = saveData.savedSeed;
+
+		playerLocationData = saveData.playerData;
 
 		if (saveData.savedChunks != null)
 		{

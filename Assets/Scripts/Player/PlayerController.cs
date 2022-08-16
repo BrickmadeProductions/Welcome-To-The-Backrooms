@@ -13,31 +13,17 @@ public enum DEATH_CASE
     FALL_DAMAGE
 }
 
-[RequireComponent(typeof(CharacterController))]
-
-public class PlayerController : MonoBehaviour, ISaveable
+public class PlayerController : MonoBehaviour
 {
+    Rigidbody rb;
+
     public ReflectionProbe probe;
     public GameObject darkShield;
     public GameObject headTarget;
 
     public DEATH_CASE deathCase;
 
-    [Serializable]
-    private struct PlayerSaveData
-    {
-        public float[] savedPosition;
-
-        public float[] savedHeadRotationEuler;
-
-        public float[] savedBodyRotationEuler;
-
-        public float savedRotationX;
-
-        public float savedRotationY;
-    }
-
-    public string OnSave()
+   /* public string OnSave()
     {
         float[] savedPosition = new float[3]
         {
@@ -45,11 +31,17 @@ public class PlayerController : MonoBehaviour, ISaveable
             transform.position.y,
             transform.position.z
         };
-        float[] savedHeadRotationEuler = new float[3]
+        float[] savedNeckRotationEuler = new float[3]
         {
             neck.transform.rotation.eulerAngles.x,
             neck.transform.rotation.eulerAngles.y,
             neck.transform.rotation.eulerAngles.z
+        };
+        float[] savedHeadRotationEuler = new float[3]
+        {
+            head.transform.rotation.eulerAngles.x,
+            head.transform.rotation.eulerAngles.y,
+            head.transform.rotation.eulerAngles.z
         };
         float[] savedBodyRotationEuler = new float[3]
         {
@@ -60,6 +52,7 @@ public class PlayerController : MonoBehaviour, ISaveable
         PlayerSaveData playerSaveData = new PlayerSaveData()
         {
             savedPosition = savedPosition,
+            savedNeckRotationEuler = savedNeckRotationEuler,
             savedHeadRotationEuler = savedHeadRotationEuler,
             savedBodyRotationEuler = savedBodyRotationEuler,
             savedRotationX = rotationX,
@@ -68,11 +61,11 @@ public class PlayerController : MonoBehaviour, ISaveable
         
 
         return JsonUtility.ToJson(playerSaveData);
-    }
+    }*/
 
-    public void OnLoad(string data)
+    /*public void OnLoad(string data)
     {
-        StartCoroutine(OnLoadAsync(data));
+        
     }
 
     public void OnLoadNoData()
@@ -82,9 +75,56 @@ public class PlayerController : MonoBehaviour, ISaveable
             transform.position = new Vector3(0f, 1.25f, 0f);
         }
         StartCoroutine(OnLoadNoDataAsync());
+    }*/
+    public IEnumerator LoadDataFromWorld()
+    {
+
+        if (GameSettings.Instance.worldInstance != null)
+        {
+
+            yield return new WaitUntil(() => GameSettings.Instance.AmInSavableScene());
+
+            rb.constraints = RigidbodyConstraints.FreezeAll;
+
+            yield return new WaitUntil(() => GameSettings.LEVEL_LOADED);
+
+            SetPlayerDataFromWorld(GameSettings.Instance.worldInstance);
+
+            GameSettings.PLAYER_DATA_LOADED = true;
+
+            yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
+            yield return new WaitUntil(() => GameSettings.LEVEL_GENERATED);
+
+
+        }
+
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
+
+        Debug.Log("Player Data Finished Loading");
+    }
+    
+    private void SetPlayerDataFromWorld(BackroomsLevelWorld world)
+    {
+        if (world.playerLocationData.savedPosition.Length == 3)
+        
+            transform.position = new Vector3(world.playerLocationData.savedPosition[0], world.playerLocationData.savedPosition[1], world.playerLocationData.savedPosition[2]);
+       
+        if (world.playerLocationData.savedBodyRotationEuler.Length == 3)
+
+            transform.rotation = Quaternion.Euler(world.playerLocationData.savedBodyRotationEuler[0], world.playerLocationData.savedBodyRotationEuler[1], world.playerLocationData.savedBodyRotationEuler[2]);
+        
+        if (world.playerLocationData.savedHeadRotationEuler.Length == 3)
+
+            neck.transform.rotation = Quaternion.Euler(world.playerLocationData.savedHeadRotationEuler[0], world.playerLocationData.savedHeadRotationEuler[1], world.playerLocationData.savedHeadRotationEuler[2]);
+
+        rotationX = world.playerLocationData.savedRotationX;
+        rotationY = world.playerLocationData.savedRotationY;
+
+
+
     }
 
-    private IEnumerator OnLoadNoDataAsync()
+    /*private IEnumerator OnLoadNoDataAsync()
     {
         Debug.Log("Player Data Doesnt Exist");
 
@@ -143,7 +183,7 @@ public class PlayerController : MonoBehaviour, ISaveable
         
         return GameSettings.Instance.AmInSavableScene();
 
-    }
+    }*/
 
     public GameObject playerRagDoll;
 
@@ -153,13 +193,55 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     bool headReset = false;
     //movement
-    float walkingSpeed = 3f;
+
+    //Movement
+    public float moveSpeed = 1500;
+
+    public float WalkmaxSpeed = 20;
+    public float Crouchmaxspeed = 20;
+    public float SprintmaxSpeed = 20;
+
+    public float maxSpeed = 20;
+
+    [HideInInspector]
+    public bool isGrounded;
+
+    float walkingSpeed = 4f;
     float runningSpeed = 6f;
-    float crouchingSpeed = 0.5f;
-    float jumpSpeed = 6.0f;
+    float crouchingMultiplier = 0.5f;
+    float jumpSpeed = 7.0f;
+
+    public float counterMovement = 0.175f;
+    float threshold = 0.01f;
+    float maxSlopeAngle = 50f;
+    float stepSmooth = 2f;
+
+    public LayerMask whatIsGround;
+
+    //Crouch & Slide
+    bool bufferStand;
+    public float slideForce = 400;
+    public float slideCounterMovement = 0.2f;
+    public bool sliding;
+
+    //Jumping
+    private bool readyToJump = true;
+    private float jumpCooldown = 0.25f;
+    public float jumpForce = 550f;
+    public float AirmaxSpeed = 20;
+
+    //Sliding
+    private Vector3 normalVector = Vector3.up;
+    private Vector3 wallNormalVector;
+
+    //Vaulting
+    private GameObject VaultObject;
+    private bool Vaulting = false;
+
+    public Transform VaultCollider;
 
     public float adrenalineSpeedMultiplier;
-    float gravity = 20.0f;
+    public float gravity = 50.0f;
 
     Coroutine run = null;
     Coroutine walk = null;
@@ -169,9 +251,12 @@ public class PlayerController : MonoBehaviour, ISaveable
     Coroutine rebuildStamina = null;
     Coroutine removeStamina = null;
 
-    public GameObject handLocation;
+    public GameObject RHandLocation;
+    public GameObject LHandLocation;
     public GameObject holdLocation;
-    public HoldableObject holding;
+
+    public HoldableObject LHolding;
+    public HoldableObject RHolding;
 
     public GameObject arms;
     public Renderer playerSkin;
@@ -199,7 +284,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     //swing noises
     public AudioClip[] swingSounds;
 
-    //fov editingi
+    //fov editing
     private float _FOVOFFSET;
     
     public bool dead = false;
@@ -218,8 +303,9 @@ public class PlayerController : MonoBehaviour, ISaveable
     public float lookXLimitBottom = 90.0f;
     public float rotationX = 0.0f;
     public float rotationY = 0.0f;
-    float height = 3.35f;
-    float center = 0.65f;
+    public float headRotationXOffset = 0f;
+    public float headRotationYOffset = 0f;
+    public float headRotationZOffset = 0f;
 
     //0 = walk, 1 = run, 2 = crouch, 3 = jumping
     public enum PLAYERSTATES : int
@@ -230,7 +316,8 @@ public class PlayerController : MonoBehaviour, ISaveable
         RUN = 3,
         JUMP = 4,
         PRONE = 5,
-        IMMOBILE = 6
+        SLIDE = 6,
+        IMMOBILE = 7,
     }
 
     public PLAYERSTATES currentPlayerState = PLAYERSTATES.IDLE;
@@ -239,13 +326,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     public Animator bodyAnim;
     public GameObject headAnimLocation;
 
-    //playerMovement
-    CharacterController characterController;
-    public Vector3 moveDirection;
-    public Vector3 velocity = Vector3.zero;
    
-    
-
     //ui
     public Canvas UI;
 
@@ -270,6 +351,8 @@ public class PlayerController : MonoBehaviour, ISaveable
     void Awake()
     {
         playerHealth = GetComponent<PlayerHealthSystem>();
+        rb = GetComponent<Rigidbody>();
+        maxSpeed = WalkmaxSpeed;
     }
 
 
@@ -278,46 +361,24 @@ public class PlayerController : MonoBehaviour, ISaveable
         ogHeadTrans = neck.transform;
 
 
-        characterController = GetComponent<CharacterController>();
-
         DontDestroyOnLoad(gameObject);
-        Saveable component = gameObject.AddComponent<Saveable>();
+
+        /*Saveable component = gameObject.AddComponent<Saveable>();
         component.SaveIdentification = GameSettings.Instance.activeUser;
         component.AddSaveableComponent("PlayerData", this, true);
 
         SaveMaster.AddListener(component);
-        SaveMaster.SyncLoad();
+        SaveMaster.SyncLoad();*/
 
-        AudioListener[] audioListeners = FindObjectsOfType<AudioListener>();
+        /*AudioListener[] audioListeners = FindObjectsOfType<AudioListener>();
         foreach (AudioListener foundListener in audioListeners)
         {
             Debug.Log(foundListener.name);
-        }
+        }*/
         
-    }
-    public void Crouch()
-    {
-        //head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition - new Vector3(0, 15, 0), Time.deltaTime);
-    }
-
-    public void UnCrouch()
-    {
-        //head.transform.localPosition = Vector3.Lerp(head.transform.localPosition, ogHeadTrans.localPosition, Time.deltaTime);
-
-        //head.transform.localRotation = Quaternion.Lerp(head.transform.localRotation, ogHeadTrans.localRotation, Time.deltaTime);
-
     }
     private void LateUpdate()
     {
-        if (characterController.isGrounded && !bodyAnim.GetBool("hitGround"))
-        {
-            bodyAnim.SetBool("hitGround", true);
-        }
-        else
-        {
-            bodyAnim.SetBool("hitGround", false);
-        }
-
         if (!dead && Cursor.lockState != CursorLockMode.None && playerHealth.canMoveHead)
         {
 
@@ -328,75 +389,164 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             rotationY = Input.GetAxis("Mouse X") * GameSettings.Instance.Sensitivity;
 
-            if (holding != null)
-            {
-                neck.transform.rotation = Quaternion.Euler(neck.transform.rotation.eulerAngles.x, neck.transform.rotation.eulerAngles.y, (bodyAnim.GetBool("isProne") ? rotationX - 90 : rotationX - 90));
-                //neck.transform.parent.parent.rotation = Quaternion.Euler(neck.transform.rotation.eulerAngles.x, neck.transform.rotation.eulerAngles.y, (bodyAnim.GetBool("isProne") ? rotationX - 90 : rotationX - 90) / 3);
-                
-                head.transform.rotation = Quaternion.Euler(bodyAnim.GetBool("isProne") ? rotationX : rotationX, head.transform.rotation.eulerAngles.y, 0);
-
-                headReset = true;
-            }
-/*            else if (headReset)
-            {
-                head.transform.rotation = Quaternion.Euler(90, head.transform.rotation.eulerAngles.y, 0);
-
-                headReset = false;
-            }*/
-            else
-            {
-                head.transform.rotation = Quaternion.Euler(rotationX, head.transform.rotation.eulerAngles.y, 0);
-
-            }
-
-            head.transform.position = Vector3.Lerp(head.transform.position, headTarget.transform.position, 75f * Time.deltaTime);
+            
             //head.transform.rotation = Quaternion.Lerp(head.transform.rotation, headTarget.transform.rotation, 10f * Time.deltaTime);
         }
-
-        if (!dead && !GameSettings.Instance.PauseMenuOpen)
+        else
         {
-            //animations
-            if (currentPlayerState != PLAYERSTATES.IMMOBILE && characterController.isGrounded)
-            {
-
-                if (Input.GetButton("Jump"))
-                {
-                    moveDirection.y = jumpSpeed;
-                    bodyAnim.SetTrigger("isJumping");
-                }
-
-                    
-
-                if (Input.GetButton("Crouch") && playerHealth.canCrouch)
-                {
-
-                    Crouch();
-                }
-                else if (playerHealth.canCrouch)
-                {
-                    UnCrouch();                    
-                }
-                else
-                {
-                    neck.transform.localPosition = ogHeadTrans.localPosition;
-
-                    neck.transform.localRotation = ogHeadTrans.localRotation;
-                }
-
-
-            }
+            rotationY = 0f;
         }
+
+        head.transform.rotation = Quaternion.Euler(bodyAnim.GetBool("isProne") ? rotationX + headRotationXOffset : rotationX + headRotationXOffset, head.transform.rotation.eulerAngles.y + headRotationYOffset, 0 + headRotationZOffset);
+        neck.transform.rotation = Quaternion.Euler(neck.transform.rotation.eulerAngles.x, neck.transform.rotation.eulerAngles.y, (bodyAnim.GetBool("isProne") ? rotationX - 90 : rotationX - 90));
+
+        head.transform.position = Vector3.Lerp(head.transform.position, headTarget.transform.position, 75f * Time.deltaTime);
+
 
 
     }
 
+    private void CounterMovement(float x, float y, Vector2 mag)
+    {
+        if (!isGrounded || currentPlayerState == PLAYERSTATES.JUMP) return;
 
-    
+        //Slow down sliding
+        if (currentPlayerState == PLAYERSTATES.SLIDE)
+        {
+            rb.AddForce(moveSpeed * Time.deltaTime * -rb.velocity.normalized * slideCounterMovement);
+            return;
+        }
 
+        //Counter movement
+        if (Math.Abs(mag.x) > threshold && Math.Abs(x) < 0.05f || (mag.x < -threshold && x > 0) || (mag.x > threshold && x < 0))
+        {
+            rb.AddForce(moveSpeed * transform.right * Time.deltaTime * -mag.x * counterMovement);
+        }
+        if (Math.Abs(mag.y) > threshold && Math.Abs(y) < 0.05f || (mag.y < -threshold && y > 0) || (mag.y > threshold && y < 0))
+        {
+            rb.AddForce(moveSpeed * transform.forward * Time.deltaTime * -mag.y * counterMovement);
+        }
+
+        //Limit diagonal running. This will also cause a full stop if sliding fast and un-crouching, so not optimal.
+        if (Mathf.Sqrt((Mathf.Pow(rb.velocity.x, 2) + Mathf.Pow(rb.velocity.z, 2))) > maxSpeed)
+        {
+            float fallspeed = rb.velocity.y;
+            Vector3 n = rb.velocity.normalized * maxSpeed;
+            rb.velocity = new Vector3(n.x, fallspeed, n.z);
+        }
+    }
+
+    /// Find the velocity relative to where the player is looking
+    /// Useful for vectors with movement and limiting movement
+    public Vector2 FindVelRelativeToLook()
+    {
+        float lookAngle = transform.eulerAngles.y;
+        float moveAngle = Mathf.Atan2(rb.velocity.x, rb.velocity.z) * Mathf.Rad2Deg;
+
+        float u = Mathf.DeltaAngle(lookAngle, moveAngle);
+        float v = 90 - u;
+
+        float magnitue = rb.velocity.magnitude;
+        float yMag = magnitue * Mathf.Cos(u * Mathf.Deg2Rad);
+        float xMag = magnitue * Mathf.Cos(v * Mathf.Deg2Rad);
+
+        return new Vector2(xMag, yMag);
+    }
+
+    private bool IsFloor(Vector3 v)
+    {
+        float angle = Vector3.Angle(Vector3.up, v);
+        return angle < maxSlopeAngle;
+    }
+
+    private bool cancellingGrounded;
+
+    /// Handle ground detection
+    private void OnCollisionStay(Collision other)
+    {
+        //Make sure we are only checking for walkable layers
+        int layer = other.gameObject.layer;
+        if (whatIsGround != (whatIsGround | (1 << layer))) return;
+
+        //Iterate through every collision in a physics update
+        for (int i = 0; i < other.contactCount; i++)
+        {
+            Vector3 normal = other.contacts[i].normal;
+            //FLOOR
+            if (IsFloor(normal))
+            {
+                isGrounded = true;
+                cancellingGrounded = false;
+                normalVector = normal;
+                CancelInvoke(nameof(StopGrounded));
+            }
+        }
+
+        //ground/wall cancel, since we can't check normals with CollisionExit
+        float delay = 3f;
+        if (!cancellingGrounded)
+        {
+            cancellingGrounded = true;
+            Invoke(nameof(StopGrounded), Time.deltaTime * delay);
+        }
+    }
+
+    private void StopGrounded()
+    {
+        isGrounded = false;
+    }
+    private void FixedUpdate()
+    {
+        if (bufferStand & PlayerHasRoom()) { bufferStand = false; }
+
+        Vector2 mag = FindVelRelativeToLook();
+        float xMag = mag.x, yMag = mag.y;
+
+        float curSpeedX = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") * adrenalineSpeedMultiplier : 0;
+        float curSpeedY = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") * adrenalineSpeedMultiplier : 0;
+
+        CounterMovement(curSpeedX, curSpeedY, mag);
+
+        //Set max speed
+        float maxSpeed = this.maxSpeed;
+
+        //If speed is larger than maxspeed, cancel out the input so you don't go over max speed
+        if (curSpeedX > 0 && xMag > maxSpeed) curSpeedX = 0;
+        if (curSpeedX < 0 && xMag < -maxSpeed) curSpeedX = 0;
+        if (curSpeedY > 0 && yMag > maxSpeed) curSpeedY = 0;
+        if (curSpeedY < 0 && yMag < -maxSpeed) curSpeedY = 0;
+
+        //Some movement multipliers
+        float multiplier = 1f, multiplierV = 1f;
+
+        // Movement in air
+        if (!isGrounded)
+        {
+            multiplier = 0.1f;
+            multiplierV = 0.1f;
+        }
+
+        // Movement while sliding
+        if (currentPlayerState == PLAYERSTATES.SLIDE)
+        {
+            multiplier = 1f;
+            multiplierV = 1f;
+        }
+
+        //Apply forces to move player
+        rb.AddForce(transform.forward * curSpeedY * moveSpeed * Time.deltaTime * multiplier * multiplierV);
+        rb.AddForce(transform.right * curSpeedX * moveSpeed * Time.deltaTime * multiplier);
+        //rb.AddForce(Vector3.down * gravity * Time.deltaTime);
+
+        bodyAnim.SetFloat("xWalk", yMag);
+        bodyAnim.SetFloat("yWalk", xMag);
+    }
     void Update()
     {
+        //If holding jump && ready to jump, then jump
+        if (Input.GetButtonDown("Jump") && isGrounded) Jump();
         //Debug.Log(headTarget.transform.position);
-        
+
         /*if (holding != null)
         Debug.Log(holding.animationPlaying);*/
 
@@ -407,7 +557,7 @@ public class PlayerController : MonoBehaviour, ISaveable
         }
 
         // Player and Camera rotation
-        if (!dead && Cursor.lockState != CursorLockMode.None && playerHealth.canMoveHead)
+        if (!dead)
         {
             
             if (currentPlayerState != PLAYERSTATES.IMMOBILE)
@@ -419,44 +569,22 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             PlayerLoop();
 
-            // We are grounded, so recalculate move direction based on axes
-            Vector3 forward = transform.TransformDirection(Vector3.forward);
-            Vector3 right = transform.TransformDirection(Vector3.right);
             // Press Left Shift to run
 
-
-            float curSpeedX = currentPlayerState != PLAYERSTATES.IMMOBILE || holding.animationPlaying ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") * adrenalineSpeedMultiplier : 0;
-            float curSpeedY = currentPlayerState != PLAYERSTATES.IMMOBILE || holding.animationPlaying ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") * adrenalineSpeedMultiplier : 0;
-
-            
-
-            if (currentPlayerState == PLAYERSTATES.CROUCH)
-            {
-                curSpeedX *= crouchingSpeed;
-                curSpeedY *= crouchingSpeed;
-            }
-            float movementDirectionY = moveDirection.y;
-
             _FOVOFFSET = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? Mathf.Lerp(_FOVOFFSET, 10f, 10f * Time.deltaTime) : Mathf.Lerp(_FOVOFFSET, 0f, 10f * Time.deltaTime)) : 0;
-            moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-            moveDirection.y = movementDirectionY;
 
             // Apply gravity. Gravity is multiplied by deltaTime twice (once here, and once below
             // when the moveDirection is multiplied by deltaTime). This is because gravity should be applied
             // as an acceleration (ms^-2)
-            if (!characterController.isGrounded && GameSettings.LEVEL_LOADED)
-            {
-                moveDirection.y -= gravity * Time.deltaTime;
-            }
+            
 
+
+            /*TODO*/
             // Move the controller
-            characterController.Move(moveDirection * Time.deltaTime);
+            //characterController.Move(new Vector3(moveDirection.x, moveDirection.y, moveDirection.z) * Time.deltaTime);
 
           /*  float smoothedSpeedX = Mathf.Lerp(0, curSpeedX, 2 * Time.deltaTime);
             float smoothedSpeedY = Mathf.Lerp(0, curSpeedY, 2 * Time.deltaTime);*/
-
-            bodyAnim.SetFloat("xWalk", curSpeedX);
-            bodyAnim.SetFloat("yWalk", curSpeedY);
 
         }
 
@@ -469,7 +597,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
         if (Physics.Raycast(new Ray(feet.transform.position, Vector3.down), out hit, 3f))
 
-            if (hit.collider.gameObject.tag != "Player" && characterController.isGrounded && !playFootSteps && characterController.velocity.magnitude > 0.005f)
+            if (hit.collider.gameObject.tag != "Player" && isGrounded && !playFootSteps && rb.velocity.magnitude > 0.005f)
             {
 
                 playFootSteps = true;
@@ -477,7 +605,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             }
 
-            if (!characterController.isGrounded && playFootSteps)
+            if (!isGrounded && playFootSteps)
             {
 
                 playFootSteps = false;
@@ -492,43 +620,147 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     }
 
+    //Vaults if you can otherwise jump
+    private void Jump()
+    {
+        //Jump and vault
+        if (!CanVault() & isGrounded)
+        {
+            maxSpeed = AirmaxSpeed;
+
+            //Add jump forces
+            rb.AddForce(transform.up * jumpForce * 1.5f);
+            //rb.AddForce(head.transform.forward * jumpForce * 1.1f);
+            //rb.AddForce(normalVector * jumpForce * 0.5f);
+
+            /*//If jumping while falling, reset y velocity.
+            Vector3 vel = rb.velocity;
+            if (rb.velocity.y < 0.5f)
+                rb.velocity = new Vector3(vel.x, 0, vel.z);
+            else if (rb.velocity.y > 0)
+                rb.velocity = new Vector3(vel.x, vel.y / 2, vel.z);*/
+        }
+    }
+    private bool CanVault()
+    {
+       /* Debug.Log("CanVault");*/
+
+        RaycastHit VaultRayHit; // cast down to find objects
+        RaycastHit VaultFinalRayHit; // cast forward to stop clipping
+        RaycastHit VaultSizeRayHit; // cast the players size to test if he can be there
+
+
+
+        //Cast down to find object
+        if (!Vaulting & currentPlayerState != PLAYERSTATES.CROUCH & Physics.SphereCast(VaultCollider.position, 0.125f, -VaultCollider.up, out VaultRayHit, 3.5f, whatIsGround))
+        {
+           /* Debug.Log("Checking Forward Ray..");
+            Debug.DrawRay(VaultCollider.position, -VaultCollider.up, Color.red, 3, false);*/
+            
+            
+
+            // Cast forward then check if the player can fit where they tried to climb
+            if (!Physics.SphereCast(new Vector3(rb.position.x, VaultCollider.position.y - (VaultRayHit.distance - 0.135f), rb.position.z), 0.125f, transform.forward, out VaultFinalRayHit, 0.475f, whatIsGround))
+            {
+                /*Debug.DrawRay(new Vector3(rb.position.x, VaultCollider.position.y - VaultRayHit.distance, rb.position.z), transform.forward, Color.blue, 3, false);*/
+
+                if (!Physics.SphereCast(VaultRayHit.point + Vector3.up * (GetComponent<CapsuleCollider>().radius + 0.01f), GetComponent<CapsuleCollider>().radius, Vector3.up, out VaultSizeRayHit, GetComponent<CapsuleCollider>().height - (GetComponent<CapsuleCollider>().radius * 2) - 0.01f, whatIsGround))
+                {
+                    /*Debug.DrawRay(VaultRayHit.point + Vector3.up * (GetComponent<CapsuleCollider>().radius + 0.01f), Vector3.up, Color.green, 3, false);
+                    Debug.Log("CastForward: " + true);*/
+                    
+                    //move the player
+
+                    Vault(VaultRayHit);
+
+                    //Return so we dont jump
+                    return true;
+                }
+                else { return false; }
+
+                
+
+            }
+            else { return false; }
+        }
+        else { return false; }
+    }
+
+    private void Vault(RaycastHit Hit)
+    {
+
+        //this is on animation start {}
+        Vaulting = true;
+        rb.isKinematic = true; //stops the player from moving
+       /* jumping = false;*/
+
+        //this is on animation end {}
+        rb.position = Hit.point + (Vector3.up / 1.5f); // moves the player after animation
+        Vaulting = false;
+        rb.isKinematic = false;
+
+    }
+
     private void HandlePlayerStates()
     {
-        if (!characterController.isGrounded)
-            currentPlayerState = PLAYERSTATES.JUMP;
-
-        //all but prone
-        if (Mathf.Abs(moveDirection.x) > 0.1f || Mathf.Abs(moveDirection.z) > 0.1f)
+        if (Mathf.Abs(rb.velocity.x) > 0.1f || Mathf.Abs(rb.velocity.z) > 0.1f && currentPlayerState != PLAYERSTATES.SLIDE)
         {
 
-            if ((Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("D")) && Input.GetButton("Run") && playerHealth.canRun && !bodyAnim.GetBool("Prone"))
+            if (Input.GetButton("Run") && playerHealth.canRun && !bodyAnim.GetBool("Prone") && !GetComponent<InventorySystem>().inventoryOpened && isGrounded)
             {
                 bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
                 bodyAnim.SetBool("isCrouching", false);
                 bodyAnim.SetBool("isWalking", false);
                 bodyAnim.SetBool("isRunning", true);
-                bodyAnim.SetBool("isIdle", false);
+
+                maxSpeed = SprintmaxSpeed;
 
                 currentPlayerState = PLAYERSTATES.RUN;
 
+                //slide
+                if (Input.GetButtonDown("Crouch") && PlayerHasRoom() && currentPlayerState != PLAYERSTATES.JUMP)
+                {
+                    if (isGrounded)
+                    {
+                        bodyAnim.SetBool("isCrouching", true);
+                        bodyAnim.SetBool("isSliding", true);
+                        bodyAnim.SetBool("isRunning", false);
+                        bodyAnim.SetBool("isWalking", false);
+
+                        Debug.Log("SLIDE");
+
+                        currentPlayerState = PLAYERSTATES.SLIDE;
+
+                        rb.AddForce(transform.forward * slideForce);
+
+                    }
+
+                }
+                
+
             }
 
-            else if ((Input.GetButton("W") || Input.GetButton("A") || Input.GetButton("S") || Input.GetButton("D")) && playerHealth.canWalk)
+            else if (playerHealth.canWalk && isGrounded)
             {
                 bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 1, Time.deltaTime * 10));
                 bodyAnim.SetBool("isWalking", true);
                 bodyAnim.SetBool("isRunning", false);
-                bodyAnim.SetBool("isIdle", false);
+
+                maxSpeed = WalkmaxSpeed;
 
                 currentPlayerState = PLAYERSTATES.WALK;
             
 
             }
+            else
+            {
+                bodyAnim.SetBool("isRunning", false);
+                bodyAnim.SetBool("isWalking", false);
+            }
 
 
 
         }
-
         //idle
         else
         {
@@ -544,39 +776,75 @@ public class PlayerController : MonoBehaviour, ISaveable
 
         }
 
-        if (Input.GetButton("Crouch") && currentPlayerState != PLAYERSTATES.JUMP && playerHealth.canWalk)
+
+        if (Input.GetButtonDown("Jump") && currentPlayerState != PLAYERSTATES.CROUCH && currentPlayerState != PLAYERSTATES.PRONE && isGrounded)
         {
 
-            bodyAnim.SetBool("isCrouching", true);
-            bodyAnim.SetBool("isRunning", false);
-            bodyAnim.SetBool("isWalking", false);
-            bodyAnim.SetBool("isRunning", false);
-            bodyAnim.SetBool("isIdle", false);
-
-            currentPlayerState = PLAYERSTATES.CROUCH;
-
-        }
-        else
-        {
-            bodyAnim.SetBool("isCrouching", false);
-        }
-
-        if (Input.GetButtonDown("Prone") && currentPlayerState != PLAYERSTATES.JUMP)
-        {
-            if (!bodyAnim.GetBool("isProne"))
+            if (CanVault())
             {
-                bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
-                bodyAnim.SetBool("isProne", true);
-                bodyAnim.SetBool("isCrouching", false);
-                bodyAnim.SetBool("isWalking", false);
-                bodyAnim.SetBool("isRunning", false);
+                bodyAnim.SetTrigger("isVaulting");
+
             }
             else
             {
-                bodyAnim.SetBool("isProne", false);
+                bodyAnim.SetTrigger("isJumping");
             }
 
+            bodyAnim.SetBool("isRunning", false);
+            bodyAnim.SetBool("isWalking", false);
+            bodyAnim.SetBool("isCrouching", false);
+
+            currentPlayerState = PLAYERSTATES.JUMP;
+
+
         }
+
+        if (Input.GetButton("Crouch") && currentPlayerState != PLAYERSTATES.JUMP && currentPlayerState != PLAYERSTATES.SLIDE && playerHealth.canWalk)
+        {
+
+            if (PlayerHasRoom())
+            {
+
+                maxSpeed = Crouchmaxspeed;
+
+                bodyAnim.SetBool("isCrouching", true);
+                bodyAnim.SetBool("isRunning", false);
+                bodyAnim.SetBool("isWalking", false);
+
+                currentPlayerState = PLAYERSTATES.CROUCH;
+                
+                
+            }
+
+
+
+        }
+        else if (Input.GetButtonUp("Crouch"))
+        {
+            if (PlayerHasRoom())
+            {
+                bodyAnim.SetBool("isCrouching", false);
+            }
+            else { bufferStand = true; }
+
+
+        }
+        /* if (Input.GetButtonDown("Prone") && currentPlayerState != PLAYERSTATES.JUMP)
+         {
+             if (!bodyAnim.GetBool("isProne"))
+             {
+                 bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
+                 bodyAnim.SetBool("isProne", true);
+                 bodyAnim.SetBool("isCrouching", false);
+                 bodyAnim.SetBool("isWalking", false);
+                 bodyAnim.SetBool("isRunning", false);
+             }
+             else
+             {
+                 bodyAnim.SetBool("isProne", false);
+             }
+
+         }*/
 
 
 
@@ -714,14 +982,17 @@ public class PlayerController : MonoBehaviour, ISaveable
                 break;
 
         }
-
-        if (currentPlayerState != PLAYERSTATES.CROUCH)
-        {
-            //GetComponent<CharacterController>().height = height;
-            //GetComponent<CharacterController>().center = new Vector3(0, center, 0);
-        }
     }
-
+    private bool PlayerHasRoom()
+    {
+        RaycastHit SneakRayHit;
+        Debug.DrawRay(transform.position + Vector3.up * (GetComponent<CapsuleCollider>().radius + 0.01f), Vector3.up, Color.cyan, 3, false);
+        if (!Physics.SphereCast(transform.position + Vector3.up * (GetComponent<CapsuleCollider>().radius + 0.01f), GetComponent<CapsuleCollider>().radius - 0.01f, Vector3.up, out SneakRayHit, GetComponent<CapsuleCollider>().height - (GetComponent<CapsuleCollider>().radius * 2) - 0.01f, whatIsGround))
+        {
+            return true;
+        }
+        else { return false; }
+    }
     private void HandleHealthSystem()
     {
         //adrenaline (100+bpm)
@@ -822,7 +1093,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     {
         if (!GameSettings.Instance.cheatSheet.noClip)
         {
-            if (playerHealth.canWalk)
+            if (playerHealth.canWalk && currentPlayerState != PLAYERSTATES.IDLE)
 
                 HandleFootstep();
 
@@ -913,11 +1184,11 @@ public class PlayerController : MonoBehaviour, ISaveable
     {
         if (col.tag == "Enter0")
         {
-            GameSettings.Instance.LoadScene(GameSettings.SCENE.LEVEL0);
+            GameSettings.Instance.LoadScene(SCENE.LEVEL0);
         }
         if (col.tag == "Enter1")
         {
-            GameSettings.Instance.LoadScene(GameSettings.SCENE.LEVEL1);
+            GameSettings.Instance.LoadScene(SCENE.LEVEL1);
         }
         
     }
@@ -977,7 +1248,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     }
     void OnDestroy()
     {
-        SaveMaster.RemoveListener(GetComponent<Saveable>());
+        //SaveMaster.RemoveListener(GetComponent<Saveable>());
     }
     
 }

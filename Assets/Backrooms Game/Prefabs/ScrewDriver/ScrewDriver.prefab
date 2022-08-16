@@ -23,8 +23,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 994001239425025910}
-  m_LocalRotation: {x: -0.5752901, y: 0.41114637, z: -0.41114637, w: 0.5752901}
-  m_LocalPosition: {x: -0.114, y: 0.918, z: 0.284}
+  m_LocalRotation: {x: -0.57687765, y: 0.41111884, z: -0.41208157, w: 0.5730464}
+  m_LocalPosition: {x: -0.052, y: 0.78, z: 0.184}
   m_LocalScale: {x: 6.666667, y: 6.666656, z: 6.666664}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -33,7 +33,7 @@ Transform:
   - {fileID: 2842265144884170164}
   m_Father: {fileID: 7088627852523957283}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -18.804, y: 90.219, z: -90.315}
 --- !u!1 &7088627852523957311
 GameObject:
   m_ObjectHideFlags: 0
@@ -111,17 +111,20 @@ MonoBehaviour:
   breakablePrefabs: []
   hitClips: []
   breakClips: []
-  inventoryWeight: 1
   holdableObject: {fileID: 7088627852523957309}
   ThrowMultiplier: 1.5
   large: 0
-  autoSwing: 0
+  autoSwing: 1
+  inventoryWeight: 1
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimations:
-  - Stab1
+  StartUseAnimation: 
+  UseAnimations:
+  - SliceVar1
+  - SliceVar2
   CustomHoldAnimation: 
+  ItemObjectAnimations: []
 --- !u!1 &7088627852977277467
 GameObject:
   m_ObjectHideFlags: 0

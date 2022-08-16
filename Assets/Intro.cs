@@ -23,7 +23,7 @@ public class Intro : MonoBehaviour
         {
             hasClicked = true;
             StopCoroutine(introC);
-            GameSettings.Instance.LoadScene(GameSettings.SCENE.HOMESCREEN);
+            GameSettings.Instance.LoadScene(SCENE.HOMESCREEN);
             GameSettings.Instance.setCutScene(false);
         }
     }
@@ -36,7 +36,7 @@ public class Intro : MonoBehaviour
         yield return new WaitForSecondsRealtime(9.5f);
         skip.gameObject.SetActive(false);
         yield return new WaitForSecondsRealtime(8f);
-        GameSettings.Instance.LoadScene(GameSettings.SCENE.HOMESCREEN);
+        GameSettings.Instance.LoadScene(SCENE.HOMESCREEN);
 
         GameSettings.Instance.setCutScene(false);
     }

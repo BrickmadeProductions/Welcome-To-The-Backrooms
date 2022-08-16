@@ -6585,8 +6585,8 @@ MonoBehaviour:
     - 0
     type: 6
     instance: {fileID: 4225260656200758192}
-  maxHealth: 100
-  health: 100
+  maxHealth: 300
+  health: 300
   agrivation: 0
   hunger: 0
   type: 6
@@ -6605,7 +6605,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 9b0588eeda112c6448b35dc90d55f614, type: 3}
   - {fileID: 8300000, guid: c2f5719ac7f0bc247b606b24942d71fd, type: 3}
   hurtNoisesSource: {fileID: 4511183550537650033}
-  damage: 10
+  damage: 15
   sanityMultiplier: 0.95
   maxAllowed: 2
   despawnDistance: 100
@@ -6619,7 +6619,7 @@ MonoBehaviour:
   spawnChance: 0.0005
   speed: 250
   stunned: 0
-  stunTime: 2
+  stunTime: 1
   eyes: {fileID: 109001933242770219}
   entitySkin: {fileID: 439210178674126766}
   runTimeID: 

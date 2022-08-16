@@ -7,7 +7,7 @@ public class InteractableDoor : InteractableObject
 	{
 	}
 
-    public override void Hold(InteractionSystem player)
+    public override void Hold(InteractionSystem player, bool RightHand)
     {
     }
 
@@ -16,9 +16,6 @@ public class InteractableDoor : InteractableObject
 		base.gameObject.transform.GetChild(0).GetComponent<Rigidbody>().AddForce(player.transform.forward * 2f, ForceMode.Impulse);
 	}
 
-	public override void AddToInv(InteractionSystem player)
-	{
-	}
 
 	public override void Init()
 	{

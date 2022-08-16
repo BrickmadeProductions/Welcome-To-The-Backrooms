@@ -218,12 +218,24 @@ public abstract class Entity : MonoBehaviour
 	private void OnBecameVisible()
 	{
 		playerCanSee = true;
+		StartCoroutine(UpdatePlayerSanity());
 	}
 
 	private void OnBecameInvisible()
 	{
 		playerCanSee = false;
 	}
+
+	public IEnumerator UpdatePlayerSanity()
+    {
+		while (playerCanSee)
+        {
+			yield return new WaitForSecondsRealtime(5f);
+			GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().DecreaseSanity(UnityEngine.Random.Range(canSeePlayer ? 5f : 2f, canSeePlayer ? 15f : 8f) * (health / 100));
+
+		}
+		
+    }
 
 	public abstract void UpdateEntity();
 

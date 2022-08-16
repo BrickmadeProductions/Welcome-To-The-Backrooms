@@ -9,25 +9,51 @@ public class ThrowWeapon : HoldableObject
     public float rotationAmount;
     public bool stuckInWall;
     public AudioClip[] stuckSounds;
+    FixedJoint ObjectConnectionJoint;
 
 
     public void OnTriggerEnter(Collider hit)
     {
-        //Debug.Log(holdableObject.velocity.magnitude);   
-        if (hit.gameObject.layer != 13 && hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6 && !stuckInWall && Flying )
+        if (hit.gameObject.layer != 13 && hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6 && !stuckInWall && Flying)
         {
-            //Debug.Log(hit.name);
             AudioSource.PlayClipAtPoint(stuckSounds[Random.Range(0, stuckSounds.Length)], hit.transform.position);
 
             Flying = false;
 
-            holdableObject.constraints = RigidbodyConstraints.FreezeAll;
+            if (hit.transform.parent != null)
+            {
+                if (hit.transform.parent.gameObject.GetComponent<Rigidbody>() != null)
+                {
+                    if (ObjectConnectionJoint == null)
+                    {
+                        ObjectConnectionJoint = gameObject.AddComponent<FixedJoint>();
+                        // sets joint position to point of contact
+                        ObjectConnectionJoint.anchor = GetComponentInChildren<Weapon>().GetComponent<Collider>().ClosestPoint(transform.position);
+                        // conects the joint to the other object
+
+                        ObjectConnectionJoint.connectedBody = hit.transform.parent.gameObject.GetComponent<Rigidbody>();
+
+                        // Stops objects from continuing to collide and creating more joints
+                        ObjectConnectionJoint.enableCollision = false;
+                    }
+
+                }
+                else
+                {
+                    holdableObject.constraints = RigidbodyConstraints.FreezeAll;
+                }
+            }
+           
 
             stuckInWall = true;
         }
+
+
+        
+        
     }
 
-/*    public void OnTriggerStay(Collider hit)
+    /*public void OnTriggerStay(Collider hit)
     {
         if (hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6 && stuckInWall)
         {
@@ -35,9 +61,15 @@ public class ThrowWeapon : HoldableObject
         }
     }*/
     public void OnTriggerExit(Collider hit)
-    { 
-        
+    {
+        if (ObjectConnectionJoint != null)
+        {
+            Destroy(ObjectConnectionJoint);
+            ObjectConnectionJoint = null;
+        }
+
         holdableObject.constraints = RigidbodyConstraints.None;
+
         stuckInWall = false;
         
         
@@ -53,20 +85,24 @@ public class ThrowWeapon : HoldableObject
         }
     }
 
+    public override void Use(InteractionSystem player, bool LMB)
+    {
+        base.Use(player, LMB);
+    }
+
     public override void Throw(Vector3 force)
     {
-        base.Throw(force);
-        holdableObject.angularVelocity = holdableObject.transform.right * rotationAmount;
-        //holdableObject.AddForceAtPosition(, transform.up * 2);
-        Flying = true;
         holdableObject.constraints = RigidbodyConstraints.None;
-        //Debug.Log("Gran And Set To False");
+        base.Throw(force);
+        holdableObject.angularVelocity = holdableObject.transform.right * rotationAmount * rotationAmount;
+        Flying = true;
+
 
     }
 
-    public override void Hold(InteractionSystem player)
+    public override void Hold(InteractionSystem player, bool RightHand)
     {
-        base.Hold(player);
+        base.Hold(player, RightHand);
         Flying = false;
         holdableObject.constraints = RigidbodyConstraints.FreezeAll;
     }
