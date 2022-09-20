@@ -128,14 +128,17 @@ public abstract class InteractableObject : MonoBehaviour
 
 	public abstract void Init();
 
-	public abstract void Throw(Vector3 force);
+	public virtual void Throw(Vector3 force)
+    {
+
+    }
 
 	public abstract void Use(InteractionSystem player, bool LMB);
 
 	public abstract void Hold(InteractionSystem player, bool RightHand);
 }
 
-// OBJECT_TYPE
+// All Savable Objects In The Game
 public enum OBJECT_TYPE
 {
     KNIFE,
@@ -155,5 +158,6 @@ public enum OBJECT_TYPE
     ROPE_COIL,
     ROPE_TIED,
     CASSET_TAPE,
-	CASSET_PLAYER
+	CASSET_PLAYER,
+	LOOT_BOX_CARDBOARD
 }

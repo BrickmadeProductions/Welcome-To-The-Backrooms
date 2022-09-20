@@ -213,7 +213,7 @@ public class PlayerController : MonoBehaviour
 
     public float counterMovement = 0.175f;
     float threshold = 0.01f;
-    float maxSlopeAngle = 50f;
+    public float maxSlopeAngle = 60f;
     float stepSmooth = 2f;
 
     public LayerMask whatIsGround;
@@ -382,12 +382,12 @@ public class PlayerController : MonoBehaviour
         if (!dead && Cursor.lockState != CursorLockMode.None && playerHealth.canMoveHead)
         {
 
-            rotationX += -Input.GetAxis("Mouse Y") * GameSettings.Instance.Sensitivity / 2;
+            rotationX += -Input.GetAxisRaw("Mouse Y") * GameSettings.Instance.Sensitivity / 2;
             rotationX = Mathf.Clamp(rotationX, -lookXLimitBottom, lookXLimitTop);
 
             rotationX = Mathf.Clamp(rotationX, -lookXLimitBottom + 4, lookXLimitTop - 4);
 
-            rotationY = Input.GetAxis("Mouse X") * GameSettings.Instance.Sensitivity;
+            rotationY = Input.GetAxisRaw("Mouse X") * GameSettings.Instance.Sensitivity;
 
             
             //head.transform.rotation = Quaternion.Lerp(head.transform.rotation, headTarget.transform.rotation, 10f * Time.deltaTime);
@@ -502,8 +502,8 @@ public class PlayerController : MonoBehaviour
         Vector2 mag = FindVelRelativeToLook();
         float xMag = mag.x, yMag = mag.y;
 
-        float curSpeedX = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") * adrenalineSpeedMultiplier : 0;
-        float curSpeedY = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") * adrenalineSpeedMultiplier : 0;
+        float curSpeedX = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxisRaw("Horizontal") * adrenalineSpeedMultiplier : 0;
+        float curSpeedY = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxisRaw("Vertical") * adrenalineSpeedMultiplier : 0;
 
         CounterMovement(curSpeedX, curSpeedY, mag);
 
@@ -536,13 +536,25 @@ public class PlayerController : MonoBehaviour
         //Apply forces to move player
         rb.AddForce(transform.forward * curSpeedY * moveSpeed * Time.deltaTime * multiplier * multiplierV);
         rb.AddForce(transform.right * curSpeedX * moveSpeed * Time.deltaTime * multiplier);
-        //rb.AddForce(Vector3.down * gravity * Time.deltaTime);
+        rb.AddForce(-transform.up * Time.deltaTime * gravity);
+
+        if (Mathf.Abs(Input.GetAxis("Horizontal")) < 0.25f && Mathf.Abs(Input.GetAxis("Vertical")) < 0.25f && isGrounded && currentPlayerState != PLAYERSTATES.SLIDE && !Input.GetButton("Jump"))
+        {
+            rb.drag = 1000f;
+        }
+        else
+        {
+            rb.drag = 1f;
+        }
+
 
         bodyAnim.SetFloat("xWalk", yMag);
         bodyAnim.SetFloat("yWalk", xMag);
     }
     void Update()
     {
+        
+
         //If holding jump && ready to jump, then jump
         if (Input.GetButtonDown("Jump") && isGrounded) Jump();
         //Debug.Log(headTarget.transform.position);
@@ -630,15 +642,16 @@ public class PlayerController : MonoBehaviour
 
             //Add jump forces
             rb.AddForce(transform.up * jumpForce * 1.5f);
-            //rb.AddForce(head.transform.forward * jumpForce * 1.1f);
-            //rb.AddForce(normalVector * jumpForce * 0.5f);
+            rb.AddForce(transform.forward * jumpForce * 1.1f * rb.velocity.magnitude);
+            rb.AddForce(normalVector * jumpForce * 0.5f);
 
-            /*//If jumping while falling, reset y velocity.
+            //If jumping while falling, reset y velocity.
+
             Vector3 vel = rb.velocity;
             if (rb.velocity.y < 0.5f)
                 rb.velocity = new Vector3(vel.x, 0, vel.z);
             else if (rb.velocity.y > 0)
-                rb.velocity = new Vector3(vel.x, vel.y / 2, vel.z);*/
+                rb.velocity = new Vector3(vel.x, vel.y / 2, vel.z);
         }
     }
     private bool CanVault()
@@ -648,8 +661,6 @@ public class PlayerController : MonoBehaviour
         RaycastHit VaultRayHit; // cast down to find objects
         RaycastHit VaultFinalRayHit; // cast forward to stop clipping
         RaycastHit VaultSizeRayHit; // cast the players size to test if he can be there
-
-
 
         //Cast down to find object
         if (!Vaulting & currentPlayerState != PLAYERSTATES.CROUCH & Physics.SphereCast(VaultCollider.position, 0.125f, -VaultCollider.up, out VaultRayHit, 3.5f, whatIsGround))
@@ -703,7 +714,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandlePlayerStates()
     {
-        if (Mathf.Abs(rb.velocity.x) > 0.1f || Mathf.Abs(rb.velocity.z) > 0.1f && currentPlayerState != PLAYERSTATES.SLIDE)
+        if (isGrounded && Mathf.Abs(rb.velocity.magnitude) >= 0.1f)
         {
 
             if (Input.GetButton("Run") && playerHealth.canRun && !bodyAnim.GetBool("Prone") && !GetComponent<InventorySystem>().inventoryOpened && isGrounded)
@@ -716,27 +727,6 @@ public class PlayerController : MonoBehaviour
                 maxSpeed = SprintmaxSpeed;
 
                 currentPlayerState = PLAYERSTATES.RUN;
-
-                //slide
-                if (Input.GetButtonDown("Crouch") && PlayerHasRoom() && currentPlayerState != PLAYERSTATES.JUMP)
-                {
-                    if (isGrounded)
-                    {
-                        bodyAnim.SetBool("isCrouching", true);
-                        bodyAnim.SetBool("isSliding", true);
-                        bodyAnim.SetBool("isRunning", false);
-                        bodyAnim.SetBool("isWalking", false);
-
-                        Debug.Log("SLIDE");
-
-                        currentPlayerState = PLAYERSTATES.SLIDE;
-
-                        rb.AddForce(transform.forward * slideForce);
-
-                    }
-
-                }
-                
 
             }
 
@@ -758,21 +748,70 @@ public class PlayerController : MonoBehaviour
                 bodyAnim.SetBool("isWalking", false);
             }
 
+            if (Input.GetButtonDown("Crouch") && currentPlayerState != PLAYERSTATES.JUMP)
+            {
+                //slide
 
+                if (isGrounded && Mathf.Abs(rb.velocity.magnitude) <= 2f)
+                {
+                    bodyAnim.SetBool("isCrouching", true);
+                    bodyAnim.SetBool("isSliding", true);
+                    bodyAnim.SetBool("isRunning", false);
+                    bodyAnim.SetBool("isWalking", false);
+
+                    Debug.Log("SLIDE");
+
+                    currentPlayerState = PLAYERSTATES.SLIDE;
+
+                    rb.AddForce(transform.forward * slideForce);
+
+                }
+
+            }
 
         }
         //idle
         else
         {
-            
+
             bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 1, Time.deltaTime * 10));
             bodyAnim.SetBool("isCrouching", false);
             bodyAnim.SetBool("isRunning", false);
             bodyAnim.SetBool("isWalking", false);
-            
-            
- 
+
+
+
             currentPlayerState = PLAYERSTATES.IDLE;
+
+        }
+
+        if (Input.GetButton("Crouch") && currentPlayerState != PLAYERSTATES.JUMP && currentPlayerState != PLAYERSTATES.SLIDE && playerHealth.canWalk)
+        {
+
+            if (PlayerHasRoom())
+            {
+
+                maxSpeed = Crouchmaxspeed;
+
+                bodyAnim.SetBool("isCrouching", true);
+                bodyAnim.SetBool("isRunning", false);
+                bodyAnim.SetBool("isWalking", false);
+
+                currentPlayerState = PLAYERSTATES.CROUCH;
+
+
+            }
+
+        }
+
+        else if (Input.GetButtonUp("Crouch"))
+        {
+            if (PlayerHasRoom())
+            {
+                bodyAnim.SetBool("isCrouching", false);
+            }
+            else { bufferStand = true; }
+
 
         }
 
@@ -799,36 +838,10 @@ public class PlayerController : MonoBehaviour
 
         }
 
-        if (Input.GetButton("Crouch") && currentPlayerState != PLAYERSTATES.JUMP && currentPlayerState != PLAYERSTATES.SLIDE && playerHealth.canWalk)
-        {
+        
+        
 
-            if (PlayerHasRoom())
-            {
-
-                maxSpeed = Crouchmaxspeed;
-
-                bodyAnim.SetBool("isCrouching", true);
-                bodyAnim.SetBool("isRunning", false);
-                bodyAnim.SetBool("isWalking", false);
-
-                currentPlayerState = PLAYERSTATES.CROUCH;
-                
-                
-            }
-
-
-
-        }
-        else if (Input.GetButtonUp("Crouch"))
-        {
-            if (PlayerHasRoom())
-            {
-                bodyAnim.SetBool("isCrouching", false);
-            }
-            else { bufferStand = true; }
-
-
-        }
+        
         /* if (Input.GetButtonDown("Prone") && currentPlayerState != PLAYERSTATES.JUMP)
          {
              if (!bodyAnim.GetBool("isProne"))

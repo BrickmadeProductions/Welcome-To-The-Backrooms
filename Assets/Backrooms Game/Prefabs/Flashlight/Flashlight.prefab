@@ -78,16 +78,19 @@ MonoBehaviour:
   breakablePrefabs: []
   hitClips: []
   breakClips: []
-  inventoryWeight: 1
   holdableObject: {fileID: 0}
   ThrowMultiplier: 0
   large: 0
+  autoSwing: 0
+  inventoryWeight: 1
+  inventoryIcon: {fileID: 0}
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimationClips: []
-  LMBAnimationBools: []
+  StartUseAnimation: 
+  UseAnimations: []
   CustomHoldAnimation: isHoldingFlashlight
+  ItemObjectAnimations: []
   emission: {fileID: 0}
   flashLight: {fileID: 8493413208097835615, guid: 1524594750d88a6488b6305b104387ef, type: 3}
 --- !u!82 &869247385304841261
@@ -638,8 +641,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9124802856274038832}
-  m_LocalRotation: {x: -0.32273448, y: 0.5704313, z: 0.37191853, w: -0.65736383}
-  m_LocalPosition: {x: -0.016, y: -0.029, z: -0.105}
+  m_LocalRotation: {x: -0.25072172, y: 0.7251173, z: 0.19039501, w: -0.6124486}
+  m_LocalPosition: {x: 0.012, y: -0.12, z: -0.117}
   m_LocalScale: {x: 0.038, y: 0.038, z: 0.038}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -650,4 +653,4 @@ Transform:
   - {fileID: 9042861530265711819}
   m_Father: {fileID: 503200684058123380}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 278.1, z: -59}
+  m_LocalEulerAnglesHint: {x: 1.776, y: 259.78198, z: -36.663}
