@@ -41,10 +41,9 @@ public class DistanceChecker : MonoBehaviour
         {
             Steam.AddAchievment("WALK_10000");
         }
-
-        if (GameSettings.LEVEL_LOADED && GameSettings.Instance.ActiveScene != SCENE.ROOM)
+        if (GameSettings.LEVEL_LOADED && GameSettings.Instance.ActiveScene != SCENE.ROOM && GameSettings.Instance.Player.GetComponent<Rigidbody>().velocity.magnitude < 20f)
         {
-            
+            //Debug.Log((lastPosition - tx.position).magnitude);
             distanceTraveled += (lastPosition - tx.position).magnitude;
             timePassed += Time.deltaTime;
             lastPosition = tx.position;

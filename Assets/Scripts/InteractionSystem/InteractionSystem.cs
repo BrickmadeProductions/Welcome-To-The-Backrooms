@@ -391,20 +391,11 @@ public class InteractionSystem : MonoBehaviour
 		{
 			GameObject interactable = raycastForGrabbing[0].collider.transform.parent.parent.gameObject;
 
-			if (interactable.gameObject.layer == 9)
+			if (interactable.gameObject.layer == 9 || interactable.gameObject.layer == 10 || interactable.gameObject.layer == 17)
 			{
-				currentlyLookingAt = interactable.GetComponent<HoldableObject>();
+				currentlyLookingAt = interactable.GetComponent<InteractableObject>();
 			}
-			else if (interactable.gameObject.layer == 10)
-			{
-				currentlyLookingAt = interactable.GetComponent<InteractableDoor>();
-			}
-			else if (interactable.gameObject.layer == 17)
-			{
-				currentlyLookingAt = interactable.GetComponent<InteractableButton>();
-			}
-			
-			
+		
 			else
 			{
 				currentlyLookingAt = null;
@@ -586,7 +577,7 @@ public class InteractionSystem : MonoBehaviour
 
 		if (currentlyLookingAt != null && currentlyLookingAt.gameObject.tag == "Usable" && Input.GetButtonDown("Grab"))
 		{
-			currentlyLookingAt.Use(this, false);
+			currentlyLookingAt.Use(this, LMB: false);
 		}
 		/*
 		if (Input.GetButtonDown("Pickup") && inventorySlots.Count < inventoryLimit && currentlyLookingAt != null)

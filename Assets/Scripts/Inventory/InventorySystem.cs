@@ -32,12 +32,6 @@ public class InventorySystem : MonoBehaviour
 
     public InventorySlot currentlySelectedSlot;*/
 
-
-    private void Awake()
-    {
-        
-    }
-
     public ContainerObject GetNextContainerObjectNotFull()
     {
         foreach (ContainerObject container in containerObjectsHeld)
@@ -117,7 +111,8 @@ public class InventorySystem : MonoBehaviour
         
     }
 
-    public void ToggleContainer(string type)
+    //when you pick up an object, open inventory selection UI
+    public void OpenInventorySelection()
     {
         inventoryOpened = !inventoryOpened;
 
@@ -128,6 +123,7 @@ public class InventorySystem : MonoBehaviour
             GetComponent<PlayerController>().playerHealth.canMoveHead = true;
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+            inventory.SetActive(false);
 
         }
 
@@ -136,11 +132,11 @@ public class InventorySystem : MonoBehaviour
             GetComponent<PlayerController>().playerHealth.canMoveHead = false;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-
+            inventory.SetActive(true);
 
         }
 
-        switch (type)
+        /*switch (type)
         {
             case "OpenPocket":
 
@@ -152,7 +148,7 @@ public class InventorySystem : MonoBehaviour
                     inventory.SetActive(true);
                     //move hand slot first
 
-                    /*//pockets
+                    *//*//pockets
                     foreach (InventorySlot slot in containerObjectsHeld[0].storageSlots)
                     {
                         pocketHandLocations[index].SwitchOtherSlotToThisSlot(slot);
@@ -163,12 +159,12 @@ public class InventorySystem : MonoBehaviour
                     {
                         pocketHandLocations[index].SwitchOtherSlotToThisSlot(slot);
                         index++;
-                    }*/
+                    }*//*
                 }
                 else
                 {
                     inventory.SetActive(false);
-                    /*int index = 0;
+                    *//*int index = 0;
                     //pockets
                     foreach (InventorySlot slot in containerObjectsHeld[0].storageSlots)
                     {
@@ -180,12 +176,12 @@ public class InventorySystem : MonoBehaviour
                     {
                         slot.SwitchOtherSlotToThisSlot(pocketHandLocations[index]);
                         index++;
-                    }*/
+                    }*//*
                 }
                
 
                 break;
-        }
+        }*/
     }
 
     void Update()
@@ -199,11 +195,9 @@ public class InventorySystem : MonoBehaviour
         if (!GameSettings.Instance.PauseMenuOpen)
         {
 
-            if (Input.GetButtonDown("OpenPocket"))
+            if (Input.GetButtonDown("OpenInventory"))
             {
-                ToggleContainer("OpenPocket");
-
-
+                OpenInventorySelection();
             }
         }
 

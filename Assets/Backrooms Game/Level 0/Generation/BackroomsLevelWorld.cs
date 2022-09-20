@@ -147,13 +147,10 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public List<GameObject> RegTiles;
 
-	public List<OBJECT_TYPE> propsThatCanSpawnOnThisLevel;
+	//spawn tables for random objects
+	public List<ObjectWithWeight> worldPropSpawnTable;
 
-	public List<ENTITY_TYPE> entitiesThatCanSpawnOnThisLevel;
-
-	private Dictionary<OBJECT_TYPE, InteractableObject> levelPropDatabase;
-
-	private Dictionary<ENTITY_TYPE, Entity> levelEntityDatabase;
+	public List<EntityWithWeight> worldEntitySpawnTable;
 
 	public int regTileSpace;
 
@@ -186,7 +183,34 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			yield return new WaitForSecondsRealtime(0.1f);
 
-			foreach (KeyValuePair<ENTITY_TYPE, Entity> entity in GameSettings.Instance.EntityDatabase)
+			GameObject entity = WeightedRandom.ReturnEntityBySpawnChances(worldEntitySpawnTable);
+
+			if (entity.GetComponent<Entity>().spawnChance > UnityEngine.Random.Range(0, 0.99f))
+			{
+				Chunk chunk = loadedChunks.ElementAt(UnityEngine.Random.Range(0, loadedChunks.Count)).Value;
+
+				string key = chunk.chunkPosX + "," + chunk.chunkPosY + "," + chunk.chunkPosZ;
+
+				int tileToSpawnIn = UnityEngine.Random.Range(0, chunk.tile_grid.Count - 1);
+
+				Tile tile = chunk.tile_grid[tileToSpawnIn];
+
+				if (tile.entitySpawnLocations.Count > 0)
+				{
+					AddNewEntity(tile.entitySpawnLocations[UnityEngine.Random.Range(0, tile.entitySpawnLocations.Count)].position, entity.gameObject);
+				}
+				else
+				{
+					AddNewEntity(new Vector3((float)tile.tilePos.x * chunk.tileWidth + (float)(chunk.chunkPosX * chunk_width) * chunk.tileWidth, 0f, (float)tile.tilePos.y * chunk.tileWidth + (float)(chunk.chunkPosZ * chunk_width) * chunk.tileWidth), entity);
+				}
+
+				allChunks[key] = chunk.saveableData;
+
+			}
+
+            
+
+			/*foreach (KeyValuePair<ENTITY_TYPE, Entity> entity in GameSettings.Instance.EntityDatabase)
 			{
 				if (entitiesThatCanSpawnOnThisLevel.Contains(entity.Value.type))
 				{
@@ -215,7 +239,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 					}
 				}
 
-			}
+			}*/
 		}
 	}
 
@@ -224,32 +248,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		if (!gen_enabled)
 		{
 			return;
-		}
-		levelPropDatabase = new Dictionary<OBJECT_TYPE, InteractableObject>();
-		levelEntityDatabase = new Dictionary<ENTITY_TYPE, Entity>();
-
-		foreach (OBJECT_TYPE propID in propsThatCanSpawnOnThisLevel)
-		{
-			InteractableObject propToGet = null;
-
-			GameSettings.Instance.PropDatabase.TryGetValue(propID, out propToGet);
-
-			if (propToGet != null)
-			{
-				levelPropDatabase.Add(propID, propToGet);
-			}
-		}
-
-		foreach (ENTITY_TYPE entityID in entitiesThatCanSpawnOnThisLevel)
-		{
-			Entity entityToGet = null;
-
-			GameSettings.Instance.EntityDatabase.TryGetValue(entityID, out entityToGet);
-
-			if (entityToGet != null)
-			{
-				levelEntityDatabase.Add(entityID, entityToGet);
-			}
 		}
 
 		loadedChunks = new Dictionary<string, Chunk>();
@@ -520,9 +518,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 				loadedChunks.Remove(loadedChunk.Key);
 
+				SaveAllObjectsAndEntities();
+
 				Destroy(chunk.gameObject);
 
-				SaveAllObjectsAndEntities();
+				
 			}
 		}
 
@@ -552,7 +552,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			chunk.transform.position = new Vector3(chunkX * ChunkSize(), chunkY * ChunkHeight(), chunkZ * ChunkSize());
 
-			loadedChunks.Add(chunkX + "," + chunkY + "," + chunkZ, chunk);
+			loadedChunks.Add(chunk.name, chunk);
 
 			StartCoroutine(LoadInObjectsAndEntities(chunk));
 
@@ -569,7 +569,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		
 		string chunkKey = chunk.chunkPosX + "," + chunk.chunkPosY + "," + chunk.chunkPosZ;
 
-		//load
+		//load objects and entities from saved file
 		if (allChunks.ContainsKey(chunk.chunkPosX + "," + chunk.chunkPosY + "," + chunk.chunkPosZ))
 		{
 			chunk.saveableData = allChunks[chunkKey];
@@ -585,41 +585,18 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				LoadSavedProp(prop.Value, chunk);
 			}
 
+			chunk.SaveChunkTileGrid();
+
 			allChunks[chunkKey] = chunk.saveableData;
 		}
 
-		//generate
-		else
-		{
-			int tileIndex = UnityEngine.Random.Range(0, chunk.tile_grid.Count);
-
-			Tile tile = chunk.tile_grid[tileIndex];
-
-			foreach (Transform propSpawnLocation in tile.randomPropSpawnLocations)
-			{
-				float spawnChanceSelection = UnityEngine.Random.Range(0f, 1.01f);
-
-				foreach (KeyValuePair<OBJECT_TYPE, InteractableObject> prop in levelPropDatabase.ToArray())
-				{
-					UnityEngine.Random.Range(0, tile.randomPropSpawnLocations.Count);
-
-					if (prop.Value.spawnChance < spawnChanceSelection && tile.randomPropSpawnLocations.Count > 0)
-					{
-						int spawnLocationChoice = UnityEngine.Random.Range(0, tile.randomPropSpawnLocations.Count);
-
-						AddNewProp(tile.randomPropSpawnLocations[spawnLocationChoice].position, tile.randomPropSpawnLocations[spawnLocationChoice].rotation, prop.Value.gameObject, chunk);
-						break;
-					}
-				
-				}
-			}
-
-			tile.SpawnPresetProps();
-
+        else
+        {
 			chunk.SaveChunkTileGrid();
-			allChunks.Add(chunkKey, chunk.saveableData);
+
+			allChunks.Add(chunk.name, chunk.saveableData);
 		}
-		
+
 
 		chunk.ALL_OBJECTS_AND_ENTITES_LOADED = true;
 	}
@@ -642,7 +619,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		return false;
 	}
 
-	public Entity AddNewEntity(Vector3 position, GameObject entity, Chunk chunk)
+	public Entity AddNewEntity(Vector3 position, GameObject entity)
 	{
 		int entityCount = 0;
 		int totalEntities = 0;
@@ -660,12 +637,21 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		if (entityCount < entity.GetComponent<Entity>().maxAllowed && totalEntities <= 50)
 		{
-			Entity entityComponent = Instantiate(entity).GetComponent<Entity>();
-			entityComponent.GenerateID(this);
-			entityComponent.gameObject.transform.position = position;
-			chunk.saveableData.entityData.entityClusterData.Add(entityComponent.type.ToString() + "-" + entityComponent.runTimeID, entityComponent.Save());
+			
 
-			return entityComponent;
+			Entity spawnedEntity = Instantiate(entity).GetComponent<Entity>();
+			spawnedEntity.GenerateID(this);
+
+			spawnedEntity.gameObject.transform.position = position;
+
+			//automatically detect which chunk this entity is in
+			Vector3 chunkVector = GameSettings.Instance.worldInstance.GetChunkKeyAtWorldLocation(spawnedEntity.transform.position);
+			string chunkKey = chunkVector.x + "," + chunkVector.y + "," + chunkVector.z;
+			GameSettings.Instance.worldInstance.loadedChunks.TryGetValue(chunkKey, out Chunk chunk);
+			
+			chunk.saveableData.entityData.entityClusterData.Add(spawnedEntity.type.ToString() + "-" + spawnedEntity.runTimeID, spawnedEntity.Save());
+
+			return spawnedEntity;
 		}
 		return null;
 	}
@@ -769,7 +755,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		return false;
 	}
 
-	public InteractableObject AddNewProp(Vector3 position, Quaternion rotation, GameObject item, Chunk chunk)
+	public InteractableObject AddNewProp(Vector3 position, Quaternion rotation, GameObject item)
 	{
 		int propCount = 0;
 		foreach (KeyValuePair<string, Chunk> loadedChunks in loadedChunks)
@@ -785,7 +771,12 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			prop.gameObject.transform.position = position;
 
 			prop.gameObject.transform.rotation = rotation;
-			
+
+			//automatically detect which chunk this item is in
+			Vector3 chunkVector = GetChunkKeyAtWorldLocation(prop.transform.position);
+			string chunkKey = chunkVector.x + "," + chunkVector.y + "," + chunkVector.z;
+			loadedChunks.TryGetValue(chunkKey, out Chunk chunk);
+
 			chunk.saveableData.propData.propClusterData.Add(prop.type.ToString() + "-" + prop.runTimeID, prop.Save());
 
 			return prop;
@@ -1020,6 +1011,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				string chunkLocation = location.x + "," + location.y + "," + location.z;
 				string propKey = propData.Value.type.ToString() + "-" + propData.Value.instance.runTimeID;
 
+				//Debug.Log(chunkData.Key + " " + chunkLocation);
+
 				if (chunkData.Key != chunkLocation)
 				{
 					if (allChunks.ContainsKey(chunkLocation))
@@ -1031,7 +1024,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 					}
 					else
 					{
-						Debug.LogError("COULD NOT SAVE -> CHUNKS DOESN'T CONTAIN KEY: " + chunkLocation);
+						Debug.LogError("ERR FOR PROP: " + propKey + " COULD NOT SAVE -> CHUNKS DOESN'T CONTAIN KEY: " + chunkLocation);
 					}
 				}
 				else if (allChunks.ContainsKey(chunkLocation))

@@ -143,8 +143,7 @@ public class CheatSheet : MonoBehaviour
         GameSettings.Instance.worldInstance.AddNewProp(
         spawnLocation,
         GameSettings.Instance.Player.transform.rotation,
-        objectToSpawn,
-        GameSettings.Instance.worldInstance.GetLoadedChunkAtPlayerLocation());
+        objectToSpawn);
 
         Debug.Log("| CHEATSHEET | Successfully Spawned: " + objectToSpawn.GetComponent<InteractableObject>().type);
     }
@@ -161,8 +160,7 @@ public class CheatSheet : MonoBehaviour
 
         GameSettings.Instance.worldInstance.AddNewEntity(
         spawnLocation,
-        entityToSpawn,
-        GameSettings.Instance.worldInstance.GetLoadedChunkAtPlayerLocation());
+        entityToSpawn);
 
         Debug.Log("| CHEATSHEET | Successfully Spawned: " + entityToSpawn.GetComponent<Entity>().type);
     }
