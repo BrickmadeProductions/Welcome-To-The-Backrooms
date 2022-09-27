@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class LootBox : InteractableObject
 {
-    public List<ObjectWithWeight> lootTable;
+    /*public List<ObjectWithWeight> lootTable;*/
 
-    public List<Transform> itemSpawnLocations;
+    public List<ItemSpawner> itemSpawnLocations;
 
     public Animator anim;
 
@@ -29,28 +29,22 @@ public class LootBox : InteractableObject
     {
         if (!hasOpened)
         {
-            foreach (Transform itemSpawn in itemSpawnLocations)
+            foreach (ItemSpawner itemSpawn in itemSpawnLocations)
             {
-                if (chanceForItemToBeInASlot > Random.Range(0, 0.99f)){
+                 if (chanceForItemToBeInASlot > Random.Range(0, 0.99f))
+                 {
+                    itemSpawn.SpawnItem();
+                 }
 
-                    //setup in loadedchunks Prop data
-                    GameObject item = WeightedRandom.ReturnItemBySpawnChances(lootTable);
-                    
-                    InteractableObject spawnedProp = GameSettings.Instance.worldInstance.AddNewProp(itemSpawn.transform.position, Quaternion.Euler(transform.localRotation.x, Random.Range(transform.localRotation.y - 15f, transform.localRotation.y + 15f), transform.localRotation.z), item);
-                    
-                    Debug.Log("LOOTBOX CONTAINED: " + spawnedProp.GetComponent<HoldableObject>().type);
-
-                    //spawnedProp.transform.parent = transform;
-                }
-
-                anim.ResetTrigger("Open");
-                anim.SetTrigger("Open");
-
-                hasOpened = true;
             }
 
-            
-        }
+            hasOpened = true;
+
+        anim.ResetTrigger("Open");
+        anim.SetTrigger("Open");
+
+
+    }
 
         
         

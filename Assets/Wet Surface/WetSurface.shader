@@ -5,7 +5,7 @@
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 		[Normal]
 		_NormalTex ("Normalmap", 2D) = "bump" {}
-		_NormalScale ("Normalmap Scale", Range(0, 1)) = 1
+		_NormalScale ("Normalmap Scale", Range(0, 5)) = 1
 		_MetallicTex ("Metallic", 2D) = "white" {}
 		[Space]
 		_Metallic ("Metallic", Range(0, 1)) = 0.0

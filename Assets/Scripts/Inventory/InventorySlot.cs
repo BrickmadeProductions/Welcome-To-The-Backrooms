@@ -1,10 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InventorySlot : MonoBehaviour
 {
     public HoldableObject objectInSlot;
+
+    public RawImage itemImage;
+    public Text nameText;
+    public Text count;
+
+    public void SetSlotInfo(InventoryObjectData invData)
+    {
+        itemImage.texture = invData.image;
+        nameText.text = invData.name;
+    }
 
     public void SwitchObjectToThisSlot(HoldableObject holdable)
     {
