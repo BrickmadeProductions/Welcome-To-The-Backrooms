@@ -2989,8 +2989,16 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
+      propertyPath: spawnOnce
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
       propertyPath: typeToSpawn
-      value: 13
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
+      propertyPath: spawnInstantly
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
@@ -3387,8 +3395,16 @@ PrefabInstance:
       value: SpawnItemType
       objectReference: {fileID: 0}
     - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
+      propertyPath: spawnOnce
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
       propertyPath: typeToSpawn
       value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
+      propertyPath: spawnInstantly
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}

@@ -112,7 +112,7 @@ public class InventorySystem : MonoBehaviour
     }
 
     //when you pick up an object, open inventory selection UI
-    public void OpenInventorySelection()
+    public void OpenInventory()
     {
         inventoryOpened = !inventoryOpened;
 
@@ -197,7 +197,7 @@ public class InventorySystem : MonoBehaviour
 
             if (Input.GetButtonDown("OpenInventory"))
             {
-                OpenInventorySelection();
+                OpenInventory();
             }
         }
 

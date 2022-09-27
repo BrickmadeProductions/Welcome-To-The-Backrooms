@@ -6,9 +6,16 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-
+[Serializable]
+public struct InventoryObjectData
+{
+	public Texture image;
+	public string name;
+}
 public class HoldableObject : InteractableObject
 {
+	public InventoryObjectData inventoryObjectData;
+
 	//general
 	public float durability;
 

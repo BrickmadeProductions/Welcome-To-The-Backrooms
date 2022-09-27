@@ -648,8 +648,9 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			Vector3 chunkVector = GameSettings.Instance.worldInstance.GetChunkKeyAtWorldLocation(spawnedEntity.transform.position);
 			string chunkKey = chunkVector.x + "," + chunkVector.y + "," + chunkVector.z;
 			GameSettings.Instance.worldInstance.loadedChunks.TryGetValue(chunkKey, out Chunk chunk);
-			
-			chunk.saveableData.entityData.entityClusterData.Add(spawnedEntity.type.ToString() + "-" + spawnedEntity.runTimeID, spawnedEntity.Save());
+
+			if (chunk != null)
+				chunk.saveableData.entityData.entityClusterData.Add(spawnedEntity.type.ToString() + "-" + spawnedEntity.runTimeID, spawnedEntity.Save());
 
 			return spawnedEntity;
 		}
@@ -774,10 +775,13 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			//automatically detect which chunk this item is in
 			Vector3 chunkVector = GetChunkKeyAtWorldLocation(prop.transform.position);
+
 			string chunkKey = chunkVector.x + "," + chunkVector.y + "," + chunkVector.z;
+
 			loadedChunks.TryGetValue(chunkKey, out Chunk chunk);
 
-			chunk.saveableData.propData.propClusterData.Add(prop.type.ToString() + "-" + prop.runTimeID, prop.Save());
+			if (chunk != null)
+				chunk.saveableData.propData.propClusterData.Add(prop.type.ToString() + "-" + prop.runTimeID, prop.Save());
 
 			return prop;
 		}
@@ -841,7 +845,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 				RemoveProp(prop.Key);
 
-				Debug.Log(loadedChunk.Value.saveableData.propData.propClusterData.Remove(prop.Key));
+				//Debug.Log(loadedChunk.Value.saveableData.propData.propClusterData.Remove(prop.Key));
 
 			}
 
@@ -855,7 +859,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 				RemoveProp(prop.Key);
 
-				Debug.Log(allChunks.Value.propData.propClusterData.Remove(prop.Key));
+				//Debug.Log(allChunks.Value.propData.propClusterData.Remove(prop.Key));
 
 			}
 		}

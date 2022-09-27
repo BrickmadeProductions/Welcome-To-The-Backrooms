@@ -358,6 +358,8 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        isGrounded = true;
+
         ogHeadTrans = neck.transform;
 
 
@@ -497,15 +499,21 @@ public class PlayerController : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        
+    }
+    void Update()
+    {
+
         if (bufferStand & PlayerHasRoom()) { bufferStand = false; }
 
+        //base magnitude off of direction faced
         Vector2 mag = FindVelRelativeToLook();
         float xMag = mag.x, yMag = mag.y;
 
-        float curSpeedX = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxisRaw("Horizontal") * adrenalineSpeedMultiplier : 0;
+        float curSpeedX = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxisRaw("Horizontal") / 1.25f * adrenalineSpeedMultiplier : 0;
         float curSpeedY = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxisRaw("Vertical") * adrenalineSpeedMultiplier : 0;
 
-        CounterMovement(curSpeedX, curSpeedY, mag);
+        //CounterMovement(curSpeedX, curSpeedY, mag);
 
         //Set max speed
         float maxSpeed = this.maxSpeed;
@@ -522,38 +530,40 @@ public class PlayerController : MonoBehaviour
         // Movement in air
         if (!isGrounded)
         {
-            multiplier = 0.1f;
-            multiplierV = 0.1f;
+            multiplier = 0.25f;
+            multiplierV = 0.25f;
         }
 
         // Movement while sliding
         if (currentPlayerState == PLAYERSTATES.SLIDE)
         {
-            multiplier = 1f;
-            multiplierV = 1f;
+            multiplier = 2f;
+            multiplierV = 2f;
         }
 
+        Vector3 walkXForce = transform.forward * curSpeedY * moveSpeed * Time.deltaTime * multiplier * multiplierV;
+        Vector3 walkYForce = transform.right * curSpeedX * moveSpeed * Time.deltaTime * multiplier;
+
         //Apply forces to move player
-        rb.AddForce(transform.forward * curSpeedY * moveSpeed * Time.deltaTime * multiplier * multiplierV);
-        rb.AddForce(transform.right * curSpeedX * moveSpeed * Time.deltaTime * multiplier);
+        rb.AddForce(walkXForce);
+        rb.AddForce(walkYForce);
         rb.AddForce(-transform.up * Time.deltaTime * gravity);
 
-        if (Mathf.Abs(Input.GetAxis("Horizontal")) < 0.25f && Mathf.Abs(Input.GetAxis("Vertical")) < 0.25f && isGrounded && currentPlayerState != PLAYERSTATES.SLIDE && !Input.GetButton("Jump"))
+        if (Mathf.Abs(Input.GetAxisRaw("Horizontal")) < 0.25f && Mathf.Abs(Input.GetAxisRaw("Vertical")) < 0.25f && isGrounded && currentPlayerState != PLAYERSTATES.SLIDE && !Input.GetButton("Jump"))
         {
             rb.drag = 1000f;
         }
         else
         {
-            rb.drag = 1f;
+            rb.drag = 2f;
         }
 
+        float rbVelX = transform.InverseTransformDirection(rb.velocity).z;
+        float rbVelY = transform.InverseTransformDirection(rb.velocity).x;
 
-        bodyAnim.SetFloat("xWalk", yMag);
-        bodyAnim.SetFloat("yWalk", xMag);
-    }
-    void Update()
-    {
-        
+        bodyAnim.SetFloat("xWalk", rbVelX);
+        bodyAnim.SetFloat("yWalk", rbVelY);
+
 
         //If holding jump && ready to jump, then jump
         if (Input.GetButtonDown("Jump") && isGrounded) Jump();
@@ -579,7 +589,7 @@ public class PlayerController : MonoBehaviour
             transform.rotation *= Quaternion.Euler(0, rotationY, 0);
             //player movement
 
-            PlayerLoop();
+            PlayerDataLoop();
 
             // Press Left Shift to run
 
@@ -641,9 +651,11 @@ public class PlayerController : MonoBehaviour
             maxSpeed = AirmaxSpeed;
 
             //Add jump forces
-            rb.AddForce(transform.up * jumpForce * 1.5f);
-            rb.AddForce(transform.forward * jumpForce * 1.1f * rb.velocity.magnitude);
-            rb.AddForce(normalVector * jumpForce * 0.5f);
+             rb.AddForce(Vector3.up * jumpForce * 1.5f);
+             rb.AddForce(transform.forward * 1000f * rb.velocity.magnitude);
+             rb.AddForce(normalVector * jumpForce * 0.5f);
+
+            //rb.velocity += Vector3.up * jumpForce * 1.5f;
 
             //If jumping while falling, reset y velocity.
 
@@ -1102,7 +1114,7 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    private void PlayerLoop()
+    private void PlayerDataLoop()
     {
         if (!GameSettings.Instance.cheatSheet.noClip)
         {
