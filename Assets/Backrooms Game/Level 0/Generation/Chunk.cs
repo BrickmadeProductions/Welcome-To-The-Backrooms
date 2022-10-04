@@ -43,7 +43,6 @@ public class Chunk : MonoBehaviour
 
 	public int z_offset;
 
-	private int RoomId;
 
 	public bool ALL_TILES_GENERATED;
 
@@ -205,6 +204,10 @@ public class Chunk : MonoBehaviour
 	{
 		GameObject tileToSpawn;
 
+		/*if (x % GameSettings.Instance.worldInstance.regTileSpace == 0 && y % GameSettings.Instance.worldInstance.regTileSpace == 0  && z % GameSettings.Instance.worldInstance.regTileSpace == 0)
+		{
+			tileToSpawn = GameSettings.Instance.worldInstance.RegTiles[0];
+        }*/
 		if (tile_id > tileset.Count - 1)
 		{
 			tileToSpawn = tileset[0];

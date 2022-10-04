@@ -180,7 +180,6 @@ MonoBehaviour:
   - {fileID: 5144882405261894941, guid: 28d8ad4a21302ff4e8b5da426d33af4b, type: 3}
   - {fileID: 7076623207126011811, guid: c764dc763975a064786c50978b7fb970, type: 3}
   - {fileID: 7392081474520821307, guid: abc7bb120413a0e4e9dc4fda4e128ef6, type: 3}
-  - {fileID: 472166766898139531, guid: b2f16886182db274c893d59db1b35eda, type: 3}
   - {fileID: 7076623207126011811, guid: bc0ff91b8904165429839dee4868e47e, type: 3}
   - {fileID: 7076623207126011811, guid: 1a40fea758b938848876de6d8377d48c, type: 3}
   - {fileID: 7076623207126011811, guid: 83ac1d39f11bded4b81d9fceae1130a5, type: 3}
@@ -188,11 +187,13 @@ MonoBehaviour:
   RegTiles: []
   worldPropSpawnTable:
   - type: 10
-    weight: 15
+    weight: 1
   - type: 2
-    weight: 60
+    weight: 10
   - type: 7
     weight: 5
+  - type: 19
+    weight: 2
   worldEntitySpawnTable:
   - type: 6
     weight: 100

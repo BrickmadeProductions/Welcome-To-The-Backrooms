@@ -20,4 +20,14 @@ public class InteractableDoor : InteractableObject
 	public override void Init()
 	{
 	}
+
+    public override void OnSaveFinished()
+    {
+        
+    }
+
+    public override void OnLoadFinished()
+    {
+        
+    }
 }

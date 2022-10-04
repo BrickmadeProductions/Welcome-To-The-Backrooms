@@ -12,7 +12,7 @@ public class LootBox : InteractableObject
 
     public float chanceForItemToBeInASlot;
 
-    bool hasOpened;
+    public bool hasOpened;
 
     public override void Hold(InteractionSystem player, bool RightHand)
     {
@@ -22,7 +22,23 @@ public class LootBox : InteractableObject
     public override void Init()
     {
         hasOpened = false;
-        anim.ResetTrigger("Open");
+        anim.SetTrigger("Close");
+    }
+
+    public override void OnLoadFinished()
+    {
+        if (hasOpened)
+        {
+            anim.SetTrigger("Open");
+        }
+        else
+        {
+            anim.SetTrigger("Close");
+        }
+    }
+    public override void OnSaveFinished()
+    {
+
     }
 
     public override void Use(InteractionSystem player, bool LMB)
@@ -39,9 +55,10 @@ public class LootBox : InteractableObject
             }
 
             hasOpened = true;
+            SetMetaData("hasOpened", "true");
 
-        anim.ResetTrigger("Open");
-        anim.SetTrigger("Open");
+            anim.ResetTrigger("Open");
+            anim.SetTrigger("Open");
 
 
     }

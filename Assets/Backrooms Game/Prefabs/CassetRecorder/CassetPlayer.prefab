@@ -623,23 +623,27 @@ MonoBehaviour:
     instance: {fileID: 0}
   type: 17
   playSounds: 0
-  spawnChance: 0
   runTimeID: 
+  inventoryObjectData:
+    image: {fileID: 2800000, guid: a5d3547ba6b73a04298503c7277f8fca, type: 3}
+    name: TapeRecorder
+    inventoryWeight: 8
+    description: A device used to play and record Cassette tapes.
   durability: 0
   breakablePrefabs: []
   hitClips: []
   breakClips: []
-  inventoryWeight: 1
-  holdableObject: {fileID: 7906662818189493193}
+  rb: {fileID: 0}
   ThrowMultiplier: 0
   large: 0
   autoSwing: 1
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimations:
-  - isRecordingCassetPlayer
+  StartUseAnimation: 
+  UseAnimations: []
   CustomHoldAnimation: isHoldingCassetPlayer
+  ItemObjectAnimations: []
   savedClips: []
   currentClipProcessing: {fileID: 0}
 --- !u!95 &2069247715574910251

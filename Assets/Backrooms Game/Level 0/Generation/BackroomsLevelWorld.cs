@@ -179,7 +179,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public IEnumerator TrySpawnEntityEveryFrame()
 	{
-		while (GameSettings.Instance.ActiveScene != SCENE.INTRO && GameSettings.Instance.ActiveScene != SCENE.HOMESCREEN && spawnEntities)
+		while (GameSettings.Instance.ActiveScene != SCENE.INTRO && GameSettings.Instance.ActiveScene != SCENE.HOMESCREEN && spawnEntities && worldEntitySpawnTable.Count > 0)
 		{
 			yield return new WaitForSecondsRealtime(0.1f);
 
@@ -542,6 +542,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			if (!allChunks.ContainsKey(chunk.name))
             {
 				chunk.GetComponent<Chunk>().CreateChunk(chunkX, chunkY, chunkZ, this, shouldGenInstantly, new List<int>(0));
+			
 			}
             else
             {
@@ -593,6 +594,12 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
         else
         {
 			chunk.SaveChunkTileGrid();
+
+			foreach (Tile tile in chunk.tile_grid)
+            {
+				tile.SpawnPresetItems();
+			}
+			
 
 			allChunks.Add(chunk.name, chunk.saveableData);
 		}
@@ -842,8 +849,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			foreach (KeyValuePair<string, SaveableProp> prop in loadedChunk.Value.saveableData.propData.propClusterData.ToList())
 			{
-
-				RemoveProp(prop.Key);
+				if (prop.Value.instance.transform.parent != null)
+					RemoveProp(prop.Key);
 
 				//Debug.Log(loadedChunk.Value.saveableData.propData.propClusterData.Remove(prop.Key));
 
@@ -856,8 +863,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			foreach (KeyValuePair<string, SaveableProp> prop in allChunks.Value.propData.propClusterData.ToList())
 			{
-
-				RemoveProp(prop.Key);
+				if (prop.Value.instance.transform.parent != null)
+					RemoveProp(prop.Key);
 
 				//Debug.Log(allChunks.Value.propData.propClusterData.Remove(prop.Key));
 
@@ -942,7 +949,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public void SaveAllObjectsAndEntities()
 	{
-
 		KeyValuePair<string, SerealizedChunk>[] serializedChunks = allChunks.ToArray();
 
 		for (int i = 0; i < serializedChunks.Length; i++)
@@ -1028,7 +1034,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 					}
 					else
 					{
-						Debug.LogError("ERR FOR PROP: " + propKey + " COULD NOT SAVE -> CHUNKS DOESN'T CONTAIN KEY: " + chunkLocation);
+						Debug.LogError("ERR FOR PROP: " + propKey + " COULD NOT SAVE PROP -> CHUNKS DOESN'T CONTAIN KEY: " + chunkLocation);
 					}
 				}
 				else if (allChunks.ContainsKey(chunkLocation))
@@ -1037,7 +1043,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				}
 				else
 				{
-					Debug.LogError("COULD NOT SAVE: " + propData.Value.type.ToString() + "-" + propData.Value.instance.runTimeID);
+					Debug.LogError("COULD NOT SAVE PROP: " + propData.Value.type.ToString() + "-" + propData.Value.instance.runTimeID);
 				}
 			}
 		}

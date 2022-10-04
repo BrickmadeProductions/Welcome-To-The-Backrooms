@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 2891958640714419772}
   - component: {fileID: 4494756353391914056}
   - component: {fileID: 1723580405266850514}
-  - component: {fileID: 3157790954629069949}
+  - component: {fileID: 4770272432896324995}
   m_Layer: 9
   m_Name: Cylinder
   m_TagString: Untagged
@@ -167,8 +167,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &3157790954629069949
-CapsuleCollider:
+--- !u!65 &4770272432896324995
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -177,9 +177,8 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 1.11
-  m_Height: 3.24
-  m_Direction: 2
+  serializedVersion: 2
+  m_Size: {x: 2, y: 1.9999998, z: 2.5999997}
   m_Center: {x: -0.0000000055879354, y: 0.000000011920929, z: 0.3}
 --- !u!1 &6239185709313815323
 GameObject:
@@ -336,22 +335,27 @@ MonoBehaviour:
     instance: {fileID: 0}
   type: 5
   playSounds: 0
-  spawnChance: 0
   runTimeID: 
+  inventoryObjectData:
+    image: {fileID: 2800000, guid: c38ee87694baea84f85f0d837d371635, type: 3}
+    name: Soup
+    inventoryWeight: 6
+    description: A hearty meal in a can.
   durability: 0
   breakablePrefabs: []
   hitClips: []
   breakClips: []
-  inventoryWeight: 1
-  holdableObject: {fileID: 0}
+  rb: {fileID: 0}
   ThrowMultiplier: 0
   large: 0
+  autoSwing: 0
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimationClips: []
-  LMBAnimationBools: []
+  StartUseAnimation: 
+  UseAnimations: []
   CustomHoldAnimation: 
+  ItemObjectAnimations: []
 --- !u!82 &6768213791637214978
 AudioSource:
   m_ObjectHideFlags: 0
