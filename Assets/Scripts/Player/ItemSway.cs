@@ -28,7 +28,7 @@ public class ItemSway : MonoBehaviour
         if (SceneManager.GetActiveScene().name != "HomeScreen" && GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canMoveHead)
 
             if (GameSettings.Instance.Player.GetComponent<PlayerController>().currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE 
-                && GameSettings.Instance.Player.GetComponent<PlayerController>().RHolding != null)
+                && GameSettings.Instance.Player.GetComponent<InteractionSystem>().GetObjectInHand() != null)
             {
                 float movementX = -Input.GetAxis("Mouse X") / 4 * amount;
                 float movementY = -Input.GetAxis("Mouse Y") / 4 * amount;

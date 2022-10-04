@@ -10,14 +10,14 @@ using UnityEngine.UI;
 public class InteractionSystem : MonoBehaviour
 {
 	private PlayerController player;
+	private InventoryMenuSystem inventory;
 
 	//building
 	public bool buildOn;
 
 	private bool canPlaceAtLocation;
 	//
-
-	public InteractableObject currentlyLookingAt;
+	public GameObject currentlyLookingAt;
 	public GameObject currentPlaceItemPrefab;
 	Material transparentPlaceMaterialGood;
 	Material transparentPlaceMaterialCollision;
@@ -28,20 +28,17 @@ public class InteractionSystem : MonoBehaviour
 
 	public Transform dropLocation;
 
-	public RawImage pickup;
-	public RawImage open;
+	public Image interact;
+
+	public Image Cursor;
 
 	public bool canGrab = true;
+
+	public float pickupTime = 0.75f;
 
 
 	public LayerMask placingLayerMask;
 	public LayerMask grabbingLayerMask;
-
-	public void AnimationFinished()
-    {
-		player.RHolding.animationPlaying = false;
-    }
-
 
 	private void Awake()
 	{
@@ -49,67 +46,9 @@ public class InteractionSystem : MonoBehaviour
 		transparentPlaceMaterialGood = Resources.Load("Materials/TransparentPlaceMaterialGood", typeof(Material)) as Material;
 		transparentPlaceMaterialCollision = Resources.Load("Materials/TransparentPlaceMaterialCollision", typeof(Material)) as Material;
 		player = GetComponent<PlayerController>();
+		inventory = GetComponent<InventoryMenuSystem>();
 	}
-	private void SetAllChildrenToLayer(Transform top, int layer)
-	{
-		top.gameObject.layer = layer;
-		foreach (Transform item in top)
-		{
-			if (item.childCount > 0)
-			{
-				item.gameObject.layer = layer;
-				SetAllChildrenToLayer(item, layer);
-			}
-			else
-			{
-				item.gameObject.layer = layer;
-			}
-		}
-	}
-
-	private void SetAllCollidersToTrigger(Transform top)
-	{
-		//Destroy(top.GetComponent<Rigidbody>());
-
-		foreach (Transform item in top)
-		{
-			if (item.childCount > 0)
-			{
-				if (item.gameObject.GetComponent<Collider>() != null)
-				{
-					foreach(Collider collider in item.gameObject.GetComponents<Collider>())
-                    {
-						collider.isTrigger = true;
-					}
-				
-					if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>() == null)
-						item.gameObject.AddComponent<WTTB_ExtraCollisionData>();
-				}
-				if (item.gameObject.GetComponent<Weapon>() != null)
-                {
-					Destroy(item.gameObject.GetComponent<Weapon>());
-                }
-				SetAllCollidersToTrigger(item);
-			}
-			else
-			{
-				if (item.gameObject.GetComponent<Collider>() != null)
-				{
-					foreach (Collider collider in item.gameObject.GetComponents<Collider>())
-					{
-						collider.isTrigger = true;
-					}
-
-					if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>() == null)
-						item.gameObject.AddComponent<WTTB_ExtraCollisionData>();
-				}
-				if (item.gameObject.GetComponent<Weapon>() != null)
-				{
-					Destroy(item.gameObject.GetComponent<Weapon>());
-				}
-			}
-		}
-	}
+	
 
 	private bool CheckForCollision(Transform trans)
 	{
@@ -164,8 +103,7 @@ public class InteractionSystem : MonoBehaviour
 		return false;
 		
 	}
-
-
+	
 	private void ChangeAllMeshMaterials(Transform top, Material mat)
 	{
 		if (top.gameObject.GetComponent<Renderer>() != null)
@@ -191,167 +129,125 @@ public class InteractionSystem : MonoBehaviour
 		}
 	}
 
-	/*private void InventoryManager()
-	{
-		if (Input.GetButtonDown("Inventory"))
-		{
-			if (inventoryOpened)
-			{
-				//player.Crouch();
-				inventoryOpened = false;
-			}
-			else
-			{
-				//player.UnCrouch();
-				inventoryOpened = true;
-			}
-		}
-	}*/
+	public HoldableObject GetObjectInHand()
+    {
+		if (inventory.rHand.itemsInSlot.Count > 0)
+			return inventory.rHand.itemsInSlot[0].connectedObject;
 
+		else return null;
+	}
+	
 	public void SetThrow()
 	{
 		
-		SetAllChildrenToLayer(player.RHolding.transform, 9);
+		BPUtil.SetAllChildrenToLayer(GetObjectInHand().transform, 9);
+		BPUtil.SetAllColliders(GetObjectInHand().transform, true);
 
-		player.RHolding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
-		player.RHolding.transform.parent = null;
+		GetObjectInHand().GetComponent<HoldableObject>().rb.isKinematic = false;
+		GetObjectInHand().transform.parent = null;
 		
 		player.holdLocation.GetComponent<AudioSource>().pitch = 1f + Random.Range(-0.1f, 0.1f);
 		player.holdLocation.GetComponent<AudioSource>().Play();
-		Collider[] components = player.RHolding.GetComponents<Collider>();
-		for (int i = 0; i < components.Length; i++)
-		{
-			components[i].enabled = true;
-		}
-		SceneManager.MoveGameObjectToScene(player.RHolding.gameObject, SceneManager.GetActiveScene());
-		player.bodyAnim.SetBool((player.RHolding.CustomHoldAnimation != "") ? player.RHolding.CustomHoldAnimation : "isHoldingSmall", value: false);
+
+		SceneManager.MoveGameObjectToScene(GetObjectInHand().gameObject, SceneManager.GetActiveScene());
+		player.bodyAnim.SetBool((GetObjectInHand().CustomHoldAnimation != "") ? GetObjectInHand().CustomHoldAnimation : "isHoldingSmall", value: false);
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
 
-		player.RHolding.transform.position = player.RHandLocation.transform.position;
+		GetObjectInHand().transform.position = player.RHandLocation.transform.position;
 
-		player.RHolding.transform.rotation = Quaternion.LookRotation(player.playerCamera.transform.forward, player.playerCamera.transform.up);
-		player.RHolding.Throw(player.playerCamera.transform.forward.normalized * ((player.GetComponent<Rigidbody>().velocity.magnitude / 10) + 1));
+		GetObjectInHand().transform.rotation = Quaternion.LookRotation(player.playerCamera.transform.forward, player.playerCamera.transform.up);
+		GetObjectInHand().Throw(player.playerCamera.transform.forward.normalized * GetObjectInHand().ThrowMultiplier * ((player.GetComponent<Rigidbody>().velocity.magnitude / 10) + 1));
 		
+		inventory.rHand.RemoveItemFromSlot(inventory.rHand.itemsInSlot[0].connectedObject, true);
 
-		player.RHolding = null;
-
-	    //player.bodyAnim.SetBool("isThrowing", false);
+		//player.bodyAnim.SetBool("isThrowing", false);
 	}
-
 	//raycast can go through multiple objects
-	public void SetHolding(InteractableObject holdableObject)
-	{
-		if (player.RHolding == null)
+	public IEnumerator StartPickup(InteractableObject holdableObject)
+    {
+		float currentTime = pickupTime;
+
+		while (currentTime >= 0 && Input.GetButtonDown("Grab"))
+		{
+			currentTime--;
+			yield return new WaitForSeconds(Time.deltaTime * 50f);
+			interact.fillAmount = currentTime;
+
+		}
+
+		if (currentTime > 0.1f)
+
+			yield break;
+
+        else if (holdableObject)
         {
-			player.bodyAnim.SetTrigger("isGrabbingRight");
+			FinalizePickup(holdableObject);
+        }
+	}
+	public void FinalizePickup(InteractableObject holdableObject)
+	{
+		InventorySlot slotToAddTo = player.GetComponent<InventoryMenuSystem>().GetNextAvailableInventorySlot((HoldableObject)holdableObject);
+		
+		if (slotToAddTo != null)
+        {
+			if (slotToAddTo == player.GetComponent<InventoryMenuSystem>().rHand)
+				player.bodyAnim.SetTrigger("isGrabbingRight");
 
-			canGrab = false;
-
-			player.RHolding = (HoldableObject)holdableObject;
-
-			if (player.RHolding.GetComponent<HoldableObject>().large)
-			{
-				SetAllChildrenToLayer(player.RHolding.transform, 14);
-			}
 			else
 			{
-				SetAllChildrenToLayer(player.RHolding.transform, 23);
-			}
+				player.bodyAnim.SetTrigger("isGrabbingLeft");
+			}		
+			
+			canGrab = false;
 
-			Collider[] components = player.RHolding.GetComponents<Collider>();
-			for (int i = 0; i < components.Length; i++)
+			
+			/*if ((HoldableObject)currentlyLookingAt.large == true)
 			{
-				components[i].enabled = false;
-			}
-
-			player.RHolding.GetComponent<HoldableObject>().holdableObject.isKinematic = true;
-			player.RHolding.transform.parent = (player.RHolding.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
-			player.RHolding.transform.position = (player.RHolding.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
-			Quaternion localRotation = Quaternion.Euler(player.neck.transform.localRotation.x / 2f, player.neck.transform.localRotation.y, player.neck.transform.localRotation.z);
-
-
-			if (player.RHolding.GetComponent<HoldableObject>().large)
-			{
-				player.bodyAnim.SetBool("isHoldingLarge", value: true);
 				player.playerHealth.canRun = false;
 				player.currentPlayerState = PlayerController.PLAYERSTATES.WALK;
 			}
+			//add to inventory
 			else
-			{
-				player.bodyAnim.SetBool((player.RHolding.CustomHoldAnimation != "") ? player.RHolding.CustomHoldAnimation : "isHoldingSmall", value: true);
-			}
-			player.RHolding.transform.localRotation = localRotation;
+			{}*/
+			slotToAddTo.AddItemToSlot((HoldableObject)holdableObject);
+			//GetObjectInRightHand().transform.localRotation = localRotation;
 
-			player.RHolding.Hold(this, true);
-		}
-		//if right hand is already holding put in next available slot
-        else if (GetComponent<InventorySystem>().GetNextContainerObjectNotFull() != null)
-        {
-			player.bodyAnim.SetTrigger("isGrabbingLeft");
-
-			canGrab = false;
-
-			player.LHolding = (HoldableObject)holdableObject;
-
-			SetAllChildrenToLayer(player.LHolding.transform, 23);
-
-			Collider[] components = player.LHolding.GetComponents<Collider>();
-			for (int i = 0; i < components.Length; i++)
-			{
-				components[i].enabled = false;
-			}
-
-			player.LHolding.GetComponent<HoldableObject>().holdableObject.isKinematic = true;
-			player.LHolding.transform.parent = player.LHolding.transform;
-			player.LHolding.transform.position = player.LHandLocation.transform.position;
-			Quaternion localRotation = Quaternion.Euler(player.neck.transform.localRotation.x / 2f, player.neck.transform.localRotation.y, player.neck.transform.localRotation.z);
-
-
-			player.LHolding.transform.localRotation = localRotation;
-
-			player.LHolding.Hold(this, false);
+			GetObjectInHand().Hold(this, true);
 		}
 		
 	}
-	
 	public void SetDrop()
 	{
-		SetAllChildrenToLayer(player.RHolding.transform, 9);
-		player.RHolding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
-		player.RHolding.transform.parent = null;
-		player.RHolding.GetComponent<HoldableObject>().saveableData.instance = player.RHolding.GetComponent<HoldableObject>();
-		player.RHolding.Throw(-Vector3.up);
 
-		Collider[] components = player.RHolding.GetComponents<Collider>();
-		for (int i = 0; i < components.Length; i++)
-		{
-			components[i].enabled = true;
-		}
+		BPUtil.SetAllChildrenToLayer(GetObjectInHand().transform, 9);
+		BPUtil.SetAllColliders(GetObjectInHand().transform, true);
 
-		SceneManager.MoveGameObjectToScene(player.RHolding.gameObject, SceneManager.GetActiveScene());
-		player.bodyAnim.SetBool((player.RHolding.CustomHoldAnimation != "") ? player.RHolding.CustomHoldAnimation : "isHoldingSmall", value: false);
+		GetObjectInHand().GetComponent<HoldableObject>().rb.isKinematic = false;
+		GetObjectInHand().transform.parent = null;
+		GetObjectInHand().GetComponent<HoldableObject>().saveableData.instance = GetObjectInHand().GetComponent<HoldableObject>();
+		GetObjectInHand().Throw(-Vector3.up);
+
+		SceneManager.MoveGameObjectToScene(GetObjectInHand().gameObject, SceneManager.GetActiveScene());
+		player.bodyAnim.SetBool((GetObjectInHand().CustomHoldAnimation != "") ? GetObjectInHand().CustomHoldAnimation : "isHoldingSmall", value: false);
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
-		player.RHolding = null;
+
+		inventory.rHand.RemoveItemFromSlot(GetObjectInHand(), true);
+
 	}
-
-
 	public void SetPlace(Vector3 location, Quaternion rotation)
 	{
-		SetAllChildrenToLayer(player.RHolding.transform, 9);
-		player.RHolding.transform.parent = null;
-		player.RHolding.GetComponent<HoldableObject>().saveableData.instance = player.RHolding.GetComponent<HoldableObject>();
-		Collider[] components = player.RHolding.GetComponents<Collider>();
-		for (int i = 0; i < components.Length; i++)
-		{
-			components[i].enabled = true;
-		}
-		SceneManager.MoveGameObjectToScene(player.RHolding.gameObject, SceneManager.GetActiveScene());
-		player.bodyAnim.SetBool((player.RHolding.CustomHoldAnimation != "") ? player.RHolding.CustomHoldAnimation : "isHoldingSmall", value: false);
+		BPUtil.SetAllChildrenToLayer(GetObjectInHand().transform, 9);
+		GetObjectInHand().transform.parent = null;
+		GetObjectInHand().GetComponent<HoldableObject>().saveableData.instance = GetObjectInHand().GetComponent<HoldableObject>();
+
+		SceneManager.MoveGameObjectToScene(GetObjectInHand().gameObject, SceneManager.GetActiveScene());
+		player.bodyAnim.SetBool((GetObjectInHand().CustomHoldAnimation != "") ? GetObjectInHand().CustomHoldAnimation : "isHoldingSmall", value: false);
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
-		player.RHolding.GetComponent<HoldableObject>().holdableObject.isKinematic = false;
-		player.RHolding.transform.position = location;
-		player.RHolding.transform.rotation = rotation;
-		player.RHolding = null;
+		GetObjectInHand().GetComponent<HoldableObject>().rb.isKinematic = false;
+		GetObjectInHand().transform.position = location;
+		GetObjectInHand().transform.rotation = rotation;
+		
+		inventory.rHand.RemoveItemFromSlot(GetObjectInHand(), true);
 
 		if (currentPlaceItemPrefab != null)
 		{
@@ -360,12 +256,45 @@ public class InteractionSystem : MonoBehaviour
 
 		currentPlaceItemPrefab = null;
 	}
+	
+	//called after inventory item is added
+	public void OnInventoryItemAddedToSlot_CallBack(InventorySlot slotUpdated, HoldableObject itemMoved)
+    {
+		//item was moved to hand
+        if (slotUpdated == GetComponent<InventoryMenuSystem>().rHand)
+        {
+			player.bodyAnim.SetBool((GetObjectInHand().CustomHoldAnimation != "") ? GetObjectInHand().CustomHoldAnimation : "isHoldingSmall", value: true);
 
+			if (GetObjectInHand().GetComponent<HoldableObject>().large)
+			{
+				BPUtil.SetAllChildrenToLayer(GetObjectInHand().transform, 14);
+			}
+			else
+			{
+				BPUtil.SetAllChildrenToLayer(GetObjectInHand().transform, 23);
+			}
+			
+			GetObjectInHand().GetComponent<HoldableObject>().rb.isKinematic = true;
+			GetObjectInHand().transform.parent = (GetObjectInHand().GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
+			GetObjectInHand().transform.position = (GetObjectInHand().GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			Quaternion localRotation = Quaternion.Euler(player.neck.transform.localRotation.x / 2f, player.neck.transform.localRotation.y, player.neck.transform.localRotation.z);
+			
+			GetObjectInHand().transform.localRotation = localRotation;
 
-	private void Update()
+			GetObjectInHand().Hold(this, true);
+		}
+		//item moved away from hand
+        else if (GetComponent<InventoryMenuSystem>().rHand.itemsInSlot.Count == 0)
+        {
+			player.bodyAnim.SetBool((itemMoved.CustomHoldAnimation != "") ? itemMoved.CustomHoldAnimation : "isHoldingSmall", value: false);
+
+		}
+		
+	}
+	void Update()
 	{
 		
-		if (GameSettings.Instance.PauseMenuOpen || GameSettings.Instance.IsCutScene || GetComponent<InventorySystem>().inventoryOpened)
+		if (GameSettings.Instance.PauseMenuOpen || GameSettings.Instance.IsCutScene || GetComponent<InventoryMenuSystem>().menuOpen)
 		{
 			return;
 		}
@@ -391,16 +320,7 @@ public class InteractionSystem : MonoBehaviour
 		{
 			GameObject interactable = raycastForGrabbing[0].collider.transform.parent.parent.gameObject;
 
-			if (interactable.gameObject.layer == 9 || interactable.gameObject.layer == 10 || interactable.gameObject.layer == 17)
-			{
-				currentlyLookingAt = interactable.GetComponent<InteractableObject>();
-			}
-		
-			else
-			{
-				currentlyLookingAt = null;
-			}
-			
+			currentlyLookingAt = interactable;
 		}
 		
 		else if (raycastForGrabbing.Length == 0)
@@ -411,21 +331,21 @@ public class InteractionSystem : MonoBehaviour
 
 		if (raycastForPlacing.Length > 0)
 		{
-			if (player.RHolding != null && buildOn)
+			if (GetObjectInHand() != null && buildOn)
 			{
 				//add in indicator prefab
 				if (currentPlaceItemPrefab == null)
 				{
 					InteractableObject heldObjectTemplate = null;
 
-					GameSettings.Instance.PropDatabase.TryGetValue(player.RHolding.type, out heldObjectTemplate);
+					GameSettings.Instance.PropDatabase.TryGetValue(GetObjectInHand().type, out heldObjectTemplate);
 
 					currentPlaceItemPrefab = Instantiate(heldObjectTemplate.gameObject);
 
 					//destroy the script so it doesnt do weird shit
 
-					SetAllCollidersToTrigger(currentPlaceItemPrefab.transform);
-					SetAllChildrenToLayer(currentPlaceItemPrefab.transform, 21);
+					BPUtil.SetAllCollidersToTrigger(currentPlaceItemPrefab.transform);
+					BPUtil.SetAllChildrenToLayer(currentPlaceItemPrefab.transform, 21);
 					Destroy(currentPlaceItemPrefab.GetComponent<InteractableObject>());
 					currentPlaceItemPrefab.GetComponentInChildren<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 				}
@@ -499,7 +419,7 @@ public class InteractionSystem : MonoBehaviour
 		}
 
 		//destroy building indicator prefab
-		if (((player.RHolding == null || !buildOn) && currentPlaceItemPrefab != null) || raycastForPlacing.Length == 0 && currentPlaceItemPrefab != null)
+		if (((GetObjectInHand() == null || !buildOn) && currentPlaceItemPrefab != null) || raycastForPlacing.Length == 0 && currentPlaceItemPrefab != null)
 		{
 			Destroy(currentPlaceItemPrefab.gameObject);
 			currentRotX = 0;
@@ -508,47 +428,65 @@ public class InteractionSystem : MonoBehaviour
 			currentPlaceItemPrefab = null;
 		}
 
-
-
 		if (currentlyLookingAt != null)
 		{
-			if (currentlyLookingAt.GetComponent<InteractableObject>())
+			
+
+			switch (currentlyLookingAt.layer)
 			{
-				switch (currentlyLookingAt.gameObject.layer)
-				{
-					case 9:
-						pickup.gameObject.SetActive(value: true);
-						break;
-					case 10:
-						open.gameObject.SetActive(value: true);
-						break;
-					case 17:
-						open.gameObject.SetActive(value: true);
-						break;
-				}
+
+				case 9:
+					interact.gameObject.SetActive(true);
+					interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "";
+
+					break;
+
+				case 10:
+					interact.gameObject.SetActive(true);
+					interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "[E] Open";
+
+					break;
+
+				case 20:
+
+					if (GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP) > 0)
+					{
+						interact.gameObject.SetActive(true);
+						interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "[E] No-Clip";
+					}
+					break;
+
+				case 25:
+					interact.gameObject.SetActive(true);
+					interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "[E] Inspect";
+
+					break;
+
 			}
+
 		}
-		
+
 		else
 		{
-			pickup.gameObject.SetActive(value: false);
-			open.gameObject.SetActive(value: false);
+			interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "";
+			interact.gameObject.SetActive(value: false);
 		}
 
 		//throwing and dropping
 
 		//pickup if nothing in hand
-		if (Input.GetButton("Grab") && currentlyLookingAt != null && currentlyLookingAt.gameObject.tag != "Usable" && canGrab)
+		if (Input.GetButton("Grab") && currentlyLookingAt != null && currentlyLookingAt.layer != 25 && currentlyLookingAt.layer != 20 && currentlyLookingAt.layer != 14 && canGrab)
 		{
-			SetHolding(currentlyLookingAt);
+			/*StartCoroutine(StartPickup(currentlyLookingAt));*/
+			FinalizePickup(currentlyLookingAt.GetComponent<InteractableObject>());
 
 		}
 
-		if (player.RHolding != null)
+		if (GetObjectInHand() != null)
 		{
 
 			//throw system, only small objects
-			if (!player.RHolding.large)
+			if (!GetObjectInHand().large)
             {
 				if (Input.GetMouseButton(1) && !player.bodyAnim.GetBool("isPreparingThrow") && (!buildOn || raycastForPlacing.Length == 0))
 				{
@@ -569,32 +507,21 @@ public class InteractionSystem : MonoBehaviour
 			}
 			
 
-			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.neck.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !player.RHolding.GetComponent<HoldableObject>().large))
+			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.neck.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !GetObjectInHand().GetComponent<HoldableObject>().large))
 			{
 				SetDrop();
 			}
 		}
 
-		if (currentlyLookingAt != null && currentlyLookingAt.gameObject.tag == "Usable" && Input.GetButtonDown("Grab"))
+		if (currentlyLookingAt != null && (currentlyLookingAt.gameObject.layer == 25 || currentlyLookingAt.gameObject.layer == 10) && Input.GetButtonDown("Use"))
 		{
-			currentlyLookingAt.Use(this, LMB: false);
+			currentlyLookingAt.GetComponent<InteractableObject>().Use(this, LMB: false);
 		}
-		/*
-		if (Input.GetButtonDown("Pickup") && inventorySlots.Count < inventoryLimit && currentlyLookingAt != null)
-		{
-			currentlyLookingAt.AddToInv(this);
-			currentSelectedInventorySlot++;
-		}
-		if (Input.GetButtonDown("Drop") && inventorySlots.Count > 0)
-		{
-			SetAllChildrenToLayer(inventoryObject.transform.GetChild(currentSelectedInventorySlot), 9);
-			DropInventoryObject();
-		}*/
 		if (Input.GetMouseButtonDown(0))
 		{
-			if (player.RHolding != null)
+			if (GetObjectInHand() != null)
 			{
-				player.RHolding.Use(this, LMB: true);
+				GetObjectInHand().Use(this, LMB: true);
 			}
 		}
 		/*else if (Input.GetMouseButtonDown(1) && player.holding != null)

@@ -55,18 +55,21 @@ MonoBehaviour:
     instance: {fileID: 0}
   type: 6
   playSounds: 1
-  spawnChance: 0
   runTimeID: 
+  inventoryObjectData:
+    image: {fileID: 2800000, guid: 52c9cb63beed7194abb253a52c8cf142, type: 3}
+    name: Backrooms Soda
+    inventoryWeight: 6
+    description: A can of soda. Provides minimal hydration. Increases Stamina regeneration.
   durability: 0
   breakablePrefabs: []
   hitClips:
   - {fileID: 8300000, guid: 4864f038af1762b40a1008058d45dce4, type: 3}
   breakClips: []
-  holdableObject: {fileID: 0}
+  rb: {fileID: 0}
   ThrowMultiplier: 0
   large: 0
   autoSwing: 0
-  inventoryWeight: 1
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
@@ -152,7 +155,7 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 67573861231f1464ab8de64119963089, type: 2}
+  - {fileID: 2100000, guid: bbd31ee73fded1448bfe9f1af52c5ebf, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -354,7 +357,7 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 67573861231f1464ab8de64119963089, type: 2}
+  - {fileID: 2100000, guid: bbd31ee73fded1448bfe9f1af52c5ebf, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

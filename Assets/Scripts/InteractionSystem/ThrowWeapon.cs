@@ -40,7 +40,7 @@ public class ThrowWeapon : HoldableObject
                 }
                 else
                 {
-                    holdableObject.constraints = RigidbodyConstraints.FreezeAll;
+                    rb.constraints = RigidbodyConstraints.FreezeAll;
                 }
             }
            
@@ -68,7 +68,7 @@ public class ThrowWeapon : HoldableObject
             ObjectConnectionJoint = null;
         }
 
-        holdableObject.constraints = RigidbodyConstraints.None;
+        rb.constraints = RigidbodyConstraints.None;
 
         stuckInWall = false;
         
@@ -92,9 +92,9 @@ public class ThrowWeapon : HoldableObject
 
     public override void Throw(Vector3 force)
     {
-        holdableObject.constraints = RigidbodyConstraints.None;
+        rb.constraints = RigidbodyConstraints.None;
         base.Throw(force);
-        holdableObject.angularVelocity = holdableObject.transform.right * rotationAmount * rotationAmount;
+        rb.angularVelocity = rb.transform.right * rotationAmount * rotationAmount;
         Flying = true;
 
 
@@ -104,7 +104,7 @@ public class ThrowWeapon : HoldableObject
     {
         base.Hold(player, RightHand);
         Flying = false;
-        holdableObject.constraints = RigidbodyConstraints.FreezeAll;
+        rb.constraints = RigidbodyConstraints.FreezeAll;
     }
 
 }

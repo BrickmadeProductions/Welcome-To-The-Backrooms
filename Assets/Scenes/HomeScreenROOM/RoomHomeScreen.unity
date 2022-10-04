@@ -1069,25 +1069,26 @@ MonoBehaviour:
     instance: {fileID: 0}
   type: 9
   playSounds: 1
-  spawnChance: 0
   runTimeID: 
+  inventoryObjectData:
+    image: {fileID: 0}
+    name: 
+    inventoryWeight: 0
   durability: 0
   breakablePrefabs: []
   hitClips: []
   breakClips: []
-  holdableObject: {fileID: 323101437}
+  rb: {fileID: 0}
   ThrowMultiplier: 0
   large: 0
   autoSwing: 0
-  invImage: {fileID: 0}
-  inventoryWeight: 15
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimations: []
+  StartUseAnimation: 
+  UseAnimations: []
   CustomHoldAnimation: 
-  OpenAnimation: 
-  ItemAnimations: []
+  ItemObjectAnimations: []
 --- !u!65 &323101436
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3001,7 +3002,6 @@ MonoBehaviour:
     instance: {fileID: 0}
   type: 0
   playSounds: 0
-  spawnChance: 0
   runTimeID: 
 --- !u!1 &848357140
 GameObject:
@@ -7373,7 +7373,7 @@ Terrain:
   m_DrawTreesAndFoliage: 1
   m_StaticShadowCaster: 0
   m_ReflectionProbeUsage: 1
-  m_MaterialTemplate: {fileID: 2100000, guid: cf749d0050f23f140b3c993d2a03f6e5, type: 2}
+  m_MaterialTemplate: {fileID: 2100000, guid: 0aa37164acf594e03876b4e0b590280e, type: 2}
   m_BakeLightProbesForTrees: 1
   m_PreserveTreePrototypeLayers: 0
   m_DeringLightProbesForTrees: 1
@@ -8697,26 +8697,27 @@ MonoBehaviour:
     instance: {fileID: 0}
   type: 0
   playSounds: 0
-  spawnChance: 0
   runTimeID: 
+  inventoryObjectData:
+    image: {fileID: 0}
+    name: 
+    inventoryWeight: 0
   durability: 25
   breakablePrefabs: []
   hitClips:
   - {fileID: 8300000, guid: 4864f038af1762b40a1008058d45dce4, type: 3}
   breakClips: []
-  holdableObject: {fileID: 0}
+  rb: {fileID: 0}
   ThrowMultiplier: 0
   large: 0
   autoSwing: 0
-  invImage: {fileID: 0}
-  inventoryWeight: 1
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
-  LMBAnimations: []
+  StartUseAnimation: 
+  UseAnimations: []
   CustomHoldAnimation: 
-  OpenAnimation: 
-  ItemAnimations: []
+  ItemObjectAnimations: []
 --- !u!54 &902484728694933887
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -14062,8 +14063,6 @@ MonoBehaviour:
   id: 0
   tilePos: {x: 0, y: 0}
   entitySpawnLocations: []
-  randomPropSpawnLocations: []
-  setPropSpawnLocations: []
 --- !u!33 &1239381607611522536
 MeshFilter:
   m_ObjectHideFlags: 0

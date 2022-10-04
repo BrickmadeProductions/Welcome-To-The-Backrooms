@@ -13,7 +13,121 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Steamworks;
 
+public class BPUtil : MonoBehaviour
+{
+	/// <summary>
+	/// returns GameObjects even if they are disabled
+	/// </summary>
+	/// <param name="name"></param>
+	/// <returns></returns>
+	public static GameObject FindGameObject(string name)
+	{
+		Transform[] objs = Resources.FindObjectsOfTypeAll<Transform>();
+		for (int i = 0; i < objs.Length; i++)
+		{
+			if (objs[i].hideFlags == HideFlags.None)
+			{
+				if (objs[i].gameObject.name == name)
+				{
+					return objs[i].gameObject;
+				}
+			}
+		}
+		return null;
+	}
+	public static void SetAllChildrenToLayer(Transform top, int layer)
+	{
+		top.gameObject.layer = layer;
+		foreach (Transform item in top)
+		{
+			if (item.childCount > 0)
+			{
+				item.gameObject.layer = layer;
+				SetAllChildrenToLayer(item, layer);
+			}
+			else
+			{
+				item.gameObject.layer = layer;
+			}
+		}
+	}
+	public static void SetAllColliders(Transform top, bool OnOff)
+	{
+		//Destroy(top.GetComponent<Rigidbody>());
 
+		foreach (Transform item in top)
+		{
+			if (item.childCount > 0)
+			{
+				if (item.gameObject.GetComponent<Collider>() != null)
+				{
+					foreach (Collider collider in item.gameObject.GetComponents<Collider>())
+					{
+						if (!item.gameObject.GetComponent<Collider>().isTrigger)
+							collider.enabled = OnOff;
+					}
+
+				}
+				SetAllColliders(item, OnOff);
+			}
+			else
+			{
+				if (item.gameObject.GetComponent<Collider>() != null)
+				{
+					foreach (Collider collider in item.gameObject.GetComponents<Collider>())
+					{
+						if (!item.gameObject.GetComponent<Collider>().isTrigger)
+							collider.enabled = OnOff;
+					}
+				}
+			}
+		}
+	}
+
+	public static void SetAllCollidersToTrigger(Transform top)
+	{
+		//Destroy(top.GetComponent<Rigidbody>());
+
+		foreach (Transform item in top)
+		{
+			if (item.childCount > 0)
+			{
+				if (item.gameObject.GetComponent<Collider>() != null)
+				{
+					foreach (Collider collider in item.gameObject.GetComponents<Collider>())
+					{
+						collider.isTrigger = true;
+					}
+
+					if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>() == null)
+						item.gameObject.AddComponent<WTTB_ExtraCollisionData>();
+				}
+				if (item.gameObject.GetComponent<Weapon>() != null)
+				{
+					Destroy(item.gameObject.GetComponent<Weapon>());
+				}
+				SetAllCollidersToTrigger(item);
+			}
+			else
+			{
+				if (item.gameObject.GetComponent<Collider>() != null)
+				{
+					foreach (Collider collider in item.gameObject.GetComponents<Collider>())
+					{
+						collider.isTrigger = true;
+					}
+
+					if (item.gameObject.GetComponent<WTTB_ExtraCollisionData>() == null)
+						item.gameObject.AddComponent<WTTB_ExtraCollisionData>();
+				}
+				if (item.gameObject.GetComponent<Weapon>() != null)
+				{
+					Destroy(item.gameObject.GetComponent<Weapon>());
+				}
+			}
+		}
+	}
+}
 public enum SCENE
 {
 	INTRO,
@@ -72,6 +186,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 	private List<InteractableObject> propDatabase;
 
 	public Dictionary<OBJECT_TYPE, InteractableObject> PropDatabase;
+
+	public InventoryItem inventoryItemPrefab;
 
 	[SerializeField]
 	private List<Entity> entityDatabase;
@@ -430,7 +546,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	private void Update()
 	{
-		if (Input.GetKeyDown(KeyCode.Escape) && !cutScene)
+		if (Input.GetKeyDown(KeyCode.Escape) && !cutScene && !Player.GetComponent<InventoryMenuSystem>().menuOpen)
 		{
 			SettingsScreen();
 		}
@@ -478,6 +594,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 	public void BackFromSettings()
 	{
 		string text = SceneManager.GetActiveScene().name;
+
 		if (text != null && text == "HomeScreen")
 		{
 			HomeScreen();
@@ -620,6 +737,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 	public void setAntiAliasing(bool io)
 	{
 		ConnectSettings();
+
 		if (Camera.main.gameObject.GetComponent<PostProcessLayer>() != null)
 		{
 			if (!io)
@@ -642,7 +760,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 		bloom.active = io;
 		bloomEnabled = io;
 	}
-
 	public void setVSync(bool io)
 	{
 		ConnectSettings();
@@ -787,7 +904,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 			yield return new WaitUntil(() => LEVEL_GENERATED);*/
 
 		yield return SceneManager.LoadSceneAsync((int)id, LoadSceneMode.Single);
-
 
 		//post load
 

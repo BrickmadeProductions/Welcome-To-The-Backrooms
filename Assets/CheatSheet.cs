@@ -112,6 +112,9 @@ public class CheatSheet : MonoBehaviour
 
     public void SpawnEntities(bool io)
     {
+        if (!io)
+            KillAllEntities();
+
         GameSettings.Instance.worldInstance.spawnEntities = io; 
     }
 

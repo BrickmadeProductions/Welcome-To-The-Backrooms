@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8949802157778739411}
-  - component: {fileID: 8562517959692505959}
   m_Layer: 5
   m_Name: SaveIcon
   m_TagString: Untagged
@@ -38,22 +37,6 @@ RectTransform:
   m_AnchoredPosition: {x: 865.7, y: -450.3}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!111 &8562517959692505959
-Animation:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 59053453214033484}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Animation: {fileID: 7400000, guid: 36b0ffaa9f9d3894e82cb833c52cf0bd, type: 2}
-  m_Animations:
-  - {fileID: 7400000, guid: 36b0ffaa9f9d3894e82cb833c52cf0bd, type: 2}
-  m_WrapMode: 0
-  m_PlayAutomatically: 1
-  m_AnimatePhysics: 0
-  m_CullingType: 0
 --- !u!1 &475803473944815365
 GameObject:
   m_ObjectHideFlags: 0

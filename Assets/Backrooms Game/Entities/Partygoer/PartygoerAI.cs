@@ -126,7 +126,7 @@ public class PartygoerAI : Entity
                     }
                 }
                 //attack
-                else if (!strangling && !stunned && canSeePlayer)
+                else if (!strangling && !stunned)
                 {
 
                     if (GetComponent<AudioSource>().isPlaying)
@@ -210,7 +210,7 @@ public class PartygoerAI : Entity
 
             Vector3 targetDirection = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.transform.position - eyes.transform.position;
 
-            GameSettings.Instance.Player.GetComponent<PlayerController>().transform.position = grabLocation.transform.position - new Vector3(0.05f, 1.2f, 0.1f);
+            GameSettings.Instance.Player.GetComponent<PlayerController>().transform.position = grabLocation.transform.position - new Vector3(0f, 2.3f, 0f);
             GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canRun = false;
             GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = false;
             GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canWalk = false;

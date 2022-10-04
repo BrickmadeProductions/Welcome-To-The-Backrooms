@@ -10,7 +10,12 @@ using UnityEngine.UI;
 public struct InventoryObjectData
 {
 	public Texture image;
+
 	public string name;
+
+	public int inventoryWeight;
+
+	public string description;
 }
 public class HoldableObject : InteractableObject
 {
@@ -25,7 +30,7 @@ public class HoldableObject : InteractableObject
 
 	public AudioClip[] breakClips;
 
-	public Rigidbody holdableObject;
+	public Rigidbody rb;
 
 	public float ThrowMultiplier;
 
@@ -34,10 +39,6 @@ public class HoldableObject : InteractableObject
 	public bool large;
 
 	public bool autoSwing;
-
-	//inventory
-	public int inventoryWeight;
-	public Texture inventoryIcon;
 
 	//building system
 	public bool canPlace;
@@ -67,19 +68,19 @@ public class HoldableObject : InteractableObject
 	public override void Init()
 	{
 
-		if (GetComponent<Animator>() != null)
+/*		if (GetComponent<Animator>() != null)
 		{
 			StartCoroutine(playItemAnimation("Close"));
-		}
+		}*/
 
 		playSounds = false;
 		broken = false;
-		holdableObject = GetComponent<Rigidbody>();
+		rb = GetComponent<Rigidbody>();
 		StartCoroutine(waitToPlaySound());
 	}
 	public override void Throw(Vector3 force)
 	{
-		holdableObject.velocity = force * ThrowMultiplier * ThrowMultiplier;
+		rb.velocity = force * ThrowMultiplier * ThrowMultiplier;
 		if (GetComponent<Animator>() != null)
 		{
 			StartCoroutine(playItemAnimation("Close"));
@@ -228,8 +229,15 @@ public class HoldableObject : InteractableObject
 			}
 		}
 	}
-
-	private void FixedUpdate()
+    public override void OnLoadFinished()
+    {
+       
+    }
+    public override void OnSaveFinished()
+    {
+        
+    }
+    private void FixedUpdate()
 	{
 		
 		transform.position += pushAmt;

@@ -33,4 +33,14 @@ public class InteractableButton : InteractableObject
 	public override void Init()
 	{
 	}
+
+    public override void OnSaveFinished()
+    {
+        
+    }
+
+    public override void OnLoadFinished()
+    {
+        
+    }
 }

@@ -502,8 +502,13 @@ MonoBehaviour:
     instance: {fileID: 0}
   type: 3
   playSounds: 1
-  spawnChance: 0.05
   runTimeID: 
+  inventoryObjectData:
+    image: {fileID: 2800000, guid: 1d305f4e0b869ce45be438cd686cd14c, type: 3}
+    name: 
+    inventoryWeight: 7
+    description: A bottle of Almond Water. Provides medium hydration. Slight healing
+      properties.
   durability: 1
   breakablePrefabs:
   - {fileID: 4027876766965811622, guid: d7adc3900566bf646862e3db1977c0c5, type: 3}
@@ -514,11 +519,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: cc2036b5a64bd3646ac68f2e42e79b2b, type: 3}
   - {fileID: 8300000, guid: d19e1b1a6ada2bc45a23c463accfb0ec, type: 3}
   - {fileID: 8300000, guid: 5112c95477f193b4b9fe637b9d43eafe, type: 3}
-  holdableObject: {fileID: 0}
+  rb: {fileID: 0}
   ThrowMultiplier: 0
   large: 0
   autoSwing: 1
-  inventoryWeight: 1
   canPlace: 0
   isPlaced: 0
   animationPlaying: 0
