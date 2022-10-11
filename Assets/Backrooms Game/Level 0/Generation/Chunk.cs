@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -29,7 +30,7 @@ public class Chunk : MonoBehaviour
 
 	public int chunkPosY;
 
-	private Dictionary<int, GameObject> tileset;
+	private Dictionary<int, Tile> tileset;
 
 	public List<Tile> tile_grid;
 
@@ -44,9 +45,9 @@ public class Chunk : MonoBehaviour
 	public int z_offset;
 
 
-	public bool ALL_TILES_GENERATED;
+	public bool ALL_TILES_GENERATED = false;
 
-	public bool ALL_OBJECTS_AND_ENTITES_LOADED;
+	public bool ALL_OBJECTS_AND_ENTITES_LOADED = false;
 
 	public void CreateChunk(int posX, int posY, int posZ, BackroomsLevelWorld parentGenerator, bool shouldGenerateInstantly, List<int> tile_grid)
 	{
@@ -93,7 +94,52 @@ public class Chunk : MonoBehaviour
 				StartCoroutine(GenerateMapFromGrid(2, tile_grid));
 			}
 		}
-		
+
+		StartCoroutine(LoadInObjectsAndEntities());
+
+	}
+
+	public IEnumerator LoadInObjectsAndEntities()
+	{
+		yield return new WaitUntil(() => ALL_TILES_GENERATED);
+
+		string chunkKey = chunkPosX + "," + chunkPosY + "," + chunkPosZ;
+
+		//load objects and entities from saved file
+		if (parentGenerator.allChunks.ContainsKey(chunkPosX + "," + chunkPosY + "," + chunkPosZ))
+		{
+			saveableData = parentGenerator.allChunks[chunkKey];
+			saveableData.instance = this;
+
+			foreach (KeyValuePair<string, SaveableEntity> entity in saveableData.entityData.entityClusterData.ToArray())
+			{
+				parentGenerator.LoadSavedEntity(entity.Value, this);
+			}
+
+			foreach (KeyValuePair<string, SaveableProp> prop in saveableData.propData.propClusterData.ToArray())
+			{
+				parentGenerator.LoadSavedProp(prop.Value, this);
+			}
+
+			SaveChunkTileGrid();
+
+			parentGenerator.allChunks[chunkKey] = saveableData;
+		}
+
+		else
+		{
+			foreach (Tile tile in tile_grid)
+			{
+				tile.SpawnPresetItems();
+			}
+
+			SaveChunkTileGrid();
+
+			parentGenerator.allChunks.Add(name, saveableData);
+		}
+
+
+		ALL_OBJECTS_AND_ENTITES_LOADED = true;
 	}
 
 	private void Awake()
@@ -117,9 +163,9 @@ public class Chunk : MonoBehaviour
 	{
 	}
 
-	private void CreateTileset(List<GameObject> tiles)
+	private void CreateTileset(List<Tile> tiles)
 	{
-		tileset = new Dictionary<int, GameObject>();
+		tileset = new Dictionary<int, Tile>();
 		for (int i = 0; i < tiles.Count; i++)
 		{
 			tileset.Add(i, tiles[i]);
@@ -136,7 +182,7 @@ public class Chunk : MonoBehaviour
 				{
 					yield return null;
 				}
-				int idUsingPerlin = GetIdUsingPerlin(x, z);
+				int idUsingPerlin = GetIDUsingWeightedRandom(x, z);
 				CreateTile(idUsingPerlin, x, chunkPosY, z);
 			}
 		}
@@ -149,7 +195,7 @@ public class Chunk : MonoBehaviour
 		{
 			for (int j = 0; j < parentGenerator.chunk_width; j++)
 			{
-				int idUsingPerlin = GetIdUsingPerlin(i, j);
+				int idUsingPerlin = GetIDUsingWeightedRandom(i, j);
 				CreateTile(idUsingPerlin, i, chunkPosY, j);
 			}
 		}
@@ -192,12 +238,18 @@ public class Chunk : MonoBehaviour
 	private int GetIdUsingPerlin(int x, int z)
 	{
 		System.Random random = new System.Random(parentGenerator.seed);
-		float num = Mathf.Clamp01(Mathf.PerlinNoise((float)(random.Next(-100000, 100000) + x - x_offset * (chunkPosX + 1)) / magnification, (float)(random.Next(-100000, 100000) + z - z_offset * (chunkPosZ + 1)) / magnification)) * (float)tileset.Count;
+		float num = Mathf.Clamp01(Mathf.PerlinNoise((float)(random.Next(-100000, 100000) + x - x_offset + (chunkPosX)) / magnification, (float)(random.Next(-100000, 100000) + z - z_offset + (chunkPosZ)) / magnification)) * (float)tileset.Count;
 		if (num == (float)tileset.Count)
 		{
 			num = tileset.Count - 1;
 		}
 		return Mathf.FloorToInt(num);
+	}
+
+	private int GetIDUsingWeightedRandom(int x, int z)
+	{
+
+		return WeightedRandomSpawning.ReturnWeightedTileIDBySpawnChance(parentGenerator.Tiles);
 	}
 
 	private void CreateTile(int tile_id, int x, int y, int z)
@@ -210,11 +262,11 @@ public class Chunk : MonoBehaviour
         }*/
 		if (tile_id > tileset.Count - 1)
 		{
-			tileToSpawn = tileset[0];
+			tileToSpawn = tileset[0].gameObject;
 		}
         else
         {
-			tileToSpawn = tileset[tile_id];
+			tileToSpawn = tileset[tile_id].gameObject;
 		}
 
 		
@@ -241,14 +293,5 @@ public class Chunk : MonoBehaviour
 		tile_grid.Add(createdTile.GetComponent<Tile>());
 
 		createdTile.GetComponent<Tile>().tilePos = new Vector2Int(x, y);
-
-		if (chunkPosY > 0)
-		{
-			Elevator componentInChildren = createdTile.GetComponentInChildren<Elevator>();
-			if (componentInChildren != null)
-			{
-				Destroy(componentInChildren.gameObject);
-			}
-		}
 	}
 }

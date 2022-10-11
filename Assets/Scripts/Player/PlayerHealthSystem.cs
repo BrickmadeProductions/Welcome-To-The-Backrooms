@@ -1,9 +1,12 @@
 // PlayerHealthSystem
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
+
+
 
 public class PlayerHealthSystem : MonoBehaviour
 {
@@ -56,6 +59,10 @@ public class PlayerHealthSystem : MonoBehaviour
 
 	public bool awake;
 
+	public bool isBeingDamaged = false;
+
+	public bool isJustDamaged = false;
+
 	public Coroutine waking;
 
 	public Coroutine sleeping;
@@ -68,20 +75,49 @@ public class PlayerHealthSystem : MonoBehaviour
 
 	public AudioMixerGroup heartBeatMixer;
 
-	public AudioSource adrenalineAudio;
+	public AudioSource earStatusAudio;
 
+	public Animator attackIndicator;
+
+	Quaternion damageTargetFXRotation = Quaternion.identity;
+
+	public void LoadInData(PlayerSaveData saveData)
+    {
+		health = saveData.healthSaved;
+
+		hunger = saveData.hungerSaved;
+
+		thirst = saveData.thirstSaved;
+
+		sanity = saveData.sanitySaved;
+
+		stamina = saveData.staminaSaved;
+
+		bodyTemperature = saveData.bodyTemperatureSaved;
+
+
+		canWalk = saveData.canWalkSaved;
+
+		canRun = saveData.canWalkSaved;
+
+		canJump = saveData.canJumpSaved;
+
+		canCrouch = saveData.canCrouchSaved;
+
+	}
 	private void Awake()
 	{
 		player = GetComponent<PlayerController>();
+
 		StartCoroutine(UpdateHealth());
 		StartCoroutine(NaturalRegen());
 	}
 
-	private void Update()
+	void Update()
 	{
 		if (Input.GetButton("Blink") && !GameSettings.Instance.IsCutScene)
 		{
-			GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", true);
+			GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
 			if (calmingDown == null)
 			{
 				calmingDown = StartCoroutine(Calm());
@@ -89,10 +125,11 @@ public class PlayerHealthSystem : MonoBehaviour
 		}
 		if (Input.GetButtonUp("Blink") && !GameSettings.Instance.IsCutScene)
 		{
-			GetComponent<Blinking>().eyelid.GetComponent<Animator>().SetBool("eyesClosed", false);
+			GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
 			StopCoroutine(calmingDown);
 			calmingDown = null;
 		}
+
 		healthText.text = ((int)health).ToString() ?? "";
 		TextMeshProUGUI textMeshProUGUI = heartRateText;
 		int num = heartRate;
@@ -131,8 +168,11 @@ public class PlayerHealthSystem : MonoBehaviour
 
 	public IEnumerator Calm()
 	{
+		yield return new WaitForSecondsRealtime(2f);
+
 		while (true)
 		{
+			
 			if (health < 100f)
 			{
 				health += 1f;
@@ -141,7 +181,7 @@ public class PlayerHealthSystem : MonoBehaviour
 			{
 				sanity += 1f;
 			}
-			yield return new WaitForSeconds(0.5f);
+			yield return new WaitForSecondsRealtime(1f);
 		}
 	}
 
@@ -151,8 +191,8 @@ public class PlayerHealthSystem : MonoBehaviour
         {
 			if (health < 100f)
 			{
-				health += 0.5f;
-				yield return new WaitForSeconds(0.25f);
+				health += UnityEngine.Random.Range(0.25f, 0.5f);
+				yield return new WaitForSecondsRealtime(2f);
 			}
 			else
 			{
@@ -163,59 +203,13 @@ public class PlayerHealthSystem : MonoBehaviour
 		
 	}
 
-	/*private IEnumerator WakeUpSequenceRoom()
-	{
-		GameSettings.Instance.setCutScene(tf: true);
-		animator.speed = 0.3f;
-		player.arms.SetActive(false);
-		animator.SetBool("isSleeping", false);
-		animator.SetBool("isWakingRoom", true);
-		canMoveHead = false;
-		player.playerCamera.gameObject.SetActive(false);
-		yield return new WaitForSeconds(8.61315f);
-		animator.speed = 1f;
-		yield return new WaitForSeconds(1.1f);
-		player.gameObject.transform.position = new Vector3(2.668f, 2.997f, 1.12f);
-		player.playerCamera.gameObject.SetActive(true);
-		canMoveHead = true;
-		awake = true;
-		animator.SetBool("isWakingRoom", false);
-		player.arms.SetActive(true);
-		GameSettings.Instance.setCutScene(tf: false);
-	}
-
-	private IEnumerator WakeUpSequenceOther()
-	{
-		GameSettings.Instance.setCutScene(tf: true);
-
-		player.bodyAnim.SetBool("isSleeping", false);
-		player.bodyAnim.SetBool("isWakingOther", true);
-
-		canMoveHead = false;
-
-		player.playerCamera.gameObject.SetActive(false);
-
-		animator.speed = 1f;
-
-		yield return new WaitForSeconds(2f);
-
-		player.playerCamera.gameObject.SetActive(true);
-
-		canMoveHead = true;
-		awake = true;
-
-		player.bodyAnim.SetBool("isWakingOther", false);
-
-		GameSettings.Instance.setCutScene(tf: false);
-	}*/
-
 	private IEnumerator SleepSequence()
 	{
 		animator.SetBool("isSleeping", true);
 		animator.SetBool("isWaking", false);
 		canMoveHead = false;
 		player.playerCamera.gameObject.SetActive(false);
-		yield return new WaitForSeconds(4.417f);
+		yield return new WaitForSecondsRealtime(4.417f);
 		player.gameObject.transform.position = new Vector3(2.668f, 2.997f, 1.12f);
 		player.playerCamera.gameObject.SetActive(true);
 		canMoveHead = true;
@@ -226,19 +220,32 @@ public class PlayerHealthSystem : MonoBehaviour
 	{
 		while (true)
 		{
-			hunger -= 0.04f;
-			thirst -= 0.07f;
+			ChangeHunger(player.currentPlayerState == PlayerController.PLAYERSTATES.RUN ? -0.5f : -0.23f);
+			ChangeThirst(player.currentPlayerState == PlayerController.PLAYERSTATES.RUN ? -0.35f : -0.2f);
 
 			if (SceneManager.GetActiveScene().name != "RoomHomeScreen" && sanity > 0f)
 			{
-				sanity -= 0.1f;
+				sanity -= 0.2f;
 			}
 			if (sanity <= 0f)
 			{
 				sanity = 0f;
-				health -= 1f;
+				health -= 3f;
 			}
-			yield return new WaitForSeconds(2f);
+			if (thirst <= 0f)
+			{
+				thirst = 0f;
+				health -= 4f;
+				canRun = false;
+			}
+			else if (thirst > 0)
+				canRun = true;
+			/*if (hunger <= 0f)
+			{
+				hunger = 0f;
+				health -= 3f;
+			}*/
+			yield return new WaitForSecondsRealtime(2f);
 		}
 	}
 
@@ -247,20 +254,20 @@ public class PlayerHealthSystem : MonoBehaviour
 		while (true)
 		{
 			ChangeHeartRate(1f);
-			yield return new WaitForSeconds(Random.Range(1, 3));
+			yield return new WaitForSecondsRealtime(UnityEngine.Random.Range(1, 3));
 		}
 	}
 
 	public IEnumerator ActivateAdrenaline()
 	{
-		adrenalineAudio.Play();
+		earStatusAudio.Play();
 		adrenalineActive = true;
 		player.adrenalineSpeedMultiplier = 1.45f;
 		float pass = 20000f;
 
 		while (adrenalineActive)
 		{
-			ChangeHeartRate(Random.Range(2f, 4f));
+			ChangeHeartRate(UnityEngine.Random.Range(2f, 4f));
 			health -= 0.1f;
 			if (pass > 1500f)
 			{
@@ -272,7 +279,7 @@ public class PlayerHealthSystem : MonoBehaviour
 				player.adrenalineSpeedMultiplier = 1f;
 				adrenalineActive = false;
 			}
-			yield return new WaitForSeconds(0.5f);
+			yield return new WaitForSecondsRealtime(0.5f);
 		}
 
 		canUseAdrenaline = false;
@@ -294,11 +301,11 @@ public class PlayerHealthSystem : MonoBehaviour
 			{
 				freqFix = false;
 			}
-			yield return new WaitForSeconds(0.5f);
+			yield return new WaitForSecondsRealtime(0.5f);
 			Debug.Log("Fixing Audio");
 		}
-		adrenalineAudio.Stop();
-		yield return new WaitForSeconds(300f);
+		earStatusAudio.Stop();
+		yield return new WaitForSecondsRealtime(300f);
 		canUseAdrenaline = true;
 	}
 
@@ -307,7 +314,7 @@ public class PlayerHealthSystem : MonoBehaviour
 		while (true)
 		{
 			ChangeHeartRate(1f);
-			yield return new WaitForSeconds(10f);
+			yield return new WaitForSecondsRealtime(10f);
 		}
 	}
 
@@ -320,8 +327,8 @@ public class PlayerHealthSystem : MonoBehaviour
 	{
 		while (true)
 		{
-			ChangeHeartRate(Random.Range(-2, 2));
-			yield return new WaitForSeconds(5f);
+			ChangeHeartRate(UnityEngine.Random.Range(-2, 2));
+			yield return new WaitForSecondsRealtime(5f);
 		}
 	}
 
@@ -329,22 +336,104 @@ public class PlayerHealthSystem : MonoBehaviour
 	{
 		while (true)
 		{
-			ChangeHeartRate(Random.Range(-3, -4));
-			yield return new WaitForSeconds(2f);
+			ChangeHeartRate(UnityEngine.Random.Range(-3, -4));
+			yield return new WaitForSecondsRealtime(2f);
 		}
 	}
 
-	public IEnumerator ChangeStamina(float amount)
+	public IEnumerator ChangeStaminaOverTime(float amount)
 	{
 		while (true)
 		{
 			stamina += amount;
-			yield return new WaitForSeconds(0.5f);
+			yield return new WaitForSecondsRealtime(0.5f);
 		}
+	}
+	public void ChangeStamina(float amount)
+	{
+		stamina += amount;
+		stamina = Mathf.Clamp(stamina, 0f, 100f);
+
+	}
+	public void ChangeThirst(float amount)
+	{
+		thirst += amount;
+		thirst = Mathf.Clamp(thirst, 0f, 100f);
+		
+	}
+
+	public void ChangeHunger(float amount)
+	{
+		hunger += amount;
+		hunger = Mathf.Clamp(hunger, 0f, 100f);
+
 	}
 
 	public void ChangeHeartRate(float amount)
 	{
 		heartRate += (int)amount;
+		heartRate = Mathf.Clamp(heartRate, 0, 200);
 	}
+
+	public void TakeDamage(float damageSubtraction, float sanityMultipler, float heartrateIncrease)
+    {
+		player.playerHealth.health -= damageSubtraction;
+		player.playerHealth.sanity *= sanityMultipler;
+		player.playerHealth.ChangeHeartRate(heartrateIncrease);
+
+		attackIndicator.ResetTrigger("Hit");
+
+		StartCoroutine(TakeDamageFX(damageSubtraction));
+
+		attackIndicator.SetTrigger("Hit");
+
+		player.playerNoises.clip = player.hitSounds[UnityEngine.Random.Range(0, player.hitSounds.Length)];
+		player.playerNoises.Play();
+
+	}
+	IEnumerator TakeDamageFX(float damageTaken)
+    {
+		isBeingDamaged = true;
+
+		isJustDamaged = true;
+
+
+		while (isBeingDamaged)
+        {
+			if (isJustDamaged)
+			{
+				float x = UnityEngine.Random.Range(-3, 3f);
+				float y = UnityEngine.Random.Range(-3, 3f);
+				float z = UnityEngine.Random.Range(-3, 3f);
+
+				x = (Mathf.Round(x) + 1) * damageTaken / 2f;
+				y = (Mathf.Round(y) + 1) * damageTaken / 2f;
+				z = (Mathf.Round(z) + 1) * damageTaken / 2f;
+
+				damageTargetFXRotation = Quaternion.Euler(x, y, z);
+				isJustDamaged = false;
+				isBeingDamaged = true;
+			}
+
+			DamageCameraFX(damageTargetFXRotation);
+
+			yield return new WaitForEndOfFrame();
+		}
+		
+    }
+	void DamageCameraFX(Quaternion lerpTo)
+    {
+		//Debug.Log(player.playerCamera.transform.localRotation.eulerAngles + " " + Quaternion.Euler(amountX, amountY, amountZ));
+
+		if (Mathf.Abs(player.playerCamera.transform.localRotation.x) < Mathf.Abs(lerpTo.x) - 1
+			&& Mathf.Abs(player.playerCamera.transform.localRotation.y) < Mathf.Abs(lerpTo.y) - 1
+			&& Mathf.Abs(player.playerCamera.transform.localRotation.z) < Mathf.Abs(lerpTo.z) - 1)
+		{
+			player.playerCamera.transform.localRotation = Quaternion.Lerp(player.playerCamera.transform.localRotation, lerpTo, Time.deltaTime * 25f);
+
+		}
+		else isBeingDamaged = false;
+
+	}
+
 }

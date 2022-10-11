@@ -32,7 +32,7 @@ public class HoldableObject : InteractableObject
 
 	public Rigidbody rb;
 
-	public float ThrowMultiplier;
+	public float ThrowMultiplier = 2;
 
 	private bool broken;
 
@@ -44,8 +44,11 @@ public class HoldableObject : InteractableObject
 	public bool canPlace;
 	public bool isPlaced = false;
 
+	public bool canBeUsed = true;
+
 	//animations
 	public bool animationPlaying;
+	
 
 	public string StartUseAnimation;
 
@@ -61,14 +64,14 @@ public class HoldableObject : InteractableObject
 
 	private IEnumerator waitToPlaySound()
 	{
-		yield return new WaitForSeconds(2f);
+		yield return new WaitForSecondsRealtime(2f);
 		playSounds = true;
 	}
 
 	public override void Init()
 	{
 
-/*		if (GetComponent<Animator>() != null)
+		/*if (GetComponent<Animator>() != null)
 		{
 			StartCoroutine(playItemAnimation("Close"));
 		}*/
@@ -78,13 +81,15 @@ public class HoldableObject : InteractableObject
 		rb = GetComponent<Rigidbody>();
 		StartCoroutine(waitToPlaySound());
 	}
-	public override void Throw(Vector3 force)
+	public override void Drop(Vector3 force)
 	{
+	
 		rb.velocity = force * ThrowMultiplier * ThrowMultiplier;
 		if (GetComponent<Animator>() != null)
 		{
 			StartCoroutine(playItemAnimation("Close"));
 		}
+		
 
 
 	}
@@ -161,7 +166,7 @@ public class HoldableObject : InteractableObject
 
 	public override void Use(InteractionSystem player, bool LMB)
 	{
-		if (UseAnimations.Count > 0)
+		if (UseAnimations.Count > 0 && !GameSettings.Instance.cheatSheetObject.gameObject.activeSelf && canBeUsed)
 		{
 			if (LMB && !animationPlaying)
 			{
@@ -175,9 +180,9 @@ public class HoldableObject : InteractableObject
 		}
 	}
 	
-    public override void Hold(InteractionSystem player, bool RightHand)
+    public override void Pickup(InteractionSystem player, bool RightHand)
     {
-		
+
 		if (RightHand)
 
 			StartCoroutine(playItemAnimation("Open"));
@@ -202,21 +207,20 @@ public class HoldableObject : InteractableObject
 			{
 				return;
 			}
+			if (breakablePrefabs.Length == 0)
+			{
+				return;
+			}
 			if (!transform.gameObject.GetComponent<AudioSource>().isPlaying && hitClips.Length != 0)
 			{
 				transform.gameObject.GetComponent<AudioSource>().clip = hitClips[UnityEngine.Random.Range(0, hitClips.Length)];
 				transform.gameObject.GetComponent<AudioSource>().pitch = 1f + UnityEngine.Random.Range(-0.15f, 0.15f);
 				transform.gameObject.GetComponent<AudioSource>().Play();
 			}
-			if (breakablePrefabs.Length == 0)
-			{
-				return;
-			}
-			if (collision.relativeVelocity.magnitude >= 5f)
-			{
-				durability -= collision.relativeVelocity.magnitude;
-			}
-			if (durability < 0f && !broken && breakClips.Length != 0)
+			
+			durability -= collision.relativeVelocity.magnitude;
+			
+			if (durability < 0f && !broken)
 			{
 				AudioSource.PlayClipAtPoint(breakClips[UnityEngine.Random.Range(0, breakClips.Length)], transform.position);
 				GameObject[] array = breakablePrefabs;
@@ -224,7 +228,7 @@ public class HoldableObject : InteractableObject
 				{
 					Instantiate(array[i], transform.position, transform.rotation).GetComponent<Rigidbody>().velocity = GetComponent<Rigidbody>().velocity / 2f;
 				}
-				Destroy(gameObject);
+				GameSettings.Instance.worldInstance.RemoveProp(GetWorldID(), true);
 				broken = true;
 			}
 		}

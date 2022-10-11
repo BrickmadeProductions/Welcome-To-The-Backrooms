@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,21 +10,40 @@ public class CheatSheet : MonoBehaviour
     public Dropdown itemSpawnDropdown;
     public Dropdown entitySpawnDropdown;
     public Dropdown levelDropdown;
+    public Dropdown eventDropdown;
 
     ENTITY_TYPE currentEntityTypeChoice;
     OBJECT_TYPE currentObjectTypeChoice;
     SCENE currentLevelChoice;
+    GAMEPLAY_EVENT currentEventChoice;
 
     public bool AIEnabled = true;
     public bool invincible = false;
     public bool noClip = false;
 
+    public TextMeshProUGUI timeSinceLastEventText;
 
     void Awake()
     {
         LoadAllLevelsToDropDown();
         LoadAllEntityTypesToDropDown();
         LoadAllItemTypesToDropDown();
+        LoadAllEventsToDropDown();
+
+        StartCoroutine(UpdateVariables());
+    }
+    IEnumerator UpdateVariables()
+    {
+        while (true)
+        {
+            if (GameSettings.Instance.worldInstance != null)
+            {
+                timeSinceLastEventText.text = "Current Event: " + GameSettings.Instance.worldInstance.currentWorldEvent.ToString() + "\nTime Since Last Event: " + GameSettings.Instance.worldInstance.timeInSecondsSinceLastEvent;
+            }
+                
+            yield return new WaitForSecondsRealtime(1f);
+        }
+       
     }
 
     public void ResetSteamStats()
@@ -67,6 +87,14 @@ public class CheatSheet : MonoBehaviour
         entitySpawnDropdown.AddOptions(entitiesList);
     }
 
+    public void LoadAllEventsToDropDown()
+    {
+        string[] objects = Enum.GetNames(typeof(GAMEPLAY_EVENT));
+        List<string> objectList = new List<string>(objects);
+
+        eventDropdown.AddOptions(objectList);
+    }
+
     public void LevelSelectionDropDownCallBack(int index)
     {
         //excempt the first 3
@@ -82,6 +110,18 @@ public class CheatSheet : MonoBehaviour
     }
 
     public void ItemDropDownCallBack(int index)
+    {
+        currentObjectTypeChoice = (OBJECT_TYPE)index;
+        Debug.Log("| CHEATSHEET | Selected: " + currentObjectTypeChoice);
+    }
+
+    public void EventDropDownCallBack(int index)
+    {
+        currentEventChoice = (GAMEPLAY_EVENT)index;
+        Debug.Log("| CHEATSHEET | Selected: " + currentEventChoice);
+    }
+
+    public void SceneSelection(int index)
     {
         currentObjectTypeChoice = (OBJECT_TYPE)index;
         Debug.Log("| CHEATSHEET | Selected: " + currentObjectTypeChoice);
@@ -124,9 +164,12 @@ public class CheatSheet : MonoBehaviour
     }
     public void RemoveAllProps()
     {
-        GameSettings.Instance.worldInstance.RemoveAllProps();
+        GameSettings.Instance.worldInstance.RemoveAllProps(true);
     }
-
+    public void Take5Damage()
+    {
+        GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.TakeDamage(5f, 1f, 0f);
+    }
     public void EntityAI(bool io)
     {
         
@@ -168,11 +211,47 @@ public class CheatSheet : MonoBehaviour
         Debug.Log("| CHEATSHEET | Successfully Spawned: " + entityToSpawn.GetComponent<Entity>().type);
     }
 
+    public void StartEvent()
+    {
+        if (GameSettings.Instance.audioHandler.playingSoundTrackLoop != null)
+        {
+            StopCoroutine(GameSettings.Instance.audioHandler.playingSoundTrackLoop);
+            GameSettings.Instance.audioHandler.playingSoundTrackLoop = null;
+
+            Debug.Log("| CHEATSHEET | Successfully Started: " + currentEventChoice);
+        }
+        
+        GameSettings.Instance.worldInstance.StartEvent(currentEventChoice);
+
+        
+    }
+
+    public void StopEvent()
+    {
+        GameSettings.Instance.worldInstance.OnEventEnd();
+
+        if (GameSettings.Instance.audioHandler.playingEventTrackLoop != null)
+        {
+            StopCoroutine(GameSettings.Instance.audioHandler.playingEventTrackLoop);
+            GameSettings.Instance.audioHandler.playingEventTrackLoop = null;
+
+            Debug.Log("| CHEATSHEET | Successfully Started: " + currentEventChoice);
+        }
+        
+
+        
+    }
+
     public void SetCurrentObjectChoice(OBJECT_TYPE type)
     {
 
     }
     public void SetCurrentEntityChoice(ENTITY_TYPE type)
+    {
+
+    }
+
+    public void SetCurrentEventChoice(GAMEPLAY_EVENT type)
     {
 
     }

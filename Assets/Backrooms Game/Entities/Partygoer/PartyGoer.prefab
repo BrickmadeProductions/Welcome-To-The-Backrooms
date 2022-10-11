@@ -95,6 +95,7 @@ Transform:
   m_Children:
   - {fileID: 9159095898059575186}
   - {fileID: 4964435343038592406}
+  - {fileID: 640416725769361016}
   m_Father: {fileID: 2769777614414350793}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
@@ -250,70 +251,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!1 &675888697304656039
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7683472720911806274}
-  - component: {fileID: 2004692976972809449}
-  - component: {fileID: 5404452190056775359}
-  m_Layer: 6
-  m_Name: Profile
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7683472720911806274
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 675888697304656039}
-  m_LocalRotation: {x: -0, y: 0.7071068, z: 0.7071068, w: 0}
-  m_LocalPosition: {x: -0, y: 1.83, z: 0}
-  m_LocalScale: {x: 5.4999986, y: 5.4999995, z: 5.4999995}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 640416725769361016}
-  m_Father: {fileID: 2769777614414350793}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2004692976972809449
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 675888697304656039}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b9a305e18de0c04dbd257a21cd47087, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sharedProfile: {fileID: 11400000, guid: 900f4651709b2e6459dfb1360e16d981, type: 2}
-  isGlobal: 0
-  blendDistance: 0
-  weight: 0.23
-  priority: 1
---- !u!65 &5404452190056775359
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 675888697304656039}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.24999997, y: 0.18896717, z: 0.69864535}
-  m_Center: {x: -0, y: 0.1710338, z: 0.08647776}
 --- !u!1 &720094886824299665
 GameObject:
   m_ObjectHideFlags: 0
@@ -601,7 +538,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2769777614414350793}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!198 &1805470077570687054
 ParticleSystem:
@@ -6535,6 +6472,7 @@ GameObject:
   - component: {fileID: 7937651569654579243}
   - component: {fileID: 4235137583940794387}
   - component: {fileID: 4358516552436303912}
+  - component: {fileID: 6872775515089567752}
   m_Layer: 12
   m_Name: PartyGoer
   m_TagString: Entity
@@ -6555,7 +6493,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 264428577078894348}
-  - {fileID: 7683472720911806274}
   - {fileID: 2637169875853473993}
   - {fileID: 5470167242802467972}
   m_Father: {fileID: 0}
@@ -6585,8 +6522,8 @@ MonoBehaviour:
     - 0
     type: 6
     instance: {fileID: 4225260656200758192}
-  maxHealth: 300
-  health: 300
+  maxHealth: 500
+  health: 500
   agrivation: 0
   hunger: 0
   type: 6
@@ -6607,25 +6544,29 @@ MonoBehaviour:
   hurtNoisesSource: {fileID: 4511183550537650033}
   damage: 15
   sanityMultiplier: 0.95
-  maxAllowed: 2
+  maxAllowed: 4
   despawnDistance: 100
   entityViewDistance: 100
-  memoryOfPlayerLocationInSeconds: 5
+  memoryOfTargetLocationInSeconds: 3
   sightMask:
     serializedVersion: 2
     m_Bits: 2092723
-  canSeePlayer: 0
+  canSeeTarget: 0
   playerCanSee: 0
   spawnChance: 0.0005
-  speed: 250
+  speed: 450
   stunned: 0
-  stunTime: 1
+  stunTime: 0.25
   eyes: {fileID: 109001933242770219}
   entitySkin: {fileID: 439210178674126766}
   runTimeID: 
   bloodPrefab: {fileID: 3918754750907898147, guid: b177515cfc0a14743b8a32fcf6996c55, type: 3}
+  currentTarget: {fileID: 0}
   grabLocation: {fileID: 7128770136166274654}
   ragDoll: {fileID: 9106987160413300465, guid: dbaccbbf15b7232458f712bf8e0eaede, type: 3}
+  emissionColor: {r: 1.5058824, g: 0, b: 0, a: 0}
+  emission: {fileID: 0}
+  partyGoerRenderer: {fileID: 439210178674126766}
 --- !u!114 &7937651569654579243
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6638,8 +6579,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a26506a098f71c34baaf9ad891d5992d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 40
-  health: 40
+  maxHealth: 500
+  health: 500
   agrivation: 0
   hunger: 0
   connectedEntity: {fileID: 4225260656200758192}
@@ -6791,6 +6732,20 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!136 &6872775515089567752
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6172414190686351424}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.5
+  m_Height: 3.7717316
+  m_Direction: 1
+  m_Center: {x: 0, y: 1.931583, z: 0}
 --- !u!1 &6237478412153717961
 GameObject:
   m_ObjectHideFlags: 0
@@ -7931,7 +7886,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2769777614414350793}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &4511183550537650033
 AudioSource:
@@ -8140,13 +8095,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8550024481444404922}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: -0.7071068, y: -0.000000029802319, z: -0.000000029802319, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 3.66, z: 0}
+  m_LocalScale: {x: 11, y: 11, z: 11}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7683472720911806274}
-  m_RootOrder: 0
+  m_Father: {fileID: 264428577078894348}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4581006383634730638
 MonoBehaviour:

@@ -9,10 +9,19 @@ public abstract class GenericMenu : MonoBehaviour
 
     public string menuOpenKey;
     public bool canOpen = true;
-    public void OpenMenu()
+    private void Awake()
     {
-        if (canOpen)
+        GameSettings.Instance.GameplayMenuDataBase.Add(this);
+        Awake_Init();
+    }
+    public abstract void Awake_Init();
+    public void ToggleMenu()
+    {
+
+        if (canOpen && !GameSettings.Instance.IsCutScene && !GameSettings.Instance.PauseMenuOpen)
         {
+
+
             menuOpen = !menuOpen;
 
             //GetComponent<PlayerController>().bodyAnim.SetBool(type, inventoryOpened);
@@ -24,6 +33,8 @@ public abstract class GenericMenu : MonoBehaviour
                 Cursor.visible = false;
                 menuObject.SetActive(false);
 
+                GameSettings.Instance.Player.GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(true);
+
             }
 
             else
@@ -32,7 +43,7 @@ public abstract class GenericMenu : MonoBehaviour
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 menuObject.SetActive(true);
-
+                GameSettings.Instance.Player.GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(false);
             }
         }
         
@@ -47,7 +58,17 @@ public abstract class GenericMenu : MonoBehaviour
 
             if (Input.GetButtonDown(menuOpenKey))
             {
-                OpenMenu();
+                foreach (GenericMenu menu in GameSettings.Instance.GameplayMenuDataBase)
+                {
+                    //toggle off the old menu
+                    if (menu.menuOpen && menu != this)
+                    {
+                        menu.ToggleMenu();
+                    }
+                }
+
+                ToggleMenu();
+                
             }
         }
     }

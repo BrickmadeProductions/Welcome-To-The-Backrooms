@@ -244,24 +244,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveableData:
-    runTimeID: 
-    location: []
-    rotationEuler: []
+    runTimeID: 838
+    location:
+    - 0
+    - 0.159
+    - -0.188
+    rotationEuler:
+    - -0
+    - 0
+    - 0
     parentName: 
-    type: 0
-    instance: {fileID: 0}
+    type: 2
+    instance: {fileID: 3693248661749687413}
   type: 2
   playSounds: 1
-  spawnChance: 0.15
-  runTimeID: 
+  runTimeID: 838
+  inventoryObjectData:
+    image: {fileID: 0}
+    name: 
+    inventoryWeight: 0
+    description: 
   durability: 50
   breakablePrefabs:
   - {fileID: 1923194832838819152, guid: cd3bc0b72eb07034cb7cb889c0603ef7, type: 3}
-  - {fileID: 7288439816490005900, guid: cf1624820f1d6824880367892b947330, type: 3}
-  - {fileID: 1973649481059671702, guid: ac14b31a51ae7b74d9b7889f4c702d3c, type: 3}
-  - {fileID: 6720034728324163095, guid: f9efcbfd94b6fb74c836875a8dc5f802, type: 3}
-  - {fileID: 4894639926733438095, guid: 8e3346a6218c95b4981f005cdf5b0423, type: 3}
-  - {fileID: 1396392059200382702, guid: 55a0b9a392bd8d8458c1c5d0cf0b4de9, type: 3}
+  - {fileID: 4684114084953699587, guid: 8045cf93c24d7f348b04b11cf4bcf656, type: 3}
+  - {fileID: 4684114084953699587, guid: 8045cf93c24d7f348b04b11cf4bcf656, type: 3}
+  - {fileID: 4684114084953699587, guid: 8045cf93c24d7f348b04b11cf4bcf656, type: 3}
+  - {fileID: 4684114084953699587, guid: 8045cf93c24d7f348b04b11cf4bcf656, type: 3}
+  - {fileID: 4684114084953699587, guid: 8045cf93c24d7f348b04b11cf4bcf656, type: 3}
   - {fileID: 4684114084953699587, guid: 8045cf93c24d7f348b04b11cf4bcf656, type: 3}
   - {fileID: 7668706958697367083, guid: 28201166d4d8eff4c8d76cb74d501ccc, type: 3}
   hitClips:
@@ -269,18 +279,18 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 0e5240b5040937f46a2798f0974643d3, type: 3}
   breakClips:
   - {fileID: 8300000, guid: 3ec90ec7ba21d9641aba6d72da0fb644, type: 3}
-  inventoryWeight: 1
-  holdableObject: {fileID: 0}
+  rb: {fileID: 0}
   ThrowMultiplier: 0.5
   large: 1
+  autoSwing: 0
   canPlace: 1
   isPlaced: 0
+  canBeUsed: 1
   animationPlaying: 0
-  LMBAnimationClips: []
-  LMBAnimationBools: []
-  RMBAnimationClips: []
-  RMBAnimationBools: []
+  StartUseAnimation: 
+  UseAnimations: []
   CustomHoldAnimation: 
+  ItemObjectAnimations: []
 --- !u!114 &6571218108610327320
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -294,8 +304,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 10
-  Thrown: 0
   connetedObject: {fileID: 3693248661749687413}
+  WeaponBloodRenderer: {fileID: 0}
+  bloodAmount: 0
+  onlyHitOneLimb: 1
 --- !u!1 &3164104811559281688
 GameObject:
   m_ObjectHideFlags: 0
@@ -336,7 +348,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3164104811559281688}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 4d2505339e826984b881663cc80531f1, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -349,7 +361,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3164104811559281688}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 4d2505339e826984b881663cc80531f1, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2

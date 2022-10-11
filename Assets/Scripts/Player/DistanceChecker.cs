@@ -8,61 +8,42 @@ using UnityEngine.UI;
 
 public class DistanceChecker : MonoBehaviour
 {
+    public static bool SHOULD_READ_STEPS = false;
     public float GetAverageSpeed() { return distanceTraveled / timePassed; }
 
     public float distanceTraveled = 0f;
 
-    int metersTraveledTotal = 0;
-    int metersTraveledBeforeStatChange = 0;
+    float metersTraveledBeforeStatChange = 0;
     public TextMeshProUGUI metersTraveledText;
 
     float timePassed = 0f;
 
     public Transform tx;
-    Vector3 lastPosition;
+    public Vector3 lastPosition;
 
    
-
-    void Start()
-    {
-        lastPosition = tx.position;
-    }
     void FixedUpdate()
     {
-        if (metersTraveledTotal >= 1)
-        {
-            Steam.AddAchievment("WALK_1");
-        }
-        if (metersTraveledTotal >= 5000)
-        {
-            Steam.AddAchievment("WALK_5000");
-        }
-        if (metersTraveledTotal >= 10000)
-        {
-            Steam.AddAchievment("WALK_10000");
-        }
-        if (GameSettings.LEVEL_LOADED && GameSettings.Instance.ActiveScene != SCENE.ROOM && GameSettings.Instance.Player.GetComponent<Rigidbody>().velocity.magnitude < 20f)
+        
+        if (GameSettings.PLAYER_DATA_LOADED && GameSettings.SCENE_LOADED && SHOULD_READ_STEPS)
         {
             //Debug.Log((lastPosition - tx.position).magnitude);
-            distanceTraveled += (lastPosition - tx.position).magnitude;
+            float increasedDistance = (lastPosition - tx.position).magnitude;
+
+            distanceTraveled += increasedDistance;
             timePassed += Time.deltaTime;
             lastPosition = tx.position;
 
-            metersTraveledBeforeStatChange += ((int)((lastPosition - tx.position).magnitude) / 3);
-            metersTraveledTotal = ((int)distanceTraveled / 3);
+            metersTraveledBeforeStatChange += increasedDistance / 3;
 
-            metersTraveledText.text = metersTraveledTotal + " M";
+            metersTraveledText.text = (int)(distanceTraveled / 3) + " M";
         }
         
     }
 
-    public int GetMetersTraveledTotal()
+    public float SetMetersTraveledStats()
     {
-        return metersTraveledTotal;
-    }
-    public int SetMetersTraveledStats()
-    {
-        int traveled = metersTraveledBeforeStatChange;
+        float traveled = metersTraveledBeforeStatChange;
 
         Steam.IncrementStat("DISTANCE_TRAVELED_METERS", traveled);
         Steam.IncrementStat("GLOBAL_DISTANCE_TRAVELED_METERS", traveled);
@@ -71,4 +52,11 @@ public class DistanceChecker : MonoBehaviour
 
         return traveled;
     }
+
+    public void LoadInData(PlayerSaveData saveData)
+    {
+        distanceTraveled = saveData.distanceTraveledSaved;
+    }
+
+    
 }

@@ -11,6 +11,8 @@ public class Tile : MonoBehaviour
 
 	public List<ItemSpawner> itemSpawnLocations;
 
+	public int SpawnWeight;
+
 	public void SpawnPresetItems()
     {
 		foreach (ItemSpawner spawner in itemSpawnLocations)

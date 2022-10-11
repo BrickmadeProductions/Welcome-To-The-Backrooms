@@ -64,15 +64,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveableData:
-    runTimeID: 
-    location: []
-    rotationEuler: []
+    runTimeID: 416
+    location:
+    - 0
+    - 0
+    - 0
+    rotationEuler:
+    - -0
+    - 0
+    - 0
     parentName: 
-    type: 0
-    instance: {fileID: 0}
+    type: 7
+    instance: {fileID: 3035513702425716336}
   type: 7
   playSounds: 1
-  runTimeID: 
+  runTimeID: 416
   inventoryObjectData:
     image: {fileID: 2800000, guid: e81a4869a8e58fe4b96e92415b896943, type: 3}
     name: FlashLight
@@ -88,6 +94,7 @@ MonoBehaviour:
   autoSwing: 0
   canPlace: 0
   isPlaced: 0
+  canBeUsed: 1
   animationPlaying: 0
   StartUseAnimation: 
   UseAnimations: []
@@ -95,6 +102,8 @@ MonoBehaviour:
   ItemObjectAnimations: []
   emission: {fileID: 0}
   flashLight: {fileID: 8493413208097835615, guid: 1524594750d88a6488b6305b104387ef, type: 3}
+  batteryLocation: {fileID: 0}
+  batteriesInserted: []
 --- !u!82 &869247385304841261
 AudioSource:
   m_ObjectHideFlags: 0
@@ -104,7 +113,7 @@ AudioSource:
   m_GameObject: {fileID: 986405930481796814}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300002, guid: 4945421a940f27f4da472315e07ea556, type: 2}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: 20bfa29a2ece3284f935fedf32737170, type: 2}
   m_audioClip: {fileID: 8300000, guid: 625b8778ed5cfd74eb7aa68b4a40593a, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.17

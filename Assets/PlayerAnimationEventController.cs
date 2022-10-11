@@ -15,6 +15,11 @@ public class PlayerAnimationEventController : MonoBehaviour
     {
         player.GetComponent<InteractionSystem>().SetThrow();
     }
+
+    public void DrinkFinished_AnimEvent()
+    {
+        player.GetComponent<InventorySystem>().rHand.itemsInSlot[0].connectedObject.GetComponent<DrinkableObject>().DrinkOneGulp();
+    }
     public void PutInMainHand_AnimEvent()
     {
         player.GetComponent<InteractionSystem>().canGrab = true;

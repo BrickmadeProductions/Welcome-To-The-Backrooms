@@ -10,40 +10,45 @@ public class NotificationSystem : MonoBehaviour
 
     public GameObject notificationPrefab;
 
-    bool isNotifRunning;
+    public AudioClip notifSound;
+
+    bool isNotifRunning = false;
 
     void Awake()
     {
         notifQueue = new Queue<Notification>();
     }
 
-    public void AddNotification(string desc)
+    public void QueueNotification(string desc)
     {
         Notification newNotif = Instantiate(notificationPrefab, notificationLocation).GetComponent<Notification>();
+
+        AudioSource.PlayClipAtPoint(notifSound, GameSettings.Instance.Player.transform.position);
+
         newNotif.SetDesc(desc);
 
         newNotif.transform.position = new Vector3(notificationLocation.position.x, notificationLocation.position.y - (125 * notifQueue.Count), notificationLocation.position.z);
-        
+
         notifQueue.Enqueue(newNotif);
         
 
     }
 
-    public IEnumerator RunTopNotification()
+    public IEnumerator DequeNotification()
     {
         isNotifRunning = true;
 
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(2.5f);
 
         Notification notif = notifQueue.Dequeue();
 
         Destroy(notif.gameObject);
 
+        //get position of each then move it 
         foreach (Notification note in notifQueue)
         {
-            note.transform.position = note.transform.position = new Vector3(notificationLocation.position.x, notificationLocation.position.y + (125 * notifQueue.Count), notificationLocation.position.z);
+            note.transform.position = new Vector3(note.transform.position.x, note.transform.position.y + 125, note.transform.position.z);
         }
-
         isNotifRunning = false;
     }
 
@@ -51,7 +56,7 @@ public class NotificationSystem : MonoBehaviour
     {
         if (notifQueue.Count > 0 && !isNotifRunning)
         {
-            StartCoroutine(RunTopNotification());
+            StartCoroutine(DequeNotification());
         }
         
     }

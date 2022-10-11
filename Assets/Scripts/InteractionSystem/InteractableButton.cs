@@ -7,11 +7,11 @@ public class InteractableButton : InteractableObject
 
 	private bool justPressed;
 
-	public override void Hold(InteractionSystem player, bool RightHand)
+	public override void Pickup(InteractionSystem player, bool RightHand)
 	{
 	}
 
-	public override void Throw(Vector3 force)
+	public override void Drop(Vector3 force)
 	{
 	}
 

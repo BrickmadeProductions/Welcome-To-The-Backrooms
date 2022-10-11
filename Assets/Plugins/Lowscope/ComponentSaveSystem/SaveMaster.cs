@@ -367,7 +367,7 @@ public class SaveMaster : MonoBehaviour
 		isDoneSaving = true;
 	}
 
-	public static void WipeSceneData(string name, bool clearSceneSaveables = true)
+	public static void WipeSceneData(string name, bool clearSceneSaveables)
 	{
 		if (activeSaveGame == null)
 		{
@@ -695,7 +695,7 @@ public class SaveMaster : MonoBehaviour
 			{
 				if (Input.GetKeyDown(settings.wipeActiveSceneData))
 				{
-					WipeSceneData(SceneManager.GetActiveScene().name);
+					WipeSceneData(SceneManager.GetActiveScene().name, true);
 				}
 				if (Input.GetKeyDown(settings.saveAndWriteToDiskKey))
 				{
@@ -727,7 +727,7 @@ public class SaveMaster : MonoBehaviour
 
 	private IEnumerator IncrementTimePlayed()
 	{
-		WaitForSeconds incrementSecond = new WaitForSeconds(1f);
+		WaitForSecondsRealtime incrementSecond = new WaitForSecondsRealtime(1f);
 		while (true)
 		{
 			yield return incrementSecond;

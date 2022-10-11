@@ -6,7 +6,7 @@ public class AnomolyObject : InteractableObject
 {
     public int maxPointsThatCanBeObtained;
     public int currentPointsPulled = 0;
-    public override void Hold(InteractionSystem player, bool RightHand)
+    public override void Pickup(InteractionSystem player, bool RightHand)
     {
         
     }
@@ -18,7 +18,7 @@ public class AnomolyObject : InteractableObject
 
     public override void OnLoadFinished()
     {
-       
+        SetMetaData("currentPointsPulled", currentPointsPulled.ToString());
     }
 
     public override void OnSaveFinished()
@@ -30,16 +30,18 @@ public class AnomolyObject : InteractableObject
     {
         if (!GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.isCurrentlyUpgrading)
         {
-            if (currentPointsPulled <= maxPointsThatCanBeObtained)
+            
+            if (currentPointsPulled < maxPointsThatCanBeObtained)
             {
                 currentPointsPulled++;
 
                 SetMetaData("currentPointsPulled", currentPointsPulled.ToString());
 
                 GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.ProgressSkill(SKILL_TYPE.NO_CLIP, GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.ProgressByDeminsingSkillPoints());
-                GameSettings.Instance.GetComponent<NotificationSystem>().AddNotification("YOU HAVE INSPECTED AN ANOMALY AND GAINED 1 SKILL POINT, USE [J] TO OPEN SKILL MENU");
+                GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("YOU HAVE INSPECTED AN ANOMALY AND GAINED 1 SKILL POINT, USE [J] TO OPEN SKILL MENU");
+            
+                if (currentPointsPulled >= maxPointsThatCanBeObtained) StartCoroutine(WaitToDestroy(!GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.isCurrentlyUpgrading));
             }
-            else StartCoroutine(WaitToDestroy(!GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.isCurrentlyUpgrading));
         }
        
         
@@ -48,7 +50,7 @@ public class AnomolyObject : InteractableObject
     IEnumerator WaitToDestroy(bool info)
     {
         yield return new WaitUntil(() => info);
-        GameSettings.Instance.worldInstance.RemoveProp(GetWorldID());
+        GameSettings.Instance.worldInstance.RemoveProp(GetWorldID(), true);
     }
 
 }

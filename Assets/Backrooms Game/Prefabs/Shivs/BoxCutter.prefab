@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2452731138100598717}
   - component: {fileID: 2294121631096601267}
   - component: {fileID: 4798014422870614306}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: BoxCutter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33,7 +33,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5012746149258618253}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6273465981391784802
 MeshFilter:
@@ -112,8 +112,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.0072172633, y: 0.019999996, z: 0.040128466}
-  m_Center: {x: 0.0001685825, y: 2.1728738e-17, z: 0.010842851}
+  m_Size: {x: 0.007217264, y: 0.02, z: 0.042675998}
+  m_Center: {x: 0.00016858232, y: 4.6121243e-10, z: 0.012116683}
 --- !u!1 &3086800962018784030
 GameObject:
   m_ObjectHideFlags: 0
@@ -161,33 +161,42 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveableData:
-    runTimeID: 
-    location: []
-    rotationEuler: []
+    runTimeID: 742
+    location:
+    - 0
+    - 0
+    - 0
+    rotationEuler:
+    - -0
+    - 0
+    - 0
     parentName: 
-    type: 0
-    instance: {fileID: 0}
+    type: 8
+    instance: {fileID: 1345254682099846511}
   type: 8
   playSounds: 0
-  runTimeID: 
+  runTimeID: 742
   inventoryObjectData:
-    image: {fileID: 0}
+    image: {fileID: 2800000, guid: c56458cd60e99304d87cdf5515048b74, type: 3}
     name: Boxcutter
-    inventoryWeight: 0
+    inventoryWeight: 5
     description: A handheld melee weapon. Best used at short range.
   durability: 0
   breakablePrefabs: []
   hitClips: []
   breakClips: []
   rb: {fileID: 0}
-  ThrowMultiplier: 0
+  ThrowMultiplier: 1.5
   large: 0
-  autoSwing: 0
+  autoSwing: 1
   canPlace: 0
   isPlaced: 0
+  canBeUsed: 1
   animationPlaying: 0
   StartUseAnimation: 
-  UseAnimations: []
+  UseAnimations:
+  - SliceVar1
+  - SliceVar1
   CustomHoldAnimation: 
   ItemObjectAnimations: []
 --- !u!54 &4317041497395312815
@@ -215,7 +224,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5012746149258618253}
-  - component: {fileID: 2180753014519999310}
   m_Layer: 9
   m_Name: ShivBoxCutterContainer
   m_TagString: Untagged
@@ -231,24 +239,57 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7298040221084833643}
   m_LocalRotation: {x: 0.0039797444, y: -0.9934172, z: -0.036426917, w: -0.10853366}
-  m_LocalPosition: {x: 0.0041, y: 0.1825, z: -0.0129}
-  m_LocalScale: {x: 0.05, y: 0.05, z: 0.05}
+  m_LocalPosition: {x: -0.0088, y: 0.1529, z: 0.0125}
+  m_LocalScale: {x: 0.05, y: 0.05, z: 0.035}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 309016236686343642}
   - {fileID: 3382913067091738108}
   m_Father: {fileID: 2422186398859061668}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -4.2, y: -192.47, z: 0}
---- !u!65 &2180753014519999310
+--- !u!1 &7863670592508262429
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 309016236686343642}
+  - component: {fileID: 7849217292124224861}
+  m_Layer: 9
+  m_Name: Collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &309016236686343642
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7863670592508262429}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 20, y: 20, z: 20}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5012746149258618253}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &7849217292124224861
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7298040221084833643}
+  m_GameObject: {fileID: 7863670592508262429}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.2636196, y: 4.990551, z: 2.110342}
-  m_Center: {x: 0.018833429, y: -1.7396331, z: -0.00066024065}
+  m_Size: {x: 0.0068129157, y: 0.2597321, z: 0.09700948}
+  m_Center: {x: 0.0008128945, y: -0.08277423, z: -0.00070251146}

@@ -29,10 +29,10 @@ public class HeadBobber : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void LateUpdate()
     {
 
-        if (Cursor.lockState != CursorLockMode.None && controller.currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE && controller.playerHealth.canWalk && controller.playerHealth.canMoveHead)
+        if (Cursor.lockState != CursorLockMode.None && controller.currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE && controller.playerHealth.canWalk && !GameSettings.Instance.IsCutScene && !controller.playerHealth.isBeingDamaged)
         {
             
             //head rotation
@@ -113,8 +113,10 @@ public class HeadBobber : MonoBehaviour
             
         }
 
-        camera.localRotation = new Quaternion(camera.localRotation.x, Mathf.Lerp(camera.localRotation.y, 0, Time.deltaTime), Mathf.Lerp(camera.localRotation.z, 0, Time.deltaTime), Mathf.Lerp(camera.localRotation.w, 1, Time.deltaTime));
-        //Debug.Log(camera.localRotation);
-        //Debug.Log(transform.localRotation);
+        if (camera.localRotation != Quaternion.identity)
+        {
+            camera.localRotation = Quaternion.Lerp(camera.localRotation, Quaternion.identity, Time.deltaTime * 10f);
+        }
+        
     }
 }

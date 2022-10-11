@@ -8,7 +8,13 @@ public class Weapon : MonoBehaviour
     public HoldableObject connetedObject;
     public Renderer WeaponBloodRenderer;
     public float bloodAmount = 0;
+    public bool onlyHitOneLimb = true;
 
+    private void Start()
+    {
+        if (connetedObject != null)
+            connetedObject.SetMetaData("damage", damage.ToString());
+    }
     public void OnTriggerEnter(Collider other)
     {
         /*
@@ -17,13 +23,14 @@ public class Weapon : MonoBehaviour
         Vector3 collisionPoint = other.gameObject.GetComponent<Collider>().ClosestPointOnBounds(transform.position);
 
         //Debug.Log(connetedObject.animationPlaying);
-        if (gameObject.layer == 23 && other.gameObject.layer == 18 && other.gameObject.layer != 11 && connetedObject.animationPlaying)
+        if (gameObject.layer == 23 && other.gameObject.layer == 18 && other.gameObject.layer != 11 && connetedObject != null ? connetedObject.animationPlaying : true && onlyHitOneLimb)
         {
+            onlyHitOneLimb = false;
             AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
 
             if (limb != null)
             {
-                if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.3f)
+                if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.2f)
                 {
                     StartCoroutine(limb.attachedEntity.StunTimer());
                 }
@@ -34,7 +41,9 @@ public class Weapon : MonoBehaviour
                 if (bloodAmount < 1)
                 {
                     bloodAmount += 0.04f;
-                    WeaponBloodRenderer.material.SetFloat("_Wetness", bloodAmount);
+
+                    if (WeaponBloodRenderer != null)
+                        WeaponBloodRenderer.material.SetFloat("_Wetness", bloodAmount);
                 }
 
                 //GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.speed = 0;
@@ -44,8 +53,9 @@ public class Weapon : MonoBehaviour
             
             
         }
-        else if (connetedObject.GetComponent<ThrowWeapon>() != null)
+        else if (connetedObject != null ? connetedObject.GetComponent<ThrowWeapon>() != null : false && onlyHitOneLimb)
         {
+            onlyHitOneLimb = false;
             if (other.gameObject.layer == 18 && other.gameObject.layer != 11 && (connetedObject.GetComponent<ThrowWeapon>().Flying || connetedObject.GetComponent<ThrowWeapon>().stuckInWall))
             {
                 //Debug.Log("Player Attack");
@@ -73,6 +83,7 @@ public class Weapon : MonoBehaviour
 
     public void OnTriggerExit(Collider other)
     {
+        onlyHitOneLimb = true;
         //GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.speed = 1;
         //Debug.Log("TriggerExit");
     }

@@ -35,38 +35,14 @@ public class Skill_Details
     public string positives;
     public string negatives;
 }
-[Serializable]
-public struct CurrentSkillStateSaveData
+
+
+public class SkillSetSystem : GenericMenu
 {
-    public Dictionary<SKILL_TYPE, SKILL_LINE> skillLineSavedData;
-}
-public class SkillSetSystem : GenericMenu, ISaveable
-{
-    CurrentSkillStateSaveData saveData;
+
     public bool isCurrentlyUpgrading = false;
 
-    public string OnSave()
-    {
-        saveData.skillLineSavedData = skillDictionary;
-
-        SaveMaster.RemoveListener(GetComponent<Saveable>());
-
-        return JsonConvert.SerializeObject(saveData);
-    }
-
-    public bool OnSaveCondition()
-    {
-        return true;
-    }
-    public void OnLoad(string data)
-    {
-        saveData = JsonConvert.DeserializeObject<CurrentSkillStateSaveData>(data);
-
-        LoadInSkills(saveData);
-
-
-    }
-    public void LoadInSkills(CurrentSkillStateSaveData saveData)
+    public void LoadInData(PlayerSaveData saveData)
     {
         foreach (KeyValuePair<SKILL_TYPE, SKILL_LINE> skillData in saveData.skillLineSavedData)
         {
@@ -95,19 +71,14 @@ public class SkillSetSystem : GenericMenu, ISaveable
     }
     public float ProgressByDeminsingSkillPoints()
     {
-        return 0.1f / (GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP) + 1);
-    }
-
-    public void OnLoadNoData()
-    {
-
+        return 0.05f / (GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP) + 1);
     }
 
     //list of skill lines
     public List<SKILL_LINE> skillLines;
     
     //reference to them
-    Dictionary<SKILL_TYPE, SKILL_LINE> skillDictionary;
+    public Dictionary<SKILL_TYPE, SKILL_LINE> skillDictionary;
 
     public GameObject DescriptionObject;
     public TextMeshProUGUI descNameText;
@@ -115,7 +86,7 @@ public class SkillSetSystem : GenericMenu, ISaveable
     public TextMeshProUGUI positivesText;
     public TextMeshProUGUI negativesText;
 
-    private void Awake()
+    public override void Awake_Init()
     {
         skillDictionary = new Dictionary<SKILL_TYPE, SKILL_LINE>();
 
@@ -124,22 +95,11 @@ public class SkillSetSystem : GenericMenu, ISaveable
         {
             skillDictionary.Add(slot.type, slot);
         }
-    }
-    void Start()
-    {
-        Saveable component = gameObject.AddComponent<Saveable>();
-        component.SaveIdentification = GameSettings.Instance.activeUser;
-        component.AddSaveableComponent("SavedSkills", this, true);
 
-        SaveMaster.SyncLoad();
+        
     }
 
-    void OnDestroy()
-    {
-        SaveMaster.RemoveListener(GetComponent<Saveable>());
-        Destroy(GetComponent<Saveable>());
-    }
-
+   
     public void SetDescriptionInformation(Skill_Details details)
     {
         descNameText.text = details.name;
@@ -163,12 +123,13 @@ public class SkillSetSystem : GenericMenu, ISaveable
         if (GetCurrentSlotOnSkillLine(skillDictionary[type]).slotProgress + currentProgressToGive >= 1)
         {
             float progressLeftForSlot = 1 - (GetCurrentSlotOnSkillLine(skillDictionary[type]).slotProgress);
+
             //ui
             StartCoroutine(GetCurrentSlotOnSkillLine(skillDictionary[type]).UpdateProgressUI(progressLeftForSlot));
 
             skillDictionary[type].currentTotalProgress += progressLeftForSlot;
 
-            GameSettings.Instance.GetComponent<NotificationSystem>().AddNotification("YOU HAVE LEVELED UP YOUR " + type.ToString() + " SKILL");
+            GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("YOU HAVE LEVELED UP YOUR " + type.ToString() + " SKILL");
             
             currentProgressToGive -= progressLeftForSlot;
 
@@ -181,7 +142,10 @@ public class SkillSetSystem : GenericMenu, ISaveable
         skillDictionary[type].currentTotalProgress += currentProgressToGive;
 
         //ui
+        
         StartCoroutine(GetCurrentSlotOnSkillLine(skillDictionary[type]).UpdateProgressUI(currentProgressToGive));
+
+        yield return new WaitUntil(() => !GetCurrentSlotOnSkillLine(skillDictionary[type]).isProgressing);
 
         isCurrentlyUpgrading = false;
 
@@ -200,21 +164,6 @@ public class SkillSetSystem : GenericMenu, ISaveable
         return skillDictionary[line.type].slots[skillDictionary[line.type].currentLevel];
     }
 
-    /*public bool IsSkillComplete(SKILL_TYPE type)
-    {
-        foreach (SkillSetSlot slot in skillSlotLocations)
-        {
-           if (slot.skill == type)
-            {
-                if (slot.skillProgress >= 1)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }*/
 
 
 }

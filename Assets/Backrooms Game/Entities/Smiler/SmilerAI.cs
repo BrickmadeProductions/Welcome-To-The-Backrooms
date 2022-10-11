@@ -6,11 +6,15 @@ public class SmilerAI : Entity
 {
     public ParticleSystem explosionEffect;
 
+    public override void Init()
+    {
+        
+    }
     public override IEnumerator AI()
     {
         while (true)
         {
-            if (playerCanSee && canSeePlayer && GameSettings.Instance.GetComponent<CheatSheet>().AIEnabled)
+            if (playerCanSee && canSeeTarget && GameSettings.Instance.GetComponent<CheatSheet>().AIEnabled)
             {
                 entityAnimator.SetBool("Attack", true);
             }
@@ -63,7 +67,13 @@ public class SmilerAI : Entity
         Destroy(gameObject);
     }
 
-    
+    public override void OnEventStart()
+    {
+        
+    }
 
-    
+    public override void OnEventEnd()
+    {
+       
+    }
 }

@@ -1074,6 +1074,7 @@ MonoBehaviour:
     image: {fileID: 0}
     name: 
     inventoryWeight: 0
+    description: 
   durability: 0
   breakablePrefabs: []
   hitClips: []
@@ -1084,6 +1085,7 @@ MonoBehaviour:
   autoSwing: 0
   canPlace: 0
   isPlaced: 0
+  canBeUsed: 1
   animationPlaying: 0
   StartUseAnimation: 
   UseAnimations: []
@@ -2566,6 +2568,34 @@ PrefabInstance:
     - target: {fileID: 7088627852523957283, guid: 881cfdb00f488ed4983c716ec7251793, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: -152.775
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088627852523957308, guid: 881cfdb00f488ed4983c716ec7251793, type: 3}
+      propertyPath: runTimeID
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088627852523957308, guid: 881cfdb00f488ed4983c716ec7251793, type: 3}
+      propertyPath: saveableData.runTimeID
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088627852523957308, guid: 881cfdb00f488ed4983c716ec7251793, type: 3}
+      propertyPath: saveableData.location.Array.data[0]
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088627852523957308, guid: 881cfdb00f488ed4983c716ec7251793, type: 3}
+      propertyPath: saveableData.location.Array.data[1]
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088627852523957308, guid: 881cfdb00f488ed4983c716ec7251793, type: 3}
+      propertyPath: saveableData.location.Array.data[2]
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088627852523957308, guid: 881cfdb00f488ed4983c716ec7251793, type: 3}
+      propertyPath: saveableData.rotationEuler.Array.data[0]
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7088627852523957308, guid: 881cfdb00f488ed4983c716ec7251793, type: 3}
+      propertyPath: saveableData.rotationEuler.Array.data[1]
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7088627852523957311, guid: 881cfdb00f488ed4983c716ec7251793, type: 3}
       propertyPath: m_Name
@@ -4394,6 +4424,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Soda Can
       objectReference: {fileID: 0}
+    - target: {fileID: 6589991860473311435, guid: 8b53f3a93b7006548bb3aa7855014721, type: 3}
+      propertyPath: runTimeID
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6589991860473311435, guid: 8b53f3a93b7006548bb3aa7855014721, type: 3}
+      propertyPath: saveableData.runTimeID
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 8733503754934616213, guid: 8b53f3a93b7006548bb3aa7855014721, type: 3}
       propertyPath: type
       value: 6
@@ -4507,8 +4545,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4966944828226584158, guid: 01143d6056d1af34e87221a4f264afcb, type: 3}
+      propertyPath: runTimeID
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4966944828226584158, guid: 01143d6056d1af34e87221a4f264afcb, type: 3}
       propertyPath: playSounds
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4966944828226584158, guid: 01143d6056d1af34e87221a4f264afcb, type: 3}
+      propertyPath: saveableData.runTimeID
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 4966944828226584158, guid: 01143d6056d1af34e87221a4f264afcb, type: 3}
       propertyPath: LMBAnimations.Array.size
@@ -6513,14 +6559,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1864328501}
-  m_LocalRotation: {x: 0.7063449, y: 0.7063449, z: 0.032816183, w: -0.032816183}
-  m_LocalPosition: {x: -0.2989, y: 0.1669, z: 0.1704}
+  m_LocalRotation: {x: 0.7070832, y: 0.7070832, z: 0.00577265, w: -0.00577265}
+  m_LocalPosition: {x: -0.2989, y: 0.1542, z: 0.1685}
   m_LocalScale: {x: 0.033, y: 0.02, z: 0.02}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2959902018503194803}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 185.32, y: 0, z: -90}
+  m_LocalEulerAnglesHint: {x: 180.936, y: 0, z: -90}
 --- !u!64 &1864328503
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -7717,7 +7763,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 259c7200b3203334d870813651006383, type: 3}
   - {fileID: 8300000, guid: b59e570f9d6a27c48b0a24dc2916dd9f, type: 3}
   - {fileID: 8300000, guid: 8b76e65fe6f5d3b44adaeb5242408f10, type: 3}
+  light_renderer: {fileID: 6083393769733597392}
+  Light: {fileID: 4348747523715687471}
   broken: 1
+  hasPower: 0
 --- !u!23 &351784333956993357
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -8702,6 +8751,7 @@ MonoBehaviour:
     image: {fileID: 0}
     name: 
     inventoryWeight: 0
+    description: 
   durability: 25
   breakablePrefabs: []
   hitClips:
@@ -8713,6 +8763,7 @@ MonoBehaviour:
   autoSwing: 0
   canPlace: 0
   isPlaced: 0
+  canBeUsed: 1
   animationPlaying: 0
   StartUseAnimation: 
   UseAnimations: []
@@ -14063,6 +14114,8 @@ MonoBehaviour:
   id: 0
   tilePos: {x: 0, y: 0}
   entitySpawnLocations: []
+  itemSpawnLocations: []
+  SpawnWeight: 0
 --- !u!33 &1239381607611522536
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -14352,7 +14405,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 259c7200b3203334d870813651006383, type: 3}
   - {fileID: 8300000, guid: b59e570f9d6a27c48b0a24dc2916dd9f, type: 3}
   - {fileID: 8300000, guid: 8b76e65fe6f5d3b44adaeb5242408f10, type: 3}
+  light_renderer: {fileID: 4849476994331609289}
+  Light: {fileID: 3132703326734763062}
   broken: 1
+  hasPower: 0
 --- !u!23 &1460206110691170522
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -20146,7 +20202,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 259c7200b3203334d870813651006383, type: 3}
   - {fileID: 8300000, guid: b59e570f9d6a27c48b0a24dc2916dd9f, type: 3}
   - {fileID: 8300000, guid: 8b76e65fe6f5d3b44adaeb5242408f10, type: 3}
+  light_renderer: {fileID: 8446487162807818707}
+  Light: {fileID: 2090417760557061420}
   broken: 0
+  hasPower: 0
 --- !u!4 &2722035934944446939
 Transform:
   m_ObjectHideFlags: 0
@@ -20468,7 +20527,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 259c7200b3203334d870813651006383, type: 3}
   - {fileID: 8300000, guid: b59e570f9d6a27c48b0a24dc2916dd9f, type: 3}
   - {fileID: 8300000, guid: 8b76e65fe6f5d3b44adaeb5242408f10, type: 3}
+  light_renderer: {fileID: 8768039846015240078}
+  Light: {fileID: 1268609347409202033}
   broken: 1
+  hasPower: 0
 --- !u!1 &3046158446540728576
 GameObject:
   m_ObjectHideFlags: 0
@@ -38090,8 +38152,16 @@ PrefabInstance:
       value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 5174651668802718682, guid: e161201840b17e141a77746ee12159c6, type: 3}
+      propertyPath: runTimeID
+      value: -1-1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5174651668802718682, guid: e161201840b17e141a77746ee12159c6, type: 3}
       propertyPath: playSounds
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5174651668802718682, guid: e161201840b17e141a77746ee12159c6, type: 3}
+      propertyPath: saveableData.runTimeID
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 5174651668802718685, guid: e161201840b17e141a77746ee12159c6, type: 3}
       propertyPath: m_Name
@@ -50709,7 +50779,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 259c7200b3203334d870813651006383, type: 3}
   - {fileID: 8300000, guid: b59e570f9d6a27c48b0a24dc2916dd9f, type: 3}
   - {fileID: 8300000, guid: 8b76e65fe6f5d3b44adaeb5242408f10, type: 3}
+  light_renderer: {fileID: 4413832812033748540}
+  Light: {fileID: 6157618318927291075}
   broken: 0
+  hasPower: 0
 --- !u!23 &7939177830879345924
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -57008,7 +57081,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 259c7200b3203334d870813651006383, type: 3}
   - {fileID: 8300000, guid: b59e570f9d6a27c48b0a24dc2916dd9f, type: 3}
   - {fileID: 8300000, guid: 8b76e65fe6f5d3b44adaeb5242408f10, type: 3}
+  light_renderer: {fileID: 3058602499036641819}
+  Light: {fileID: 4775788637844813540}
   broken: 0
+  hasPower: 0
 --- !u!33 &8922838254893216358
 MeshFilter:
   m_ObjectHideFlags: 0

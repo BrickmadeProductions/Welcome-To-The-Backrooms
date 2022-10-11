@@ -12,6 +12,8 @@ using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Steamworks;
+using Lowscope.Saving.Core;
+using Lowscope.Saving.Data;
 
 public class BPUtil : MonoBehaviour
 {
@@ -141,6 +143,11 @@ public enum SCENE
 	LEVELRUN,
 	FOURKEYS_CLIPPINGZONE
 }
+public enum GAMEPLAY_EVENT
+{
+	NONE,
+	LIGHTS_OUT
+}
 public class GameSettings : MonoBehaviour, ISaveable
 {
 	[Serializable]
@@ -173,12 +180,21 @@ public class GameSettings : MonoBehaviour, ISaveable
 		public float masterVolume;
 
 	}
-	public TextMeshProUGUI teamMemberMode;
+
+	public static List<string> cachedSaveIdentifiers;
+
+	public TextMeshProUGUI devModeInfo;
 
 	//BrickmadeProductions, king, wahoo, RJC, Constant
 	public static readonly List<ulong> teamMemberSteamIDs = new List<ulong> { 76561199226044925, 76561198017133391, 76561198139743119, 76561198109625129, 76561198968340030 };
 
 	public BackroomsLevelWorld worldInstance = null;
+	public CutSceneHandler cutSceneHandler;
+
+	private List<GenericMenu> gameMenuDatabase;
+
+	[SerializeField]
+	public List<GenericMenu> GameplayMenuDataBase => gameMenuDatabase;
 
 	private SaveData runtimeSaveData;
 
@@ -198,11 +214,13 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public static volatile bool LEVEL_SAVE_LOADED = false;
 
-	public static volatile bool LEVEL_GENERATED = false;
+	public static volatile bool SPAWN_REGION_GENERATED = false;
 
-	public static volatile bool LEVEL_LOADED = false;
+	public static volatile bool SCENE_LOADED = false;
 
 	public static volatile bool PLAYER_DATA_LOADED = false;
+
+	public static volatile bool WORLD_SAVING = false;
 
 	public string activeUser;
 
@@ -307,7 +325,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 	[SerializeField]
 	public Slider sensitivitySlider;
 
-	private float masterVolume = 0.99f;
+	private float masterVolume = 0f;
 
 	[SerializeField]
 	public Slider masterVolumeSlider;
@@ -341,10 +359,11 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public GameObject settingsScreen;
 
+	public GameObject deleteSaveScreen;
+
 	public SCENE ActiveScene;
 
 	public SCENE LastSavedScene = SCENE.ROOM;
-
 	public PostProcessVolume Post => post;
 
 	public Vignette Vignette => vignette;
@@ -395,10 +414,10 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public static GameSettings Instance => m_instance;
 
+
 	private void Awake()
 	{
-		
-
+	
 		GameScreen();
 
 		Init();
@@ -421,17 +440,20 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		DontDestroyOnLoad(gameObject);
 
+		
 
-	}
-    private void Start()
-    {
-		SaveMaster.SyncLoad();
+
 	}
 
     private void Init()
 	{
 
 		post = GetComponent<PostProcessVolume>();
+		cutSceneHandler = GetComponent<CutSceneHandler>();
+		gameMenuDatabase = new List<GenericMenu>();
+
+		cachedSaveIdentifiers = new List<string>();
+
 		PropDatabase = new Dictionary<OBJECT_TYPE, InteractableObject>();
 
 		foreach (InteractableObject item in propDatabase)
@@ -463,6 +485,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 		runtimeSaveData = JsonConvert.DeserializeObject<SaveData>(data);
 		ConnectSettings();
 		LoadSettings(runtimeSaveData);
+		//set buttons
 	    ambientOcclusionButton.isOn = AmbientOcclusionEnabled;
 		bloomButton.isOn = BloomEnabled;
 		antiAliasingButton.isOn = AntiAliasingEnabled;
@@ -475,13 +498,27 @@ public class GameSettings : MonoBehaviour, ISaveable
 		masterVolumeSlider.value = MasterVolume;
 		sensitivitySlider.value = Sensitivity;
 		bloodAndGoreToggle.isOn = BloodAndGore;
+
 		LastSavedScene = runtimeSaveData.lastSavedScene;
+
 		setScreenRes(screenResIndex);
 		setFullscreen(fullScreenEnabled);
 	}
 
 	public void OnLoadNoData()
 	{
+		setAmbientOcclusion(true);
+		setAntiAliasing(true);
+		setVignette(true);
+		setBloom(true);
+		setChromatic(true);
+		setScreenRes(0);
+		setFullscreen(true);
+		setVSync(false);
+		setMotionBlur(false);
+		setFOV(80f);
+		setMasterVolume(1f);
+		//setSensitivity(data.sensitivity);
 	}
 
 	public string OnSave()
@@ -506,21 +543,25 @@ public class GameSettings : MonoBehaviour, ISaveable
 	}
 
 	public void ResetGame()
+    {
+		StartCoroutine(ResetGameAsync());
+    }
+	public IEnumerator ResetGameAsync()
 	{
-		
-		Saveable[] array = SaveMaster.GetAllSavables().ToArray();
-		foreach (Saveable saveable in array)
-		{
-			if (saveable != GetComponent<Saveable>())
-			{
-				SaveMaster.WipeSaveable(saveable);
-			}
-		}
 
-		SaveMaster.WriteActiveSaveToDisk();
+		//dont wipe saveables because the main menu has savables active from this object
 
 		LastSavedScene = SCENE.ROOM;
 		LoadScene(SCENE.HOMESCREEN);
+
+		yield return new WaitUntil(() => ActiveScene == SCENE.HOMESCREEN);
+
+		SaveMaster.DeleteSave(0);
+
+		SaveFileUtility.LoadSave(0, true);
+		SaveMaster.SetSlot(0, false);
+
+		SaveMaster.SyncSave();
 
 	}
 
@@ -546,11 +587,28 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	private void Update()
 	{
-		if (Input.GetKeyDown(KeyCode.Escape) && !cutScene && !Player.GetComponent<InventoryMenuSystem>().menuOpen)
+		//close menu otherwise open settings
+		if (Input.GetButtonDown("Esc") && !IsCutScene)
 		{
-			SettingsScreen();
+			foreach (GenericMenu menu in GameplayMenuDataBase)
+			{
+				//toggle off the old menu
+				if (menu.menuOpen)
+				{
+					menu.ToggleMenu();
+				}
+			}
+
+			if (PauseMenuOpen)
+            {
+				GameScreen();
+
+			}
+			else SettingsScreen();
 		}
+
 		Logo.transform.rotation = Quaternion.Euler(Mathf.Sin(Time.realtimeSinceStartup * 0.5f) * 3f, Mathf.Sin(Time.realtimeSinceStartup * 0.5f) * -3f, 0f);
+		
 		if ((double)UnityEngine.Random.value >= 0.99)
 		{
 			smilerLogoOn = !smilerLogoOn;
@@ -800,6 +858,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 			Instance.worldInstance.SaveAllObjectsAndEntities();
 		}
 
+		yield return new WaitUntil(() => !WORLD_SAVING);
+
 		SaveMaster.SyncSave();
 		SaveMaster.WriteActiveSaveToDisk();
 
@@ -825,19 +885,16 @@ public class GameSettings : MonoBehaviour, ISaveable
 		switch (LastSavedScene)
 		{
 			case SCENE.HOMESCREEN:
-				Debug.LogError("LASTSAVEDSCENEERROR");
 				LoadScene(SCENE.ROOM);
 				break;
 			case SCENE.INTRO:
-				Debug.LogError("LASTSAVEDSCENEERROR");
 				LoadScene(SCENE.ROOM);
 				break;
 			case SCENE.LOADING:
-				Debug.LogError("LASTSAVEDSCENEERROR");
-				LoadScene(SCENE.LOADING);
+				LoadScene(SCENE.ROOM);
 				break;
 		}
-		if (LastSavedScene != SCENE.INTRO && LastSavedScene != SCENE.HOMESCREEN && LastSavedScene != SCENE.LOADING)
+		if (LastSavedScene != SCENE.INTRO && LastSavedScene != SCENE.HOMESCREEN && LastSavedScene != SCENE.LOADING && LastSavedScene != SCENE.ROOM)
 		{
 			LoadScene(LastSavedScene);
 		}
@@ -866,45 +923,39 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public void LoadScene(SCENE id)
 	{
-		if (SceneManager.GetActiveScene().buildIndex != (int)id)
-			StartCoroutine(PreLoadScene(id));
+		StartCoroutine(PreLoadScene(id));
 	}
 
 	public void LoadScene(int id)
 	{
-		if (SceneManager.GetActiveScene().buildIndex != id)
-			StartCoroutine(PreLoadScene((SCENE)id));
+		StartCoroutine(PreLoadScene((SCENE)id));
 
 	}
 
 	private IEnumerator PreLoadScene(SCENE id)
 	{
 		
-
+		//before loading world, save level
 		if (worldInstance != null)
         {
-			StartCoroutine(SaveAllProgress());
+			if (id != SCENE.HOMESCREEN)
+				worldInstance.OnMoveToNewLevel();
 
-			SceneManager.LoadSceneAsync(2, LoadSceneMode.Additive);
+			yield return StartCoroutine(SaveAllProgress());
 
-			yield return new WaitUntil(() => SaveMaster.isDoneSaving);
 		}
 
-		
-
-		LEVEL_LOADED = false;
+		SCENE_LOADED = false;
 
 		LEVEL_SAVE_LOADED = false;
 
-		LEVEL_GENERATED = false;
+		SPAWN_REGION_GENERATED = false;
 
 		PLAYER_DATA_LOADED = false;
 
-		/*if (Instance.worldInstance != null)
-			yield return new WaitUntil(() => LEVEL_GENERATED);*/
-
 		yield return SceneManager.LoadSceneAsync((int)id, LoadSceneMode.Single);
 
+		//scene has been loaded
 		//post load
 
 		if (ActiveScene != 0 && player == null)
@@ -920,7 +971,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 				player.GetComponent<PlayerController>().darkShield.SetActive(false);
 
 				//player.transform.position = new Vector3(0f, 1.1f, 0.7f);
-				player.transform.position = new Vector3(0f, 3f, 0.7f);
+				player.transform.position = new Vector3(0f, 2f, 0.7f);
 
 				post.profile = homeScreenRoomProfile;
 
@@ -954,13 +1005,15 @@ public class GameSettings : MonoBehaviour, ISaveable
 				LEVEL_SAVE_LOADED = true;
 				PLAYER_DATA_LOADED = true;
 
+				audioHandler.StopCurrentSceneSoundTrack();
+
 				HomeScreen();
 
 				break;
 
 			case SCENE.LEVEL0:
 
-				player.transform.position = new Vector3(0f, 2.5f, 0f);
+				player.transform.position = new Vector3(0f, 0.5f, 0f);
 
 				player.GetComponent<PlayerController>().darkShield.SetActive(true);
 
@@ -974,7 +1027,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 				player.GetComponent<PlayerController>().darkShield.SetActive(true);
 
-				player.transform.position = new Vector3(0f, 2f, 0f);
+				player.transform.position = new Vector3(0f, 1.75f, 0f);
 
 				post.profile = level1Profile;
 
@@ -1006,7 +1059,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 			case SCENE.LEVELRUN:
 
-				player.transform.position = new Vector3(0, 1, 0);
+				player.transform.position = new Vector3(0, 0, 0);
 
 				player.GetComponent<PlayerController>().darkShield.SetActive(true);
 
@@ -1036,25 +1089,34 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		if (AmInSavableScene())
 		{
-			audioHandler.SetUpAudio(id);
 			LastSavedScene = ActiveScene;
+			audioHandler.StopCurrentSceneSoundTrack();
+			audioHandler.SetUpAudio(id, ActiveScene == SCENE.LEVELRUN);
 		}
 
-		LEVEL_LOADED = true;
-
-		if (ActiveScene != SCENE.ROOM && player.GetComponent<PlayerHealthSystem>() != null)
-		{
-			player.GetComponent<PlayerHealthSystem>().WakeUpOther();
-		}
+		SCENE_LOADED = true;
 
 		GAME_FIRST_LOADED = false;
-		
-		SaveMaster.SyncLoad();
+
+		//SaveMaster.SyncLoad();
+		SaveMaster.WriteActiveSaveToDisk();
 
 		Steam.UpdateRichPresence();
 
-	}
+		//loading screen wait for level to load
+		if (worldInstance != null)
+		{
+			//loading screen
+			yield return SceneManager.LoadSceneAsync(2, LoadSceneMode.Additive);
 
+			yield return new WaitUntil(() => SPAWN_REGION_GENERATED);
+
+			SceneManager.UnloadScene(2);
+			
+		}
+
+
+	}
 	public bool AmInSavableScene()
 	{
 		if (ActiveScene != SCENE.INTRO && ActiveScene != SCENE.HOMESCREEN && ActiveScene != SCENE.ROOM && ActiveScene != SCENE.LOADING)
@@ -1063,4 +1125,9 @@ public class GameSettings : MonoBehaviour, ISaveable
 		}
 		return false;
 	}
+
+	void OnApplicationQuit()
+    {
+		SaveAllProgress();
+    }
 }

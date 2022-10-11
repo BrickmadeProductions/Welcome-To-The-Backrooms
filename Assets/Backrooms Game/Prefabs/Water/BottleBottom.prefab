@@ -30,7 +30,8 @@ Transform:
   m_GameObject: {fileID: 4027876766965811622}
   m_LocalRotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 8, y: 8, z: 8}
+  m_LocalScale: {x: 4, y: 4, z: 4}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -54,6 +55,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -125,6 +127,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 926
+    location:
+    - 0
+    - 0
+    - 0
+    rotationEuler:
+    - 270.01978
+    - 0
+    - 0
+    parentName: 
+    type: 0
+    instance: {fileID: 6804282787703142062}
+  type: 0
+  playSounds: 1
+  runTimeID: 926
+  inventoryObjectData:
+    image: {fileID: 0}
+    name: 
+    inventoryWeight: 0
+    description: 
   durability: 0
   breakablePrefabs: []
   hitClips:
@@ -132,10 +155,14 @@ MonoBehaviour:
   - {fileID: 8300000, guid: d19e1b1a6ada2bc45a23c463accfb0ec, type: 3}
   - {fileID: 8300000, guid: 5112c95477f193b4b9fe637b9d43eafe, type: 3}
   breakClips: []
-  playSounds: 1
-  inventoryWeight: 1
-  holdableObject: {fileID: 0}
+  rb: {fileID: 0}
+  ThrowMultiplier: 0
   large: 0
+  autoSwing: 0
+  canPlace: 0
+  isPlaced: 0
   animationPlaying: 0
-  animationClips: []
-  animationBools: []
+  StartUseAnimation: 
+  UseAnimations: []
+  CustomHoldAnimation: 
+  ItemObjectAnimations: []

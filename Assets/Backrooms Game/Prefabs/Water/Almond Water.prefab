@@ -145,7 +145,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 838547b23d18f3641bc546b1f885db2c, type: 2}
+  - {fileID: 2100000, guid: 2c867a6db2f10804fbc50fcfa9a40913, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -179,9 +179,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c5ea98fa047165449c86e7300518dc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxWobble: 0.03
-  wobbleSpeed: 0.61
-  recovery: 0.46
+  maxWobble: 0.02
+  wobbleSpeed: 0.3
+  recovery: 0.4
 --- !u!1 &4567178902267999293
 GameObject:
   m_ObjectHideFlags: 0
@@ -440,8 +440,8 @@ GameObject:
   m_Component:
   - component: {fileID: 8189078796972353778}
   - component: {fileID: 5731310799800252581}
-  - component: {fileID: 6461271711412109696}
   - component: {fileID: 2216274278999694209}
+  - component: {fileID: 2391920567668754710}
   m_Layer: 9
   m_Name: Almond Water
   m_TagString: HoldableObject
@@ -481,56 +481,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &6461271711412109696
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8858197199751230024}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  saveableData:
-    runTimeID: 
-    location: []
-    rotationEuler: []
-    parentName: 
-    type: 0
-    instance: {fileID: 0}
-  type: 3
-  playSounds: 1
-  runTimeID: 
-  inventoryObjectData:
-    image: {fileID: 2800000, guid: 1d305f4e0b869ce45be438cd686cd14c, type: 3}
-    name: 
-    inventoryWeight: 7
-    description: A bottle of Almond Water. Provides medium hydration. Slight healing
-      properties.
-  durability: 1
-  breakablePrefabs:
-  - {fileID: 4027876766965811622, guid: d7adc3900566bf646862e3db1977c0c5, type: 3}
-  - {fileID: 7907412150563559736, guid: e83c0ac28bc204a41b0628e14f86ba0a, type: 3}
-  hitClips:
-  - {fileID: 8300000, guid: 4864f038af1762b40a1008058d45dce4, type: 3}
-  breakClips:
-  - {fileID: 8300000, guid: cc2036b5a64bd3646ac68f2e42e79b2b, type: 3}
-  - {fileID: 8300000, guid: d19e1b1a6ada2bc45a23c463accfb0ec, type: 3}
-  - {fileID: 8300000, guid: 5112c95477f193b4b9fe637b9d43eafe, type: 3}
-  rb: {fileID: 0}
-  ThrowMultiplier: 0
-  large: 0
-  autoSwing: 1
-  canPlace: 0
-  isPlaced: 0
-  animationPlaying: 0
-  StartUseAnimation: StartDrinking
-  UseAnimations:
-  - isDrinking
-  CustomHoldAnimation: 
-  ItemObjectAnimations: []
 --- !u!82 &2216274278999694209
 AudioSource:
   m_ObjectHideFlags: 0
@@ -627,3 +577,64 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2391920567668754710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8858197199751230024}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d442cbc430148cc4ea8301300efc6faf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 159
+    location:
+    - 0
+    - 0
+    - 0
+    rotationEuler:
+    - -0
+    - 0
+    - 0
+    parentName: 
+    type: 3
+    instance: {fileID: 2391920567668754710}
+  type: 3
+  playSounds: 0
+  runTimeID: 159
+  inventoryObjectData:
+    image: {fileID: 2800000, guid: 1d305f4e0b869ce45be438cd686cd14c, type: 3}
+    name: Almond Water
+    inventoryWeight: 3
+    description: A bottle of Almond Water. Provides medium hydration. Slight healing
+      properties.
+  durability: 2
+  breakablePrefabs:
+  - {fileID: 7907412150563559736, guid: e83c0ac28bc204a41b0628e14f86ba0a, type: 3}
+  - {fileID: 4027876766965811622, guid: d7adc3900566bf646862e3db1977c0c5, type: 3}
+  hitClips:
+  - {fileID: 8300000, guid: cc2036b5a64bd3646ac68f2e42e79b2b, type: 3}
+  breakClips:
+  - {fileID: 8300000, guid: cc2036b5a64bd3646ac68f2e42e79b2b, type: 3}
+  - {fileID: 8300000, guid: d19e1b1a6ada2bc45a23c463accfb0ec, type: 3}
+  - {fileID: 8300000, guid: 5112c95477f193b4b9fe637b9d43eafe, type: 3}
+  rb: {fileID: 0}
+  ThrowMultiplier: 2
+  large: 0
+  autoSwing: 0
+  canPlace: 0
+  isPlaced: 0
+  canBeUsed: 1
+  animationPlaying: 0
+  StartUseAnimation: StartDrinking
+  UseAnimations:
+  - isDrinking
+  CustomHoldAnimation: 
+  ItemObjectAnimations: []
+  filledAmount: 0.2
+  maxDrinks: 7
+  waterRenderer: {fileID: 2763552518790900559}
+  thirstQuenchPerDrink: 25

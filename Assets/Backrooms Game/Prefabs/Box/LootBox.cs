@@ -6,7 +6,7 @@ public class LootBox : InteractableObject
 {
     /*public List<ObjectWithWeight> lootTable;*/
 
-    public List<ItemSpawner> itemSpawnLocations;
+    public List<Transform> itemSpawnLocations;
 
     public Animator anim;
 
@@ -14,7 +14,7 @@ public class LootBox : InteractableObject
 
     public bool hasOpened;
 
-    public override void Hold(InteractionSystem player, bool RightHand)
+    public override void Pickup(InteractionSystem player, bool RightHand)
     {
         
     }
@@ -22,6 +22,7 @@ public class LootBox : InteractableObject
     public override void Init()
     {
         hasOpened = false;
+        SetMetaData("hasOpened", "false");
         anim.SetTrigger("Close");
     }
 
@@ -45,11 +46,15 @@ public class LootBox : InteractableObject
     {
         if (!hasOpened)
         {
-            foreach (ItemSpawner itemSpawn in itemSpawnLocations)
+            foreach (Transform itemSpawn in itemSpawnLocations)
             {
                  if (chanceForItemToBeInASlot > Random.Range(0, 0.99f))
                  {
-                    itemSpawn.SpawnItem();
+                    GameObject itemToSpawn = WeightedRandomSpawning.ReturnItemBySpawnChances(GameSettings.Instance.worldInstance.worldPropSpawnTable);
+                    
+                    if (itemToSpawn.GetComponent<HoldableObject>() != null)
+                        if (!itemToSpawn.GetComponent<HoldableObject>().large)
+                        GameSettings.Instance.worldInstance.AddNewProp(itemSpawn.position, Quaternion.identity, itemToSpawn);
                  }
 
             }
