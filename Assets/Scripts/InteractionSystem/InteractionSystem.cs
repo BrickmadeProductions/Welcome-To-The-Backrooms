@@ -351,7 +351,16 @@ public class InteractionSystem : MonoBehaviour
 		{
 			currentlyLookingAt.Use(this, false);
 		}
+<<<<<<< Updated upstream
 		if (Input.GetButtonDown("Pickup") && inventorySlots.Count < inventoryLimit && currentlyLookingAt != null)
+=======
+		
+	}
+	void LateUpdate()
+	{
+		
+		if (GameSettings.Instance.PauseMenuOpen || GameSettings.Instance.IsCutScene || GetComponent<InventoryMenuSystem>().menuOpen)
+>>>>>>> Stashed changes
 		{
 			currentlyLookingAt.AddToInv(this);
 			currentSelectedInventorySlot++;
@@ -524,6 +533,7 @@ public class InteractionSystem : MonoBehaviour
 		{
 			if (currentlyLookingAt.GetComponent<InteractableObject>())
 			{
+<<<<<<< Updated upstream
 				switch (currentlyLookingAt.gameObject.layer)
 				{
 					case 9:
@@ -536,10 +546,89 @@ public class InteractionSystem : MonoBehaviour
 						open.gameObject.SetActive(value: true);
 						break;
 				}
+=======
+
+				case 9:
+					interact.gameObject.SetActive(true);
+					interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "";
+
+					break;
+
+				case 10:
+					interact.gameObject.SetActive(true);
+					interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "[E] Open";
+
+					break;
+
+				case 20:
+
+					if (GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP) > 0)
+					{
+						interact.gameObject.SetActive(true);
+						interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "[E] No-Clip";
+					}
+					break;
+
+				case 25:
+					interact.gameObject.SetActive(true);
+					interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "[E] Inspect";
+
+					break;
+
+			}
+
+		}
+
+		else
+		{
+			interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "";
+			interact.gameObject.SetActive(value: false);
+		}
+
+		//throwing and dropping
+
+		//pickup if nothing in hand
+		if (Input.GetButton("Grab") && currentlyLookingAt != null && currentlyLookingAt.layer != 25 && currentlyLookingAt.layer != 20 && currentlyLookingAt.layer != 14 && canGrab)
+		{
+			/*StartCoroutine(StartPickup(currentlyLookingAt));*/
+			FinalizePickup(currentlyLookingAt.GetComponent<InteractableObject>());
+
+		}
+
+		if (GetObjectInHand() != null)
+		{
+
+			//throw system, only small objects
+			if (!GetObjectInHand().large && GetObjectInHand().ThrowAble)
+            {
+				if (Input.GetMouseButton(1) && !player.bodyAnim.GetBool("isPreparingThrow") && (!buildOn || raycastForPlacing.Length == 0))
+				{
+					//Debug.Log("PREP Throw I.S.");
+					player.bodyAnim.SetBool("isPreparingThrow", true);
+					player.bodyAnim.ResetTrigger("isThrowing");
+				}
+
+				if (Input.GetMouseButtonUp(1) && (!buildOn || raycastForPlacing.Length == 0))
+				{
+					//Debug.Log("Throw I.S.");
+
+					player.bodyAnim.SetBool("isPreparingThrow", false);
+					player.bodyAnim.SetTrigger("isThrowing");
+
+
+				}
+			}
+			
+
+			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.neck.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !GetObjectInHand().GetComponent<HoldableObject>().large))
+			{
+				SetDrop();
+>>>>>>> Stashed changes
 			}
 		}
 		else
 		{
+<<<<<<< Updated upstream
 			pickup.gameObject.SetActive(value: false);
 			open.gameObject.SetActive(value: false);
 		}
@@ -563,4 +652,15 @@ public class InteractionSystem : MonoBehaviour
 		player.bodyAnim.SetBool("DropItem", value: true);
 		StartCoroutine(DropObjectAtCorrectTime());
 	}
+=======
+			if (GetObjectInHand() != null)
+			{
+				GetObjectInHand().Use(this, LMB: true);
+			}
+		}else if (Input.GetMouseButtonDown(1) && GetObjectInHand() != null)
+		{
+			GetObjectInHand().Use(this, LMB: false);
+		}
+	}
+>>>>>>> Stashed changes
 }

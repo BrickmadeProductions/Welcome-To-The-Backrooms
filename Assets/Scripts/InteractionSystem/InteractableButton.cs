@@ -24,7 +24,6 @@ public class InteractableButton : InteractableObject
 		justPressed = true;
 		pressed = true;
 	}
-
 	public void Update()
 	{
 		if (justPressed)

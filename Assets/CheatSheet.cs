@@ -9,6 +9,7 @@ public class CheatSheet : MonoBehaviour
     public Dropdown itemSpawnDropdown;
     public Dropdown entitySpawnDropdown;
     public Dropdown levelDropdown;
+    public Dropdown StatsDropdown;
 
     ENTITY_TYPE currentEntityTypeChoice;
     OBJECT_TYPE currentObjectTypeChoice;
@@ -55,6 +56,15 @@ public class CheatSheet : MonoBehaviour
     }
 
     public void LoadAllEntityTypesToDropDown()
+    {
+        string[] entities = Enum.GetNames(typeof(ENTITY_TYPE));
+        List<string> entitiesList = new List<string>(entities);
+
+        entitySpawnDropdown.AddOptions(entitiesList);
+    }
+
+    //Loads all player stats
+    public void LoadAllStatTypesToDropDown()
     {
         string[] entities = Enum.GetNames(typeof(ENTITY_TYPE));
         List<string> entitiesList = new List<string>(entities);

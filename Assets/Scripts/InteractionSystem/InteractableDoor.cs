@@ -16,11 +16,15 @@ public class InteractableDoor : InteractableObject
 		base.gameObject.transform.GetChild(0).GetComponent<Rigidbody>().AddForce(player.transform.forward * 2f, ForceMode.Impulse);
 	}
 
+<<<<<<< Updated upstream
 	public override void AddToInv(InteractionSystem player)
 	{
 	}
 
 	public override void Init()
+=======
+    public override void Init()
+>>>>>>> Stashed changes
 	{
 	}
 }

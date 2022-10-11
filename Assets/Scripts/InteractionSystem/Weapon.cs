@@ -17,11 +17,16 @@ public class Weapon : MonoBehaviour
          */
         Vector3 collisionPoint = other.gameObject.GetComponent<Collider>().ClosestPointOnBounds(transform.position);
 
+<<<<<<< Updated upstream
 
         if (gameObject.layer == 13 && other.gameObject.layer == 18 && connetedObject.animationPlaying)
+=======
+        Debug.Log(connetedObject.animationPlaying);
+        if (gameObject.layer == 23 && other.gameObject.layer == 18 && other.gameObject.layer != 11 && connetedObject.animationPlaying)
+>>>>>>> Stashed changes
         {
             AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
-
+            Debug.Log("Player Attackedss");
             if (limb != null)
             {
                 if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.3f)
@@ -43,11 +48,20 @@ public class Weapon : MonoBehaviour
         }
         else if (other.gameObject.layer == 18 && Thrown)
         {
+<<<<<<< Updated upstream
             //Debug.Log("Player Attack");
             AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
             if (limb != null)
             {
                 if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.3f)
+=======
+            Debug.Log("Player Attack Throw");
+            if (other.gameObject.layer == 18 && other.gameObject.layer != 11 && (connetedObject.GetComponent<ThrowWeapon>().Flying || connetedObject.GetComponent<ThrowWeapon>().stuckInWall))
+            {
+                Debug.Log("Player Attack");
+                AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
+                if (limb != null)
+>>>>>>> Stashed changes
                 {
                     StartCoroutine(limb.attachedEntity.StunTimer());
                 }
@@ -60,8 +74,11 @@ public class Weapon : MonoBehaviour
                 }
             }
         }
+<<<<<<< Updated upstream
 
 
+=======
+>>>>>>> Stashed changes
     }
 
     public void OnTriggerExit(Collider other)

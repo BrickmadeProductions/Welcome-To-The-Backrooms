@@ -20,6 +20,8 @@ public class HoldableObject : InteractableObject
 
 	public float ThrowMultiplier;
 
+	public bool ThrowAble = true;
+
 	private bool broken;
 
 	public bool large;
@@ -98,6 +100,14 @@ public class HoldableObject : InteractableObject
 			}
 		}
 	}
+<<<<<<< Updated upstream
+=======
+
+	public override void Hold(InteractionSystem player, bool RightHand)
+    {
+		
+		if (RightHand)
+>>>>>>> Stashed changes
 
 	public override void AddToInv(InteractionSystem interactionSystem)
 	{

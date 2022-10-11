@@ -117,7 +117,29 @@ public abstract class InteractableObject : MonoBehaviour
 
 	public abstract void Init();
 
+<<<<<<< Updated upstream
 	public abstract void Throw(Vector3 force);
+=======
+	/// <summary>
+	/// Calls when all variables have been pulled from this object
+	/// </summary>
+	public abstract void OnSaveFinished();
+
+	/// <summary>
+	/// Calls when all variables have been loaded to this object
+	/// </summary>
+	public abstract void OnLoadFinished();
+
+	public virtual void Throw(Vector3 force)
+    {
+
+    }
+	/// <summary>
+	/// Runs when the USE button is pressed while item is on the ground, or the RMB is pressed when holding
+	/// </summary>
+	/// <param name="player"></param>
+	/// <param name="LMB"></param>
+>>>>>>> Stashed changes
 
 	public abstract void Use(InteractionSystem player, bool LMB);
 
@@ -129,6 +151,7 @@ public abstract class InteractableObject : MonoBehaviour
 // OBJECT_TYPE
 public enum OBJECT_TYPE
 {
+<<<<<<< Updated upstream
 	KNIFE,
 	AXE,
 	CHAIR,
@@ -145,4 +168,27 @@ public enum OBJECT_TYPE
 	METAL_LADDER,
 	ROPE_COIL,
 	ROPE_TIED
+=======
+    KNIFE,
+    AXE,
+    CHAIR,
+    ALMOND_WATER,
+    SCREWDRIVER,
+    SOUP,
+    SODA,
+    FLASHLIGHT,
+    BOXCUTTER,
+    TAPE,
+    SHIV_BOXCUTTER,
+    BIGSPOON,
+    SPEAR,
+    METAL_LADDER,
+    ROPE_COIL,
+    ROPE_TIED,
+    CASSET_TAPE,
+	CASSET_PLAYER,
+	LOOT_BOX_CARDBOARD,
+	ANOMOLY_CHAIR,
+	GLOCK
+>>>>>>> Stashed changes
 }
