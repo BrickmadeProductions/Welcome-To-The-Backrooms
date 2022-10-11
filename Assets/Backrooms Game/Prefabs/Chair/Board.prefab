@@ -28,7 +28,9 @@ Transform:
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2966355079460796042}
   m_Father: {fileID: 1742327623365562810}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
@@ -51,6 +53,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -81,6 +84,51 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &3238799845759554004
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2966355079460796042}
+  - component: {fileID: 7642451844567134042}
+  m_Layer: 9
+  m_Name: Collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2966355079460796042
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3238799845759554004}
+  m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.04, y: 0.039999988, z: 0.039999988}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4045617285736005951}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &7642451844567134042
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3238799845759554004}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 0.15834734, z: 1}
+  m_Center: {x: 0, y: 0.025714872, z: 0}
 --- !u!1 &7668706958697367083
 GameObject:
   m_ObjectHideFlags: 0
@@ -93,7 +141,6 @@ GameObject:
   - component: {fileID: 3750834689907515825}
   - component: {fileID: 7610232900887421506}
   - component: {fileID: 5426564105021035801}
-  - component: {fileID: 1534019170684451711}
   m_Layer: 9
   m_Name: Board
   m_TagString: Wood
@@ -111,6 +158,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.019999996, y: 0.057500005, z: -1.58}
   m_LocalScale: {x: 25, y: 25, z: 25}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4045617285736005951}
   m_Father: {fileID: 0}
@@ -144,6 +192,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 312
+    location:
+    - -0.019999996
+    - 0.057500005
+    - -1.58
+    rotationEuler:
+    - -0
+    - 0
+    - 0
+    parentName: 
+    type: 22
+    instance: {fileID: 7610232900887421506}
+  type: 22
+  playSounds: 1
+  runTimeID: 312
+  inventoryObjectData:
+    image: {fileID: 0}
+    name: Wood Board
+    inventoryWeight: 3
+    description: Wood
   durability: 0
   breakablePrefabs: []
   hitClips:
@@ -151,10 +220,18 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 0e5240b5040937f46a2798f0974643d3, type: 3}
   breakClips:
   - {fileID: 8300000, guid: 3ec90ec7ba21d9641aba6d72da0fb644, type: 3}
-  playSounds: 1
-  inventoryWeight: 1
-  holdableObject: {fileID: 0}
-  large: 1
+  rb: {fileID: 0}
+  ThrowMultiplier: 2
+  large: 0
+  autoSwing: 0
+  canPlace: 0
+  isPlaced: 0
+  canBeUsed: 1
+  animationPlaying: 0
+  StartUseAnimation: 
+  UseAnimations: []
+  CustomHoldAnimation: 
+  ItemObjectAnimations: []
 --- !u!82 &5426564105021035801
 AudioSource:
   m_ObjectHideFlags: 0
@@ -251,16 +328,3 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!65 &1534019170684451711
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7668706958697367083}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.038975127, y: 0.0041273604, z: 0.041385584}
-  m_Center: {x: 0.00004629731, y: -0.0002725187, z: -0.0002862024}

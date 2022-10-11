@@ -14,7 +14,7 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     [SerializeField]
     private Canvas canvas;
-    private CanvasGroup canvasGroup;
+    public CanvasGroup canvasGroup;
 
     public GameObject description;
 
@@ -22,6 +22,9 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public TextMeshProUGUI descriptionText;
 
+    public TextMeshProUGUI metaDataText;
+
+    
     private void OnDisable()
     {
         description.SetActive(false);
@@ -34,6 +37,7 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         canvas = GetComponentInParent<Canvas>();
         canvasGroup = GetComponent<CanvasGroup>();
+        
     }
     public void SetDetails(InventoryObjectData data, HoldableObject connected, InventorySlot slotin)
     {
@@ -41,7 +45,11 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
         connectedObject = connected;
 
-        itemImageLocation.texture = data.image;
+        if (data.image != null)
+        {
+            itemImageLocation.texture = data.image;
+        }
+        
 
         nameText.text = data.name.ToUpper();
 
@@ -58,32 +66,33 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             canvas.worldCamera,
             out position);
 
-        GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().currentItemSlected.transform.position = canvas.transform.TransformPoint(new Vector3(position.x, position.y, -1));
+        GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.transform.position = canvas.transform.TransformPoint(new Vector3(position.x, position.y, -1));
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
-        GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().canOpen = false;
+        GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = false;
         canvasGroup.alpha = 0.6f;
         canvasGroup.blocksRaycasts = false;
-        GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().currentItemSlected = this;
+        GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = this;
 
         Debug.Log("Picking Up From " + slotIn.name);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().canOpen = true;
+        GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = true;
         transform.parent = slotIn.transform;
         transform.position = slotIn.transform.position;
 
-        GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().currentItemSlected = null;
+        GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = null;
         canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        description.SetActive(true);
+        if (GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected == null)
+            description.SetActive(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -93,6 +102,10 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            GameSettings.Instance.Player.GetComponent<InteractionSystem>().SetDrop(slotIn);
+        }
         description.SetActive(false);
     }
 

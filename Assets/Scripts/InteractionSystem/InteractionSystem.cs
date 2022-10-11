@@ -10,7 +10,7 @@ using UnityEngine.UI;
 public class InteractionSystem : MonoBehaviour
 {
 	private PlayerController player;
-	private InventoryMenuSystem inventory;
+	private InventorySystem inventory;
 
 	//building
 	public bool buildOn;
@@ -36,9 +36,12 @@ public class InteractionSystem : MonoBehaviour
 
 	public float pickupTime = 0.75f;
 
-
 	public LayerMask placingLayerMask;
 	public LayerMask grabbingLayerMask;
+
+	public List<string> punchingAnimations;
+
+	public List<Weapon> fists;
 
 	private void Awake()
 	{
@@ -46,7 +49,7 @@ public class InteractionSystem : MonoBehaviour
 		transparentPlaceMaterialGood = Resources.Load("Materials/TransparentPlaceMaterialGood", typeof(Material)) as Material;
 		transparentPlaceMaterialCollision = Resources.Load("Materials/TransparentPlaceMaterialCollision", typeof(Material)) as Material;
 		player = GetComponent<PlayerController>();
-		inventory = GetComponent<InventoryMenuSystem>();
+		inventory = GetComponent<InventorySystem>();
 	}
 	
 
@@ -139,7 +142,6 @@ public class InteractionSystem : MonoBehaviour
 	
 	public void SetThrow()
 	{
-		
 		BPUtil.SetAllChildrenToLayer(GetObjectInHand().transform, 9);
 		BPUtil.SetAllColliders(GetObjectInHand().transform, true);
 
@@ -156,7 +158,7 @@ public class InteractionSystem : MonoBehaviour
 		GetObjectInHand().transform.position = player.RHandLocation.transform.position;
 
 		GetObjectInHand().transform.rotation = Quaternion.LookRotation(player.playerCamera.transform.forward, player.playerCamera.transform.up);
-		GetObjectInHand().Throw(player.playerCamera.transform.forward.normalized * GetObjectInHand().ThrowMultiplier * ((player.GetComponent<Rigidbody>().velocity.magnitude / 10) + 1));
+		GetObjectInHand().Drop(player.playerCamera.transform.forward.normalized * GetObjectInHand().ThrowMultiplier * ((player.GetComponent<Rigidbody>().velocity.magnitude / 10) + 1));
 		
 		inventory.rHand.RemoveItemFromSlot(inventory.rHand.itemsInSlot[0].connectedObject, true);
 
@@ -170,7 +172,7 @@ public class InteractionSystem : MonoBehaviour
 		while (currentTime >= 0 && Input.GetButtonDown("Grab"))
 		{
 			currentTime--;
-			yield return new WaitForSeconds(Time.deltaTime * 50f);
+			yield return new WaitForSecondsRealtime(Time.deltaTime * 50f);
 			interact.fillAmount = currentTime;
 
 		}
@@ -186,19 +188,26 @@ public class InteractionSystem : MonoBehaviour
 	}
 	public void FinalizePickup(InteractableObject holdableObject)
 	{
-		InventorySlot slotToAddTo = player.GetComponent<InventoryMenuSystem>().GetNextAvailableInventorySlot((HoldableObject)holdableObject);
 		
+		InventorySlot slotToAddTo = player.GetComponent<InventorySystem>().GetNextAvailableInventorySlot((HoldableObject)holdableObject);
+
+
 		if (slotToAddTo != null)
         {
-			if (slotToAddTo == player.GetComponent<InventoryMenuSystem>().rHand)
+			if (slotToAddTo == player.GetComponent<InventorySystem>().rHand)
+            {
+				canGrab = false;
 				player.bodyAnim.SetTrigger("isGrabbingRight");
+			}
+				
 
 			else
 			{
+				
 				player.bodyAnim.SetTrigger("isGrabbingLeft");
 			}		
 			
-			canGrab = false;
+			
 
 			
 			/*if ((HoldableObject)currentlyLookingAt.large == true)
@@ -212,26 +221,34 @@ public class InteractionSystem : MonoBehaviour
 			slotToAddTo.AddItemToSlot((HoldableObject)holdableObject);
 			//GetObjectInRightHand().transform.localRotation = localRotation;
 
-			GetObjectInHand().Hold(this, true);
+			holdableObject.Pickup(this, true);
 		}
 		
 	}
-	public void SetDrop()
+	public void SetDrop(InventorySlot slot)
 	{
 
-		BPUtil.SetAllChildrenToLayer(GetObjectInHand().transform, 9);
-		BPUtil.SetAllColliders(GetObjectInHand().transform, true);
+		BPUtil.SetAllChildrenToLayer(slot.itemsInSlot[0].connectedObject.transform, 9);
+		BPUtil.SetAllColliders(slot.itemsInSlot[0].connectedObject.transform, true);
 
-		GetObjectInHand().GetComponent<HoldableObject>().rb.isKinematic = false;
-		GetObjectInHand().transform.parent = null;
-		GetObjectInHand().GetComponent<HoldableObject>().saveableData.instance = GetObjectInHand().GetComponent<HoldableObject>();
-		GetObjectInHand().Throw(-Vector3.up);
+		slot.itemsInSlot[0].connectedObject.rb.isKinematic = false;
+		slot.itemsInSlot[0].connectedObject.transform.parent = null;
+/*		slot.itemsInSlot[0].connectedObject.saveableData.instance = holdable;*/
+		slot.itemsInSlot[0].connectedObject.Drop(-Vector3.up);
 
-		SceneManager.MoveGameObjectToScene(GetObjectInHand().gameObject, SceneManager.GetActiveScene());
-		player.bodyAnim.SetBool((GetObjectInHand().CustomHoldAnimation != "") ? GetObjectInHand().CustomHoldAnimation : "isHoldingSmall", value: false);
-		player.bodyAnim.SetBool("isHoldingLarge", value: false);
+		SceneManager.MoveGameObjectToScene(slot.itemsInSlot[0].connectedObject.gameObject, SceneManager.GetActiveScene());
+		
+		//only stop animation if in right hand
+		if (slot == inventory.rHand)
+        {
+			player.bodyAnim.SetBool((slot.itemsInSlot[0].connectedObject.CustomHoldAnimation != "") ? slot.itemsInSlot[0].connectedObject.CustomHoldAnimation : "isHoldingSmall", value: false);
+			player.bodyAnim.SetBool("isHoldingLarge", value: false);
+		}
+		
 
-		inventory.rHand.RemoveItemFromSlot(GetObjectInHand(), true);
+		slot.itemsInSlot[0].connectedObject.transform.position = dropLocation.position;
+
+		slot.RemoveItemFromSlot(slot.itemsInSlot[0].connectedObject, true);
 
 	}
 	public void SetPlace(Vector3 location, Quaternion rotation)
@@ -258,43 +275,125 @@ public class InteractionSystem : MonoBehaviour
 	}
 	
 	//called after inventory item is added
-	public void OnInventoryItemAddedToSlot_CallBack(InventorySlot slotUpdated, HoldableObject itemMoved)
+	public void OnInventoryItemAddedToSlot_CallBack(InventorySlot slotFrom, InventorySlot slotTo)
     {
-		//item was moved to hand
-        if (slotUpdated == GetComponent<InventoryMenuSystem>().rHand)
+		//item got added to inv from outside to right hand
+		if (slotTo == GetComponent<InventorySystem>().rHand && slotFrom == null)
         {
-			player.bodyAnim.SetBool((GetObjectInHand().CustomHoldAnimation != "") ? GetObjectInHand().CustomHoldAnimation : "isHoldingSmall", value: true);
+			player.bodyAnim.SetBool((slotTo.itemsInSlot[0].connectedObject.CustomHoldAnimation != "") ? slotTo.itemsInSlot[0].connectedObject.CustomHoldAnimation : "isHoldingSmall", value: true);
+			BPUtil.SetAllChildrenToLayer(slotTo.itemsInSlot[0].connectedObject.transform, 23);
 
-			if (GetObjectInHand().GetComponent<HoldableObject>().large)
-			{
-				BPUtil.SetAllChildrenToLayer(GetObjectInHand().transform, 14);
-			}
-			else
-			{
-				BPUtil.SetAllChildrenToLayer(GetObjectInHand().transform, 23);
-			}
-			
-			GetObjectInHand().GetComponent<HoldableObject>().rb.isKinematic = true;
-			GetObjectInHand().transform.parent = (GetObjectInHand().GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
-			GetObjectInHand().transform.position = (GetObjectInHand().GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			StartCoroutine(slotTo.itemsInSlot[0].connectedObject.playItemAnimation("Open"));
+
+			slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
+			slotTo.itemsInSlot[0].connectedObject.transform.parent = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
+			slotTo.itemsInSlot[0].connectedObject.transform.position = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
 			Quaternion localRotation = Quaternion.Euler(player.neck.transform.localRotation.x / 2f, player.neck.transform.localRotation.y, player.neck.transform.localRotation.z);
+
+			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = localRotation;
+
+			slotTo.itemsInSlot[0].connectedObject.Pickup(this, true);
+			return;
+		}
+		//item got added to inv from outside and is going into a new slot
+		if (slotTo != GetComponent<InventorySystem>().rHand && slotFrom == null)
+		{
+			BPUtil.SetAllChildrenToLayer(slotTo.itemsInSlot[0].connectedObject.transform, 23);
+			return;
+		}
+		//item swapped inside inv
+		if (slotTo != GetComponent<InventorySystem>().rHand && slotFrom != GetComponent<InventorySystem>().rHand)
+		{
+			BPUtil.SetAllChildrenToLayer(slotTo.itemsInSlot[0].connectedObject.transform, 23);
+			return;
+		}
+		//item was moved to hand and not swapped
+		if (slotTo == GetComponent<InventorySystem>().rHand && slotFrom.itemsInSlot.Count == 0)
+		{
+			player.bodyAnim.SetBool((slotTo.itemsInSlot[0].connectedObject.CustomHoldAnimation != "") ? slotTo.itemsInSlot[0].connectedObject.CustomHoldAnimation : "isHoldingSmall", value: true);
+			BPUtil.SetAllChildrenToLayer(slotTo.itemsInSlot[0].connectedObject.transform, 23);
+
+			StartCoroutine(slotTo.itemsInSlot[0].connectedObject.playItemAnimation("Open"));
+
+			slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
+			slotTo.itemsInSlot[0].connectedObject.transform.parent = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
+			slotTo.itemsInSlot[0].connectedObject.transform.position = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			Quaternion localRotation = Quaternion.Euler(player.neck.transform.localRotation.x / 2f, player.neck.transform.localRotation.y, player.neck.transform.localRotation.z);
+
+			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = localRotation;
+
+			slotTo.itemsInSlot[0].connectedObject.Pickup(this, true);
+			return;
+		}
+		//item moved away from hand and was not swapped (hand empty now)
+		if (slotTo != GetComponent<InventorySystem>().rHand && slotFrom.itemsInSlot.Count == 0)
+		{
+			player.bodyAnim.SetBool((slotTo.itemsInSlot[0].connectedObject.CustomHoldAnimation != "") ? slotTo.itemsInSlot[0].connectedObject.CustomHoldAnimation : "isHoldingSmall", value: false);
+
+			StartCoroutine(slotTo.itemsInSlot[0].connectedObject.playItemAnimation("Close"));
+
+			BPUtil.SetAllChildrenToLayer(slotTo.itemsInSlot[0].connectedObject.transform, 23);
+			return;
+		}
+
+		//item swapped into hand from another slot
+		if (slotTo == GetComponent<InventorySystem>().rHand && slotFrom.itemsInSlot.Count > 0)
+		{
+			player.bodyAnim.SetBool((slotFrom.itemsInSlot[0].connectedObject.CustomHoldAnimation != "") ? slotFrom.itemsInSlot[0].connectedObject.CustomHoldAnimation : "isHoldingSmall", value: false);
+
+			BPUtil.SetAllChildrenToLayer(slotFrom.itemsInSlot[0].connectedObject.transform, 23);
+
+			StartCoroutine(slotFrom.itemsInSlot[0].connectedObject.playItemAnimation("Close"));
+
+			player.bodyAnim.SetBool((slotTo.itemsInSlot[0].connectedObject.CustomHoldAnimation != "") ? slotTo.itemsInSlot[0].connectedObject.CustomHoldAnimation : "isHoldingSmall", value: true);
 			
-			GetObjectInHand().transform.localRotation = localRotation;
+			BPUtil.SetAllChildrenToLayer(slotTo.itemsInSlot[0].connectedObject.transform, 23);
+			
+			StartCoroutine(slotTo.itemsInSlot[0].connectedObject.playItemAnimation("Open"));
 
-			GetObjectInHand().Hold(this, true);
-		}
-		//item moved away from hand
-        else if (GetComponent<InventoryMenuSystem>().rHand.itemsInSlot.Count == 0)
-        {
-			player.bodyAnim.SetBool((itemMoved.CustomHoldAnimation != "") ? itemMoved.CustomHoldAnimation : "isHoldingSmall", value: false);
+			slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
+			slotTo.itemsInSlot[0].connectedObject.transform.parent = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
+			slotTo.itemsInSlot[0].connectedObject.transform.position = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			Quaternion localRotation = Quaternion.Euler(player.neck.transform.localRotation.x / 2f, player.neck.transform.localRotation.y, player.neck.transform.localRotation.z);
 
+			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = localRotation;
+
+			slotTo.itemsInSlot[0].connectedObject.Pickup(this, true);
+
+			
+			return;
 		}
-		
+		//item swapped away from hand into another slot
+		if (slotFrom == GetComponent<InventorySystem>().rHand && slotTo.itemsInSlot.Count > 0)
+		{
+			player.bodyAnim.SetBool((slotTo.itemsInSlot[0].connectedObject.CustomHoldAnimation != "") ? slotTo.itemsInSlot[0].connectedObject.CustomHoldAnimation : "isHoldingSmall", value: false);
+			BPUtil.SetAllChildrenToLayer(slotTo.itemsInSlot[0].connectedObject.transform, 23);
+
+			StartCoroutine(slotTo.itemsInSlot[0].connectedObject.playItemAnimation("Close"));
+
+			player.bodyAnim.SetBool((slotFrom.itemsInSlot[0].connectedObject.CustomHoldAnimation != "") ? slotFrom.itemsInSlot[0].connectedObject.CustomHoldAnimation : "isHoldingSmall", value: true);
+			BPUtil.SetAllChildrenToLayer(slotFrom.itemsInSlot[0].connectedObject.transform, 23);
+
+			StartCoroutine(slotFrom.itemsInSlot[0].connectedObject.playItemAnimation("Open"));
+
+			slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
+			slotFrom.itemsInSlot[0].connectedObject.transform.parent = (slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
+			slotFrom.itemsInSlot[0].connectedObject.transform.position = (slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			Quaternion localRotation = Quaternion.Euler(player.neck.transform.localRotation.x / 2f, player.neck.transform.localRotation.y, player.neck.transform.localRotation.z);
+
+			slotFrom.itemsInSlot[0].connectedObject.transform.localRotation = localRotation;
+
+			slotFrom.itemsInSlot[0].connectedObject.Pickup(this, true);
+
+			return;
+		}
+
+
 	}
 	void Update()
 	{
 		
-		if (GameSettings.Instance.PauseMenuOpen || GameSettings.Instance.IsCutScene || GetComponent<InventoryMenuSystem>().menuOpen)
+		if (GameSettings.Instance.PauseMenuOpen || GameSettings.Instance.IsCutScene || GetComponent<InventorySystem>().menuOpen)
 		{
 			return;
 		}
@@ -436,12 +535,14 @@ public class InteractionSystem : MonoBehaviour
 			{
 
 				case 9:
+
 					interact.gameObject.SetActive(true);
 					interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "";
 
 					break;
 
 				case 10:
+
 					interact.gameObject.SetActive(true);
 					interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "[E] Open";
 
@@ -452,11 +553,13 @@ public class InteractionSystem : MonoBehaviour
 					if (GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP) > 0)
 					{
 						interact.gameObject.SetActive(true);
-						interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "[E] No-Clip";
+						interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "[E] Attempt No-Clip";
 					}
+
 					break;
 
 				case 25:
+
 					interact.gameObject.SetActive(true);
 					interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "[E] Inspect";
 
@@ -475,10 +578,13 @@ public class InteractionSystem : MonoBehaviour
 		//throwing and dropping
 
 		//pickup if nothing in hand
-		if (Input.GetButton("Grab") && currentlyLookingAt != null && currentlyLookingAt.layer != 25 && currentlyLookingAt.layer != 20 && currentlyLookingAt.layer != 14 && canGrab)
+		if (Input.GetButtonDown("Grab") && currentlyLookingAt != null && currentlyLookingAt.layer != 25 && currentlyLookingAt.layer != 20 && currentlyLookingAt.layer != 14 && canGrab)
 		{
-			/*StartCoroutine(StartPickup(currentlyLookingAt));*/
-			FinalizePickup(currentlyLookingAt.GetComponent<InteractableObject>());
+			if (currentlyLookingAt.GetComponent<HoldableObject>())
+
+				if (!currentlyLookingAt.GetComponent<HoldableObject>().large)
+
+					FinalizePickup(currentlyLookingAt.GetComponent<InteractableObject>());
 
 		}
 
@@ -509,7 +615,7 @@ public class InteractionSystem : MonoBehaviour
 
 			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.neck.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !GetObjectInHand().GetComponent<HoldableObject>().large))
 			{
-				SetDrop();
+				SetDrop(inventory.rHand);
 			}
 		}
 
@@ -517,17 +623,58 @@ public class InteractionSystem : MonoBehaviour
 		{
 			currentlyLookingAt.GetComponent<InteractableObject>().Use(this, LMB: false);
 		}
+
+
 		if (Input.GetMouseButtonDown(0))
 		{
 			if (GetObjectInHand() != null)
 			{
 				GetObjectInHand().Use(this, LMB: true);
 			}
+            else
+            {
+				string animChoice = punchingAnimations[Random.Range(0, punchingAnimations.Count)];
+
+				bool canPunch = true;
+				//reset punching
+				foreach (string animation in punchingAnimations)
+				{
+					player.bodyAnim.ResetTrigger(animation);
+					if (player.bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(animation))
+						canPunch = false;
+				}
+
+				if (canPunch)
+                {
+
+					player.bodyAnim.SetTrigger(animChoice);
+				}
+					
+			}
 		}
-		/*else if (Input.GetMouseButtonDown(1) && player.holding != null)
+
+
+		if (player.bodyAnim.GetCurrentAnimatorStateInfo(1).IsName("Punch_Right"))
 		{
-			player.holding.Use(this, LMB: false);
-		}*/
+			fists[0].gameObject.GetComponent<Collider>().enabled = true;
+			fists[1].gameObject.GetComponent<Collider>().enabled = false;
+			
+
+		}
+		else if (player.bodyAnim.GetCurrentAnimatorStateInfo(1).IsName("Punch_Left"))
+		{
+			fists[0].gameObject.GetComponent<Collider>().enabled = false;
+			fists[1].gameObject.GetComponent<Collider>().enabled = true;
+			
+
+		}
+		else
+        {
+			fists[0].gameObject.GetComponent<Collider>().enabled = false;
+			fists[1].gameObject.GetComponent<Collider>().enabled = false;
+		}
+
+
 	}
 
 }

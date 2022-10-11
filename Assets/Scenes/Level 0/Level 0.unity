@@ -23,7 +23,7 @@ RenderSettings:
   m_AmbientSkyColor: {r: 0.5377358, g: 0.5377358, b: 0.5377358, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
-  m_AmbientIntensity: 0.8
+  m_AmbientIntensity: 0
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.1254902, g: 0.1254902, b: 0.1254902, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 9aebd864658434e4a8a90d451e33e454, type: 2}
@@ -35,10 +35,10 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 16
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 0.2
+  m_ReflectionIntensity: 0.305
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.05119747, g: 0.048644986, b: 0.019098768, a: 0.2}
+  m_IndirectSpecularColor: {r: 0.07807614, g: 0.074183606, b: 0.029125622, a: 0.305}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -176,29 +176,41 @@ MonoBehaviour:
   viewDistance: 3
   SpecialTiles: []
   Tiles:
-  - {fileID: 8209230494130185599, guid: 53cc790fa15f0ba44a8a286ff24b1b3e, type: 3}
-  - {fileID: 5144882405261894941, guid: 28d8ad4a21302ff4e8b5da426d33af4b, type: 3}
-  - {fileID: 7076623207126011811, guid: c764dc763975a064786c50978b7fb970, type: 3}
-  - {fileID: 7392081474520821307, guid: abc7bb120413a0e4e9dc4fda4e128ef6, type: 3}
-  - {fileID: 7076623207126011811, guid: bc0ff91b8904165429839dee4868e47e, type: 3}
-  - {fileID: 7076623207126011811, guid: 1a40fea758b938848876de6d8377d48c, type: 3}
-  - {fileID: 7076623207126011811, guid: 83ac1d39f11bded4b81d9fceae1130a5, type: 3}
-  - {fileID: 7076623207126011811, guid: c3e47fd5e7451fa4ab110db68c86e8ab, type: 3}
+  - {fileID: 4438954458412058210, guid: 1bb25f0c6c129a54aa04531952c9ebb1, type: 3}
+  - {fileID: 4438954458412058210, guid: 53cc790fa15f0ba44a8a286ff24b1b3e, type: 3}
+  - {fileID: 797442135156344320, guid: 28d8ad4a21302ff4e8b5da426d33af4b, type: 3}
+  - {fileID: 3333342657051012286, guid: c764dc763975a064786c50978b7fb970, type: 3}
+  - {fileID: 3333342657051012286, guid: bc0ff91b8904165429839dee4868e47e, type: 3}
+  - {fileID: 3333342657051012286, guid: 1a40fea758b938848876de6d8377d48c, type: 3}
+  - {fileID: 3333342657051012286, guid: 83ac1d39f11bded4b81d9fceae1130a5, type: 3}
+  - {fileID: 3333342657051012286, guid: c3e47fd5e7451fa4ab110db68c86e8ab, type: 3}
+  - {fileID: 3090222251298622758, guid: abc7bb120413a0e4e9dc4fda4e128ef6, type: 3}
   RegTiles: []
   worldPropSpawnTable:
-  - type: 10
-    weight: 1
   - type: 2
-    weight: 10
+    weight: 1000
   - type: 7
-    weight: 5
+    weight: 150
   - type: 19
-    weight: 2
+    weight: 200
+  - type: 14
+    weight: 300
+  - type: 4
+    weight: 200
+  - type: 3
+    weight: 100
+  - type: 8
+    weight: 250
+  - type: 18
+    weight: 50
+  - type: 20
+    weight: 200
   worldEntitySpawnTable:
   - type: 6
     weight: 100
   regTileSpace: 0
   seed: 0
+  gameplay_events_possible: 01000000
 --- !u!4 &803962858
 Transform:
   m_ObjectHideFlags: 0

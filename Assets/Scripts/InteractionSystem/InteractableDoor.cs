@@ -3,11 +3,11 @@ using UnityEngine;
 
 public class InteractableDoor : InteractableObject
 {
-	public override void Throw(Vector3 force)
+	public override void Drop(Vector3 force)
 	{
 	}
 
-    public override void Hold(InteractionSystem player, bool RightHand)
+    public override void Pickup(InteractionSystem player, bool RightHand)
     {
     }
 

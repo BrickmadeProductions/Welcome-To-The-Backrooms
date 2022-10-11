@@ -47,16 +47,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveableData:
-    runTimeID: 
-    location: []
-    rotationEuler: []
+    runTimeID: 202
+    location:
+    - 0
+    - 0
+    - 0
+    rotationEuler:
+    - 270.01978
+    - 0
+    - 0
     parentName: 
-    type: 0
-    instance: {fileID: 0}
+    type: 19
+    instance: {fileID: 4154783479142313328}
   type: 19
   playSounds: 0
-  runTimeID: 
-  maxPointsThatCanBeObtained: 5
+  runTimeID: 202
+  maxPointsThatCanBeObtained: 1
   currentPointsPulled: 0
 --- !u!54 &739629174799673163
 Rigidbody:

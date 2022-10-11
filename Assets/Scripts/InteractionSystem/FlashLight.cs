@@ -13,8 +13,24 @@ public class FlashLight : HoldableObject
 
     bool on = false;
 
+    public Transform batteryLocation;
+    public InteractableObject[] batteriesInserted;
+
+    void DetermineCharge()
+    {
+        /*foreach ()*/
+    }
+    void InsertBattery(InteractableObject insert)
+    {
+        if (batteriesInserted.Length < 2)
+        {
+
+        }
+    }
     private void Start()
     {
+        batteriesInserted = new InteractableObject[2];
+
         emission = transform.GetChild(0).GetChild(0).GetComponent<Renderer>().material;
 
         lightAudio = GetComponent<AudioSource>();
@@ -33,6 +49,8 @@ public class FlashLight : HoldableObject
         {
             on = !on;
 
+            SetMetaData("on", on.ToString());
+
             switch (on)
             {
                 case true:
@@ -47,6 +65,7 @@ public class FlashLight : HoldableObject
                     emission.SetColor("_EmissionColor", Color.black);
                     emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
                     Destroy(runtimeFlashLightCollider);
+                    
                     break;
             }
 
@@ -57,7 +76,7 @@ public class FlashLight : HoldableObject
 
     }
 
-    public override void Throw(Vector3 force)
+    public override void Drop(Vector3 force)
     {
         
     }

@@ -115,7 +115,7 @@ AudioSource:
   m_GameObject: {fileID: 7527896785735740941}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: 20bfa29a2ece3284f935fedf32737170, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 1
@@ -279,11 +279,11 @@ MonoBehaviour:
   maxAllowed: 4
   despawnDistance: 500
   entityViewDistance: 500
-  memoryOfPlayerLocationInSeconds: 0
+  memoryOfTargetLocationInSeconds: 0
   sightMask:
     serializedVersion: 2
     m_Bits: 65531
-  canSeePlayer: 0
+  canSeeTarget: 0
   playerCanSee: 0
   spawnChance: 0.1
   speed: 2
@@ -293,6 +293,7 @@ MonoBehaviour:
   entitySkin: {fileID: 0}
   runTimeID: 4638
   bloodPrefab: {fileID: 0}
+  currentTarget: {fileID: 0}
   explosionEffect: {fileID: 3925061542897833910, guid: 6a2e518db0b05a74a97784bb5b449817, type: 3}
 --- !u!23 &3512871350104039503
 MeshRenderer:

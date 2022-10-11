@@ -13,7 +13,7 @@ public class ElevatorCallButton : InteractableButton
         open = false;
     }
 
-    public override void Throw(Vector3 force)
+    public override void Drop(Vector3 force)
     {
         
     }

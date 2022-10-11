@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 6415607258256687676}
   - component: {fileID: 8910298509280953112}
   - component: {fileID: 4811399395925488851}
-  - component: {fileID: 2640736607332657944}
   m_Layer: 9
   m_Name: HeadBoard
   m_TagString: Wood
@@ -32,7 +31,9 @@ Transform:
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071067}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 25, y: 25, z: 25}
-  m_Children: []
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 164193058100083297}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -55,6 +56,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -113,6 +115,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 804
+    location:
+    - 0
+    - 0
+    - 0
+    rotationEuler:
+    - 270.01978
+    - -0
+    - 0
+    parentName: 
+    type: 21
+    instance: {fileID: 8910298509280953112}
+  type: 21
+  playSounds: 1
+  runTimeID: 804
+  inventoryObjectData:
+    image: {fileID: 0}
+    name: HeadBoard
+    inventoryWeight: 3
+    description: Wood
   durability: 0
   breakablePrefabs: []
   hitClips:
@@ -120,10 +143,18 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 0e5240b5040937f46a2798f0974643d3, type: 3}
   breakClips:
   - {fileID: 8300000, guid: 3ec90ec7ba21d9641aba6d72da0fb644, type: 3}
-  playSounds: 1
-  inventoryWeight: 1
-  holdableObject: {fileID: 0}
-  large: 1
+  rb: {fileID: 0}
+  ThrowMultiplier: 2
+  large: 0
+  autoSwing: 0
+  canPlace: 0
+  isPlaced: 0
+  canBeUsed: 1
+  animationPlaying: 0
+  StartUseAnimation: 
+  UseAnimations: []
+  CustomHoldAnimation: 
+  ItemObjectAnimations: []
 --- !u!82 &4811399395925488851
 AudioSource:
   m_ObjectHideFlags: 0
@@ -220,16 +251,80 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!65 &2640736607332657944
+--- !u!1 &7025993754088300862
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 164193058100083297}
+  m_Layer: 9
+  m_Name: HeadBoardContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &164193058100083297
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7025993754088300862}
+  m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071067}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 799434412499210428}
+  m_Father: {fileID: 127966153387945461}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8236492577142276755
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 799434412499210428}
+  - component: {fileID: 906830044975111687}
+  m_Layer: 9
+  m_Name: Collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &799434412499210428
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8236492577142276755}
+  m_LocalRotation: {x: -0.006972975, y: -0.0003411572, z: -0.04886599, w: 0.99878097}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.04, y: 0.040000007, z: 0.040000007}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 164193058100083297}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: -0.8, y: 0, z: -5.602}
+--- !u!65 &906830044975111687
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1923194832838819152}
+  m_GameObject: {fileID: 8236492577142276755}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.0075775813, y: 0.032547932, z: 0.031761363}
-  m_Center: {x: -0.00013161649, y: 0.000000009313224, z: -0.0006415219}
+  m_Size: {x: 0.121314645, y: 0.8071476, z: 0.78072155}
+  m_Center: {x: 0.0024912136, y: -0.012333035, z: -0.008544789}

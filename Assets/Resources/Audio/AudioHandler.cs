@@ -13,9 +13,31 @@ struct SceneMusicData
     public AudioClip[] soundTracks;
 }
 
+struct EventMusicData
+{
+    public AudioClip eventBegin;
+
+    public AudioClip eventTrack;
+
+    public AudioClip eventEnd;
+
+};
+
 public class AudioHandler : MonoBehaviour
 {
-    Coroutine randomlyPlayTracks = null;
+    public Coroutine playingSoundTrackLoop = null;
+    public Coroutine playingEventTrackLoop = null;
+
+    public Coroutine randomlyPlayTracks = null;
+
+    //event tracks
+    public AudioClip lightsOutBegin;
+
+    public AudioClip lightsOutTrack;
+
+    public AudioClip lightsOutEnd;
+
+    Dictionary<GAMEPLAY_EVENT, EventMusicData> eventMusicDictionary;
 
     Dictionary<SCENE, SceneMusicData> sceneMusicDictionary;
 
@@ -110,6 +132,7 @@ public class AudioHandler : MonoBehaviour
     public void PopulateMusicData()
     {
         sceneMusicDictionary = new Dictionary<SCENE, SceneMusicData>();
+        eventMusicDictionary = new Dictionary<GAMEPLAY_EVENT, EventMusicData>();
 
         level0Mixer = Resources.Load<AudioMixer>("Audio/Level0").FindMatchingGroups("Master")[0];
         level1Mixer = Resources.Load<AudioMixer>("Audio/Level1").FindMatchingGroups("Master")[0];
@@ -160,9 +183,80 @@ public class AudioHandler : MonoBehaviour
             soundTracks = clippingZoneTracks,
 
         });
+
+
+        //events
+        eventMusicDictionary.Add(GAMEPLAY_EVENT.LIGHTS_OUT, new EventMusicData()
+        {
+            eventBegin = lightsOutBegin,
+            eventTrack = lightsOutTrack,
+            eventEnd = lightsOutEnd,
+        });
+    }
+    IEnumerator SoundTrackLoop(SceneMusicData data, bool playInstantly)
+    {
+        GetComponent<AudioSource>().volume = 0.08f;
+
+        while (true)
+        {
+            GetComponent<AudioSource>().Stop();
+
+            if (!playInstantly)
+                yield return new WaitForSecondsRealtime(Random.Range(150, 300));
+
+            if (data.soundTracks.Length > 0)
+            {
+                GetComponent<AudioSource>().clip = data.soundTracks[Random.Range(0, data.soundTracks.Length)];
+                GetComponent<AudioSource>().Play();
+            }
+            else
+            {
+                GetComponent<AudioSource>().clip = sound0Track;
+                GetComponent<AudioSource>().Play();
+            }
+
+            yield return new WaitForSecondsRealtime(Random.Range(900, 3600));
+        }
+       
+    }
+    IEnumerator EventTrack()
+    {
+        GetComponent<AudioSource>().volume = 1f;
+
+        
+        GetComponent<AudioSource>().Stop();
+        GetComponent<AudioSource>().clip = eventMusicDictionary[GameSettings.Instance.worldInstance.currentWorldEvent].eventBegin;
+        GetComponent<AudioSource>().Play();
+
+        yield return new WaitForSecondsRealtime(1f);
+
+        GameSettings.Instance.worldInstance.OnEvenStart();
+
+        yield return new WaitForSecondsRealtime(15f);
+
+        GetComponent<AudioSource>().volume = 0.1f;
+
+        GetComponent<AudioSource>().loop = true;
+        GetComponent<AudioSource>().clip = eventMusicDictionary[GameSettings.Instance.worldInstance.currentWorldEvent].eventTrack;
+        GetComponent<AudioSource>().Play();
+
+        yield return new WaitForSecondsRealtime(60f * 5f);
+
+        GetComponent<AudioSource>().loop = false;
+
+        GetComponent<AudioSource>().volume = 1f;
+
+        GetComponent<AudioSource>().clip = eventMusicDictionary[GameSettings.Instance.worldInstance.currentWorldEvent].eventEnd;
+        GetComponent<AudioSource>().Play();
+
+        yield return new WaitUntil(() => !GetComponent<AudioSource>().isPlaying);
+
+        GameSettings.Instance.worldInstance.OnEventEnd();
+
+        
     }
     //play intro, wait, then play a random level track every 5 to 10 miunutes
-    public IEnumerator playSceneSoundTrack(SCENE scene)
+    public IEnumerator StartLoop(SCENE scene, bool playInstantly)
     {
         GetComponent<AudioSource>().Stop();
         
@@ -182,49 +276,47 @@ public class AudioHandler : MonoBehaviour
 
         }
 
-        /*if (GameSettings.Instance.LastSavedScene != GameSettings.SCENE.HOMESCREEN)
-        {
-          *//*  if (data.introTrack != null)
-            {
-                GetComponent<AudioSource>().clip = data.introTrack;
-                GetComponent<AudioSource>().Play();
-
-                yield return new WaitUntil(() => !GetComponent<AudioSource>().isPlaying);
-            }*//*
-            else
-            {
-                GetComponent<AudioSource>().clip = intro;
-                GetComponent<AudioSource>().Play();
-            }
-        }*/
-       
-
-
         while (true)
         {
-
-            GetComponent<AudioSource>().Stop();
-
-            if (data.soundTracks.Length > 0)
+            
+            if (GameSettings.Instance.worldInstance.currentWorldEvent == GAMEPLAY_EVENT.NONE && playingSoundTrackLoop == null)
             {
-                GetComponent<AudioSource>().clip = data.soundTracks[Random.Range(0, data.soundTracks.Length)];
-                GetComponent<AudioSource>().Play();
+                if (playingEventTrackLoop != null)
+                {
+                    StopCoroutine(playingEventTrackLoop);
+                    playingEventTrackLoop = null;
+                }
+                
+                playingSoundTrackLoop = StartCoroutine(SoundTrackLoop(data, playInstantly));
             }
-            else
+            else if (GameSettings.Instance.worldInstance.currentWorldEvent != GAMEPLAY_EVENT.NONE && playingEventTrackLoop == null)
             {
-                GetComponent<AudioSource>().clip = sound0Track;
-                GetComponent<AudioSource>().Play();
-            }
+                
+                if (playingSoundTrackLoop != null)
+                {
+                    StopCoroutine(playingSoundTrackLoop);
+                    playingSoundTrackLoop = null;
+                }
+                    
+                playingEventTrackLoop = StartCoroutine(EventTrack());
+                
+                
 
-            yield return new WaitForSeconds(Random.Range(300, 600));
+            }
+            yield return new WaitForSecondsRealtime(2f);
+
         }
 
        
 
     }
-
-    public void SetUpAudio(SCENE scene)
+    public void StopCurrentSceneSoundTrack()
     {
+        GetComponent<AudioSource>().Stop();
+    }
+    public void SetUpAudio(SCENE scene, bool playInstantly = false)
+    {
+        
         //setup audio data
         SceneMusicData data;
 
@@ -232,32 +324,52 @@ public class AudioHandler : MonoBehaviour
         {
             GetComponent<AudioSource>().outputAudioMixerGroup = sceneMusicDictionary[scene].levelMixer;
 
-            foreach (AudioSource source in FindObjectsOfType<AudioSource>())
-            {
-                //casset player is excluded
-                if (source.gameObject.GetComponent<CassetPlayer>() == null)
-                {
-                    if (source.gameObject.GetComponents<AudioSource>().Length > 0)
-                    {
-                        foreach (AudioSource mSource in source.GetComponents<AudioSource>())
-                        {
-                            mSource.outputAudioMixerGroup = sceneMusicDictionary[scene].levelMixer;
-                        }
-                    }
+            master = sceneMusicDictionary[scene].levelMixer.audioMixer;
+        }
 
-                    source.outputAudioMixerGroup = sceneMusicDictionary[scene].levelMixer;
+        foreach (AudioSource source in FindObjectsOfTypeAll(typeof(AudioSource)))
+        {
+            //casset player is excluded
+            if (source.gameObject.GetComponent<CassetPlayer>() == null)
+            {
+                if (source.gameObject.GetComponents<AudioSource>().Length > 0)
+                {
+                    foreach (AudioSource mSource in source.GetComponents<AudioSource>())
+                    {
+                        mSource.outputAudioMixerGroup = sceneMusicDictionary[scene].levelMixer;
+                    }
                 }
+
+                source.outputAudioMixerGroup = sceneMusicDictionary[scene].levelMixer;
+            }
+
+        }
+
+        foreach (InventorySlot invSlot in GameSettings.Instance.Player.GetComponent<InventorySystem>().GetAllInvSlots())
+        {
+            if (invSlot.itemsInSlot.Count > 0)
+            {
+                if (GetComponent<AudioSource>() != null)
+
+                    GetComponent<AudioSource>().outputAudioMixerGroup = GameSettings.Instance.audioHandler.master.outputAudioMixerGroup;
+
+                foreach (AudioSource audioSource in invSlot.itemsInSlot[0].connectedObject.GetComponentsInChildren<AudioSource>())
+                {
+                    audioSource.outputAudioMixerGroup = sceneMusicDictionary[scene].levelMixer;
+                }
+
                 
             }
 
-            master = sceneMusicDictionary[scene].levelMixer.audioMixer;
+
         }
 
         if (randomlyPlayTracks != null)
         {
             StopCoroutine(randomlyPlayTracks);
+            randomlyPlayTracks = null;
         }
-        randomlyPlayTracks = StartCoroutine(playSceneSoundTrack(scene));
+        randomlyPlayTracks = StartCoroutine(StartLoop(scene, playInstantly));
        
         
     }

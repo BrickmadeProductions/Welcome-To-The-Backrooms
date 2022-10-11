@@ -90,19 +90,19 @@ public class ThrowWeapon : HoldableObject
         base.Use(player, LMB);
     }
 
-    public override void Throw(Vector3 force)
+    public override void Drop(Vector3 force)
     {
         rb.constraints = RigidbodyConstraints.None;
-        base.Throw(force);
+        base.Drop(force);
         rb.angularVelocity = rb.transform.right * rotationAmount * rotationAmount;
         Flying = true;
 
 
     }
 
-    public override void Hold(InteractionSystem player, bool RightHand)
+    public override void Pickup(InteractionSystem player, bool RightHand)
     {
-        base.Hold(player, RightHand);
+        base.Pickup(player, RightHand);
         Flying = false;
         rb.constraints = RigidbodyConstraints.FreezeAll;
     }

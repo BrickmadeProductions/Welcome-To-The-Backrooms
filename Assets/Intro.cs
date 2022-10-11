@@ -9,7 +9,6 @@ public class Intro : MonoBehaviour
     Coroutine introC = null;
     public TextMeshProUGUI skip;
     bool hasClicked = false;
-    // Start is called before the first frame update
     void Start()
     {
         introC = StartCoroutine(playIntro());

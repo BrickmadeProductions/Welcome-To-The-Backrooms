@@ -69,6 +69,8 @@ public class Steam : MonoBehaviour
     public static void IncrementStat(string statName, float amount)
     {
         float currentStat;
+        
+        SteamUserStats.RequestCurrentStats();
         SteamUserStats.GetStat(statName, out currentStat);
         SteamUserStats.SetStat(statName, currentStat + amount);
         SteamUserStats.StoreStats();
@@ -76,6 +78,7 @@ public class Steam : MonoBehaviour
     public static void IncrementStat(string statName, int amount)
     {
         int currentStat;
+        SteamUserStats.RequestCurrentStats();
         SteamUserStats.GetStat(statName, out currentStat);
         SteamUserStats.SetStat(statName, currentStat + amount);
         SteamUserStats.StoreStats();
@@ -83,6 +86,7 @@ public class Steam : MonoBehaviour
     public static void DecrementStat(string statName, float amount)
     {
         float currentStat;
+        SteamUserStats.RequestCurrentStats();
         SteamUserStats.GetStat(statName, out currentStat);
         SteamUserStats.SetStat(statName, currentStat - amount);
         SteamUserStats.StoreStats();
@@ -91,6 +95,7 @@ public class Steam : MonoBehaviour
     public static void DecrementStat(string statName, int amount)
     {
         int currentStat;
+        SteamUserStats.RequestCurrentStats();
         SteamUserStats.GetStat(statName, out currentStat);
         SteamUserStats.SetStat(statName, currentStat - amount);
         SteamUserStats.StoreStats();
@@ -154,8 +159,8 @@ public class Steam : MonoBehaviour
 
             if (GameSettings.teamMemberSteamIDs.Contains(name))
             {
-                GameSettings.Instance.teamMemberMode.gameObject.SetActive(true);
-                GameSettings.Instance.teamMemberMode.text = GameSettings.Instance.teamMemberMode.text + " " + SteamFriends.GetPersonaName();
+                GameSettings.Instance.devModeInfo.gameObject.SetActive(true);
+                GameSettings.Instance.devModeInfo.text = GameSettings.Instance.devModeInfo.text + " " + SteamFriends.GetPersonaName();
                 
             }
         }

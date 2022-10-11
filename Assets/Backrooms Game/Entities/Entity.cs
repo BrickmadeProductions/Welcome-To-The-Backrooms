@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using System;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 [Serializable]
 public struct SaveableEntity
@@ -64,13 +65,13 @@ public abstract class Entity : MonoBehaviour
 
 	public int entityViewDistance = 500;
 
-	public int memoryOfPlayerLocationInSeconds;
+	public int memoryOfTargetLocationInSeconds;
 
-	private Coroutine rememberPlayerLocation;
+	private Coroutine rememberTargetLocation;
 
 	public LayerMask sightMask;
 
-	public bool canSeePlayer;
+	public bool canSeeTarget;
 
 	public bool playerCanSee;
 
@@ -92,7 +93,52 @@ public abstract class Entity : MonoBehaviour
 
 	public GameObject bloodPrefab;
 
-	public void GenerateID(BackroomsLevelWorld world)
+	public Transform currentTarget;
+
+	List<EntityAudioAttractor> currentPossibleTargets;
+
+	public abstract void OnEventStart();
+	public abstract void OnEventEnd();
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.GetComponent<EntityAudioAttractor>())
+        {
+			currentPossibleTargets.Add(collision.collider.GetComponent<EntityAudioAttractor>());
+
+		}
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+		if (collision.collider.GetComponent<EntityAudioAttractor>())
+		{
+			currentPossibleTargets.Remove(collision.collider.GetComponent<EntityAudioAttractor>());
+
+		}
+	}
+
+	private void SetCurrentTarget()
+    {
+		Transform best = null;
+
+		for (int i = 1; i < currentPossibleTargets.Count + 1; i++)
+        {
+			if (currentPossibleTargets[i].priority > currentPossibleTargets[i - 1].priority)
+            {
+				best = currentPossibleTargets[i].target;
+
+			}
+        }
+
+		currentTarget = best;
+
+		if (currentPossibleTargets.Count == 0)
+		{
+			currentTarget = GameSettings.Instance.Player.transform;
+		}
+
+	}
+    public void GenerateID(BackroomsLevelWorld world)
 	{
 		runTimeID = UnityEngine.Random.Range(0, 10000).ToString();
 
@@ -143,10 +189,16 @@ public abstract class Entity : MonoBehaviour
 
 	private void Awake()
 	{
+
+		currentPossibleTargets = new List<EntityAudioAttractor>();
+
 		hurtNoisesSource.outputAudioMixerGroup = GameSettings.Instance.audioHandler.master.FindMatchingGroups("Master")[0];
 		attackNoiseSource.outputAudioMixerGroup = GameSettings.Instance.audioHandler.master.FindMatchingGroups("Master")[0];
 		movementNoiseSource.outputAudioMixerGroup = GameSettings.Instance.audioHandler.master.FindMatchingGroups("Master")[0];
+		Init();
 	}
+
+	abstract public void Init();
 
 	private void Start()
 	{
@@ -173,19 +225,19 @@ public abstract class Entity : MonoBehaviour
 
 		}
 		StartCoroutine(AI());
-		Debug.Log("Spawned " + type);
 	}
 
-	private IEnumerator RememberPlayerLocation()
+	private IEnumerator RememberTargetLocation()
 	{
-		yield return new WaitForSeconds(memoryOfPlayerLocationInSeconds);
-		canSeePlayer = false;
-		rememberPlayerLocation = null;
+		yield return new WaitForSecondsRealtime(memoryOfTargetLocationInSeconds);
+		canSeeTarget = false;
+		rememberTargetLocation = null;
 		attackNoiseSource.Stop();
 	}
 
 	private void Update()
 	{
+		SetCurrentTarget();
 		UpdateEntity();
 
 		if ((Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > despawnDistance && !isDespawned) || health <= 0f)
@@ -194,24 +246,43 @@ public abstract class Entity : MonoBehaviour
 			Despawn();
 			return;
 		}
-		Vector3 position = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.position;
-		if (Vector3.Distance(eyes.transform.position, position) < (float)entityViewDistance && Physics.Raycast(eyes.transform.position, position - eyes.transform.position, out var hitInfo, despawnDistance, sightMask))
-		{
-			if (hitInfo.collider.gameObject.layer == 11)
-			{
-				canSeePlayer = true;
-			}
-			else if (rememberPlayerLocation == null)
-			{
-				rememberPlayerLocation = StartCoroutine(RememberPlayerLocation());
-			}
+
+		
+		if (currentTarget != null)
+        {
+			float angle = Vector3.SignedAngle(currentTarget.position - eyes.transform.position, transform.forward, transform.up);
+
+			if (Physics.Raycast(eyes.transform.position, currentTarget.position - eyes.transform.position, out var hitInfo, despawnDistance, sightMask))
+
+				//Debug.Log((Vector3.Distance(eyes.transform.position, currentTarget.position) < 6f));
+				//determines if it can see the target
+				if (Vector3.Distance(eyes.transform.position, currentTarget.position) < entityViewDistance
+				&&
+				(angle < 50 && angle > -50))
+				{
+					if (hitInfo.collider.gameObject.layer == 11)
+					{
+						canSeeTarget = true;
+					}
+					else if (rememberTargetLocation == null)
+					{
+						rememberTargetLocation = StartCoroutine(RememberTargetLocation());
+					}
+				}
+				//it can always know its there if its close enough
+				else if (Vector3.Distance(eyes.transform.position, currentTarget.position) < (GameSettings.Instance.Player.GetComponent<PlayerController>().currentPlayerState == PlayerController.PLAYERSTATES.RUN ? 70f : 10f))
+					canSeeTarget = true;
 		}
+		
+		
+		
+		
 	}
 
 	public IEnumerator StunTimer()
 	{
 		stunned = true;
-		yield return new WaitForSeconds(stunTime);
+		yield return new WaitForSecondsRealtime(stunTime);
 		stunned = false;
 	}
 
@@ -231,7 +302,7 @@ public abstract class Entity : MonoBehaviour
 		while (playerCanSee)
         {
 			yield return new WaitForSecondsRealtime(5f);
-			GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().DecreaseSanity(UnityEngine.Random.Range(canSeePlayer ? 5f : 2f, canSeePlayer ? 15f : 8f) * (health / 100));
+			GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().DecreaseSanity(UnityEngine.Random.Range(canSeeTarget ? 5f : 2f, canSeeTarget ? 15f : 8f) * (health / 100));
 
 		}
 		

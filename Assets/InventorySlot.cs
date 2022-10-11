@@ -55,26 +55,50 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
     public void AddItemToSlot(InventoryItem invItem)
     {
-
+        InventorySlot slotFrom = invItem.slotIn;
         //exit the method and dont do anything if the slot can't hold anymore items
         /*if (GetCurrentSlotWeight() + invItem.connectedObject.inventoryObjectData.inventoryWeight > weightAllowed)
             return;*/
-
-        if (itemsInSlot.Count > 0)
-            return;
 
         if (whiteList.Count > 0)
             if (!whiteList.Contains(invItem.connectedObject.type))
                 return;
 
-        if (GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().rHand == this && itemsInSlot.Count > 0)
-            return;
 
-       
-        //remove current item from that slot
-        GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().currentItemSlected.slotIn.itemsInSlot.Remove(
-            GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().currentItemSlected
-            );
+        //remove current item we are putting into here from its original slot (do this before potential swap)
+        invItem.slotIn.itemsInSlot.Remove(invItem);
+
+        //swap senerio
+        if (itemsInSlot.Count > 0)
+        {
+
+            //put the item from here into the other slot
+            InventoryItem itemFromThisSlot = itemsInSlot[0];
+
+            itemsInSlot.Remove(itemFromThisSlot);
+
+            itemFromThisSlot.slotIn = invItem.slotIn;
+            invItem.slotIn.itemsInSlot.Add(itemFromThisSlot);
+
+            itemFromThisSlot.connectedObject.transform.parent = invItem.slotIn.physicalLocation;
+            itemFromThisSlot.connectedObject.transform.position = invItem.slotIn.physicalLocation.position;
+            itemFromThisSlot.connectedObject.transform.localRotation = invItem.slotIn.physicalLocation.localRotation;
+
+            itemFromThisSlot.connectedObject.rb.isKinematic = true;
+            BPUtil.SetAllColliders(itemFromThisSlot.connectedObject.transform, false);
+
+            //itemFromThisSlot.connectedObject.SetMetaData("INV_SLOT", itemFromThisSlot.slotIn.name);
+            //GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().SetSaveData(itemFromThisSlot.slotIn.name, itemFromThisSlot.connectedObject.GetWorldID());
+
+            itemFromThisSlot.transform.parent = itemFromThisSlot.slotIn.transform;
+            itemFromThisSlot.transform.position = itemFromThisSlot.slotIn.transform.position;
+
+            GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = null;
+            itemFromThisSlot.canvasGroup.alpha = 1f;
+            itemFromThisSlot.canvasGroup.blocksRaycasts = true;
+
+        }
+
 
         //set itemSlotInfo
         invItem.slotIn = this;
@@ -87,46 +111,19 @@ public class InventorySlot : MonoBehaviour, IDropHandler
         invItem.connectedObject.rb.isKinematic = true;
         BPUtil.SetAllColliders(invItem.connectedObject.transform, false);
 
-        invItem.connectedObject.SetMetaData("INV_SLOT", name);
-
-        /*if (itemsInSlot.Count == 0)
-        {
-            
-            
-        }
-        else //swap
-        {
-            //old slot
-            InventorySlot oldSlot = invItem.slotIn;
-
-            oldSlot.RemoveItemFromSlot(invItem, false);
-
-            oldSlot.AddItemToSlot(itemsInSlot[0]);
-
-            invItem.slotIn = this;
-            itemsInSlot.Add(invItem);
-
-            invItem.connectedObject.transform.parent = physicalLocation;
-            invItem.connectedObject.transform.position = physicalLocation.position;
-            invItem.connectedObject.transform.localRotation = physicalLocation.localRotation;
-
-            invItem.connectedObject.rb.isKinematic = true;
-            BPUtil.SetAllColliders(invItem.connectedObject.transform, false);
-        }
-*/
+        //itemFromThisSlot.connectedObject.SetMetaData("INV_SLOT", invItem.slotIn.name);
+        //GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().SetSaveData(name, invItem.connectedObject.GetWorldID());
         //call the callback in the interactionsystem to update the physicals
-        GameSettings.Instance.Player.GetComponent<InteractionSystem>().OnInventoryItemAddedToSlot_CallBack(this, invItem.connectedObject);
+        GameSettings.Instance.Player.GetComponent<InteractionSystem>().OnInventoryItemAddedToSlot_CallBack(slotFrom, this);
 
     }
     public void AddItemToSlot(HoldableObject holdableObject)
     {
+        
         //exit the method and dont do anything if the slot can't hold anymore items
         /*if (GetCurrentSlotWeight() + holdableObject.inventoryObjectData.inventoryWeight > weightAllowed)
             return;*/
         if (itemsInSlot.Count > 0)
-            return;
-
-        if (GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().rHand == this && itemsInSlot.Count > 0)
             return;
 
         GameObject newInventoryItem = Instantiate(GameSettings.Instance.inventoryItemPrefab.gameObject, transform);
@@ -143,20 +140,23 @@ public class InventorySlot : MonoBehaviour, IDropHandler
         holdableObject.transform.position = physicalLocation.position;
         holdableObject.transform.localRotation = physicalLocation.localRotation;
 
-        holdableObject.SetMetaData("INV_SLOT", name);
+        //holdableObject.SetMetaData("INV_SLOT", name);
+
+        //GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().SetSaveData(name, holdableObject.GetWorldID());
+
         //call the callback in the interactionsystem to update the physicals
-        GameSettings.Instance.Player.GetComponent<InteractionSystem>().OnInventoryItemAddedToSlot_CallBack(this, holdableObject);
+        GameSettings.Instance.Player.GetComponent<InteractionSystem>().OnInventoryItemAddedToSlot_CallBack(null, this);
     }
 
     public void OnDrop(PointerEventData data)
     {
-        if (GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().currentItemSlected != null)
+        if (GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected != null)
         {
-            AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().currentItemSlected);
+            AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
 
-            GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().currentItemSlected = null;
+            GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = null;
 
-            Debug.Log("Dropping To " + name);
+            //Debug.Log("Dropping To " + name);
         }
         
     }
