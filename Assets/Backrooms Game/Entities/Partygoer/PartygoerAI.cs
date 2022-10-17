@@ -19,14 +19,14 @@ public class PartygoerAI : Entity
     {
         emission.EnableKeyword("_EMISSION");
         emission.SetColor("_EmissionColor", emissionColor);
-        emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+        
         
     }
     public override void OnEventEnd()
     {
-        emission.EnableKeyword("_EMISSION");
+        emission.DisableKeyword("_EMISSION");
         emission.SetColor("_EmissionColor", Color.black);
-        emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
+        
     }
 
     public override void Init()
@@ -37,7 +37,13 @@ public class PartygoerAI : Entity
         {
             emission.EnableKeyword("_EMISSION");
             emission.SetColor("_EmissionColor", emissionColor);
-            emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+           
+        }
+        else
+        {
+            emission.DisableKeyword("_EMISSION");
+            emission.SetColor("_EmissionColor", Color.black);
+            
         }
         
     }

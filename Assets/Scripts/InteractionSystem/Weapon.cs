@@ -20,9 +20,15 @@ public class Weapon : MonoBehaviour
         /*
          * Stabable Layer - 18
          */
+        GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetTrigger("WeaponHitObject");
+
         Vector3 collisionPoint = other.gameObject.GetComponent<Collider>().ClosestPointOnBounds(transform.position);
 
-        //Debug.Log(connetedObject.animationPlaying);
+        //hit a breakable holdable object sitting on the floor
+        if (other.gameObject.layer == 9 && connetedObject.animationPlaying)
+        {
+            other.GetComponentInParent<HoldableObject>().TakeDamage(damage);
+        }
         if (gameObject.layer == 23 && other.gameObject.layer == 18 && other.gameObject.layer != 11 && connetedObject != null ? connetedObject.animationPlaying : true && onlyHitOneLimb)
         {
             onlyHitOneLimb = false;
@@ -83,6 +89,7 @@ public class Weapon : MonoBehaviour
 
     public void OnTriggerExit(Collider other)
     {
+        GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.ResetTrigger("WeaponHitObject");
         onlyHitOneLimb = true;
         //GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.speed = 1;
         //Debug.Log("TriggerExit");

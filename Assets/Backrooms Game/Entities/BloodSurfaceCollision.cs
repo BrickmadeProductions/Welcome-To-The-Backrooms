@@ -29,11 +29,21 @@ public class BloodSurfaceCollision : MonoBehaviour
         {
             GameObject splat = Instantiate(bloodSurfaceSplats[Random.Range(0, bloodSurfaceSplats.Length)], CollisionEvents[i].intersection, Quaternion.LookRotation(CollisionEvents[i].normal));
             splat.transform.localScale = (Vector3.one * 0.25f) * Random.Range(0.7f, 1.3f);
-            GameSettings.Instance.worldInstance.globalBloodAndGoreObjects.Add(splat);
-            if (GameSettings.Instance.BloodAndGore == false)
+
+            if (!other.transform.parent.gameObject.GetComponent<DeferredDecalRenderer>() 
+                && other.gameObject.layer != 11
+                && other.gameObject.layer != 12
+                && other.gameObject.layer != 22
+                && other.gameObject.layer != 21
+                && other.gameObject.layer != 9
+                && other.gameObject.layer != 10)
             {
-                gameObject.SetActive(false);
+                other.transform.parent.gameObject.AddComponent<DeferredDecalRenderer>();
+                splat.transform.parent = other.transform;
             }
+                
+
+            GameSettings.Instance.worldInstance.globalBloodAndGoreObjects.Add(splat);
 
         }
 

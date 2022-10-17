@@ -462,7 +462,7 @@ MonoBehaviour:
   playSounds: 0
   runTimeID: 482
   inventoryObjectData:
-    image: {fileID: 2800000, guid: 285eb09b08cbafa428345bddd78e56a3, type: 3}
+    image: {fileID: 2800000, guid: 5422d2e56ae5e0440b8bdda41e5321e0, type: 3}
     name: Knife
     inventoryWeight: 5
     description: A handheld melee weapon. Best used at short range. Throwable.
@@ -476,7 +476,9 @@ MonoBehaviour:
   autoSwing: 1
   canPlace: 0
   isPlaced: 0
+  canBeUsed: 1
   animationPlaying: 0
+  offHandIKPoint: {fileID: 0}
   StartUseAnimation: 
   UseAnimations:
   - SliceVar1
@@ -566,3 +568,4 @@ MonoBehaviour:
   connetedObject: {fileID: 5174651668802718682}
   WeaponBloodRenderer: {fileID: 2147181769708924259}
   bloodAmount: 0
+  onlyHitOneLimb: 1

@@ -14,6 +14,7 @@ using UnityEngine.UI;
 using Steamworks;
 using Lowscope.Saving.Core;
 using Lowscope.Saving.Data;
+using System.Linq;
 
 public class BPUtil : MonoBehaviour
 {
@@ -185,8 +186,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public TextMeshProUGUI devModeInfo;
 
-	//BrickmadeProductions, king, wahoo, RJC, Constant
-	public static readonly List<ulong> teamMemberSteamIDs = new List<ulong> { 76561199226044925, 76561198017133391, 76561198139743119, 76561198109625129, 76561198968340030 };
+	//BrickmadeProductions, king, wahoo, RJC, Constant, WoodE
+	public static readonly List<ulong> teamMemberSteamIDs = new List<ulong> { 76561199226044925, 76561198017133391, 76561198139743119, 76561198109625129, 76561198968340030, 76561198374741749 };
 
 	public BackroomsLevelWorld worldInstance = null;
 	public CutSceneHandler cutSceneHandler;
@@ -587,6 +588,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	private void Update()
 	{
+		
 		//close menu otherwise open settings
 		if (Input.GetButtonDown("Esc") && !IsCutScene)
 		{
@@ -855,7 +857,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		if (Instance.worldInstance != null)
         {
-			Instance.worldInstance.SaveAllObjectsAndEntities();
+			Instance.worldInstance.SaveAllObjectsAndEntitiesInChunks(Instance.worldInstance.allChunks.ToArray());
 		}
 
 		yield return new WaitUntil(() => !WORLD_SAVING);
@@ -955,6 +957,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		yield return SceneManager.LoadSceneAsync((int)id, LoadSceneMode.Single);
 
+		ActiveScene = id;
+
 		//scene has been loaded
 		//post load
 
@@ -962,6 +966,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 		{
 			player = Instantiate(playerPrefab);
 		}
+
+		audioHandler.ResetSoundTrackLoopState();
 
 		switch (id)
 		{
@@ -1004,8 +1010,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 				LEVEL_SAVE_LOADED = true;
 				PLAYER_DATA_LOADED = true;
-
-				audioHandler.StopCurrentSceneSoundTrack();
 
 				HomeScreen();
 
@@ -1085,12 +1089,9 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		ConnectSettings();
 
-		ActiveScene = id;
-
 		if (AmInSavableScene())
 		{
 			LastSavedScene = ActiveScene;
-			audioHandler.StopCurrentSceneSoundTrack();
 			audioHandler.SetUpAudio(id, ActiveScene == SCENE.LEVELRUN);
 		}
 

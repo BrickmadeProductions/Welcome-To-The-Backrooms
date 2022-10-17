@@ -26,11 +26,11 @@ Transform:
   m_GameObject: {fileID: 2913593733054977851}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0.15428185, y: 0.28605348, z: 0.5723635}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7752675755633391657}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &3704535279898496626
 BoxCollider:
@@ -43,8 +43,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 0.2693265, z: 0.9355153}
-  m_Center: {x: 0, y: -0.2820169, z: 0.14518473}
+  m_Size: {x: 1.9770203, y: 1.7238653, z: 0.5924327}
+  m_Center: {x: 0.00865305, y: -0.43948963, z: 0.22444898}
 --- !u!1 &5248864574294948862
 GameObject:
   m_ObjectHideFlags: 0
@@ -68,15 +68,16 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5248864574294948862}
-  m_LocalRotation: {x: -1, y: 0, z: 0, w: 0}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalRotation: {x: -0.233631, y: 0.26155984, z: 0.57084924, w: 0.7423842}
+  m_LocalPosition: {x: -0.543, y: -0.302, z: 0.958}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 919273184186694356}
   - {fileID: 5698779536432981006}
   m_Father: {fileID: 4656278529634436841}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: -180, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -40.204, y: 9.163, z: 71.757}
 --- !u!1 &6463286826440067181
 GameObject:
   m_ObjectHideFlags: 0
@@ -86,8 +87,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4656278529634436841}
-  - component: {fileID: 6805312870202808124}
-  - component: {fileID: 7358215993547777169}
   - component: {fileID: 4051335608007172233}
   - component: {fileID: 5633348184513015531}
   m_Layer: 9
@@ -113,21 +112,120 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!33 &6805312870202808124
+--- !u!114 &4051335608007172233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6463286826440067181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 297
+    location:
+    - 0
+    - 0
+    - 0
+    rotationEuler:
+    - 90
+    - 0
+    - 0
+    parentName: 
+    type: 14
+    instance: {fileID: 4051335608007172233}
+  type: 14
+  playSounds: 1
+  runTimeID: 297
+  inventoryObjectData:
+    image: {fileID: 2800000, guid: 9d1c1095be3473149b76399342a19415, type: 3}
+    name: Rope Coil
+    inventoryWeight: 10
+    description: Cord of rope arranged in a coil pattern.
+  durability: 0
+  breakablePrefabs: []
+  hitClips: []
+  breakClips: []
+  rb: {fileID: 0}
+  ThrowMultiplier: 0
+  large: 0
+  autoSwing: 0
+  canPlace: 0
+  isPlaced: 0
+  canBeUsed: 1
+  animationPlaying: 0
+  offHandIKPoint: {fileID: 0}
+  StartUseAnimation: 
+  UseAnimations: []
+  CustomHoldAnimation: 
+  ItemObjectAnimations: []
+--- !u!54 &5633348184513015531
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6463286826440067181}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!1 &8981666703390933527
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 919273184186694356}
+  - component: {fileID: 855926454543022935}
+  - component: {fileID: 2731721878009043823}
+  m_Layer: 0
+  m_Name: Mesh
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &919273184186694356
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8981666703390933527}
+  m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7752675755633391657}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &855926454543022935
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6463286826440067181}
+  m_GameObject: {fileID: 8981666703390933527}
   m_Mesh: {fileID: -8296241059378954164, guid: f99b0932939a8ad47aea6348c1062908, type: 3}
---- !u!23 &7358215993547777169
+--- !u!23 &2731721878009043823
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6463286826440067181}
+  m_GameObject: {fileID: 8981666703390933527}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -163,67 +261,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &4051335608007172233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6463286826440067181}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  saveableData:
-    runTimeID: 297
-    location:
-    - 0
-    - 0
-    - 0
-    rotationEuler:
-    - 90
-    - 0
-    - 0
-    parentName: 
-    type: 14
-    instance: {fileID: 4051335608007172233}
-  type: 14
-  playSounds: 1
-  runTimeID: 297
-  inventoryObjectData:
-    image: {fileID: 2800000, guid: affbeb4861ee431428d4bbdbfe3d371a, type: 3}
-    name: Rope Coil
-    inventoryWeight: 10
-    description: Cord of rope arranged in a coil pattern.
-  durability: 0
-  breakablePrefabs: []
-  hitClips: []
-  breakClips: []
-  rb: {fileID: 0}
-  ThrowMultiplier: 0
-  large: 0
-  autoSwing: 0
-  canPlace: 0
-  isPlaced: 0
-  animationPlaying: 0
-  StartUseAnimation: 
-  UseAnimations: []
-  CustomHoldAnimation: 
-  ItemObjectAnimations: []
---- !u!54 &5633348184513015531
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6463286826440067181}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0

@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
+using UnityEngine.Animations.Rigging;
 public class InteractionSystem : MonoBehaviour
 {
 	private PlayerController player;
@@ -142,6 +142,7 @@ public class InteractionSystem : MonoBehaviour
 	
 	public void SetThrow()
 	{
+
 		BPUtil.SetAllChildrenToLayer(GetObjectInHand().transform, 9);
 		BPUtil.SetAllColliders(GetObjectInHand().transform, true);
 
@@ -186,9 +187,26 @@ public class InteractionSystem : MonoBehaviour
 			FinalizePickup(holdableObject);
         }
 	}
+	public void SetOffHandIKInfo(HoldableObject objectToTest)
+    {
+		Transform offhandIK = objectToTest.offHandIKPoint;
+
+		if (offhandIK != null)
+		{
+			GetComponent<PlayerController>().builder.layers[1].active = true;
+			GetComponent<PlayerController>().offHandIK.data.target = offhandIK;
+			GetComponent<PlayerController>().builder.Build();
+		}
+		else
+		{
+			GetComponent<PlayerController>().offHandIK.data.target = null;
+			GetComponent<PlayerController>().builder.layers[1].active = false;
+			GetComponent<PlayerController>().builder.Build();
+		}
+	}
+
 	public void FinalizePickup(InteractableObject holdableObject)
 	{
-		
 		InventorySlot slotToAddTo = player.GetComponent<InventorySystem>().GetNextAvailableInventorySlot((HoldableObject)holdableObject);
 
 
@@ -198,6 +216,7 @@ public class InteractionSystem : MonoBehaviour
             {
 				canGrab = false;
 				player.bodyAnim.SetTrigger("isGrabbingRight");
+				
 			}
 				
 
@@ -250,6 +269,14 @@ public class InteractionSystem : MonoBehaviour
 
 		slot.RemoveItemFromSlot(slot.itemsInSlot[0].connectedObject, true);
 
+		if (slot == GetComponent<InventorySystem>().rHand)
+        {
+			GetComponent<PlayerController>().offHandIK.data.target = null;
+			GetComponent<PlayerController>().builder.layers[1].active = false;
+			GetComponent<PlayerController>().builder.Build();
+		}
+		
+
 	}
 	public void SetPlace(Vector3 location, Quaternion rotation)
 	{
@@ -277,6 +304,14 @@ public class InteractionSystem : MonoBehaviour
 	//called after inventory item is added
 	public void OnInventoryItemAddedToSlot_CallBack(InventorySlot slotFrom, InventorySlot slotTo)
     {
+		if (GetComponent<InventorySystem>().rHand.itemsInSlot.Count > 0)
+			SetOffHandIKInfo(GetComponent<InventorySystem>().rHand.itemsInSlot[0].connectedObject);
+        else
+        {
+			GetComponent<PlayerController>().offHandIK.data.target = null;
+			GetComponent<PlayerController>().builder.layers[1].active = false;
+			GetComponent<PlayerController>().builder.Build();
+		}
 		//item got added to inv from outside to right hand
 		if (slotTo == GetComponent<InventorySystem>().rHand && slotFrom == null)
         {
@@ -288,9 +323,7 @@ public class InteractionSystem : MonoBehaviour
 			slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
 			slotTo.itemsInSlot[0].connectedObject.transform.parent = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
 			slotTo.itemsInSlot[0].connectedObject.transform.position = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
-			Quaternion localRotation = Quaternion.Euler(player.neck.transform.localRotation.x / 2f, player.neck.transform.localRotation.y, player.neck.transform.localRotation.z);
-
-			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = localRotation;
+			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = Quaternion.identity;
 
 			slotTo.itemsInSlot[0].connectedObject.Pickup(this, true);
 			return;
@@ -318,9 +351,7 @@ public class InteractionSystem : MonoBehaviour
 			slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
 			slotTo.itemsInSlot[0].connectedObject.transform.parent = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
 			slotTo.itemsInSlot[0].connectedObject.transform.position = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
-			Quaternion localRotation = Quaternion.Euler(player.neck.transform.localRotation.x / 2f, player.neck.transform.localRotation.y, player.neck.transform.localRotation.z);
-
-			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = localRotation;
+			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = Quaternion.identity;
 
 			slotTo.itemsInSlot[0].connectedObject.Pickup(this, true);
 			return;
@@ -354,9 +385,7 @@ public class InteractionSystem : MonoBehaviour
 			slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
 			slotTo.itemsInSlot[0].connectedObject.transform.parent = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
 			slotTo.itemsInSlot[0].connectedObject.transform.position = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
-			Quaternion localRotation = Quaternion.Euler(player.neck.transform.localRotation.x / 2f, player.neck.transform.localRotation.y, player.neck.transform.localRotation.z);
-
-			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = localRotation;
+			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = Quaternion.identity;
 
 			slotTo.itemsInSlot[0].connectedObject.Pickup(this, true);
 
@@ -379,9 +408,7 @@ public class InteractionSystem : MonoBehaviour
 			slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
 			slotFrom.itemsInSlot[0].connectedObject.transform.parent = (slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
 			slotFrom.itemsInSlot[0].connectedObject.transform.position = (slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
-			Quaternion localRotation = Quaternion.Euler(player.neck.transform.localRotation.x / 2f, player.neck.transform.localRotation.y, player.neck.transform.localRotation.z);
-
-			slotFrom.itemsInSlot[0].connectedObject.transform.localRotation = localRotation;
+			slotFrom.itemsInSlot[0].connectedObject.transform.localRotation = Quaternion.identity;
 
 			slotFrom.itemsInSlot[0].connectedObject.Pickup(this, true);
 
@@ -594,24 +621,38 @@ public class InteractionSystem : MonoBehaviour
 			//throw system, only small objects
 			if (!GetObjectInHand().large)
             {
-				if (Input.GetMouseButton(1) && !player.bodyAnim.GetBool("isPreparingThrow") && (!buildOn || raycastForPlacing.Length == 0))
+				if (Input.GetMouseButton(1) && !player.bodyAnim.GetBool("isPreparingThrow") && (!buildOn || raycastForPlacing.Length == 0) && !inventory.menuOpen)
 				{
-
+					GetComponent<PlayerController>().offHandIK.data.target = null;
+					GetComponent<PlayerController>().builder.layers[1].active = false;
 					player.bodyAnim.SetBool("isPreparingThrow", true);
 					player.bodyAnim.ResetTrigger("isThrowing");
 				}
 
-				if (Input.GetMouseButtonUp(1) && (!buildOn || raycastForPlacing.Length == 0))
+				else if (Input.GetMouseButtonUp(1) && !inventory.menuOpen)
 				{
 					//Debug.Log("Throw");
-
 					player.bodyAnim.SetBool("isPreparingThrow", false);
 					player.bodyAnim.SetTrigger("isThrowing");
 
 
 				}
 			}
-			
+
+			//
+			//
+			//
+			//
+			//
+			//
+			//
+			//fix
+			if (inventory.menuOpen && player.bodyAnim.GetBool("isPreparingThrow"))
+			{
+				player.bodyAnim.SetBool("isPreparingThrow", false);
+				player.bodyAnim.ResetTrigger("isThrowing");
+			}
+
 
 			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.neck.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !GetObjectInHand().GetComponent<HoldableObject>().large))
 			{

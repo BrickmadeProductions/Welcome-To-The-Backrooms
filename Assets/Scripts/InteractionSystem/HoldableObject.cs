@@ -48,7 +48,8 @@ public class HoldableObject : InteractableObject
 
 	//animations
 	public bool animationPlaying;
-	
+
+	public Transform offHandIKPoint;
 
 	public string StartUseAnimation;
 
@@ -195,43 +196,44 @@ public class HoldableObject : InteractableObject
 		
 
 	}
-    private void OnCollisionEnter(Collision collision)
+    
+	public void TakeDamage(float damage)
+    {
+		if (!(transform.gameObject.GetComponent<AudioSource>() != null) || !playSounds)
+		{
+			return;
+		}
+		if (breakablePrefabs.Length == 0)
+		{
+			return;
+		}
+		if (!transform.gameObject.GetComponent<AudioSource>().isPlaying && hitClips.Length != 0)
+		{
+			transform.gameObject.GetComponent<AudioSource>().clip = hitClips[UnityEngine.Random.Range(0, hitClips.Length)];
+			transform.gameObject.GetComponent<AudioSource>().pitch = 1f + UnityEngine.Random.Range(-0.15f, 0.15f);
+			transform.gameObject.GetComponent<AudioSource>().Play();
+		}
+
+		durability -= damage;
+
+		if (durability < 0f && !broken)
+		{
+			AudioSource.PlayClipAtPoint(breakClips[UnityEngine.Random.Range(0, breakClips.Length)], transform.position);
+			for (int i = 0; i < breakablePrefabs.Length; i++)
+			{
+				GameSettings.Instance.worldInstance.AddNewProp(transform.position + new Vector3(0, 2, 0), transform.rotation, GameSettings.Instance.PropDatabase[breakablePrefabs[i].GetComponent<HoldableObject>().type].gameObject);
+			}
+			broken = true;
+			GameSettings.Instance.worldInstance.RemoveProp(GetWorldID(), true);
+			
+		}
+	}
+
+	private void OnCollisionEnter(Collision collision)
 	{
-		if (collision.gameObject.tag == "Player")
-		{
-			_ = collision.rigidbody != null;
-		}
-		else
-		{
-			if (!(transform.gameObject.GetComponent<AudioSource>() != null) || !playSounds || !(collision.relativeVelocity.magnitude >= 4f))
-			{
-				return;
-			}
-			if (breakablePrefabs.Length == 0)
-			{
-				return;
-			}
-			if (!transform.gameObject.GetComponent<AudioSource>().isPlaying && hitClips.Length != 0)
-			{
-				transform.gameObject.GetComponent<AudioSource>().clip = hitClips[UnityEngine.Random.Range(0, hitClips.Length)];
-				transform.gameObject.GetComponent<AudioSource>().pitch = 1f + UnityEngine.Random.Range(-0.15f, 0.15f);
-				transform.gameObject.GetComponent<AudioSource>().Play();
-			}
-			
-			durability -= collision.relativeVelocity.magnitude;
-			
-			if (durability < 0f && !broken)
-			{
-				AudioSource.PlayClipAtPoint(breakClips[UnityEngine.Random.Range(0, breakClips.Length)], transform.position);
-				GameObject[] array = breakablePrefabs;
-				for (int i = 0; i < array.Length; i++)
-				{
-					Instantiate(array[i], transform.position, transform.rotation).GetComponent<Rigidbody>().velocity = GetComponent<Rigidbody>().velocity / 2f;
-				}
-				GameSettings.Instance.worldInstance.RemoveProp(GetWorldID(), true);
-				broken = true;
-			}
-		}
+		if (collision.relativeVelocity.magnitude >= 4f)
+			TakeDamage(collision.relativeVelocity.magnitude);
+
 	}
     public override void OnLoadFinished()
     {

@@ -230,12 +230,11 @@ public class PlayerHealthSystem : MonoBehaviour
 			if (sanity <= 0f)
 			{
 				sanity = 0f;
-				health -= 3f;
+				TakeDamage(5f, 0f, 2f);
 			}
 			if (thirst <= 0f)
 			{
-				thirst = 0f;
-				health -= 4f;
+				TakeDamage(2f, 0f, 2f);
 				canRun = false;
 			}
 			else if (thirst > 0)

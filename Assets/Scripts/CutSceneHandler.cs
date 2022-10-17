@@ -121,7 +121,7 @@ public class CutSceneHandler : MonoBehaviour
 
                 GameSettings.Instance.Player.GetComponent<PlayerController>().rb.AddForce(GameSettings.Instance.Player.transform.forward * 5f);
 
-                GameSettings.Instance.audioHandler.StopCurrentSceneSoundTrack();
+                GameSettings.Instance.audioHandler.ResetSoundTrackLoopState();
 
                 GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("NoClip_Success", true);
 

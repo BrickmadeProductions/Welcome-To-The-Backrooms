@@ -264,19 +264,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveableData:
-    runTimeID: 967
+    runTimeID: 
     location:
     - -0
     - 0
     - 0
     rotationEuler:
-    - 270.01978
+    - 0
     - 0
     - 0
     parentName: 
     type: 0
     instance: {fileID: 3798548454979468547}
-  type: 0
+  type: 26
   playSounds: 1
   runTimeID: 967
   inventoryObjectData:
@@ -297,7 +297,9 @@ MonoBehaviour:
   autoSwing: 0
   canPlace: 0
   isPlaced: 0
+  canBeUsed: 1
   animationPlaying: 0
+  offHandIKPoint: {fileID: 0}
   StartUseAnimation: 
   UseAnimations: []
   CustomHoldAnimation: 

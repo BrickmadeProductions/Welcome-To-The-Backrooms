@@ -32,7 +32,7 @@ public class HeadBobber : MonoBehaviour
     void LateUpdate()
     {
 
-        if (Cursor.lockState != CursorLockMode.None && controller.currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE && controller.playerHealth.canWalk && !GameSettings.Instance.IsCutScene && !controller.playerHealth.isBeingDamaged)
+        if (controller.currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE && controller.playerHealth.canWalk && !GameSettings.Instance.IsCutScene && !controller.playerHealth.isBeingDamaged)
         {
             
             //head rotation
@@ -72,8 +72,10 @@ public class HeadBobber : MonoBehaviour
                 else if (controller.currentPlayerState == PlayerController.PLAYERSTATES.CROUCH && controller.currentPlayerState != PlayerController.PLAYERSTATES.JUMP)
                 {
                     timer += Time.deltaTime * walkingBobbingSpeed;
-                    //camera.localPosition = new Vector3(0, camera.localPosition.y, camera.localPosition.z);
-                    camera.localPosition = new Vector3(0, Mathf.Lerp(camera.localPosition.y, defaultPosY, Time.deltaTime * walkingBobbingSpeed), camera.localPosition.z);
+                    camera.localPosition = new Vector3(Mathf.Lerp(prevPosX, defaultPosX + Mathf.Sin(timer / 2) * horizontalBobbingAmount, Time.deltaTime * 10), defaultPosY + Mathf.Sin(timer) * bobbingAmount / 16, camera.localPosition.z);
+
+                    //camera.localRotation = new Quaternion(Mathf.Lerp(prevRotX, camera.localRotation.w, Time.deltaTime * 10), 0, Mathf.Lerp(prevRotZ, Mathf.Sin(timer / 2) * horizontalBobbingAmount / 8 / 15, Time.deltaTime * 10), camera.localRotation.w);
+                    
                     prevPosX = camera.localPosition.x;
 
                     prevRotX = camera.localPosition.x;
@@ -100,9 +102,7 @@ public class HeadBobber : MonoBehaviour
                     //Idle
                     timer += Time.deltaTime * walkingBobbingSpeed;
 
-
-                    if (!Input.GetButton("LeanLeft") && !Input.GetButton("LeanRight"))
-                        camera.localPosition = new Vector3(camera.localRotation.x, Mathf.Lerp(camera.localPosition.y, defaultPosY, Time.deltaTime * walkingBobbingSpeed), Mathf.Lerp(prevPosX, defaultPosX + Mathf.Sin(timer / 10) * horizontalBobbingAmount, Time.deltaTime * 10));
+                    camera.localPosition = new Vector3(camera.localRotation.x, Mathf.Lerp(camera.localPosition.y, defaultPosY, Time.deltaTime * walkingBobbingSpeed), Mathf.Lerp(prevPosX, defaultPosX + Mathf.Sin(timer / 10) * horizontalBobbingAmount, Time.deltaTime * 10));
 
                     prevPosX = camera.localPosition.x;
 

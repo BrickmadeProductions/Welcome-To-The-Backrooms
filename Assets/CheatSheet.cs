@@ -213,17 +213,10 @@ public class CheatSheet : MonoBehaviour
 
     public void StartEvent()
     {
-        if (GameSettings.Instance.audioHandler.playingSoundTrackLoop != null)
-        {
-            StopCoroutine(GameSettings.Instance.audioHandler.playingSoundTrackLoop);
-            GameSettings.Instance.audioHandler.playingSoundTrackLoop = null;
-
-            Debug.Log("| CHEATSHEET | Successfully Started: " + currentEventChoice);
-        }
-        
+       
         GameSettings.Instance.worldInstance.StartEvent(currentEventChoice);
+        Debug.Log("| CHEATSHEET | Successfully Started: " + currentEventChoice);
 
-        
     }
 
     public void StopEvent()

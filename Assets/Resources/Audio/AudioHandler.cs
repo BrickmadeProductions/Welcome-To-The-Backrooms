@@ -28,8 +28,6 @@ public class AudioHandler : MonoBehaviour
     public Coroutine playingSoundTrackLoop = null;
     public Coroutine playingEventTrackLoop = null;
 
-    public Coroutine randomlyPlayTracks = null;
-
     //event tracks
     public AudioClip lightsOutBegin;
 
@@ -197,12 +195,12 @@ public class AudioHandler : MonoBehaviour
     {
         GetComponent<AudioSource>().volume = 0.08f;
 
+        if (!playInstantly)
+            yield return new WaitForSecondsRealtime(Random.Range(150, 300));
+
         while (true)
         {
             GetComponent<AudioSource>().Stop();
-
-            if (!playInstantly)
-                yield return new WaitForSecondsRealtime(Random.Range(150, 300));
 
             if (data.soundTracks.Length > 0)
             {
@@ -219,16 +217,19 @@ public class AudioHandler : MonoBehaviour
         }
        
     }
-    IEnumerator EventTrack()
+    public IEnumerator StartEventTrack(GAMEPLAY_EVENT gameplay_event, float timeIntoEvent)
     {
         GetComponent<AudioSource>().volume = 1f;
 
-        
-        GetComponent<AudioSource>().Stop();
-        GetComponent<AudioSource>().clip = eventMusicDictionary[GameSettings.Instance.worldInstance.currentWorldEvent].eventBegin;
-        GetComponent<AudioSource>().Play();
+        if (timeIntoEvent == 0)
+        {
+            GetComponent<AudioSource>().Stop();
+            GetComponent<AudioSource>().clip = eventMusicDictionary[gameplay_event].eventBegin;
+            GetComponent<AudioSource>().Play();
 
-        yield return new WaitForSecondsRealtime(1f);
+            yield return new WaitForSecondsRealtime(1f);
+
+        }
 
         GameSettings.Instance.worldInstance.OnEvenStart();
 
@@ -237,10 +238,15 @@ public class AudioHandler : MonoBehaviour
         GetComponent<AudioSource>().volume = 0.1f;
 
         GetComponent<AudioSource>().loop = true;
-        GetComponent<AudioSource>().clip = eventMusicDictionary[GameSettings.Instance.worldInstance.currentWorldEvent].eventTrack;
+        GetComponent<AudioSource>().clip = eventMusicDictionary[gameplay_event].eventTrack;
         GetComponent<AudioSource>().Play();
 
-        yield return new WaitForSecondsRealtime(60f * 5f);
+        if (timeIntoEvent == 0)
+
+            yield return new WaitForSecondsRealtime(60f * 10f);
+
+        else 
+            yield return new WaitForSecondsRealtime((60f * 10f) - timeIntoEvent);
 
         GetComponent<AudioSource>().loop = false;
 
@@ -256,7 +262,7 @@ public class AudioHandler : MonoBehaviour
         
     }
     //play intro, wait, then play a random level track every 5 to 10 miunutes
-    public IEnumerator StartLoop(SCENE scene, bool playInstantly)
+    public IEnumerator InternalSoundTrackLoop(SCENE scene, bool playInstantly)
     {
         GetComponent<AudioSource>().Stop();
         
@@ -289,20 +295,7 @@ public class AudioHandler : MonoBehaviour
                 
                 playingSoundTrackLoop = StartCoroutine(SoundTrackLoop(data, playInstantly));
             }
-            else if (GameSettings.Instance.worldInstance.currentWorldEvent != GAMEPLAY_EVENT.NONE && playingEventTrackLoop == null)
-            {
-                
-                if (playingSoundTrackLoop != null)
-                {
-                    StopCoroutine(playingSoundTrackLoop);
-                    playingSoundTrackLoop = null;
-                }
-                    
-                playingEventTrackLoop = StartCoroutine(EventTrack());
-                
-                
 
-            }
             yield return new WaitForSecondsRealtime(2f);
 
         }
@@ -310,8 +303,19 @@ public class AudioHandler : MonoBehaviour
        
 
     }
-    public void StopCurrentSceneSoundTrack()
+    public void ResetSoundTrackLoopState()
     {
+        if (playingEventTrackLoop != null)
+        {
+            StopCoroutine(playingEventTrackLoop);
+            playingEventTrackLoop = null;
+        }
+        if (playingSoundTrackLoop != null)
+        {
+            StopCoroutine(playingSoundTrackLoop);
+            playingSoundTrackLoop = null;
+        }
+
         GetComponent<AudioSource>().Stop();
     }
     public void SetUpAudio(SCENE scene, bool playInstantly = false)
@@ -327,6 +331,7 @@ public class AudioHandler : MonoBehaviour
             master = sceneMusicDictionary[scene].levelMixer.audioMixer;
         }
 
+        //fix audio to current mixer
         foreach (AudioSource source in FindObjectsOfTypeAll(typeof(AudioSource)))
         {
             //casset player is excluded
@@ -364,13 +369,18 @@ public class AudioHandler : MonoBehaviour
 
         }
 
-        if (randomlyPlayTracks != null)
-        {
-            StopCoroutine(randomlyPlayTracks);
-            randomlyPlayTracks = null;
-        }
-        randomlyPlayTracks = StartCoroutine(StartLoop(scene, playInstantly));
-       
-        
+        //starts soundtrack for first time after world load -> BackroomsLevelWorld.cs
+    }
+
+    public void SceneSoundTrackStart(SCENE scene, bool playInstantly)
+    {
+         ResetSoundTrackLoopState();
+         playingSoundTrackLoop = StartCoroutine(InternalSoundTrackLoop(scene, playInstantly));
+    }
+
+    public void EventSoundTrackStart(GAMEPLAY_EVENT gameplay_event, float timeIntoEvent)
+    {
+        ResetSoundTrackLoopState();
+        playingEventTrackLoop = StartCoroutine(StartEventTrack(gameplay_event, timeIntoEvent));
     }
 }

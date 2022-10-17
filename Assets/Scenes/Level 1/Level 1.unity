@@ -160,6 +160,9 @@ MonoBehaviour:
     savedBodyRotationEuler: []
     savedRotationX: 0
     savedRotationY: 0
+  currentWorldEvent: 0
+  timeInSecondsSinceLastEvent: 0
+  timeIntoCurrentEvent: 0
   globalBloodAndGoreObjects: []
   spawnEntities: 1
   entityAI: 1
@@ -174,16 +177,16 @@ MonoBehaviour:
   chunk_width: 1
   layerDistance: 1
   viewDistance: 3
-  SpecialTiles: []
   Tiles:
   - {fileID: 8892405685109173974, guid: bdd7dab7f277f41488b4bac91ee7da2d, type: 3}
   - {fileID: 5267625787904721635, guid: 5ed437d60b5c44947af6e436e0485bd1, type: 3}
   - {fileID: 3871777592979612537, guid: 06a7b2f06405af341af924a70cf9eaf4, type: 3}
-  RegTiles: []
+  - {fileID: 5267625787904721635, guid: bc24cb1dbd2aa8c44bced7177acb0d61, type: 3}
   worldPropSpawnTable: []
   worldEntitySpawnTable: []
-  regTileSpace: 2
-  seed: 0
+  worldDataSeed: 0
+  biomeDataSeed: 0
+  gameplay_events_possible: 01000000
 --- !u!4 &757962601
 Transform:
   m_ObjectHideFlags: 0

@@ -27,81 +27,87 @@ public class SkillsHandler : MonoBehaviour
             && GameSettings.Instance.Player.GetComponent<InteractionSystem>().currentlyLookingAt != null 
             && GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP) > 0
             && GameSettings.Instance.Player.GetComponent<InteractionSystem>().currentlyLookingAt.tag == "NoClipable"
-            && GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetFloat("xWalk") > 8
             )
         {
-           
-            bool success = false;
-
-            switch (GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP))
+            if (GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetFloat("xWalk") > 8)
             {
-                case 0:
+                bool success = false;
 
-                    //NO ABILITY
+                switch (GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP))
+                {
+                    case 0:
 
-                    break;
+                        //NO ABILITY
 
-                case 1:
+                        break;
 
-                    if (UnityEngine.Random.Range(0f, 1f) > 0.8f)
-                    {
-                        success = true;
-                    }
-                    else 
-                        
-                        success = false;
+                    case 1:
 
-                    break;
+                        if (UnityEngine.Random.Range(0f, 1f) > 0.8f)
+                        {
+                            success = true;
+                        }
+                        else
 
-                case 2:
+                            success = false;
 
-                    if (UnityEngine.Random.Range(0f, 1f) > 0.7f)
-                    {
-                        success = true;
-                    }
-                    else 
-                        
-                        success = false;
+                        break;
 
-                    break;
+                    case 2:
 
-                case 3:
-                    if (UnityEngine.Random.Range(0f, 1f) > 0.3f)
-                    {
-                        success = true;
-                    }
-                    else 
-                        
-                        success = false;
+                        if (UnityEngine.Random.Range(0f, 1f) > 0.7f)
+                        {
+                            success = true;
+                        }
+                        else
 
-                    break;
+                            success = false;
 
-                case 4:
-                    if (UnityEngine.Random.Range(0f, 1f) > 0.1f)
-                    {
-                        success = true;
-                    }
-                    else
+                        break;
 
-                        success = false;
+                    case 3:
+                        if (UnityEngine.Random.Range(0f, 1f) > 0.3f)
+                        {
+                            success = true;
+                        }
+                        else
 
-                    break;
+                            success = false;
+
+                        break;
+
+                    case 4:
+                        if (UnityEngine.Random.Range(0f, 1f) > 0.1f)
+                        {
+                            success = true;
+                        }
+                        else
+
+                            success = false;
+
+                        break;
+
+                }
+
+                if (success)
+                {
+                    NoClipWall_Success();
+                }
+                else
+
+                    NoClipWall_Fail();
+
 
             }
 
-            if (success)
+            else
             {
-                NoClipWall_Success();
+                GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("MAYBE I SHOULD GET A RUNNING START?");
             }
-            else 
-                
-                NoClipWall_Fail();
-            
-
-
 
 
         }
+        
     }
     // Update is called once per frame
     void Update()

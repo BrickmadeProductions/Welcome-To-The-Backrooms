@@ -316,8 +316,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 1
-      minScalar: 0.1
+      scalar: 0.5
+      minScalar: 0.2
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -4980,9 +4980,9 @@ Light:
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.629
+    m_Bias: 0.1
     m_NormalBias: 0.4
-    m_NearPlane: 0.2
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -5101,6 +5101,11 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 259c7200b3203334d870813651006383, type: 3}
   - {fileID: 8300000, guid: b59e570f9d6a27c48b0a24dc2916dd9f, type: 3}
   - {fileID: 8300000, guid: 8b76e65fe6f5d3b44adaeb5242408f10, type: 3}
+  biomeColors:
+  - biomeID: 0
+    emissionColor: {r: 0.9245283, g: 0.8587398, b: 0.78061587, a: 0}
+  - biomeID: 1
+    emissionColor: {r: 0.54772025, g: 0.012917929, b: 0.012917929, a: 0}
   light_renderer: {fileID: 7353996437443229158}
   Light: {fileID: 3757363834104421886}
   broken: 0

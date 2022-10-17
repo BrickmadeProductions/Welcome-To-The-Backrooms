@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public enum DEATH_CASE
 {
@@ -38,9 +39,25 @@ public struct PlayerSaveData
     public bool canCrouchSaved;
 
     public float distanceTraveledSaved;
+
+    //notifications
+
+    public bool hasGivenDrinkingNotificationSaved;
+    public bool hasGivenSanityNotificationSaved;
+    public bool hasGivenHeartRateNotificationSaved;
+    public bool hasGivenStaminaNotificationSaved;
 }
 public class PlayerController : MonoBehaviour, ISaveable
 {
+    public TwoBoneIKConstraint offHandIK;
+    public RigBuilder builder;
+
+    //notifications
+    public bool hasGivenDrinkingNotification = false;
+    public bool hasGivenSanityNotification = false;
+    public bool hasGivenHeartRateNotification = false;
+    public bool hasGivenStaminaNotification = false;
+
     PlayerSaveData playerSaveData;
     public string OnSave()
     {
@@ -58,6 +75,11 @@ public class PlayerController : MonoBehaviour, ISaveable
         playerSaveData.canCrouchSaved = playerHealth.canCrouch;
         playerSaveData.canJumpSaved = playerHealth.canJump;
         playerSaveData.canWalkSaved = playerHealth.canWalk;
+
+        playerSaveData.hasGivenStaminaNotificationSaved = hasGivenStaminaNotification;
+        playerSaveData.hasGivenHeartRateNotificationSaved = hasGivenHeartRateNotification;
+        playerSaveData.hasGivenSanityNotificationSaved = hasGivenSanityNotification;
+        playerSaveData.hasGivenDrinkingNotificationSaved = hasGivenDrinkingNotification;
 
         playerSaveData.distanceTraveledSaved = distance.distanceTraveled;
 
@@ -88,11 +110,18 @@ public class PlayerController : MonoBehaviour, ISaveable
 
         GetComponent<InventorySystem>().LoadInData(playerSaveData);
 
+        hasGivenDrinkingNotification = playerSaveData.hasGivenDrinkingNotificationSaved;
+        hasGivenHeartRateNotification = playerSaveData.hasGivenHeartRateNotificationSaved;
+        hasGivenSanityNotification = playerSaveData.hasGivenSanityNotificationSaved;
+        hasGivenStaminaNotification = playerSaveData.hasGivenStaminaNotificationSaved;
+
+        rb.velocity = Vector3.zero;
 
     }
 
     public void OnLoadNoData()
     {
+        rb.velocity = Vector3.zero;
         return;
     }
 
@@ -344,7 +373,8 @@ public class PlayerController : MonoBehaviour, ISaveable
         GetComponent<Saveable>().SaveIdentification = GameSettings.Instance.activeUser;
         GetComponent<Saveable>().AddSaveableComponent("PlayerData", this, true);       
 
-        isGrounded = true;
+        //if (GetComponent<Collider>().)
+        isGrounded = false;
 
         ogHeadTrans = neck.transform;
 
@@ -456,15 +486,39 @@ public class PlayerController : MonoBehaviour, ISaveable
     {
         isGrounded = false;
     }
-    private void FixedUpdate()
-    {
-        
-    }
     void Update()
     {
       
         if (!GameSettings.Instance.IsCutScene)
         {
+            if (playerHealth.sanity <= 50f && !hasGivenSanityNotification)
+            {
+                GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("BE SURE TO WATCH YOUR SANITY, WEIRD THINGS HAPPEN WHEN IT GETS LOW (HOLD [H])");
+                hasGivenSanityNotification = true;
+            }
+                
+            
+            if (playerHealth.thirst <= 50f && !hasGivenDrinkingNotification)
+            {
+                GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("BE SURE TO STAY HYDRATED, OR YOU COULD END UP LIKE THE REST OF THEM.... (HOLD [H])");
+                hasGivenDrinkingNotification = true;
+            }
+               
+            
+            if (playerHealth.stamina <= 50f && !hasGivenStaminaNotification)
+            {
+                GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("YOU CAN ONLY RUN FOR A LIMITED AMOUNT OF TIME BEFORE YOU RUN OUT OF BREATH, BE CAREFUL TO CONSERVE YOUR ENERGY...");
+                hasGivenStaminaNotification = true;
+            }
+               
+            
+            if (playerHealth.heartRate >= 105f && !hasGivenHeartRateNotification)
+            {
+                GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("KEEPING YOUR HEARTRATE AROUND 90BPM WILL KEEP YOUR BODY HEALTH, BE SURE TO WATCH YOUR BPM (HOLD [H])");
+                hasGivenHeartRateNotification = true;
+            }
+                
+
             if (bufferStand & PlayerHasRoom()) { bufferStand = false; }
 
             //base magnitude off of direction faced
@@ -514,9 +568,13 @@ public class PlayerController : MonoBehaviour, ISaveable
             {
                 rb.drag = 1000f;
             }
-            else
+            else if (isGrounded)
             {
                 rb.drag = 2f;
+            }
+            else
+            {
+                rb.drag = 0f;
             }
 
             float rbVelX = transform.InverseTransformDirection(rb.velocity).z;
@@ -589,15 +647,19 @@ public class PlayerController : MonoBehaviour, ISaveable
                 rotationY = 0f;
             }
 
-            head.transform.rotation = Quaternion.Euler(bodyAnim.GetBool("isProne") ? rotationX + headRotationXOffset : rotationX + headRotationXOffset, head.transform.rotation.eulerAngles.y + headRotationYOffset, 0 + headRotationZOffset);
-            neck.transform.rotation = Quaternion.Euler(neck.transform.rotation.eulerAngles.x, neck.transform.rotation.eulerAngles.y, (bodyAnim.GetBool("isProne") ? rotationX - 90 : rotationX - 90));
+            
 
-            head.transform.position = Vector3.Lerp(head.transform.position, headTarget.transform.position, 75f * Time.deltaTime);
         }
         
 
     }
+    void LateUpdate()
+    {
+        head.transform.rotation = Quaternion.Euler(bodyAnim.GetBool("isProne") ? rotationX + headRotationXOffset : rotationX + headRotationXOffset, head.transform.rotation.eulerAngles.y + headRotationYOffset, 0 + headRotationZOffset);
+        //neck.transform.rotation = Quaternion.Euler(neck.transform.rotation.eulerAngles.x, neck.transform.rotation.eulerAngles.y, (bodyAnim.GetBool("isProne") ? rotationX - 90 : rotationX - 90));
 
+        head.transform.position = Vector3.Lerp(head.transform.position, headTarget.transform.position, 75f * Time.deltaTime);
+    }
     private void HandleFootstep()
     {
         //footstep
@@ -610,6 +672,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
                 playFootSteps = true;
                 footStep = StartCoroutine(PlayFootstep(hit.collider.tag));
+                //Debug.Log(hit.collider.tag);
 
             }
 
@@ -638,8 +701,8 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             //Add jump forces
              rb.AddForce(Vector3.up * jumpForce * 1.5f);
-             rb.AddForce(transform.forward * 1000f * rb.velocity.magnitude);
-             rb.AddForce(normalVector * jumpForce * 0.5f);
+             rb.AddForce(-transform.forward * 1000f * rb.velocity.magnitude);
+             rb.AddForce(normalVector * jumpForce * 0.1f);
 
             //rb.velocity += Vector3.up * jumpForce * 1.5f;
 
@@ -746,7 +809,7 @@ public class PlayerController : MonoBehaviour, ISaveable
                 bodyAnim.SetBool("isWalking", false);
             }
 
-            if (Input.GetButtonDown("Crouch") && currentPlayerState != PLAYERSTATES.JUMP)
+            if (Input.GetButtonDown("Crouch") && currentPlayerState != PLAYERSTATES.JUMP && isGrounded)
             {
                 //slide
 

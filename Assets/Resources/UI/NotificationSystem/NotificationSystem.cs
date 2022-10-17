@@ -38,7 +38,9 @@ public class NotificationSystem : MonoBehaviour
     {
         isNotifRunning = true;
 
-        yield return new WaitForSeconds(2.5f);
+        yield return new WaitUntil(() => GameSettings.SPAWN_REGION_GENERATED);        
+
+        yield return new WaitForSecondsRealtime(5f);
 
         Notification notif = notifQueue.Dequeue();
 

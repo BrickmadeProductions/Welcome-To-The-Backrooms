@@ -13,9 +13,11 @@ public class AttackableEntityLimb : MonoBehaviour
 
         if (!GetComponent<AudioSource>().isPlaying)
         {
-            GameObject blood = Instantiate(attachedEntity.bloodPrefab, collisionPoint, Quaternion.identity);
-            blood.transform.localRotation = Quaternion.Euler(0,0, Random.Range(-360f, 360f));
-            AudioSource.PlayClipAtPoint(attachedEntity.hurtNoises[Random.Range(0, attachedEntity.hurtNoises.Length)], transform.position);
+            if (GameSettings.Instance.BloodAndGore)
+                Instantiate(attachedEntity.bloodPrefab, collisionPoint, Quaternion.identity);
+            
+            attachedEntity.hurtNoisesSource.clip = attachedEntity.hurtNoises[Random.Range(0, attachedEntity.hurtNoises.Length)];
+            attachedEntity.hurtNoisesSource.Play();
 
         }
         

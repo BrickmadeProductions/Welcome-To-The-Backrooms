@@ -194,7 +194,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveableData:
-    runTimeID: 968
+    runTimeID: 
     location:
     - 0
     - 0
@@ -208,7 +208,7 @@ MonoBehaviour:
     instance: {fileID: 4815625687032808539}
   type: 23
   playSounds: 1
-  runTimeID: 968
+  runTimeID: 
   inventoryObjectData:
     image: {fileID: 0}
     name: Wood Stick
@@ -229,6 +229,7 @@ MonoBehaviour:
   isPlaced: 0
   canBeUsed: 1
   animationPlaying: 0
+  offHandIKPoint: {fileID: 0}
   StartUseAnimation: 
   UseAnimations: []
   CustomHoldAnimation: 
@@ -242,7 +243,7 @@ AudioSource:
   m_GameObject: {fileID: 4684114084953699587}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300002, guid: 20bfa29a2ece3284f935fedf32737170, type: 2}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: 4945421a940f27f4da472315e07ea556, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 0.309
