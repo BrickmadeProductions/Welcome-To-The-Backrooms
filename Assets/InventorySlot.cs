@@ -83,6 +83,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             itemFromThisSlot.connectedObject.transform.parent = invItem.slotIn.physicalLocation;
             itemFromThisSlot.connectedObject.transform.position = invItem.slotIn.physicalLocation.position;
             itemFromThisSlot.connectedObject.transform.localRotation = invItem.slotIn.physicalLocation.localRotation;
+            itemFromThisSlot.connectedObject.transform.localPosition = Vector3.zero;
 
             itemFromThisSlot.connectedObject.rb.isKinematic = true;
             BPUtil.SetAllColliders(itemFromThisSlot.connectedObject.transform, false);
@@ -106,6 +107,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
         invItem.connectedObject.transform.parent = physicalLocation;
         invItem.connectedObject.transform.position = physicalLocation.position;
+        invItem.connectedObject.transform.localPosition = Vector3.zero;
         invItem.connectedObject.transform.localRotation = physicalLocation.localRotation;
 
         invItem.connectedObject.rb.isKinematic = true;
@@ -138,6 +140,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
         holdableObject.transform.parent = physicalLocation;
         holdableObject.transform.position = physicalLocation.position;
+        holdableObject.transform.localPosition = Vector3.zero;
         holdableObject.transform.localRotation = physicalLocation.localRotation;
 
         //holdableObject.SetMetaData("INV_SLOT", name);

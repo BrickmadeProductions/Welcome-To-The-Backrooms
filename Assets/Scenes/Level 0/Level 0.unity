@@ -160,6 +160,9 @@ MonoBehaviour:
     savedBodyRotationEuler: []
     savedRotationX: 0
     savedRotationY: 0
+  currentWorldEvent: 0
+  timeInSecondsSinceLastEvent: 0
+  timeIntoCurrentEvent: 0
   globalBloodAndGoreObjects: []
   spawnEntities: 1
   entityAI: 1
@@ -174,9 +177,7 @@ MonoBehaviour:
   chunk_width: 1
   layerDistance: 1
   viewDistance: 3
-  SpecialTiles: []
   Tiles:
-  - {fileID: 4438954458412058210, guid: 1bb25f0c6c129a54aa04531952c9ebb1, type: 3}
   - {fileID: 4438954458412058210, guid: 53cc790fa15f0ba44a8a286ff24b1b3e, type: 3}
   - {fileID: 797442135156344320, guid: 28d8ad4a21302ff4e8b5da426d33af4b, type: 3}
   - {fileID: 3333342657051012286, guid: c764dc763975a064786c50978b7fb970, type: 3}
@@ -184,32 +185,43 @@ MonoBehaviour:
   - {fileID: 3333342657051012286, guid: 1a40fea758b938848876de6d8377d48c, type: 3}
   - {fileID: 3333342657051012286, guid: 83ac1d39f11bded4b81d9fceae1130a5, type: 3}
   - {fileID: 3333342657051012286, guid: c3e47fd5e7451fa4ab110db68c86e8ab, type: 3}
-  - {fileID: 3090222251298622758, guid: abc7bb120413a0e4e9dc4fda4e128ef6, type: 3}
-  RegTiles: []
+  - {fileID: 3333342657051012286, guid: 7ca841196ee2e0e40b2b5fce56368269, type: 3}
+  - {fileID: 3764419667728190324, guid: c378d2e14d2c6a34da2a13774dc56c1f, type: 3}
+  - {fileID: 3333342657051012286, guid: 5193fc1fd3c19d04089be7ebeb138b8e, type: 3}
   worldPropSpawnTable:
   - type: 2
-    weight: 1000
+    biomesSpawnsIn: 00000000
+    weight: 900
   - type: 7
+    biomesSpawnsIn: 02000000
     weight: 150
   - type: 19
+    biomesSpawnsIn: 0600000007000000
     weight: 200
   - type: 14
+    biomesSpawnsIn: 0000000001000000020000000300000004000000050000000600000007000000
     weight: 300
   - type: 4
+    biomesSpawnsIn: 00000000
     weight: 200
   - type: 3
+    biomesSpawnsIn: 060000000100000007000000
     weight: 100
   - type: 8
+    biomesSpawnsIn: 0000000001000000020000000300000006000000
     weight: 250
   - type: 18
+    biomesSpawnsIn: 00000000010000000600000007000000
     weight: 50
   - type: 20
+    biomesSpawnsIn: 0400000001000000
     weight: 200
   worldEntitySpawnTable:
   - type: 6
+    biomesSpawnsIn: 00000000
     weight: 100
-  regTileSpace: 0
-  seed: 0
+  worldDataSeed: 0
+  biomeDataSeed: 0
   gameplay_events_possible: 01000000
 --- !u!4 &803962858
 Transform:

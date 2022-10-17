@@ -12013,6 +12013,7 @@ GameObject:
   - component: {fileID: 1005928957}
   - component: {fileID: 1005928958}
   - component: {fileID: 1005928959}
+  - component: {fileID: 1005928960}
   m_Layer: 8
   m_Name: GameState
   m_TagString: Untagged
@@ -12107,6 +12108,8 @@ MonoBehaviour:
   - {fileID: 4815625687032808539, guid: 8045cf93c24d7f348b04b11cf4bcf656, type: 3}
   - {fileID: 7610232900887421506, guid: 28201166d4d8eff4c8d76cb74d501ccc, type: 3}
   - {fileID: 8910298509280953112, guid: cd3bc0b72eb07034cb7cb889c0603ef7, type: 3}
+  - {fileID: 6804282787703142062, guid: d7adc3900566bf646862e3db1977c0c5, type: 3}
+  - {fileID: 3798548454979468547, guid: e83c0ac28bc204a41b0628e14f86ba0a, type: 3}
   inventoryItemPrefab: {fileID: 4105468441734903545, guid: 138f1b9e745cce64691792cffcb980f8, type: 3}
   entityDatabase:
   - {fileID: 4225260656200758192, guid: f254f54165076c64ba860e8b6002ed68, type: 3}
@@ -12382,6 +12385,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerWalkedStats: {fileID: 1019622179}
   globalWalkedStats: {fileID: 935356571}
+--- !u!114 &1005928960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1005928946}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbda8eb494bdcf5449eb8310c019113e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rend: {fileID: 0}
 --- !u!1 &1017207760
 GameObject:
   m_ObjectHideFlags: 0
@@ -13138,7 +13154,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: DEMO v0.1.1
+  m_text: DEMO v0.1.3
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

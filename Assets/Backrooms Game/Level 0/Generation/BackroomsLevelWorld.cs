@@ -7,6 +7,33 @@ using Lowscope.Saving;
 using Newtonsoft.Json;
 using UnityEngine;
 
+public enum BIOME_ID
+{
+	//level 0
+	LEVEL_0_YELLOW_ROOMS,
+	LEVEL_0_RED_ROOMS,
+	LEVEL_0_TALL_ROOMS,
+	LEVEL_0_PILLAR_ROOMS,
+	LEVEL_0_GOO_ROOMS,
+	LEVEL_0_PITFALLS,
+	LEVEL_0_OVERGROWN,
+	LEVEL_0_SWAMP,
+
+	//level 1
+	LEVEL_1_PARKING_GARAGE,
+	LEVEL_1_MAZE,
+	LEVEL_1_VOID_CUTS
+}
+
+
+[Serializable]
+public struct WorldTileData
+{
+	public Tile prefab;
+	public BIOME_ID biomeID;
+
+}
+
 [Serializable]
 public struct EntityCluster
 {
@@ -22,7 +49,8 @@ public struct PropCluster
 [Serializable]
 public struct WorldSaveData
 {
-	public int savedSeed;
+	public int savedWorldDataSeed;
+	public int savedBiomeDataSeed;
 
 	public PlayerLocationData playerData;
 
@@ -31,6 +59,8 @@ public struct WorldSaveData
 	public Dictionary<string, SerealizedChunk> savedChunks;
 
 	public float timeInSecondsSinceLastEventSaved;
+
+	public float timeIntoCurrentEventSaved;
 }
 
 
@@ -58,6 +88,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	public GAMEPLAY_EVENT currentWorldEvent;
 
 	public float timeInSecondsSinceLastEvent;
+	public float timeIntoCurrentEvent;
 	private class ThreadedActionManager
 	{
 		public bool doActions;
@@ -145,34 +176,110 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	[Range(1f, 5f)]
 	public int viewDistance;
 
-	[Header("Chunk Information")]
+	[Header("World Generation")]
 
-	[SerializeField]
-	public List<Tile> SpecialTiles;
-
-	[SerializeField]
+	///used to add tiles in the editor
 	public List<Tile> Tiles;
 
-	public List<Tile> RegTiles;
+	//used to assossiate tiles to biome data
+	public Dictionary<int, WorldTileData> tileDataList;
+
+	[Header("Item Spawning")]
 
 	//spawn tables for random objects
-	public List<ObjectWithWeight> worldPropSpawnTable;
+	public List<ObjectSpawnData> worldPropSpawnTable;
 
-	public List<EntityWithWeight> worldEntitySpawnTable;
+	public List<EntitySpawnData> worldEntitySpawnTable;
 
-	public int regTileSpace;
+	[Header("World Data")]
 
-	public int seed;
+	public int worldDataSeed;
+	public int biomeDataSeed;
 
 	public GAMEPLAY_EVENT[] gameplay_events_possible;
 
+	public BIOME_ID GetBiomeCurrentPlayerIsIn()
+    {
+		Chunk chunk = GetLoadedChunkAtPlayerLocation();
+
+		float worldPrelinID =
+			Mathf.PerlinNoise(
+				((float)(chunk.chunkPosX) / chunk.magnification) + ((float)worldDataSeed / 10000f) + 0.01f,
+				((float)(chunk.chunkPosZ) / chunk.magnification) + ((float)worldDataSeed / 10000f) + 0.01f) * 1.4f;
+
+		float biomePerlinID =
+			Mathf.PerlinNoise(
+				((float)(chunk.chunkPosX) / chunk.magnification) + ((float)biomeDataSeed / 10000f) + 0.01f,
+				((float)(chunk.chunkPosZ) / chunk.magnification) + ((float)biomeDataSeed / 10000f) + 0.01f) * 1.1f;
+		
+		biomePerlinID = Mathf.Clamp01(biomePerlinID);
+
+
+		//GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+		//cube.transform.localScale = new Vector3(tileWidth, 5, tileWidth);
+		//cube.transform.position = new Vector3(chunkPosX * tileWidth, 25f, chunkPosZ * tileWidth);
+		//cube.GetComponent<Renderer>().material.color = new Color(worldPrelinID, worldPrelinID, worldPrelinID);
+
+		//Debug.Log("World Perlin: " + worldPrelinID);
+		//Debug.Log("Biome Perlin: " + biomePerlinID);
+
+		BIOME_ID biomeID = BIOME_ID.LEVEL_0_YELLOW_ROOMS;
+
+		if (worldPrelinID >= 0.3f && worldPrelinID < 1.01)
+		{
+			biomeID = BIOME_ID.LEVEL_0_YELLOW_ROOMS;
+
+		}
+		else if (worldPrelinID < 0.3f)
+		{
+			if (biomePerlinID >= 0f && biomePerlinID < 0.3f)
+			{
+				biomeID = BIOME_ID.LEVEL_0_RED_ROOMS;
+			}
+			else if (biomePerlinID >= 0.4f && biomePerlinID < 0.6f)
+			{
+				biomeID = BIOME_ID.LEVEL_0_OVERGROWN;
+			}
+			else if (biomePerlinID >= 0.6f && biomePerlinID < 0.8f)
+			{
+				biomeID = BIOME_ID.LEVEL_0_PILLAR_ROOMS;
+			}
+			else if (biomePerlinID >= 0.8f && biomePerlinID < 0.9f)
+			{
+				biomeID = BIOME_ID.LEVEL_0_PILLAR_ROOMS;
+			}
+			else if (biomePerlinID >= 0.9f && biomePerlinID < 1.01f)
+			{
+				biomeID = BIOME_ID.LEVEL_0_RED_ROOMS;
+			}
+
+		}
+
+		return biomeID;
+	}
+
+	private void CreateTileset(List<Tile> tiles)
+	{
+		tileDataList = new Dictionary<int, WorldTileData>();
+		for (int i = 0; i < tiles.Count; i++)
+		{
+			tileDataList.Add(tiles[i].id, new WorldTileData() { biomeID = tiles[i].biomeID, prefab = tiles[i] });
+		}
+	}
+
+
 	private void Awake()
 	{
+		
+		CreateTileset(Tiles);
+
 		GameSettings.Instance.worldInstance = this;
 
 		globalBloodAndGoreObjects = new List<GameObject>();
 
-		seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+		worldDataSeed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+		biomeDataSeed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
 
 		Pre_Init();
 	}
@@ -191,7 +298,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	{
 		yield return new WaitUntil(() => currentWorldEvent == GAMEPLAY_EVENT.NONE);
 
-		yield return new WaitForSecondsRealtime(((12f + (UnityEngine.Random.Range(-5f, 5f)) - timeInSecondsSinceLastEvent) * 60f));
+		yield return new WaitForSecondsRealtime(((15f) * 60) - timeInSecondsSinceLastEvent);
 
 		StartEvent(gameplay_events_possible[UnityEngine.Random.Range(0, gameplay_events_possible.Length)]);
 
@@ -209,25 +316,28 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	public void StartEvent(GAMEPLAY_EVENT gameplay_event)
     {
 		StartCoroutine(GameSettings.SaveAllProgress());
+		GameSettings.Instance.audioHandler.EventSoundTrackStart(gameplay_event, 0f);
 		currentWorldEvent = gameplay_event;
 		
 	}
 
 	//works
-	IEnumerator TrackEventTimeStatus()
+	IEnumerator TrackEventTime()
     {
 		while (true)
         {
 			if (currentWorldEvent == GAMEPLAY_EVENT.NONE)
 			{
 				yield return new WaitForSecondsRealtime(1f);
+				timeIntoCurrentEvent = 0;
 				timeInSecondsSinceLastEvent += 1f;
 			}
             else
             {
+				yield return new WaitForSecondsRealtime(1f);
+				timeIntoCurrentEvent += 1f;
 				timeInSecondsSinceLastEvent = 0;
-				yield return new WaitUntil(() => currentWorldEvent == GAMEPLAY_EVENT.NONE);
-				
+
 
 			}
 		}
@@ -245,6 +355,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			}
 
 		}
+
+		//audio handler calls back to OnEventEnd() after finishing the tracks, this is a good way to track the timing
 
 		switch (currentWorldEvent)
 		{
@@ -282,7 +394,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		}
 
-
 		switch (currentWorldEvent)
 		{
 			case GAMEPLAY_EVENT.LIGHTS_OUT:
@@ -303,6 +414,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		}
 
 		currentWorldEvent = GAMEPLAY_EVENT.NONE;
+
+		GameSettings.Instance.audioHandler.SceneSoundTrackStart(GameSettings.Instance.ActiveScene, false);
 	}
 	public IEnumerator TrySpawnEntities()
 	{
@@ -312,7 +425,31 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			GameObject entity = WeightedRandomSpawning.ReturnEntityBySpawnChances(worldEntitySpawnTable);
 
-			if (entity.GetComponent<Entity>().spawnChance > UnityEngine.Random.Range(0, currentWorldEvent == GAMEPLAY_EVENT.NONE ? 0.99f : 0.25f))
+			float spawnChanceCap = UnityEngine.Random.Range(0, currentWorldEvent == GAMEPLAY_EVENT.NONE ? 0.99f : 0.49f);
+
+			switch (GetBiomeCurrentPlayerIsIn())
+            {
+				case BIOME_ID.LEVEL_0_YELLOW_ROOMS:
+					spawnChanceCap *= 1f;
+					break;
+				case BIOME_ID.LEVEL_0_GOO_ROOMS:
+					spawnChanceCap *= 0.5f;
+					break;
+				case BIOME_ID.LEVEL_0_OVERGROWN:
+					spawnChanceCap *= 0.9f;
+					break;
+				case BIOME_ID.LEVEL_0_PITFALLS:
+					spawnChanceCap *= 1.2f;
+					break;
+				case BIOME_ID.LEVEL_0_SWAMP:
+					spawnChanceCap *= 0.9f;
+					break;
+				case BIOME_ID.LEVEL_0_RED_ROOMS:
+					spawnChanceCap *= 0.25f;
+					break;
+			}
+
+			if (entity.GetComponent<Entity>().spawnChance > spawnChanceCap)
 			{
 				Chunk chunk = loadedChunks.ElementAt(UnityEngine.Random.Range(0, loadedChunks.Count)).Value;
 
@@ -338,7 +475,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			}
 		}
 	}
-
 	public SCENE ReturnNextRandomLevel()
     {
 		switch (GameSettings.Instance.ActiveScene)
@@ -400,8 +536,12 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 					if (chunk != null)
 					{
-						yield return new WaitUntil(() => chunk.GetComponent<Chunk>().ALL_TILES_GENERATED);
-						yield return new WaitUntil(() => chunk.GetComponent<Chunk>().ALL_OBJECTS_AND_ENTITES_LOADED);
+						if (chunk.GetComponent<Chunk>() != null)
+                        {
+							yield return new WaitUntil(() => chunk.GetComponent<Chunk>().ALL_TILES_GENERATED);
+							yield return new WaitUntil(() => chunk.GetComponent<Chunk>().ALL_OBJECTS_AND_ENTITES_LOADED);
+						}
+						
 
 						currentChunkNumber++;
 					}
@@ -451,7 +591,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			StartCoroutine(TryStartRandomEvents());
 
-		StartCoroutine(TrackEventTimeStatus());
+		StartCoroutine(TrackEventTime());
 
 		
 
@@ -508,9 +648,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			playerData = playerLocationData,
 			currentWorldEventSaved = currentWorldEvent,
-			savedSeed = seed,
+			savedWorldDataSeed = worldDataSeed,
+			savedBiomeDataSeed = biomeDataSeed,
 			savedChunks = allChunks,
-			timeInSecondsSinceLastEventSaved = timeInSecondsSinceLastEvent
+			timeInSecondsSinceLastEventSaved = timeInSecondsSinceLastEvent,
+			timeIntoCurrentEventSaved = timeIntoCurrentEvent
 		};
 		return JsonConvert.SerializeObject(worldSaveData);
 	}
@@ -536,11 +678,15 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	{
 		timeInSecondsSinceLastEvent = saveData.timeInSecondsSinceLastEventSaved;
 
-		seed = saveData.savedSeed;
+		timeIntoCurrentEvent = saveData.timeIntoCurrentEventSaved;
+
+		worldDataSeed = saveData.savedWorldDataSeed;
+
+		biomeDataSeed = saveData.savedBiomeDataSeed;
 
 		currentWorldEvent = saveData.currentWorldEventSaved;
 
-		UnityEngine.Random.InitState(seed);
+		//UnityEngine.Random.InitState(worldDataSeed);
 
 		playerLocationData = saveData.playerData;
 
@@ -552,6 +698,13 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			Debug.LogError("LEVEL_READ_ERROR");
 		}
+		//start music after world data has loaded
+		if (currentWorldEvent != GAMEPLAY_EVENT.NONE)
+
+			GameSettings.Instance.audioHandler.EventSoundTrackStart(currentWorldEvent, timeIntoCurrentEvent);
+		else
+
+			GameSettings.Instance.audioHandler.SceneSoundTrackStart(GameSettings.Instance.ActiveScene, false);
 	}
 
 	public void OnLoad(string data)
@@ -564,10 +717,9 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public void OnLoadNoData()
 	{
-
 		GameSettings.LEVEL_SAVE_LOADED = true;
 		timeInSecondsSinceLastEvent = 0f;
-		UnityEngine.Random.InitState(seed);
+		UnityEngine.Random.InitState(worldDataSeed);
 		Debug.LogError("No Save To Load");
 	}
 
@@ -595,7 +747,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 					for (int y = (ThreeDimensional ? (newPlayerChunkLocation.y - layerDistance) : 0); y < ((!ThreeDimensional) ? 1 : (newPlayerChunkLocation.y + layerDistance)); y++)
 					{
 						Chunk chunk = LoadInChunk(x, y, z, shouldGenInstantly: false);
-						
+						//Debug.Log(GetBiomeCurrentPlayerIsIn());
 						if (chunk != null)
 						{
 							currentChunkNumber++;
@@ -612,6 +764,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public void UnloadChunks()
 	{
+
 		foreach (KeyValuePair<string, Chunk> loadedChunk in loadedChunks.ToArray())
 		{
 			Chunk chunk = loadedChunk.Value;
@@ -639,7 +792,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 				loadedChunks.Remove(loadedChunk.Key);
 
-				SaveAllObjectsAndEntities();
+				SaveAllObjectsAndEntitiesInChunks(allChunks.ToArray());
 
 				Destroy(chunk.gameObject);
 
@@ -870,8 +1023,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			loadedChunks.TryGetValue(chunkKey, out Chunk chunk);
 
-			if (chunk != null)
-				chunk.saveableData.propData.propClusterData.Add(prop.type.ToString() + "-" + prop.runTimeID, prop.Save());
+			if (chunk != null && !chunk.saveableData.propData.propClusterData.ContainsKey(prop.GetWorldID()))
+				chunk.saveableData.propData.propClusterData.Add(prop.GetWorldID(), prop.Save());
 
 			return prop;
 		}
@@ -1031,12 +1184,13 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			{
 				Debug.Log("Waiting For Level To Load");
 			}
-			else if (gen_enabled)
+			else if (gen_enabled && GameSettings.SPAWN_REGION_GENERATED)
 			{
 				UpdateChunks();
 			}
-
+			
 			yield return new WaitForSecondsRealtime(1f);
+
 		}
 		
 	}
@@ -1050,15 +1204,13 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		}
 	}
 
-	public void SaveAllObjectsAndEntities()
+	public void SaveAllObjectsAndEntitiesInChunks(KeyValuePair<string, SerealizedChunk>[] chunks)
 	{
 		GameSettings.WORLD_SAVING = true;
 
-		KeyValuePair<string, SerealizedChunk>[] serializedChunks = allChunks.ToArray();
-
-		for (int i = 0; i < serializedChunks.Length; i++)
+		for (int i = 0; i < chunks.Length; i++)
 		{
-			KeyValuePair<string, SerealizedChunk> chunkData = serializedChunks[i];
+			KeyValuePair<string, SerealizedChunk> chunkData = chunks[i];
 
 			KeyValuePair<string, SaveableEntity>[] entityDataList = chunkData.Value.entityData.entityClusterData.ToArray();
 
@@ -1152,7 +1304,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				}
 			}
 		}
-		Debug.Log("Saved All World Data...");
+		//Debug.Log("Saved All World Data...");
 		GameSettings.WORLD_SAVING = false;
 	}
 

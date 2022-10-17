@@ -128,7 +128,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveableData:
-    runTimeID: 926
+    runTimeID: 
     location:
     - 0
     - 0
@@ -140,9 +140,9 @@ MonoBehaviour:
     parentName: 
     type: 0
     instance: {fileID: 6804282787703142062}
-  type: 0
+  type: 25
   playSounds: 1
-  runTimeID: 926
+  runTimeID: 
   inventoryObjectData:
     image: {fileID: 0}
     name: 
@@ -161,7 +161,9 @@ MonoBehaviour:
   autoSwing: 0
   canPlace: 0
   isPlaced: 0
+  canBeUsed: 1
   animationPlaying: 0
+  offHandIKPoint: {fileID: 0}
   StartUseAnimation: 
   UseAnimations: []
   CustomHoldAnimation: 

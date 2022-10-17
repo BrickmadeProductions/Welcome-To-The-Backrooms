@@ -30,8 +30,6 @@ public class Chunk : MonoBehaviour
 
 	public int chunkPosY;
 
-	private Dictionary<int, Tile> tileset;
-
 	public List<Tile> tile_grid;
 
 	public float magnification;
@@ -69,8 +67,6 @@ public class Chunk : MonoBehaviour
 		chunkPosX = posX;
 		chunkPosY = posY;
 		chunkPosZ = posZ;
-
-		CreateTileset(parentGenerator.Tiles);
 
 		if (tile_grid.Count == 0)
         {
@@ -144,6 +140,7 @@ public class Chunk : MonoBehaviour
 
 	private void Awake()
 	{
+		
 		tile_grid = new List<Tile>();
 	}
 
@@ -162,16 +159,7 @@ public class Chunk : MonoBehaviour
 	internal void UpdateChunkData()
 	{
 	}
-
-	private void CreateTileset(List<Tile> tiles)
-	{
-		tileset = new Dictionary<int, Tile>();
-		for (int i = 0; i < tiles.Count; i++)
-		{
-			tileset.Add(i, tiles[i]);
-		}
-	}
-
+	
 	private IEnumerator GenerateRandomMap(int framesPerTile)
 	{
 		for (int x = 0; x < parentGenerator.chunk_width; x++)
@@ -182,8 +170,8 @@ public class Chunk : MonoBehaviour
 				{
 					yield return null;
 				}
-				int idUsingPerlin = GetIDUsingWeightedRandom(x, z);
-				CreateTile(idUsingPerlin, x, chunkPosY, z);
+				int tileIDToGenerate = GetTileIDFromWorldLocation(x, z);
+				CreateTile(tileIDToGenerate, x, chunkPosY, z);
 			}
 		}
 		ALL_TILES_GENERATED = true;
@@ -195,8 +183,8 @@ public class Chunk : MonoBehaviour
 		{
 			for (int j = 0; j < parentGenerator.chunk_width; j++)
 			{
-				int idUsingPerlin = GetIDUsingWeightedRandom(i, j);
-				CreateTile(idUsingPerlin, i, chunkPosY, j);
+				int tileIDToGenerate = GetTileIDFromWorldLocation(i, j);
+				CreateTile(tileIDToGenerate, i, chunkPosY, j);
 			}
 		}
 		ALL_TILES_GENERATED = true;
@@ -235,41 +223,167 @@ public class Chunk : MonoBehaviour
 		ALL_TILES_GENERATED = true;
 	}
 
-	private int GetIdUsingPerlin(int x, int z)
+	public void CombineMeshes(GameObject obj)
 	{
-		System.Random random = new System.Random(parentGenerator.seed);
-		float num = Mathf.Clamp01(Mathf.PerlinNoise((float)(random.Next(-100000, 100000) + x - x_offset + (chunkPosX)) / magnification, (float)(random.Next(-100000, 100000) + z - z_offset + (chunkPosZ)) / magnification)) * (float)tileset.Count;
-		if (num == (float)tileset.Count)
+		//Temporarily set position to zero to make matrix math easier
+		Vector3 position = obj.transform.position;
+		obj.transform.position = Vector3.zero;
+
+		//Get all mesh filters and combine
+		MeshFilter[] meshFilters = obj.GetComponentsInChildren<MeshFilter>();
+		CombineInstance[] combine = new CombineInstance[meshFilters.Length];
+		int i = 1;
+		while (i < meshFilters.Length)
 		{
-			num = tileset.Count - 1;
+			combine[i].mesh = meshFilters[i].sharedMesh;
+			combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+			meshFilters[i].gameObject.SetActive(false);
+			i++;
 		}
-		return Mathf.FloorToInt(num);
+		obj.AddComponent<MeshFilter>();
+		obj.transform.GetComponent<MeshFilter>().mesh = new Mesh();
+		obj.transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine, true, true);
+		obj.transform.gameObject.SetActive(true);
+
+		//Return to original position
+		obj.transform.position = position;
+
+		//Add collider to mesh (if needed)
+		//obj.AddComponent<MeshCollider>();
 	}
 
-	private int GetIDUsingWeightedRandom(int x, int z)
+	//get biome id
+	//make a list of all tiles that have that biome id
+	//get a random from weighted list of tiles in that biome
+	private int GetTileIDFromWorldLocation(int x, int z)
 	{
+		float worldPrelinID = 
+			Mathf.PerlinNoise(
+				((float)(chunkPosX) / magnification) + ((float)parentGenerator.worldDataSeed / 10000f) + 0.01f,
+				((float)(chunkPosZ) / magnification) + ((float)parentGenerator.worldDataSeed / 10000f) + 0.01f) * 1.4f;
 
-		return WeightedRandomSpawning.ReturnWeightedTileIDBySpawnChance(parentGenerator.Tiles);
+		float biomePerlinID =
+			Mathf.PerlinNoise(
+				((float)(chunkPosX) / magnification) + ((float)parentGenerator.biomeDataSeed / 10000f) + 0.01f,
+				((float)(chunkPosZ) / magnification) + ((float)parentGenerator.biomeDataSeed / 10000f) + 0.01f) * 1.1f;
+
+		biomePerlinID = Mathf.Clamp01(biomePerlinID);
+
+
+		//GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+		//cube.transform.localScale = new Vector3(tileWidth, 5, tileWidth);
+		//cube.transform.position = new Vector3(chunkPosX * tileWidth, 25f, chunkPosZ * tileWidth);
+		//cube.GetComponent<Renderer>().material.color = new Color(worldPrelinID, worldPrelinID, worldPrelinID);
+		
+		//Debug.Log("World Perlin: " + worldPrelinID);
+		//Debug.Log("Biome Perlin: " + biomePerlinID);
+
+		BIOME_ID biomeID = BIOME_ID.LEVEL_0_YELLOW_ROOMS;
+
+
+		Debug.Log(GameSettings.Instance.ActiveScene);
+
+		
+		switch (GameSettings.Instance.ActiveScene)
+        {
+
+			case (SCENE.LEVEL0):
+
+				if (worldPrelinID >= 0.3f && worldPrelinID <= 1.01)
+				{
+					biomeID = BIOME_ID.LEVEL_0_YELLOW_ROOMS;
+
+				}
+				else if (worldPrelinID >= 0f && worldPrelinID < 0.3f)
+				{
+					if (biomePerlinID >= 0f && biomePerlinID < 0.3f)
+					{
+						biomeID = BIOME_ID.LEVEL_0_RED_ROOMS;
+					}
+					else if (biomePerlinID >= 0.3f && biomePerlinID < 0.6f)
+					{
+						biomeID = BIOME_ID.LEVEL_0_OVERGROWN;
+					}
+					else if (biomePerlinID >= 0.6f && biomePerlinID < 0.8f)
+					{
+						biomeID = BIOME_ID.LEVEL_0_PILLAR_ROOMS;
+					}
+					else if (biomePerlinID >= 0.8f && biomePerlinID < 0.9f)
+					{
+						biomeID = BIOME_ID.LEVEL_0_PILLAR_ROOMS;
+					}
+					else if (biomePerlinID >= 0.9f && biomePerlinID < 1.01f)
+					{
+						biomeID = BIOME_ID.LEVEL_0_RED_ROOMS;
+					}
+
+				}
+
+				break;
+
+			case (SCENE.LEVEL1):
+
+				if (worldPrelinID >= 0.5f && worldPrelinID < 1.01)
+				{
+					biomeID = BIOME_ID.LEVEL_1_PARKING_GARAGE;
+
+				}
+				else if (worldPrelinID >= 0f && worldPrelinID < 0.5f)
+				{
+					if (biomePerlinID >= 0f && biomePerlinID < 0.5f)
+					{
+						biomeID = BIOME_ID.LEVEL_1_PARKING_GARAGE;
+					}
+					else if (biomePerlinID >= 0.5f && biomePerlinID <= 1.01f)
+					{
+						biomeID = BIOME_ID.LEVEL_1_PARKING_GARAGE;
+					}
+
+
+				}
+				if (Mathf.Abs(chunkPosZ) % 3 == 0)
+				{
+					biomeID = BIOME_ID.LEVEL_1_VOID_CUTS;
+				}
+
+
+				break;
+
+        }
+
+		
+		
+
+		List<Tile> potentialTiles = new List<Tile>();
+
+		foreach (KeyValuePair<int, WorldTileData> tileData in parentGenerator.tileDataList)
+        {
+			if (tileData.Value.biomeID == biomeID)
+            {
+				potentialTiles.Add(tileData.Value.prefab);
+			}
+				
+        }
+		int random = WeightedRandomSpawning.ReturnWeightedTileIDBySpawnChance(potentialTiles);
+
+		return random;
 	}
 
 	private void CreateTile(int tile_id, int x, int y, int z)
 	{
+
+
 		GameObject tileToSpawn;
 
 		/*if (x % GameSettings.Instance.worldInstance.regTileSpace == 0 && y % GameSettings.Instance.worldInstance.regTileSpace == 0  && z % GameSettings.Instance.worldInstance.regTileSpace == 0)
 		{
 			tileToSpawn = GameSettings.Instance.worldInstance.RegTiles[0];
         }*/
-		if (tile_id > tileset.Count - 1)
-		{
-			tileToSpawn = tileset[0].gameObject;
-		}
-        else
-        {
-			tileToSpawn = tileset[tile_id].gameObject;
-		}
 
-		
+		tileToSpawn = parentGenerator.tileDataList[tile_id].prefab.gameObject;
+
+
 
 		GameObject createdTile = null;
 
@@ -293,5 +407,8 @@ public class Chunk : MonoBehaviour
 		tile_grid.Add(createdTile.GetComponent<Tile>());
 
 		createdTile.GetComponent<Tile>().tilePos = new Vector2Int(x, y);
+
+		//CombineMeshes(createdTile);
+		
 	}
 }

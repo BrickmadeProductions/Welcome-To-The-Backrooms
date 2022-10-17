@@ -84,6 +84,12 @@ public class InventorySystem : GenericMenu
             if (currentPlayerInventorySave.propsInInventory.ContainsKey(slot.name))
             {
                 slot.AddItemToSlot((HoldableObject)GameSettings.Instance.worldInstance.FindPropInWorldByKey(GetComponent<InventorySystem>().currentPlayerInventorySave.propsInInventory[slot.name]));
+                if (slot == rHand)
+                {
+                    GetComponent<PlayerController>().builder.layers[1].active = true;
+                    GetComponent<PlayerController>().offHandIK.data.target = slot.itemsInSlot[0].connectedObject.offHandIKPoint;
+                    GetComponent<PlayerController>().builder.Build();
+                }
             }
         }
     }

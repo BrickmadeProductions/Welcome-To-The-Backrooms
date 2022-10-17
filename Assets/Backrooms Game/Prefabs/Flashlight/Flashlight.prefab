@@ -80,7 +80,7 @@ MonoBehaviour:
   playSounds: 1
   runTimeID: 416
   inventoryObjectData:
-    image: {fileID: 2800000, guid: e81a4869a8e58fe4b96e92415b896943, type: 3}
+    image: {fileID: 2800000, guid: 41a2028c3c1bfe548b2779f17bd4e4c8, type: 3}
     name: FlashLight
     inventoryWeight: 10
     description: Source of illumination.
@@ -96,6 +96,7 @@ MonoBehaviour:
   isPlaced: 0
   canBeUsed: 1
   animationPlaying: 0
+  offHandIKPoint: {fileID: 0}
   StartUseAnimation: 
   UseAnimations: []
   CustomHoldAnimation: isHoldingFlashlight
@@ -113,7 +114,7 @@ AudioSource:
   m_GameObject: {fileID: 986405930481796814}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300002, guid: 20bfa29a2ece3284f935fedf32737170, type: 2}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: 4945421a940f27f4da472315e07ea556, type: 2}
   m_audioClip: {fileID: 8300000, guid: 625b8778ed5cfd74eb7aa68b4a40593a, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.17

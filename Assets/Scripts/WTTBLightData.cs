@@ -1,15 +1,31 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+[System.Serializable]
+public struct LightingBiomeColor
+{
+    public BIOME_ID biomeID;
+    [ColorUsage(true, true)]
+    public Color emissionColor;
+}
+
 public class WTTBLightData : MonoBehaviour
 {
+    BIOME_ID assossiatedBiome;
 
     public List<AudioClip> lightSounds;
+
+    public List<LightingBiomeColor> biomeColors;
+
+    Dictionary<BIOME_ID, Color> biomeColorsDictionary;
 
     public Renderer light_renderer;
     public Light Light;
     Material emissionMat;
-    Color emissionColor;
+
+    [ColorUsage(true, true)]
+    Color setColor;
 
     float defaultIntensity;
 
@@ -21,7 +37,58 @@ public class WTTBLightData : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
+        biomeColorsDictionary = new Dictionary<BIOME_ID, Color>();
+
+        foreach (LightingBiomeColor color in biomeColors)
+        {
+            biomeColorsDictionary.Add(color.biomeID, color.emissionColor);
+        }
+
+        assossiatedBiome = GetComponentInParent<Tile>().biomeID;
+
+        //color data
+        defaultIntensity = Light.intensity;
+        emissionMat = light_renderer.material;
+
+        //set default color
+        setColor = emissionMat.GetColor("_EmissionColor");
+
+        //is it broken?
+        broken = Random.Range(0f, 1f) < 0.07f ? true : false;
+
+        if (biomeColorsDictionary.Count > 0)
+        {
+            //set color data
+            switch (assossiatedBiome)
+            {
+                case BIOME_ID.LEVEL_0_YELLOW_ROOMS:
+
+                    setColor = biomeColorsDictionary[BIOME_ID.LEVEL_0_YELLOW_ROOMS];
+                    Light.color = biomeColorsDictionary[BIOME_ID.LEVEL_0_YELLOW_ROOMS];
+                    break;
+
+                case BIOME_ID.LEVEL_0_RED_ROOMS:
+
+                    setColor = biomeColorsDictionary[BIOME_ID.LEVEL_0_RED_ROOMS];
+                    Light.color = biomeColorsDictionary[BIOME_ID.LEVEL_0_RED_ROOMS];
+                    Light.intensity /= 4f;
+                    Light.range /= 3f;
+                    break;
+
+
+
+            }
+        }
+        else
+        {
+            setColor = Color.white;
+            Light.color = Color.white;
+        }
+       
+
+        //set power info data
         if (GameSettings.Instance != null)
+
             if (GameSettings.Instance.worldInstance != null)
             {
                 if (GameSettings.Instance.worldInstance.currentWorldEvent != GAMEPLAY_EVENT.LIGHTS_OUT)
@@ -37,19 +104,11 @@ public class WTTBLightData : MonoBehaviour
                 hasPower = true;
             }
         
-        
-
-        defaultIntensity = Light.intensity;
-        emissionMat = light_renderer.material;
-        emissionColor = emissionMat.GetColor("_EmissionColor");
-
-        broken = Random.Range(0f, 1f) < 0.07f ? true : false;
-        
-        if (broken)
-            StartCoroutine(randomIO());
 
         if (broken)
         {
+            StartCoroutine(randomIO());
+
             if (lightSounds.Count > 0)
             {
                 int clipChoice = Random.Range(0, lightSounds.Count);
@@ -76,6 +135,10 @@ public class WTTBLightData : MonoBehaviour
 
             if (hasPower)
             {
+                if (Light.shadows == LightShadows.Soft)
+                {
+                    Light.shadows = LightShadows.None;
+                }
 
                 on = !on;
 
@@ -91,6 +154,11 @@ public class WTTBLightData : MonoBehaviour
             }
             else
             {
+                if (Light.shadows == LightShadows.None)
+                {
+                    Light.shadows = LightShadows.Soft;
+                }
+
                 Light.intensity = defaultIntensity / 5f;
                 yield return new WaitUntil(() => GameSettings.Instance.worldInstance.currentWorldEvent != GAMEPLAY_EVENT.LIGHTS_OUT);
             }
@@ -110,7 +178,7 @@ public class WTTBLightData : MonoBehaviour
 
                 emissionMat.EnableKeyword("_EMISSION");
                 emissionMat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
-                emissionMat.SetColor("_EmissionColor", emissionColor);
+                emissionMat.SetColor("_EmissionColor", setColor);
 
                 Light.intensity = defaultIntensity;
                 Light.intensity += Random.Range(-1.5f, 2f);

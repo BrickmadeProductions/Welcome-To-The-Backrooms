@@ -69,7 +69,7 @@ public abstract class InteractableObject : MonoBehaviour
 
 	public void ConnectIDToWorld(BackroomsLevelWorld world)
 	{
-		while (world.CheckWorldForPropKey(type.ToString() + "-" + runTimeID))
+		while (world.CheckWorldForPropKey(GetWorldID()))
 		{
 			runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
 		}
@@ -113,7 +113,7 @@ public abstract class InteractableObject : MonoBehaviour
 				}
 				else
 				{
-					Debug.LogWarning(data.Key + " WAS NOT FOUND AS A TYPE");
+					//Debug.LogWarning(data.Key + " WAS NOT FOUND AS A TYPE");
 				}
 
 
@@ -260,6 +260,8 @@ public abstract class InteractableObject : MonoBehaviour
 		WOODEN_CHAIR_HEADBOARD,
 		WOODEN_CHAIR_SEAT,
 		WOODEN_CHAIR_STICK,
-		BATTERY
+		BATTERY,
+		ALMOND_WATER_BOTTOM,
+		ALMOND_WATER_TOP
 	}
 

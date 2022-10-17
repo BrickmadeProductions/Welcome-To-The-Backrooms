@@ -23,7 +23,17 @@ public class ItemSpawner : MonoBehaviour
 
     public void SpawnItem()
     {
-        GameObject objectToSpawn = random ? WeightedRandomSpawning.ReturnItemBySpawnChances(GameSettings.Instance.worldInstance.worldPropSpawnTable) : GameSettings.Instance.PropDatabase[typeToSpawn].gameObject;
+        List<ObjectSpawnData> itemsThatCanSpawnHere = new List<ObjectSpawnData>();
+
+        foreach (ObjectSpawnData data in GameSettings.Instance.worldInstance.worldPropSpawnTable)
+        {
+            if (data.biomesSpawnsIn.Contains(GetComponentInParent<Tile>().biomeID))
+            {
+                itemsThatCanSpawnHere.Add(data);
+            }
+        }
+
+        GameObject objectToSpawn = random ? WeightedRandomSpawning.ReturnItemBySpawnChances(itemsThatCanSpawnHere) : GameSettings.Instance.PropDatabase[typeToSpawn].gameObject;
 
         Vector3 spawnLocationKey = GameSettings.Instance.worldInstance.GetChunkKeyAtWorldLocation(transform.position);
         //random prop in world table

@@ -4,16 +4,19 @@ using System.Linq;
 using UnityEngine;
 
 [System.Serializable]
-public struct ObjectWithWeight
+public struct ObjectSpawnData
 {
     public OBJECT_TYPE type;
+    public List<BIOME_ID> biomesSpawnsIn;
     public int weight;
 }
 [System.Serializable]
-public struct EntityWithWeight
+public struct EntitySpawnData
 {
     public ENTITY_TYPE type;
+    public List<BIOME_ID> biomesSpawnsIn;
     public int weight;
+    
 }
 
 public class WeightedRandomSpawning
@@ -26,8 +29,13 @@ public class WeightedRandomSpawning
         {
             weights[i] = tiles[i].SpawnWeight;
         }
-       
-        int randomWeight = UnityEngine.Random.Range(0, weights.Sum());
+        int random = Random.Range(0, weights.Sum());
+
+        Tile tileToSpawn = tiles.First(i => (random -= i.SpawnWeight) < 0);
+
+        return tileToSpawn.id;
+
+       /* int randomWeight = Random.Range(0, weights.Sum());
 
         for (int i = 0; i < weights.Length; ++i)
         {
@@ -39,9 +47,9 @@ public class WeightedRandomSpawning
             }
         }
 
-        return 0;
+        return 0;*/
     }
-    public static GameObject ReturnEntityBySpawnChances(List<EntityWithWeight> spawnableEntities)
+    public static GameObject ReturnEntityBySpawnChances(List<EntitySpawnData> spawnableEntities)
     {
         int[] weights = new int[spawnableEntities.Count];
 
@@ -65,7 +73,7 @@ public class WeightedRandomSpawning
         return GameSettings.Instance.EntityDatabase[ENTITY_TYPE.PARTYGOER].gameObject;
     }
 
-    public static GameObject ReturnItemBySpawnChances(List<ObjectWithWeight> spawnableItems)
+    public static GameObject ReturnItemBySpawnChances(List<ObjectSpawnData> spawnableItems)
     {
         int[] weights = new int[spawnableItems.Count];
 
