@@ -9,27 +9,92 @@ public class FlashLight : HoldableObject
     public Light flashLight;
     AudioSource lightAudio;
 
-    GameObject runtimeFlashLightCollider;
+    public bool on = false;
+    public bool canTurnOn = true;
 
-    bool on = false;
-
-    public Transform batteryLocation;
-    public InteractableObject[] batteriesInserted;
-
-    void DetermineCharge()
+    Coroutine losePowerOverTime = null;
+    public void OnLoadBatteries(int amount, bool playSound)
     {
-        /*foreach ()*/
+        flashLight.intensity = GetComponent<Loadable>().amountLoaded / 100f;
+        canTurnOn = true;
     }
-    void InsertBattery(InteractableObject insert)
+    public void OnUnloadBatteries(int amount, bool playSound)
     {
-        if (batteriesInserted.Length < 2)
+
+    }
+    public IEnumerator LosePowerOverTime()
+    {
+        while (true)
         {
+            yield return new WaitForSecondsRealtime(3f);
 
+            GetComponent<Loadable>().UnloadObject(1, false);
+            flashLight.intensity = GetComponent<Loadable>().amountLoaded / 100f;
+
+            if (GetComponent<Loadable>().amountLoaded <= 0)
+            {
+                canTurnOn = false;
+                break;
+            }
         }
+        
     }
-    private void Start()
+
+    public override void OnLoadFinished()
     {
-        batteriesInserted = new InteractableObject[2];
+        GetComponent<Loadable>().amountLoaded = int.Parse(saveableData.metaData["amountLoaded"]);
+
+        SetStat(GetComponent<Loadable>().stat_ammoName, GetComponent<Loadable>().amountLoaded.ToString());
+        SetMetaData("amountLoaded", GetComponent<Loadable>().amountLoaded.ToString());
+        
+        if (GetComponent<Loadable>().amountLoaded <= 0)
+        {
+            canTurnOn = false;
+        }
+
+
+        if (on)
+        {
+            emission.EnableKeyword("_EMISSION");
+            emission.SetColor("_EmissionColor", emissionColor);
+            emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+            flashLight.gameObject.SetActive(true);
+            if (losePowerOverTime == null)
+                losePowerOverTime = StartCoroutine(LosePowerOverTime());
+        }
+        else
+        {
+            emission.EnableKeyword("_EMISSION");
+            emission.SetColor("_EmissionColor", Color.black);
+            emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
+            flashLight.gameObject.SetActive(false);
+            if (losePowerOverTime != null)
+            {
+                StopCoroutine(losePowerOverTime);
+                losePowerOverTime = null;
+            }
+        }
+
+        flashLight.intensity = GetComponent<Loadable>().amountLoaded / 100f;
+
+    }
+
+    public override void Init()
+    {
+        base.Init();
+
+        GetComponent<Loadable>().onLoadAmmo += OnLoadBatteries;
+        GetComponent<Loadable>().onUnloadAmmo += OnUnloadBatteries;
+
+        int RandomStartAmount = Random.Range(0, 100);
+
+        GetComponent<Loadable>().amountLoaded = RandomStartAmount;
+
+
+        SetStat(GetComponent<Loadable>().stat_ammoName, GetComponent<Loadable>().amountLoaded.ToString());
+        SetMetaData("amountLoaded", GetComponent<Loadable>().amountLoaded.ToString());
+
+      
 
         emission = transform.GetChild(0).GetChild(0).GetComponent<Renderer>().material;
 
@@ -37,15 +102,47 @@ public class FlashLight : HoldableObject
 
         emissionColor = emission.GetColor("_EmissionColor");
 
-
         emission.EnableKeyword("_EMISSION");
         emission.SetColor("_EmissionColor", Color.black);
         emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
+        flashLight.gameObject.SetActive(false);
+
+
+
+
+    }
+    public void Update()
+    {
+        if (on)
+        {
+            if (GameSettings.Instance.worldInstance.GetBiomeCurrentPlayerIsIn() == BIOME_ID.LEVEL_0_RED_ROOMS)
+            {
+                lightAudio.pitch = UnityEngine.Random.Range(0.6f, 1.3f);
+                lightAudio.PlayOneShot(lightAudio.clip);
+
+                on = false;
+
+                SetMetaData("on", on.ToString());
+
+                emission.EnableKeyword("_EMISSION");
+                emission.SetColor("_EmissionColor", Color.black);
+                emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
+                flashLight.gameObject.SetActive(false);
+
+            }
+
+
+        }
+
+
 
     }
     public override void Use(InteractionSystem player, bool LMB)
     {
-        if (LMB)
+        lightAudio.pitch = UnityEngine.Random.Range(0.6f, 1.3f);
+        lightAudio.PlayOneShot(lightAudio.clip);
+
+        if (LMB && GameSettings.Instance.worldInstance.GetBiomeCurrentPlayerIsIn() != BIOME_ID.LEVEL_0_RED_ROOMS && canTurnOn)
         {
             on = !on;
 
@@ -54,31 +151,41 @@ public class FlashLight : HoldableObject
             switch (on)
             {
                 case true:
+                    if (losePowerOverTime == null)
+                        losePowerOverTime = StartCoroutine(LosePowerOverTime());
+
                     emission.EnableKeyword("_EMISSION");
                     emission.SetColor("_EmissionColor", emissionColor);
                     emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
-                    runtimeFlashLightCollider = Instantiate(flashLight.gameObject, transform.GetChild(0));
+                    flashLight.gameObject.SetActive(true);
+
                     break;
 
                 case false:
+
+                    if (losePowerOverTime != null)
+                    {
+                        StopCoroutine(losePowerOverTime);
+                        losePowerOverTime = null;
+                    }
+                       
                     emission.EnableKeyword("_EMISSION");
                     emission.SetColor("_EmissionColor", Color.black);
                     emission.globalIlluminationFlags = MaterialGlobalIlluminationFlags.EmissiveIsBlack;
-                    Destroy(runtimeFlashLightCollider);
-                    
+                    flashLight.gameObject.SetActive(false);
+
                     break;
             }
 
-            lightAudio.pitch = UnityEngine.Random.Range(0.6f, 1.3f);
-            lightAudio.PlayOneShot(lightAudio.clip);
+           
         }
-        
+        else
+        {
+            on = false;
+        }
+
 
     }
 
-    public override void Drop(Vector3 force)
-    {
-        
-    }
 
 }

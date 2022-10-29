@@ -339,9 +339,11 @@ MonoBehaviour:
     parentName: 
     type: 5
     instance: {fileID: 7447349725876534975}
+  objectCategory: 0
   type: 5
   playSounds: 0
   runTimeID: 986
+  canBeLoadedWith: 
   inventoryObjectData:
     image: {fileID: 2800000, guid: 60691e2627014ec43a747ddd1e2ed2c1, type: 3}
     name: Soup
@@ -349,12 +351,15 @@ MonoBehaviour:
     description: A hearty meal in a can.
   durability: 0
   breakablePrefabs: []
+  breakLocations: []
   hitClips: []
   breakClips: []
   rb: {fileID: 0}
   ThrowMultiplier: 0
   large: 0
   autoSwing: 0
+  shouldDisableCrossHair: 0
+  connectedInvItem: {fileID: 0}
   canPlace: 0
   isPlaced: 0
   canBeUsed: 1
@@ -363,6 +368,7 @@ MonoBehaviour:
   StartUseAnimation: 
   UseAnimations: []
   CustomHoldAnimation: 
+  currentAnimChoice: 0
   ItemObjectAnimations: []
 --- !u!82 &6768213791637214978
 AudioSource:
@@ -373,7 +379,7 @@ AudioSource:
   m_GameObject: {fileID: 8708151145868929372}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300002, guid: 4945421a940f27f4da472315e07ea556, type: 2}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: 20bfa29a2ece3284f935fedf32737170, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1

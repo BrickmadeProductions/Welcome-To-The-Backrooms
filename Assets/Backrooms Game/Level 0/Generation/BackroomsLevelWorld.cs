@@ -1,4 +1,52 @@
 ﻿// BackroomsLevelWorld
+/*private class ThreadedActionManager
+	{
+		public bool doActions;
+
+		public bool isDoingActions;
+
+		public Queue<ThreadedAction> actionQueue;
+
+		public void UpdateListener()
+		{
+			if (!doActions || isDoingActions)
+			{
+				return;
+			}
+			isDoingActions = true;
+			foreach (ThreadedAction item in actionQueue)
+			{
+				item.DoAction();
+				item.ActionCompleted = true;
+			}
+			doActions = false;
+			isDoingActions = false;
+		}
+
+		public bool DoAllQueuedActions()
+		{
+			if (!isDoingActions)
+			{
+				doActions = true;
+				return true;
+			}
+			return false;
+		}
+
+		public void AddActionToQueue(ThreadedAction action)
+		{
+			actionQueue.Enqueue(action);
+		}
+	}
+
+	public abstract class ThreadedAction
+	{
+		public bool ActionCompleted;
+
+		public abstract void DoAction();
+	}
+*/
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -46,6 +94,11 @@ public struct PropCluster
 	public Dictionary<string, SaveableProp> propClusterData;
 }
 
+public struct WorldBiomeData
+{
+
+}
+
 [Serializable]
 public struct WorldSaveData
 {
@@ -55,6 +108,8 @@ public struct WorldSaveData
 	public PlayerLocationData playerData;
 
 	public GAMEPLAY_EVENT currentWorldEventSaved;
+
+	public Dictionary<string, SavedContainerInventoryData> savedContainers;
 
 	public Dictionary<string, SerealizedChunk> savedChunks;
 
@@ -89,53 +144,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public float timeInSecondsSinceLastEvent;
 	public float timeIntoCurrentEvent;
-	private class ThreadedActionManager
-	{
-		public bool doActions;
-
-		public bool isDoingActions;
-
-		public Queue<ThreadedAction> actionQueue;
-
-		public void UpdateListener()
-		{
-			if (!doActions || isDoingActions)
-			{
-				return;
-			}
-			isDoingActions = true;
-			foreach (ThreadedAction item in actionQueue)
-			{
-				item.DoAction();
-				item.ActionCompleted = true;
-			}
-			doActions = false;
-			isDoingActions = false;
-		}
-
-		public bool DoAllQueuedActions()
-		{
-			if (!isDoingActions)
-			{
-				doActions = true;
-				return true;
-			}
-			return false;
-		}
-
-		public void AddActionToQueue(ThreadedAction action)
-		{
-			actionQueue.Enqueue(action);
-		}
-	}
-
-	public abstract class ThreadedAction
-	{
-		public bool ActionCompleted;
-
-		public abstract void DoAction();
-	}
-
+	
 	[HideInInspector]
 	public List<GameObject> globalBloodAndGoreObjects;
 
@@ -172,6 +181,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	public volatile Dictionary<string, Chunk> loadedChunks;
 
 	public volatile Dictionary<string, SerealizedChunk> allChunks;
+
+	public volatile Dictionary<string, SavedContainerInventoryData> containersInWorld;
 
 	[Range(1f, 5f)]
 	public int viewDistance;
@@ -281,16 +292,33 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		worldDataSeed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
 		biomeDataSeed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
 
+		currentWorldEvent = GAMEPLAY_EVENT.NONE;
+
 		Pre_Init();
 	}
+	//DEMO
+	public IEnumerator TimeLimitForDemo()
+    {
+		int minutesLeft = 60;
+		GameSettings.Instance.demoText.text = "DEMO TIME LEFT: " + minutesLeft + " Minutes";
 
+		while (minutesLeft > 0)
+        {
+			yield return new WaitForSecondsRealtime(60f);
+			minutesLeft--;
+			GameSettings.Instance.demoText.text = "DEMO TIME LEFT: " + minutesLeft + " Minutes";
+		}
+		
+		GameSettings.Instance.cutSceneHandler.BeginCutScene(CUT_SCENE.NO_CLIP_SUCCESS_WALL_DEMO);
+
+	}
 	public IEnumerator SaveDataEveryXMinutes(float minutes)
 	{
 		while (true)
 		{
 			yield return new WaitForSecondsRealtime(minutes * 60f);
 			yield return new WaitUntil(() => GameSettings.LEVEL_SAVE_LOADED);
-			StartCoroutine(GameSettings.SaveAllProgress());
+			StartCoroutine(GameSettings.Instance.SaveAllProgress());
 		}
 	}
 
@@ -298,13 +326,15 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	{
 		yield return new WaitUntil(() => currentWorldEvent == GAMEPLAY_EVENT.NONE);
 
-		yield return new WaitForSecondsRealtime(((15f) * 60) - timeInSecondsSinceLastEvent);
+		yield return new WaitForSecondsRealtime(((10f) * 60f) - timeInSecondsSinceLastEvent);
 
 		StartEvent(gameplay_events_possible[UnityEngine.Random.Range(0, gameplay_events_possible.Length)]);
 
 		while (true)
 		{
-			yield return new WaitForSecondsRealtime((30f * 60f) + UnityEngine.Random.Range(-5f, 5f));
+			yield return new WaitUntil(() => currentWorldEvent == GAMEPLAY_EVENT.NONE);
+
+			yield return new WaitForSecondsRealtime((15f * 60f) + UnityEngine.Random.Range(-5f, 5f));
 
 			if (UnityEngine.Random.Range(0, 1f) < 0.5f)
 			{
@@ -315,14 +345,18 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	}
 	public void StartEvent(GAMEPLAY_EVENT gameplay_event)
     {
-		StartCoroutine(GameSettings.SaveAllProgress());
-		GameSettings.Instance.audioHandler.EventSoundTrackStart(gameplay_event, 0f);
-		currentWorldEvent = gameplay_event;
+		if (currentWorldEvent == GAMEPLAY_EVENT.NONE)
+        {
+			currentWorldEvent = gameplay_event;
+			StartCoroutine(GameSettings.Instance.SaveAllProgress());
+			GameSettings.Instance.audioHandler.EventSoundTrackStart(currentWorldEvent, 0f, 10f * 60f);
+			
+		}
+		
 		
 	}
 
-	//works
-	IEnumerator TrackEventTime()
+	public IEnumerator TrackEventTime()
     {
 		while (true)
         {
@@ -414,7 +448,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		}
 
 		currentWorldEvent = GAMEPLAY_EVENT.NONE;
-
+		timeIntoCurrentEvent = 0;
 		GameSettings.Instance.audioHandler.SceneSoundTrackStart(GameSettings.Instance.ActiveScene, false);
 	}
 	public IEnumerator TrySpawnEntities()
@@ -497,6 +531,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		loadedChunks = new Dictionary<string, Chunk>();
 		allChunks = new Dictionary<string, SerealizedChunk>();
+		containersInWorld = new Dictionary<string, SavedContainerInventoryData>();
 
 		currentRoomNumber = 0;
 		currentChunkNumber = 0;
@@ -567,6 +602,9 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
                     {
 						invSlot.itemsInSlot[0].connectedObject.GenerateID();
 						invSlot.itemsInSlot[0].connectedObject.ConnectIDToWorld(this);
+
+						GameSettings.Instance.Player.GetComponent<InventorySystem>().currentPlayerInventorySave.propsInInventory[invSlot.name] = invSlot.itemsInSlot[0].connectedObject.GetWorldID();
+
 					}
 
 					allChunks[key].propData.propClusterData.Add(invSlot.itemsInSlot[0].connectedObject.GetWorldID(), invSlot.itemsInSlot[0].connectedObject.saveableData);
@@ -581,24 +619,50 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 
 		}
+
+		foreach (ContainerObject container in FindObjectsOfTypeAll(typeof(ContainerObject)))
+		{
+			foreach (InventorySlot invSlot in container.storageSlots)
+			{
+				if (invSlot.itemsInSlot.Count > 0)
+				{
+					if (!CheckWorldForPropKey(invSlot.itemsInSlot[0].connectedObject.GetWorldID()))
+					{
+						Vector3 position = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
+
+						string key = position.x + "," + position.y + "," + position.z;
+
+						//load in objects from room or objects that the player has that havent been registered
+						if (invSlot.itemsInSlot[0].connectedObject.runTimeID == "-1")
+						{
+							invSlot.itemsInSlot[0].connectedObject.GenerateID();
+							invSlot.itemsInSlot[0].connectedObject.ConnectIDToWorld(this);
+
+
+						}
+							allChunks[key].propData.propClusterData.Add(invSlot.itemsInSlot[0].connectedObject.GetWorldID(), invSlot.itemsInSlot[0].connectedObject.saveableData);
+
+							Debug.Log("Loaded over a " + invSlot.itemsInSlot[0].connectedObject.type.ToString() + " in a container..");
+						
+
+
+					}
+
+
+				}
+			}
+
+
+		}
+
+
 		//players inventory data has been loaded this runs after spawn chunks have generated, just add items to it
 		GameSettings.Instance.Player.GetComponent<InventorySystem>().PutSavedItemsInInventory();
 
-		if (currentWorldEvent != GAMEPLAY_EVENT.NONE)
-			StartEvent(currentWorldEvent);
-
-		if (gameplay_events_possible.Count() > 0)
-
-			StartCoroutine(TryStartRandomEvents());
-
-		StartCoroutine(TrackEventTime());
-
-		
-
-		StartCoroutine(SaveDataEveryXMinutes(5f));
-		StartCoroutine(TrySpawnEntities());
-
 		Debug.Log("Done With Spawn Region");
+
+		GameSettings.WORLD_FINISHED_LOADING = true;
+
 	}
 
 	public string OnSave()
@@ -651,6 +715,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			savedWorldDataSeed = worldDataSeed,
 			savedBiomeDataSeed = biomeDataSeed,
 			savedChunks = allChunks,
+			savedContainers = containersInWorld,
 			timeInSecondsSinceLastEventSaved = timeInSecondsSinceLastEvent,
 			timeIntoCurrentEventSaved = timeIntoCurrentEvent
 		};
@@ -660,10 +725,13 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	private IEnumerator OnLoadAsync(string data)
 	{
 		yield return new WaitUntil(() => GameSettings.SCENE_LOADED);
-		
+
+		bool success = false;
 		try
 		{
 			LoadSaveData(JsonConvert.DeserializeObject<WorldSaveData>(data));
+			success = true;
+			
 		}
 		catch (ArgumentException exception)
 		{
@@ -672,6 +740,16 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		}
 		GameSettings.LEVEL_SAVE_LOADED = true;
 		Debug.Log("Level Save Loaded");
+
+		//make sure the active scene is updated before starting events
+		yield return new WaitUntil(() => GameSettings.SCENE_FINISHED_LOADING);
+		//start music after world data has loaded
+		if (currentWorldEvent != GAMEPLAY_EVENT.NONE)
+
+			GameSettings.Instance.audioHandler.EventSoundTrackStart(currentWorldEvent, timeIntoCurrentEvent, 10f * 60f);
+		else
+
+			GameSettings.Instance.audioHandler.SceneSoundTrackStart(GameSettings.Instance.ActiveScene, GameSettings.Instance.ActiveScene == SCENE.LEVELRUN);
 	}
 
 	private void LoadSaveData(WorldSaveData saveData)
@@ -690,21 +768,17 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		playerLocationData = saveData.playerData;
 
+
 		if (saveData.savedChunks != null)
 		{
+			containersInWorld = saveData.savedContainers;
 			allChunks = saveData.savedChunks;
 		}
 		else
 		{
 			Debug.LogError("LEVEL_READ_ERROR");
 		}
-		//start music after world data has loaded
-		if (currentWorldEvent != GAMEPLAY_EVENT.NONE)
-
-			GameSettings.Instance.audioHandler.EventSoundTrackStart(currentWorldEvent, timeIntoCurrentEvent);
-		else
-
-			GameSettings.Instance.audioHandler.SceneSoundTrackStart(GameSettings.Instance.ActiveScene, false);
+		
 	}
 
 	public void OnLoad(string data)
@@ -719,8 +793,9 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	{
 		GameSettings.LEVEL_SAVE_LOADED = true;
 		timeInSecondsSinceLastEvent = 0f;
-		UnityEngine.Random.InitState(worldDataSeed);
+		//UnityEngine.Random.InitState(worldDataSeed);
 		Debug.LogError("No Save To Load");
+		GameSettings.Instance.audioHandler.SceneSoundTrackStart(GameSettings.Instance.ActiveScene, GameSettings.Instance.ActiveScene == SCENE.LEVELRUN);
 	}
 
 	public bool OnSaveCondition()
@@ -883,6 +958,31 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			if (chunk != null)
 				chunk.saveableData.entityData.entityClusterData.Add(spawnedEntity.type.ToString() + "-" + spawnedEntity.runTimeID, spawnedEntity.Save());
 
+			if (spawnedEntity.drops.Count > 0)
+			{
+				foreach (EntityDrop objectToDrop in spawnedEntity.drops)
+				{
+					//use weights as normal randomness here
+					if (UnityEngine.Random.Range(0, 100) < objectToDrop.dropChance)
+					{
+						InteractableObject spawnedObject = GameSettings.Instance.worldInstance.AddNewProp(objectToDrop.locationOnBody.position, Quaternion.identity, GameSettings.Instance.PropDatabase[objectToDrop.type].gameObject);
+
+						BPUtil.SetAllColliders(spawnedObject.transform, false);
+
+						spawnedObject.transform.parent = objectToDrop.locationOnBody;
+						spawnedObject.transform.localPosition = Vector3.zero;
+						spawnedObject.transform.localRotation = Quaternion.identity;
+
+						spawnedObject.GetComponent<Rigidbody>().isKinematic = true;
+
+						spawnedEntity.activeDropsHeld.Add(spawnedObject);
+
+						break;
+					}
+
+				}
+			}
+
 			return spawnedEntity;
 		}
 		return null;
@@ -1005,7 +1105,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			propCount += loadedChunks.Value.saveableData.propData.propClusterData.Count;
 		}
-		if (propCount <= 100)
+		if (propCount <= 500)
 		{
 			InteractableObject prop = Instantiate(item).GetComponent<InteractableObject>();
 
@@ -1202,6 +1302,26 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			if (invSlot.itemsInSlot.Count > 0)
 				RemoveProp(invSlot.itemsInSlot[0].connectedObject.GetWorldID(), false);
 		}
+
+		if (GameSettings.Instance.Player.GetComponent<InventorySystem>().backPack.itemsInSlot.Count > 0)
+		{
+			if (containersInWorld.ContainsKey(GameSettings.Instance.Player.GetComponent<InventorySystem>().backPack.itemsInSlot[0].connectedObject.GetWorldID()))
+			{
+				foreach (InventorySlot invSlot in ((ContainerObject)GameSettings.Instance.Player.GetComponent<InventorySystem>().backPack.itemsInSlot[0].connectedObject).storageSlots)
+				{
+					if (invSlot.itemsInSlot.Count > 0)
+						RemoveProp(invSlot.itemsInSlot[0].connectedObject.GetWorldID(), false);
+				}
+				RemoveProp(((ContainerObject)GameSettings.Instance.Player.GetComponent<InventorySystem>().backPack.itemsInSlot[0].connectedObject).GetWorldID(), false);
+
+				containersInWorld.Remove(GameSettings.Instance.Player.GetComponent<InventorySystem>().backPack.itemsInSlot[0].connectedObject.GetWorldID());
+			}
+		}
+
+		
+
+			
+
 	}
 
 	public void SaveAllObjectsAndEntitiesInChunks(KeyValuePair<string, SerealizedChunk>[] chunks)

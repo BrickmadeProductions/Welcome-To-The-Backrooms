@@ -98,9 +98,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 8
-  connetedObject: {fileID: 1345254682099846511}
-  WeaponBloodRenderer: {fileID: 0}
+  connetedObject: {fileID: 0}
+  WeaponBloodRenderer: {fileID: 2452731138100598717}
   bloodAmount: 0
+  onlyHitOneLimb: 1
 --- !u!65 &4798014422870614306
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -123,8 +124,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2422186398859061668}
-  - component: {fileID: 1345254682099846511}
   - component: {fileID: 4317041497395312815}
+  - component: {fileID: 3049888663259931596}
   m_Layer: 9
   m_Name: BoxCutter
   m_TagString: Untagged
@@ -148,57 +149,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1345254682099846511
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3086800962018784030}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  saveableData:
-    runTimeID: 742
-    location:
-    - 0
-    - 0
-    - 0
-    rotationEuler:
-    - -0
-    - 0
-    - 0
-    parentName: 
-    type: 8
-    instance: {fileID: 1345254682099846511}
-  type: 8
-  playSounds: 0
-  runTimeID: 742
-  inventoryObjectData:
-    image: {fileID: 2800000, guid: c56458cd60e99304d87cdf5515048b74, type: 3}
-    name: Boxcutter
-    inventoryWeight: 5
-    description: A handheld melee weapon. Best used at short range.
-  durability: 0
-  breakablePrefabs: []
-  hitClips: []
-  breakClips: []
-  rb: {fileID: 0}
-  ThrowMultiplier: 1.5
-  large: 0
-  autoSwing: 1
-  canPlace: 0
-  isPlaced: 0
-  canBeUsed: 1
-  animationPlaying: 0
-  StartUseAnimation: 
-  UseAnimations:
-  - SliceVar1
-  - SliceVar1
-  CustomHoldAnimation: 
-  ItemObjectAnimations: []
 --- !u!54 &4317041497395312815
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -215,6 +165,65 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &3049888663259931596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3086800962018784030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fac7629b594161249a3035a2d6e06a8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  saveableData:
+    runTimeID: 
+    location: []
+    rotationEuler: []
+    parentName: 
+    type: 0
+    instance: {fileID: 0}
+  objectCategory: 3
+  type: 8
+  playSounds: 0
+  runTimeID: -1
+  canBeLoadedWith: 
+  inventoryObjectData:
+    image: {fileID: 2800000, guid: c56458cd60e99304d87cdf5515048b74, type: 3}
+    name: Boxcutter
+    inventoryWeight: 5
+    description: A handheld melee weapon. Best used at short range. CAN BE USED TO
+      SHAVE WOOD
+  durability: 0
+  breakablePrefabs: []
+  hitClips: []
+  breakClips: []
+  rb: {fileID: 0}
+  ThrowMultiplier: 2
+  large: 0
+  autoSwing: 0
+  shouldDisableCrossHair: 0
+  connectedInvItem: {fileID: 0}
+  canPlace: 0
+  isPlaced: 0
+  canBeUsed: 1
+  animationPlaying: 0
+  offHandIKPoint: {fileID: 0}
+  StartUseAnimation: 
+  UseAnimations:
+  - SliceVar1
+  CustomHoldAnimation: 
+  ItemObjectAnimations: []
+  Flying: 0
+  rotationAmount: 0
+  stuckInWall: 0
+  stuckSounds: []
+  ObjectConnectionJoint: {fileID: 0}
+  currentBlade: {fileID: 0}
+  currentFasten: {fileID: 0}
+  bladeLocation: {fileID: 0}
+  fastenLocation: {fileID: 0}
 --- !u!1 &7298040221084833643
 GameObject:
   m_ObjectHideFlags: 0

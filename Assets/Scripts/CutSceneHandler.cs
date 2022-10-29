@@ -64,6 +64,7 @@ public class CutSceneHandler : MonoBehaviour
     }
     public IEnumerator BeginCutSceneAsync(CUT_SCENE cutsceneIndex)
     {
+
         GameSettings.Instance.Player.GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(false);
 
         foreach (GenericMenu menu in GameSettings.Instance.GameplayMenuDataBase)
@@ -142,6 +143,10 @@ public class CutSceneHandler : MonoBehaviour
 
                 GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("NoClip_Success", false);
 
+                GameSettings.Instance.Player.GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(true);
+
+                yield return new WaitForSecondsRealtime(3f);
+
                 break;
 
             case NO_CLIP_FAIL_WALL:
@@ -160,21 +165,21 @@ public class CutSceneHandler : MonoBehaviour
 
                 GameSettings.Instance.Player.GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
 
-                yield return new WaitForSecondsRealtime(0.5f);
-
-                GameSettings.Instance.Player.GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
 
                 yield return new WaitForSecondsRealtime(0.5f);
 
                 GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("NoClip_Fail", false);
 
-                break;
-        }       
+                yield return new WaitForSecondsRealtime(0.5f);
 
-        
+                GameSettings.Instance.Player.GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
+
+                GameSettings.Instance.Player.GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(true);
+                break;
+        }
 
 
         GameSettings.Instance.setCutScene(false);
-        GameSettings.Instance.Player.GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(true);
+        
     }
 }

@@ -6,101 +6,99 @@
 
 // http://www.popekim.com/2012/10/siggraph-2012-screen-space-decals-in.html
 
-Shader "Decal/DecalShader Diffuse+Normals"
-{
-	Properties
-	{
-		_Color("Color", Color) = (1, 1, 1, 1)
-		_MainTex ("Diffuse", 2D) = "white" {}
-		_BumpMap ("Normals", 2D) = "bump" {}
+Shader "Decal/DecalShader Diffuse+Normals"{
+	//show values to edit in inspector
+	Properties{
+		[HDR] _Color("Tint", Color) = (0, 0, 0, 1)
+		_MainTex("Texture", 2D) = "white" {}
 	}
-	SubShader
-	{
-		Tags { "RenderType" = "Fade" }
-		Pass
-		{
-			Fog { Mode Off } // no fog in g-buffers pass
-			ZWrite Off
-			Blend SrcAlpha OneMinusSrcAlpha
-			
+
+		SubShader{
+		//the material is completely transparent and is rendered before other transparent geometry by default (at 2500)
+		Tags{ "RenderType" = "Transparent" "Queue" = "Transparent-400" "DisableBatching" = "True"}
+
+		//Blend via alpha
+		Blend SrcAlpha OneMinusSrcAlpha
+		//dont write to zbuffer because we have semitransparency
+		ZWrite off
+
+		Pass{
 			CGPROGRAM
-			#pragma target 3.0
-			#pragma vertex vert
-			#pragma fragment frag
-			#pragma exclude_renderers nomrt
-			
+
+			//include useful shader functions
 			#include "UnityCG.cginc"
 
+			//define vertex and fragment shader functions
+			#pragma vertex vert
+			#pragma fragment frag
 
-			struct v2f
-			{
-				float4 pos : SV_POSITION;
-				half2 uv : TEXCOORD0;
-				float4 screenUV : TEXCOORD1;
-				float3 ray : TEXCOORD2;
-				half3 orientation : TEXCOORD3;
-				half3 orientationX : TEXCOORD4;
-				half3 orientationZ : TEXCOORD5;
+			//texture and transforms of the texture
+			sampler2D _MainTex;
+			float4 _MainTex_ST;
+
+			//tint of the texture
+			fixed4 _Color;
+
+			//global texture that holds depth information
+			sampler2D_float _CameraDepthTexture;
+
+			//the mesh data thats read by the vertex shader
+			struct appdata {
+				float4 vertex : POSITION;
 			};
 
-			v2f vert (float3 v : POSITION)
-			{
+			//the data thats passed from the vertex to the fragment shader and interpolated by the rasterizer
+			struct v2f {
+				float4 position : SV_POSITION;
+				float4 screenPos : TEXCOORD0;
+				float3 ray : TEXCOORD1;
+			};
+
+			//the vertex shader function
+			v2f vert(appdata v) {
 				v2f o;
-				o.pos = UnityObjectToClipPos (float4(v,1));
-				o.uv = v.xz+0.5;
-				o.screenUV = ComputeScreenPos (o.pos);
-				o.ray = mul (UNITY_MATRIX_MV, float4(v,1)).xyz * float3(-1,-1,1);
-				o.orientation = mul ((float3x3)unity_ObjectToWorld, float3(0,1,0));
-				o.orientationX = mul ((float3x3)unity_ObjectToWorld, float3(1,0,0));
-				o.orientationZ = mul ((float3x3)unity_ObjectToWorld, float3(0,0,1));
+				//convert the vertex positions from object space to clip space so they can be rendered correctly
+				float3 worldPos = mul(unity_ObjectToWorld, v.vertex);
+				o.position = UnityWorldToClipPos(worldPos);
+				//calculate the ray between the camera to the vertex
+				o.ray = worldPos - _WorldSpaceCameraPos;
+				//calculate the screen position
+				o.screenPos = ComputeScreenPos(o.position);
 				return o;
 			}
 
-			CBUFFER_START(UnityPerCamera2)
-			// float4x4 _CameraToWorld;
-			CBUFFER_END
-
-			sampler2D _MainTex;
-			sampler2D _BumpMap;
-			sampler2D_float _CameraDepthTexture;
-			sampler2D _NormalsCopy;
-
-			fixed4 _Color;
-
-			void frag(v2f i, out half4 outDiffuse : COLOR0, out half4 outNormal : COLOR1)
-			{
-				i.ray = i.ray * (_ProjectionParams.z / i.ray.z);
-				float2 uv = i.screenUV.xy / i.screenUV.w;
-				// read depth and reconstruct world position
-				float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, uv);
-				depth = Linear01Depth (depth);
-				float4 vpos = float4(i.ray * depth,1);
-				float3 wpos = mul (unity_CameraToWorld, vpos).xyz;
-				float3 opos = mul (unity_WorldToObject, float4(wpos,1)).xyz;
-
-				clip (float3(0.5,0.5,0.5) - abs(opos.xyz));
-
-
-				i.uv = opos.xz+0.5;
-
-				half3 normal = tex2D(_NormalsCopy, uv).rgb;
-				fixed3 wnormal = normal.rgb * 2.0 - 1.0;
-				clip (dot(wnormal, i.orientation) - 0.3);
-
-				fixed4 col = tex2D (_MainTex, i.uv) * _Color;
-				clip (col.a - 0.2);
-				outDiffuse = col;
-
-				fixed3 nor = UnpackNormal(tex2D(_BumpMap, i.uv));
-				half3x3 norMat = half3x3(i.orientationX, i.orientationZ, i.orientation);
-				nor = mul (nor, norMat);
-				outNormal = fixed4(nor*0.5+0.5,1);
-
+			float3 getProjectedObjectPos(float2 screenPos, float3 worldRay) {
+				//get depth from depth texture
+				float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenPos);
+				depth = Linear01Depth(depth) * _ProjectionParams.z;
+				//get a ray thats 1 long on the axis from the camera away (because thats how depth is defined)
+				worldRay = normalize(worldRay);
+				//the 3rd row of the view matrix has the camera forward vector encoded, so a dot product with that will give the inverse distance in that direction
+				worldRay /= dot(worldRay, -UNITY_MATRIX_V[2].xyz);
+				//with that reconstruct world and object space positions
+				float3 worldPos = _WorldSpaceCameraPos + worldRay * depth;
+				float3 objectPos = mul(unity_WorldToObject, float4(worldPos,1)).xyz;
+				//discard pixels where any component is beyond +-0.5
+				clip(0.5 - abs(objectPos));
+				//get -0.5|0.5 space to 0|1 for nice texture stuff if thats what we want
+				objectPos += 0.5;
+				return objectPos;
 			}
-			ENDCG
-		}		
 
+			//the fragment shader function
+			fixed4 frag(v2f i) : SV_TARGET{
+				//unstretch screenspace uv and get uvs from function
+				float2 screenUv = i.screenPos.xy / i.screenPos.w;
+				float2 uv = getProjectedObjectPos(screenUv, i.ray).xz;
+				//read the texture color at the uv coordinate
+				  fixed4 col = tex2D(_MainTex, uv);
+				  //multiply the texture color and tint color
+				  col *= _Color;
+				  //return the final color to be drawn on screen
+				  return col;
+			  }
+
+			  ENDCG
+		  }
 	}
-
-	Fallback Off
 }

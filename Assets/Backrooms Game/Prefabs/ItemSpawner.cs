@@ -12,7 +12,7 @@ public class ItemSpawner : MonoBehaviour
     public bool random;
     public bool spawnOnce;
     public bool spawnInstantly;
-    public float randomSpawnChance = 0.5f;
+    public float randomSpawnChance = 0.3f;
 
 
     /*public void Start()
@@ -42,16 +42,16 @@ public class ItemSpawner : MonoBehaviour
             if (spawnOnce)
             {
 
-                if (!GameSettings.Instance.worldInstance.allChunks.ContainsKey(spawnLocationKey.x + "," + spawnLocationKey.y + "," + spawnLocationKey.z) && UnityEngine.Random.Range(0f, 1f) > randomSpawnChance)
+                if (!GameSettings.Instance.worldInstance.allChunks.ContainsKey(spawnLocationKey.x + "," + spawnLocationKey.y + "," + spawnLocationKey.z) && UnityEngine.Random.Range(0f, 1f) < randomSpawnChance)
                 {
                     
-                    GameSettings.Instance.worldInstance.AddNewProp(transform.position, new Quaternion(transform.localEulerAngles.x, UnityEngine.Random.Range(transform.localRotation.y - 15f, transform.localRotation.y + 15f), transform.localRotation.z, 1), objectToSpawn);
+                    GameSettings.Instance.worldInstance.AddNewProp(transform.position, new Quaternion(objectToSpawn.transform.rotation.x, UnityEngine.Random.Range(transform.localRotation.y - 15f, transform.localRotation.y + 15f), objectToSpawn.transform.rotation.z, 1), objectToSpawn);
                 }
             }
 
             else if (UnityEngine.Random.Range(0f, 1f) < randomSpawnChance)
             {
-                GameSettings.Instance.worldInstance.AddNewProp(transform.position, new Quaternion(transform.localRotation.x, UnityEngine.Random.Range(transform.localRotation.y - 15f, transform.localRotation.y + 15f), transform.localRotation.z, 1), objectToSpawn);
+                GameSettings.Instance.worldInstance.AddNewProp(transform.position, new Quaternion(objectToSpawn.transform.rotation.x, UnityEngine.Random.Range(transform.localRotation.y - 15f, transform.localRotation.y + 15f), objectToSpawn.transform.rotation.z, 1), objectToSpawn);
             }
         }
         //typeToSpawn preset

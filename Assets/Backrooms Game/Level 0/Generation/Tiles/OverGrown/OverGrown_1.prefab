@@ -65,7 +65,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a968f7262c59324a92beb683cbfbf8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 60
+  id: 61
   biomeID: 6
   tilePos: {x: 0, y: 0}
   entitySpawnLocations: []
@@ -263,6 +263,10 @@ PrefabInstance:
     - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
       propertyPath: spawnInstantly
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
+      propertyPath: randomSpawnChance
+      value: 0.05
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
@@ -602,6 +606,10 @@ PrefabInstance:
     - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
       propertyPath: spawnInstantly
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
+      propertyPath: randomSpawnChance
+      value: 0.05
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
@@ -1518,6 +1526,10 @@ PrefabInstance:
       propertyPath: spawnInstantly
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
+      propertyPath: randomSpawnChance
+      value: 0.05
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
 --- !u!4 &4354958441048045664 stripped
@@ -1619,6 +1631,10 @@ PrefabInstance:
       propertyPath: spawnInstantly
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
+      propertyPath: randomSpawnChance
+      value: 0.05
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
 --- !u!4 &4491353371678837332 stripped
@@ -1719,6 +1735,10 @@ PrefabInstance:
     - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
       propertyPath: spawnInstantly
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8327966812543859305, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
+      propertyPath: randomSpawnChance
+      value: 0.05
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 80de8196472f0234cb1af86f8d13c149, type: 3}
@@ -1899,6 +1919,10 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
+    - target: {fileID: 5492798850996027748, guid: 9a42a5e595b2a9d4ab165bf92bf7cf1d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: c1224e2d22c69ec489489021f4ba34af, type: 2}
     - target: {fileID: 5823681496555086922, guid: 9a42a5e595b2a9d4ab165bf92bf7cf1d, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647

@@ -28,12 +28,24 @@ public struct SaveableProp
 
 public abstract class InteractableObject : MonoBehaviour
 {
+	public delegate void OnLoadFinish();
+	public OnLoadFinish onLoad;
+
+	public delegate void OnSaveFinish();
+	public OnSaveFinish onSave;
+
 	public SaveableProp saveableData;
 
+	public OBJECT_CATEGORY objectCategory;
 	public OBJECT_TYPE type;
+
+	//metadata is saved on save with the object data
 	public Dictionary<string, string> activeMetaData;
 
-	public bool playSounds;
+	//stats are used for the display name just in case values need to be modified 
+	public Dictionary<string, string> stats;
+
+	public bool playSounds = false;
 
 	public string runTimeID = "-1";
 
@@ -42,6 +54,55 @@ public abstract class InteractableObject : MonoBehaviour
 		return type.ToString() + "-" + runTimeID;
 	}
 
+	public string GetStat(string key)
+	{
+		if (stats.ContainsKey(key))
+		{
+
+			return stats[key];
+		}
+		else
+		{
+			return null;
+		}
+	}
+	public void SetStat(string key, string value)
+	{
+		if (stats.ContainsKey(key))
+		{
+
+			stats[key] = value;
+		}
+		else
+		{
+			stats.Add(key, value);
+		}
+	}
+
+	public void RemoveStat(string key)
+	{
+		if (stats.ContainsKey(key))
+		{
+
+			stats.Remove(key);
+		}
+	}
+
+	public string GetMetaData(string field)
+	{
+
+		if (activeMetaData.ContainsKey(field))
+		{
+
+			return activeMetaData[field];
+		}
+		else
+		{
+			return null;
+		}
+
+
+	}
 	public void SetMetaData(string field, string value)
 	{
 		
@@ -69,11 +130,18 @@ public abstract class InteractableObject : MonoBehaviour
 
 	public void ConnectIDToWorld(BackroomsLevelWorld world)
 	{
+		float tries = 0;
+
 		while (world.CheckWorldForPropKey(GetWorldID()))
 		{
-			runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
-		}
+			tries++;
+			
+			runTimeID = UnityEngine.Random.Range(0, 1000000000).ToString();
+			
+			if (tries > 5f)
 
+				break;
+		}
 		gameObject.name = type.ToString() + "-" + runTimeID;
 
 		Save();
@@ -83,7 +151,7 @@ public abstract class InteractableObject : MonoBehaviour
 	/// </summary>
 	public void GenerateID()
 	{
-		runTimeID = UnityEngine.Random.Range(0, 1000).ToString();
+		runTimeID = UnityEngine.Random.Range(0, 1000000000).ToString();
 
 		gameObject.name = type.ToString() + "-" + runTimeID;
 
@@ -94,9 +162,12 @@ public abstract class InteractableObject : MonoBehaviour
 	{
 		saveableData = objectData;
 
+		
 		if (saveableData.metaData.Count > 0)
 		{
-			foreach (KeyValuePair<string, string> data in saveableData.metaData)
+			activeMetaData = saveableData.metaData;
+
+			foreach (KeyValuePair<string, string> data in activeMetaData)
 			{
 
 				FieldInfo metaDataVariable = GetType().GetField(data.Key);
@@ -190,6 +261,7 @@ public abstract class InteractableObject : MonoBehaviour
 	private void Awake()
 	{
 		activeMetaData = new Dictionary<string, string>();
+		stats = new Dictionary<string, string>();
 		saveableData = new SaveableProp
 		{
 
@@ -197,9 +269,13 @@ public abstract class InteractableObject : MonoBehaviour
 			metaData = new Dictionary<string, string>()
 		};
 
+
+		SetStat("Item Type", objectCategory.ToString());
+
 		Init();
 	}
 
+	
 	public void OnDestroy()
 	{
 
@@ -224,6 +300,7 @@ public abstract class InteractableObject : MonoBehaviour
 	{
 
 	}
+	
 	/// <summary>
 	/// Runs when the USE button is pressed while item is on the ground, or the RMB is pressed when holding
 	/// </summary>
@@ -233,35 +310,61 @@ public abstract class InteractableObject : MonoBehaviour
 
 	public abstract void Pickup(InteractionSystem player, bool RightHand);
 }
+
+
 	// All Savable Objects In The Game
-	public enum OBJECT_TYPE
-	{
-		KNIFE,
-		AXE,
-		CHAIR,
-		ALMOND_WATER,
-		SCREWDRIVER,
-		SOUP,
-		SODA,
-		FLASHLIGHT,
-		BOXCUTTER,
-		TAPE,
-		SHIV_BOXCUTTER,
-		BIGSPOON,
-		SPEAR,
-		METAL_LADDER,
-		ROPE_COIL,
-		ROPE_TIED,
-		CASSET_TAPE,
-		CASSET_PLAYER,
-		LOOT_BOX_CARDBOARD,
-		ANOMOLY_CHAIR,
-		ANOMOLY_HAND,
-		WOODEN_CHAIR_HEADBOARD,
-		WOODEN_CHAIR_SEAT,
-		WOODEN_CHAIR_STICK,
-		BATTERY,
-		ALMOND_WATER_BOTTOM,
-		ALMOND_WATER_TOP
-	}
+public enum OBJECT_TYPE
+{
+	KNIFE,
+	WEAPON_BASE_STICK,
+	CHAIR,
+	ALMOND_WATER,
+	SCREWDRIVER,
+	SOUP,
+	SODA,
+	FLASHLIGHT,
+	BOXCUTTER,
+	TAPE,
+	SHIV_BOXCUTTER,
+	BIGSPOON,
+	SPEAR,
+	METAL_LADDER,
+	ROPE_COIL,
+	ROPE_TIED,
+	CASSET_TAPE,
+	CASSET_PLAYER,
+	LOOT_BOX_CARDBOARD,
+	ANOMOLY_CHAIR,
+	ANOMOLY_HAND,
+	WOODEN_CHAIR_HEADBOARD,
+	WOODEN_CHAIR_SEAT,
+	WOODEN_CHAIR_STICK,
+	BATTERY,
+	ALMOND_WATER_BOTTOM,
+	ALMOND_WATER_TOP,
+	BACKPACK_LEVEL_1,
+	BACKPACK_LEVEL_2,
+	BACKPACK_LEVEL_3,
+	WOODEN_AXE_HEAD,
+	WATER_BOTTLE_GENERIC,
+	PLANK_WOOD,
+	STEEL_AXE_HEAD,
+	WOOD_SCRAPS,
+	PUMPKIN_HEAD_SCREAM_EVENT,
+	CANDY_BUCKET_SCREAM_EVENT,
+	HAMMER_HEAD_WOOD,
+	NAILS,
+
+}
+
+public enum OBJECT_CATEGORY
+{
+	DEFAULT,
+	LOADABLE,
+	AMMO,
+	CRAFTING_MATERIAL,
+	WEAPON_BASE,
+	ARMOR,
+	CONTAINER
+}
 

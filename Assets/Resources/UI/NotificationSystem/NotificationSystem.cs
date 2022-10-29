@@ -10,8 +10,6 @@ public class NotificationSystem : MonoBehaviour
 
     public GameObject notificationPrefab;
 
-    public AudioClip notifSound;
-
     bool isNotifRunning = false;
 
     void Awake()
@@ -21,24 +19,37 @@ public class NotificationSystem : MonoBehaviour
 
     public void QueueNotification(string desc)
     {
-        Notification newNotif = Instantiate(notificationPrefab, notificationLocation).GetComponent<Notification>();
+        notificationLocation.gameObject.GetComponent<AudioSource>().Play();
 
-        AudioSource.PlayClipAtPoint(notifSound, GameSettings.Instance.Player.transform.position);
+        bool notifExists = false;
 
-        newNotif.SetDesc(desc);
+        foreach (Notification notif in notifQueue)
+        {
+            if (notif.description.text == desc)
+            {
+                notifExists = true;
+            }
+        }
 
-        newNotif.transform.position = new Vector3(notificationLocation.position.x, notificationLocation.position.y - (125 * notifQueue.Count), notificationLocation.position.z);
+        if (!notifExists)
+        {
+            Notification newNotif = Instantiate(notificationPrefab, notificationLocation).GetComponent<Notification>();
 
-        notifQueue.Enqueue(newNotif);
-        
+           
+            newNotif.SetDesc(desc);
+
+            newNotif.transform.position = new Vector3(notificationLocation.position.x, notificationLocation.position.y - (125 * notifQueue.Count), notificationLocation.position.z);
+
+            notifQueue.Enqueue(newNotif);
+
+        }
+
 
     }
 
     public IEnumerator DequeNotification()
     {
-        isNotifRunning = true;
-
-        yield return new WaitUntil(() => GameSettings.SPAWN_REGION_GENERATED);        
+        isNotifRunning = true;     
 
         yield return new WaitForSecondsRealtime(5f);
 

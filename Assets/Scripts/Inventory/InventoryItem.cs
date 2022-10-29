@@ -22,9 +22,11 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public TextMeshProUGUI descriptionText;
 
-    public TextMeshProUGUI metaDataText;
+    public TextMeshProUGUI statText;
 
     
+
+
     private void OnDisable()
     {
         description.SetActive(false);
@@ -33,17 +35,25 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         description.SetActive(false);
     }
-    private void Awake()
+    public void Awake()
+    {
+        
+        canvasGroup = GetComponent<CanvasGroup>();
+        TryFindCanvas();
+    }
+    public void TryFindCanvas()
     {
         canvas = GetComponentInParent<Canvas>();
-        canvasGroup = GetComponent<CanvasGroup>();
-        
+       
     }
+    
     public void SetDetails(InventoryObjectData data, HoldableObject connected, InventorySlot slotin)
     {
+
         slotIn = slotin;
 
         connectedObject = connected;
+        connectedObject.connectedInvItem = this;
 
         if (data.image != null)
         {
@@ -70,12 +80,13 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
+
         GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = false;
         canvasGroup.alpha = 0.6f;
         canvasGroup.blocksRaycasts = false;
         GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = this;
-
-        Debug.Log("Picking Up From " + slotIn.name);
+        description.SetActive(false);
+        //Debug.Log("Picking Up From " + slotIn.name);
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -98,6 +109,7 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public void OnPointerExit(PointerEventData eventData)
     {
         description.SetActive(false);
+
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -106,7 +118,7 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             GameSettings.Instance.Player.GetComponent<InteractionSystem>().SetDrop(slotIn);
         }
-        description.SetActive(false);
+        
     }
 
     public void OnPointerMove(PointerEventData eventData)
@@ -119,6 +131,6 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             canvas.worldCamera,
             out position);
 
-        description.transform.position = canvas.transform.TransformPoint(new Vector3(position.x + 100f, position.y + 100f, -1));
+        description.transform.position = canvas.transform.TransformPoint(new Vector3(position.x + 150f, position.y + 150f, -1));
     }
 }

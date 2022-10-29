@@ -392,7 +392,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5174651668802718681}
   - component: {fileID: 5174651668802718680}
-  - component: {fileID: 5174651668802718682}
+  - component: {fileID: 8642348890757596964}
   - component: {fileID: 4703391106281597620}
   m_Layer: 9
   m_Name: PocketKnife
@@ -433,7 +433,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &5174651668802718682
+--- !u!114 &8642348890757596964
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -442,38 +442,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 5174651668802718685}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d794876699ece514badbdfaf2d5cdca2, type: 3}
+  m_Script: {fileID: 11500000, guid: fac7629b594161249a3035a2d6e06a8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   saveableData:
-    runTimeID: 482
-    location:
-    - 0
-    - 0
-    - 0
-    rotationEuler:
-    - -0
-    - 0
-    - 0
+    runTimeID: 
+    location: []
+    rotationEuler: []
     parentName: 
     type: 0
-    instance: {fileID: 5174651668802718682}
+    instance: {fileID: 0}
+  objectCategory: 3
   type: 0
   playSounds: 0
-  runTimeID: 482
+  runTimeID: -1
+  canBeLoadedWith: 
   inventoryObjectData:
     image: {fileID: 2800000, guid: 5422d2e56ae5e0440b8bdda41e5321e0, type: 3}
     name: Knife
-    inventoryWeight: 5
-    description: A handheld melee weapon. Best used at short range. Throwable.
+    inventoryWeight: 8
+    description: A handheld melee weapon. Best used at short range. CAN BE USED TO
+      SHAVE WOOD
   durability: 0
   breakablePrefabs: []
   hitClips: []
   breakClips: []
-  rb: {fileID: 0}
+  rb: {fileID: 5174651668802718680}
   ThrowMultiplier: 2
   large: 0
   autoSwing: 1
+  shouldDisableCrossHair: 0
   canPlace: 0
   isPlaced: 0
   canBeUsed: 1
@@ -484,8 +482,15 @@ MonoBehaviour:
   - SliceVar1
   - SliceVar2
   CustomHoldAnimation: 
-  ItemObjectAnimations:
-  - Open
+  ItemObjectAnimations: []
+  Flying: 0
+  rotationAmount: 0
+  stuckInWall: 0
+  stuckSounds: []
+  currentBlade: {fileID: 0}
+  currentFasten: {fileID: 0}
+  bladeLocation: {fileID: 3453204332779128588}
+  fastenLocation: {fileID: 2402291300905290889}
 --- !u!95 &4703391106281597620
 Animator:
   serializedVersion: 4
@@ -565,7 +570,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 15
-  connetedObject: {fileID: 5174651668802718682}
+  connetedObject: {fileID: 8642348890757596964}
   WeaponBloodRenderer: {fileID: 2147181769708924259}
   bloodAmount: 0
   onlyHitOneLimb: 1

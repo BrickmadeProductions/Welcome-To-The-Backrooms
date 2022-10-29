@@ -97,6 +97,8 @@ public class Chunk : MonoBehaviour
 
 	public IEnumerator LoadInObjectsAndEntities()
 	{
+		List<ContainerObject> containersInThisChunk = new List<ContainerObject>();
+
 		yield return new WaitUntil(() => ALL_TILES_GENERATED);
 
 		string chunkKey = chunkPosX + "," + chunkPosY + "," + chunkPosZ;
@@ -109,12 +111,16 @@ public class Chunk : MonoBehaviour
 
 			foreach (KeyValuePair<string, SaveableEntity> entity in saveableData.entityData.entityClusterData.ToArray())
 			{
-				parentGenerator.LoadSavedEntity(entity.Value, this);
+				Entity entityToSpawn = parentGenerator.LoadSavedEntity(entity.Value, this);
 			}
 
 			foreach (KeyValuePair<string, SaveableProp> prop in saveableData.propData.propClusterData.ToArray())
 			{
-				parentGenerator.LoadSavedProp(prop.Value, this);
+				InteractableObject objectToSpawn = parentGenerator.LoadSavedProp(prop.Value, this);
+
+				//this is a container, load in objects that belong in its slots
+				if (parentGenerator.containersInWorld.ContainsKey(prop.Key))
+					containersInThisChunk.Add((ContainerObject)objectToSpawn);
 			}
 
 			SaveChunkTileGrid();
@@ -134,6 +140,12 @@ public class Chunk : MonoBehaviour
 			parentGenerator.allChunks.Add(name, saveableData);
 		}
 
+
+		foreach(ContainerObject container in containersInThisChunk)
+        {
+			//Debug.Log("Loading In slots for " + container.name);
+			container.LoadInSlots(parentGenerator.containersInWorld[container.GetWorldID()]);
+        }
 
 		ALL_OBJECTS_AND_ENTITES_LOADED = true;
 	}
@@ -223,35 +235,6 @@ public class Chunk : MonoBehaviour
 		ALL_TILES_GENERATED = true;
 	}
 
-	public void CombineMeshes(GameObject obj)
-	{
-		//Temporarily set position to zero to make matrix math easier
-		Vector3 position = obj.transform.position;
-		obj.transform.position = Vector3.zero;
-
-		//Get all mesh filters and combine
-		MeshFilter[] meshFilters = obj.GetComponentsInChildren<MeshFilter>();
-		CombineInstance[] combine = new CombineInstance[meshFilters.Length];
-		int i = 1;
-		while (i < meshFilters.Length)
-		{
-			combine[i].mesh = meshFilters[i].sharedMesh;
-			combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
-			meshFilters[i].gameObject.SetActive(false);
-			i++;
-		}
-		obj.AddComponent<MeshFilter>();
-		obj.transform.GetComponent<MeshFilter>().mesh = new Mesh();
-		obj.transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine, true, true);
-		obj.transform.gameObject.SetActive(true);
-
-		//Return to original position
-		obj.transform.position = position;
-
-		//Add collider to mesh (if needed)
-		//obj.AddComponent<MeshCollider>();
-	}
-
 	//get biome id
 	//make a list of all tiles that have that biome id
 	//get a random from weighted list of tiles in that biome
@@ -268,21 +251,21 @@ public class Chunk : MonoBehaviour
 				((float)(chunkPosZ) / magnification) + ((float)parentGenerator.biomeDataSeed / 10000f) + 0.01f) * 1.1f;
 
 		biomePerlinID = Mathf.Clamp01(biomePerlinID);
-
+		worldPrelinID = Mathf.Clamp01(worldPrelinID);
 
 		//GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
 		//cube.transform.localScale = new Vector3(tileWidth, 5, tileWidth);
 		//cube.transform.position = new Vector3(chunkPosX * tileWidth, 25f, chunkPosZ * tileWidth);
 		//cube.GetComponent<Renderer>().material.color = new Color(worldPrelinID, worldPrelinID, worldPrelinID);
-		
+
 		//Debug.Log("World Perlin: " + worldPrelinID);
 		//Debug.Log("Biome Perlin: " + biomePerlinID);
 
 		BIOME_ID biomeID = BIOME_ID.LEVEL_0_YELLOW_ROOMS;
 
 
-		Debug.Log(GameSettings.Instance.ActiveScene);
+		//Debug.Log(GameSettings.Instance.ActiveScene);
 
 		
 		switch (GameSettings.Instance.ActiveScene)
@@ -324,6 +307,14 @@ public class Chunk : MonoBehaviour
 
 			case (SCENE.LEVEL1):
 
+				Debug.Log(worldPrelinID + " " + biomePerlinID);
+
+				if ((Mathf.Abs(chunkPosZ) % 15) == 0 && chunkPosZ != 0)
+				{
+					biomeID = BIOME_ID.LEVEL_1_VOID_CUTS;
+					break;
+				}
+				
 				if (worldPrelinID >= 0.5f && worldPrelinID < 1.01)
 				{
 					biomeID = BIOME_ID.LEVEL_1_PARKING_GARAGE;
@@ -337,23 +328,22 @@ public class Chunk : MonoBehaviour
 					}
 					else if (biomePerlinID >= 0.5f && biomePerlinID <= 1.01f)
 					{
-						biomeID = BIOME_ID.LEVEL_1_PARKING_GARAGE;
+						biomeID = BIOME_ID.LEVEL_1_MAZE;
 					}
 
 
 				}
-				if (Mathf.Abs(chunkPosZ) % 3 == 0)
-				{
-					biomeID = BIOME_ID.LEVEL_1_VOID_CUTS;
-				}
+				
 
 
 				break;
 
         }
 
-		
-		
+
+
+
+		//Debug.Log(biomeID.ToString());
 
 		List<Tile> potentialTiles = new List<Tile>();
 

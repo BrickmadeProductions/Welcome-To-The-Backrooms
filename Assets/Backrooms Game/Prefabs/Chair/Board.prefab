@@ -157,8 +157,8 @@ Transform:
   m_GameObject: {fileID: 7668706958697367083}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.019999996, y: 0.057500005, z: -1.58}
-  m_LocalScale: {x: 25, y: 25, z: 25}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 21.76, y: 21.76, z: 21.76}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4045617285736005951}
   m_Father: {fileID: 0}
@@ -205,16 +205,19 @@ MonoBehaviour:
     parentName: 
     type: 22
     instance: {fileID: 7610232900887421506}
+  objectCategory: 3
   type: 22
   playSounds: 1
   runTimeID: 312
+  canBeLoadedWith: 
   inventoryObjectData:
-    image: {fileID: 0}
+    image: {fileID: 2800000, guid: e5a3d4f8937922944a28d7556a8ce5ce, type: 3}
     name: Wood Board
-    inventoryWeight: 3
+    inventoryWeight: 18
     description: Wood
   durability: 0
   breakablePrefabs: []
+  breakLocations: []
   hitClips:
   - {fileID: 8300000, guid: 3ec90ec7ba21d9641aba6d72da0fb644, type: 3}
   - {fileID: 8300000, guid: 0e5240b5040937f46a2798f0974643d3, type: 3}
@@ -224,6 +227,8 @@ MonoBehaviour:
   ThrowMultiplier: 2
   large: 0
   autoSwing: 0
+  shouldDisableCrossHair: 0
+  connectedInvItem: {fileID: 0}
   canPlace: 0
   isPlaced: 0
   canBeUsed: 1
@@ -232,6 +237,7 @@ MonoBehaviour:
   StartUseAnimation: 
   UseAnimations: []
   CustomHoldAnimation: 
+  currentAnimChoice: 0
   ItemObjectAnimations: []
 --- !u!82 &5426564105021035801
 AudioSource:
@@ -242,7 +248,7 @@ AudioSource:
   m_GameObject: {fileID: 7668706958697367083}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300002, guid: 4945421a940f27f4da472315e07ea556, type: 2}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: 20bfa29a2ece3284f935fedf32737170, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
   m_Volume: 0.309

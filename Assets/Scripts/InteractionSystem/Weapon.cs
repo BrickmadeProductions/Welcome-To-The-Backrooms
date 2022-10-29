@@ -5,94 +5,255 @@ using UnityEngine;
 public class Weapon : MonoBehaviour
 {
     public float damage;
-    public HoldableObject connetedObject;
+    public CraftedWeapon connetedObject;
     public Renderer WeaponBloodRenderer;
     public float bloodAmount = 0;
     public bool onlyHitOneLimb = true;
 
     private void Start()
     {
-        if (connetedObject != null)
-            connetedObject.SetMetaData("damage", damage.ToString());
+        //fix
+        SearchForConnectedItem();
+
+
     }
-    public void OnTriggerEnter(Collider other)
+    public void SearchForConnectedItem()
     {
-        /*
-         * Stabable Layer - 18
-         */
-        GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetTrigger("WeaponHitObject");
-
-        Vector3 collisionPoint = other.gameObject.GetComponent<Collider>().ClosestPointOnBounds(transform.position);
-
-        //hit a breakable holdable object sitting on the floor
-        if (other.gameObject.layer == 9 && connetedObject.animationPlaying)
+        if (GetComponentInParent<CraftedWeapon>() != null)
         {
-            other.GetComponentInParent<HoldableObject>().TakeDamage(damage);
+            connetedObject = GetComponentInParent<CraftedWeapon>();
+            connetedObject.SetStat("Damage", damage.ToString());
         }
-        if (gameObject.layer == 23 && other.gameObject.layer == 18 && other.gameObject.layer != 11 && connetedObject != null ? connetedObject.animationPlaying : true && onlyHitOneLimb)
+    }
+    //hand to hand combat
+    public void OnTriggerEnter(Collider hit)
+    {
+        //make sure that an entity isnt holding this.
+        if (gameObject.GetComponentInParent<Entity>() == null)
         {
-            onlyHitOneLimb = false;
-            AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
-
-            if (limb != null)
+            Vector3 collisionPoint = hit.gameObject.GetComponent<Collider>().ClosestPointOnBounds(transform.position);
+            /*
+             * Stabable Layer - 18
+             */
+            //turn down durability no matter what as long as its not the player
+            //weapon is in players hand
+            if (gameObject.layer == 23)
             {
-                if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.2f)
+                if (connetedObject != null)
                 {
-                    StartCoroutine(limb.attachedEntity.StunTimer());
+                    connetedObject = GetComponentInParent<CraftedWeapon>();
                 }
-
-                limb.attachedEntity.health -= (damage * limb.damageMultiplier);
-                limb.Stabbed(collisionPoint);
-
-                if (bloodAmount < 1)
+                if (hit.gameObject != gameObject)
                 {
-                    bloodAmount += 0.04f;
+                    //not player
+                    if (hit.gameObject.layer != 11)
+                    {
+                        //hit a breakable holdable object sitting on the floor
+                        if (hit.gameObject.layer == 9 && connetedObject.animationPlaying)
+                        {
+                            Debug.Log("Damage");
+                            hit.GetComponentInParent<HoldableObject>().TakeDamage(damage);
+                        }
+                        //hit a wall, also check if 
+                        else if (hit.gameObject.layer != 9 && hit.gameObject.layer == 18 && connetedObject != null ? connetedObject.animationPlaying : true && onlyHitOneLimb)
+                        {
+                            GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetTrigger("WeaponHitObject");
 
-                    if (WeaponBloodRenderer != null)
-                        WeaponBloodRenderer.material.SetFloat("_Wetness", bloodAmount);
+                            onlyHitOneLimb = false;
+                            AttackableEntityLimb limb = hit.GetComponent<AttackableEntityLimb>();
+
+                            if (limb != null)
+                            {
+                                if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.2f)
+                                {
+                                    StartCoroutine(limb.attachedEntity.StunTimer());
+                                }
+
+                                limb.attachedEntity.health -= (damage * limb.damageMultiplier);
+                                limb.Stabbed(collisionPoint);
+
+                                //GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.speed = 0;
+
+                            }
+
+                            if (bloodAmount < 1 && GameSettings.Instance.BloodAndGore)
+                            {
+                                bloodAmount += 0.04f;
+
+                                if (WeaponBloodRenderer != null)
+                                {
+                                    Debug.Log(hit.gameObject.layer);
+                                    WeaponBloodRenderer.material.SetFloat("_Wetness", bloodAmount);
+                                }
+
+                            }
+
+                        }
+
+                    }
                 }
-
-                //GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.speed = 0;
-                
             }
-                
-            
-            
-        }
-        else if (connetedObject != null ? connetedObject.GetComponent<ThrowWeapon>() != null : false && onlyHitOneLimb)
-        {
-            onlyHitOneLimb = false;
-            if (other.gameObject.layer == 18 && other.gameObject.layer != 11 && (connetedObject.GetComponent<ThrowWeapon>().Flying || connetedObject.GetComponent<ThrowWeapon>().stuckInWall))
+            //weapon was being thrown, and is connected to a weapon base
+            else if (connetedObject != null)
             {
-                //Debug.Log("Player Attack");
-                AttackableEntityLimb limb = other.GetComponent<AttackableEntityLimb>();
-                if (limb != null)
+                if (connetedObject.currentBlade != null && hit.gameObject != gameObject)
                 {
-                    if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.3f)
+
+                    if (hit.gameObject.layer != 13 && hit.gameObject.layer != 11 && hit.gameObject.layer != 8 && hit.gameObject.layer != 6 && !connetedObject.stuckInWall && connetedObject.Flying)
                     {
-                        StartCoroutine(limb.attachedEntity.StunTimer());
+                        AudioSource.PlayClipAtPoint(connetedObject.stuckSounds[UnityEngine.Random.Range(0, connetedObject.stuckSounds.Length)], hit.transform.position);
+
+                        /*if (connetedObject.ObjectConnectionJoint == null && hit.transform.GetComponentInParent<Rigidbody>() != null)
+                        {
+                            //conects the joint to the other object
+
+                            connetedObject.ObjectConnectionJoint = GetComponentInParent<HoldableObject>().gameObject.AddComponent<FixedJoint>();
+                            // sets joint position to point of contact
+                            connetedObject.ObjectConnectionJoint.anchor = GetComponentInChildren<Weapon>().GetComponent<Collider>().ClosestPoint(transform.position);
+
+                            connetedObject.ObjectConnectionJoint.connectedBody = hit.GetComponentInParent<Rigidbody>();
+                            // Stops objects from continuing to collide and creating more joints
+                            connetedObject.ObjectConnectionJoint.enableCollision = false;
+
+                        }*/
+                        if (hit.transform.GetComponentInParent<Rigidbody>() == null)
+                        {
+                            connetedObject.rb.constraints = RigidbodyConstraints.FreezeAll;
+                        }
+
+                        connetedObject.stuckInWall = true;
+                        connetedObject.Flying = false;
+
+
                     }
-                    limb.attachedEntity.health -= (damage * limb.damageMultiplier);
-                    limb.Stabbed(collisionPoint);
-                    if (bloodAmount < 1)
+
+                    //hit entity limb
+                    if (hit.gameObject.layer != 9 && hit.gameObject.layer == 18 && (connetedObject.GetComponent<CraftedWeapon>().Flying || connetedObject.GetComponent<CraftedWeapon>().stuckInWall))
                     {
-                        bloodAmount += 0.04f;
-                        WeaponBloodRenderer.material.SetFloat("_Wetness", bloodAmount);
+                        //Debug.Log("Player Attack");
+                        AttackableEntityLimb limb = hit.GetComponent<AttackableEntityLimb>();
+
+                        if (limb != null)
+                        {
+                            if (!limb.attachedEntity.stunned && Random.Range(0f, 1f) < 0.3f)
+                            {
+                                StartCoroutine(limb.attachedEntity.StunTimer());
+                            }
+                            limb.attachedEntity.health -= (damage * limb.damageMultiplier);
+                            limb.Stabbed(collisionPoint);
+
+                            if (bloodAmount < 1 && GameSettings.Instance.BloodAndGore)
+                            {
+                                bloodAmount += 0.04f;
+
+                                if (WeaponBloodRenderer != null)
+                                {
+                                    Debug.Log(hit.gameObject.layer);
+                                    WeaponBloodRenderer.material.SetFloat("_Wetness", bloodAmount);
+                                }
+                            }
+                        }
                     }
+
+                }
+            }
+            if (connetedObject != null)
+            {
+                //reduce durability
+                if (hit.gameObject.layer != 11 && connetedObject.stuckInWall ? true : connetedObject.animationPlaying)
+                {
+                    if (connetedObject.currentFasten != null)
+                    {
+                        connetedObject.currentFasten.durabilityLeft -= 1;
+
+                        connetedObject.SetStat("Fasten Durability", connetedObject.currentFasten.durabilityLeft.ToString());
+
+                        //set object stat
+                        GetComponentInParent<HoldableObject>().SetStat("Durability", GetComponentInParent<WeaponPiece>().durabilityLeft.ToString());
+                        GetComponentInParent<HoldableObject>().SetMetaData("Durability", GetComponentInParent<WeaponPiece>().durabilityLeft.ToString());
+
+
+                        if (connetedObject.currentFasten.durabilityLeft <= 0)
+                        {
+                            connetedObject.BreakPiece(connetedObject.currentFasten, connetedObject.connectedInvItem);
+
+                            if (connetedObject.currentBlade != null)
+                                connetedObject.BreakPiece(connetedObject.currentBlade, connetedObject.connectedInvItem);
+                        }
+
+
+                    }
+                    else
+                    {
+                        if (connetedObject.currentBlade != null)
+                        {
+                            connetedObject.currentBlade.durabilityLeft -= 1;
+
+                            if (connetedObject.currentBlade.durabilityLeft <= 1)
+                                connetedObject.currentBlade.durabilityLeft = 1;
+
+                            connetedObject.SetStat("Blade Durability", connetedObject.currentBlade.durabilityLeft.ToString());
+
+                            GetComponentInParent<HoldableObject>().SetStat("Durability", GetComponentInParent<WeaponPiece>().durabilityLeft.ToString());
+                            GetComponentInParent<HoldableObject>().SetMetaData("Durability", GetComponentInParent<WeaponPiece>().durabilityLeft.ToString());
+
+                            if (connetedObject.currentBlade.durabilityLeft <= 1)
+                            {
+                                if (connetedObject.currentFasten == null)
+                                {
+                                    connetedObject.BreakPiece(connetedObject.currentBlade, connetedObject.connectedInvItem);
+                                }
+
+                            }
+
+
+                        }
+                    }
+
                 }
             }
         }
         
-
+      
 
     }
 
+
+    //fix blood renderer
+    //fix joint
+    //fix durability
+
     public void OnTriggerExit(Collider other)
     {
-        GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.ResetTrigger("WeaponHitObject");
+        
+        if (connetedObject != null)
+        {
+            //weapon is in players hand
+            if (gameObject.layer == 23)
+            {
+                if (connetedObject.ObjectConnectionJoint != null)
+                {
+                    Destroy(GetComponentInParent<HoldableObject>().gameObject.GetComponent<FixedJoint>());
+                    Destroy(GetComponentInParent<HoldableObject>().gameObject.GetComponent<Rigidbody>());
+                    connetedObject.ObjectConnectionJoint = null;
+                }
+
+                GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.ResetTrigger("WeaponHitObject");
+            }
+            
+
+            connetedObject.stuckInWall = false;
+
+            
+        }
+
         onlyHitOneLimb = true;
+
+
         //GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.speed = 1;
         //Debug.Log("TriggerExit");
+
+
     }
 
 }

@@ -24,6 +24,17 @@ public struct SaveableEntity
 		return type.ToString() + "-" + runTimeID;
 	}
 }
+[Serializable]
+public struct EntityDrop
+{
+	public OBJECT_TYPE type;
+
+	public Transform locationOnBody;
+
+	public int dropChance;
+
+
+}
 
 public abstract class Entity : MonoBehaviour
 {
@@ -97,6 +108,10 @@ public abstract class Entity : MonoBehaviour
 
 	List<EntityAudioAttractor> currentPossibleTargets;
 
+	public List<EntityDrop> drops;
+
+	public List<InteractableObject> activeDropsHeld;
+
 	public abstract void OnEventStart();
 	public abstract void OnEventEnd();
 
@@ -140,11 +155,19 @@ public abstract class Entity : MonoBehaviour
 	}
     public void GenerateID(BackroomsLevelWorld world)
 	{
-		runTimeID = UnityEngine.Random.Range(0, 10000).ToString();
+		runTimeID = UnityEngine.Random.Range(0, 1000000000).ToString();
+
+		float tries = 0;
 
 		while (world.CheckWorldForEntityKey(type.ToString() + "-" + runTimeID))
 		{
-			runTimeID = UnityEngine.Random.Range(0, 10000).ToString();
+			tries++;
+
+			runTimeID = UnityEngine.Random.Range(0, 1000000000).ToString();
+
+			if (tries > 5f)
+				break;
+
 		}
 
 		gameObject.name = type.ToString() + "-" + runTimeID;
@@ -240,8 +263,28 @@ public abstract class Entity : MonoBehaviour
 		SetCurrentTarget();
 		UpdateEntity();
 
-		if ((Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > despawnDistance && !isDespawned) || health <= 0f)
+		if ((Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > despawnDistance && !isDespawned))
 		{
+			Despawn();
+			isDespawned = true;
+			return;
+		}
+		if (health <= 0)
+        {
+			if (activeDropsHeld.Count > 0)
+			{
+				foreach (InteractableObject spawnedObject in activeDropsHeld)
+				{
+					BPUtil.SetAllColliders(spawnedObject.transform, true);
+
+					spawnedObject.transform.parent = null;
+
+					spawnedObject.GetComponent<Rigidbody>().isKinematic = false;
+
+				}
+			}
+
+
 			Despawn();
 			isDespawned = true;
 			return;
@@ -302,7 +345,7 @@ public abstract class Entity : MonoBehaviour
 		while (playerCanSee)
         {
 			yield return new WaitForSecondsRealtime(5f);
-			GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().DecreaseSanity(UnityEngine.Random.Range(canSeeTarget ? 5f : 2f, canSeeTarget ? 15f : 8f) * (health / 100));
+			GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().ChangeSanity(-UnityEngine.Random.Range(canSeeTarget ? 5f : 2f, canSeeTarget ? 15f : 8f) * (health / 100));
 
 		}
 		

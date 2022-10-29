@@ -96,10 +96,14 @@ MonoBehaviour:
   - isDrinking
   CustomHoldAnimation: 
   ItemObjectAnimations: []
-  filledAmount: 0.2
-  maxDrinks: 10
+  currentUsesLeft: 0.2
+  maxUsesTotal: 7
   waterRenderer: {fileID: 1554613059737719819}
+  destroyWhenFinished: 0
   thirstQuenchPerDrink: 8
+  sanityQuenchPerDrink: 3
+  healthQuenchPerDrink: 10
+  hungerQueenchPerConsume: 5
 --- !u!1 &1263591725544516484
 GameObject:
   m_ObjectHideFlags: 0

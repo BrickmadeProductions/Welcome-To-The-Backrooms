@@ -79,7 +79,21 @@ public class PlayerHealthSystem : MonoBehaviour
 
 	public Animator attackIndicator;
 
+	public float armorReduction = 1;
+
 	Quaternion damageTargetFXRotation = Quaternion.identity;
+
+	//sanity effects
+	public AudioSource sanitySource;
+
+	public Material[] shakeMaterials;
+
+	Vector2[] originalOffsetMainOffset;
+	Vector2[] originalOffsetWetOffset;
+	Vector2[] originalOffsetDetailOffset;
+	Vector2[] originalOffsetDetailMaskOffset;
+
+	float shake = 0;
 
 	public void LoadInData(PlayerSaveData saveData)
     {
@@ -107,13 +121,37 @@ public class PlayerHealthSystem : MonoBehaviour
 	}
 	private void Awake()
 	{
+		originalOffsetMainOffset = new Vector2[shakeMaterials.Length];
+		originalOffsetWetOffset = new Vector2[shakeMaterials.Length];
+		originalOffsetDetailOffset = new Vector2[shakeMaterials.Length];
+		originalOffsetDetailMaskOffset = new Vector2[shakeMaterials.Length];
+
 		player = GetComponent<PlayerController>();
 
 		StartCoroutine(UpdateHealth());
 		StartCoroutine(NaturalRegen());
-	}
 
-	void Update()
+		for (int i = 0; i < shakeMaterials.Length; i++)
+		{
+			originalOffsetMainOffset[i] = shakeMaterials[i].GetTextureOffset(Shader.PropertyToID("_MainTex"));
+			originalOffsetWetOffset[i] = shakeMaterials[i].GetTextureOffset(Shader.PropertyToID("_WetMap"));
+			originalOffsetDetailOffset[i] = shakeMaterials[i].GetTextureOffset(Shader.PropertyToID("_DetailAlbedoMap"));
+			originalOffsetDetailMaskOffset[i] = shakeMaterials[i].GetTextureOffset(Shader.PropertyToID("_DetailMask"));
+		}
+
+	}
+    private void OnDestroy()
+    {
+		for (int i = 0; i < shakeMaterials.Length; i++)
+		{
+			shakeMaterials[i].SetTextureOffset(Shader.PropertyToID("_MainTex"), originalOffsetMainOffset[i]);
+			shakeMaterials[i].SetTextureOffset(Shader.PropertyToID("_WetMap"), originalOffsetWetOffset[i]);
+			shakeMaterials[i].SetTextureOffset(Shader.PropertyToID("_DetailAlbedoMap"), originalOffsetDetailOffset[i]);
+			shakeMaterials[i].SetTextureOffset(Shader.PropertyToID("_DetailMask"), originalOffsetDetailMaskOffset[i]);
+
+		}
+	}
+    void Update()
 	{
 		if (Input.GetButton("Blink") && !GameSettings.Instance.IsCutScene)
 		{
@@ -138,6 +176,62 @@ public class PlayerHealthSystem : MonoBehaviour
 		sanityText.text = ((int)sanity).ToString() ?? "";
 		heartBeatSource.pitch = (float)heartRate / 90f;
 		heartBeatSource.volume = (float)heartRate / 100f - 1f;
+
+		if (shake > 0)
+		{
+			Vector3 shakeValue = (UnityEngine.Random.insideUnitCircle * Mathf.Clamp01(1f - (sanity / 100f))) / 10f;
+			shake -= Time.deltaTime / 2;
+
+			if (sanity < 50f)
+            
+				sanitySource.volume = Mathf.Clamp01((1f - (sanity / 100f)) - 0.5f);
+			else
+				sanitySource.volume = Mathf.Clamp01(Mathf.Lerp(sanitySource.volume, 0, Time.deltaTime / 2f));
+
+			if (sanity < 15f)
+
+				foreach (Material mat in shakeMaterials)
+				{
+					mat.SetTextureOffset(Shader.PropertyToID("_MainTex"), shakeValue);
+					mat.SetTextureOffset(Shader.PropertyToID("_WetMap"), shakeValue);
+					mat.SetTextureOffset(Shader.PropertyToID("_DetailAlbedoMap"), shakeValue);
+					mat.SetTextureOffset(Shader.PropertyToID("_DetailMask"), shakeValue);
+
+				}
+			
+			
+			GameSettings.Instance.Chrom.intensity.value = Mathf.Clamp01(Mathf.Lerp(GameSettings.Instance.Chrom.intensity.value, (0.081f + (1f - (sanity / 100f))) - 0.081f , Time.deltaTime / 2));
+			GameSettings.Instance.Vignette.intensity.value = Mathf.Clamp(Mathf.Lerp(GameSettings.Instance.Vignette.intensity.value, (0.392f + (1f - (sanity / 100f))) - 0.392f, Time.deltaTime / 2), 0, 0.7f);
+			GameSettings.Instance.ColorGrading.saturation.value = Mathf.Clamp01(Mathf.Lerp(GameSettings.Instance.ColorGrading.saturation.value, ((1f - (sanity / 100f))), Time.deltaTime / 2)) * -50f;
+
+		}
+		else
+		{
+			shake = 0.0f;
+		}
+
+		if (sanity < 75f)
+		{
+			shake = 1f;
+		}
+		else
+		{
+			sanitySource.volume = 0;
+
+			for (int i = 0; i < shakeMaterials.Length; i++)
+			{
+				shakeMaterials[i].SetTextureOffset(Shader.PropertyToID("_MainTex"), originalOffsetMainOffset[i]);
+				shakeMaterials[i].SetTextureOffset(Shader.PropertyToID("_WetMap"), originalOffsetWetOffset[i]);
+				shakeMaterials[i].SetTextureOffset(Shader.PropertyToID("_DetailAlbedoMap"), originalOffsetDetailOffset[i]);
+				shakeMaterials[i].SetTextureOffset(Shader.PropertyToID("_DetailMask"), originalOffsetDetailMaskOffset[i]);
+
+			}
+			GameSettings.Instance.Chrom.intensity.value = Mathf.Lerp(GameSettings.Instance.Chrom.intensity.value, 0.081f, Time.deltaTime);
+			GameSettings.Instance.Vignette.intensity.value = Mathf.Lerp(GameSettings.Instance.Vignette.intensity.value, 0.392f, Time.deltaTime);
+			GameSettings.Instance.ColorGrading.saturation.value = Mathf.Clamp01(Mathf.Lerp(GameSettings.Instance.ColorGrading.saturation.value, 0f, Time.deltaTime));
+		}
+		
+
 	}
 
 	public void WakeUpRoom()
@@ -223,7 +317,7 @@ public class PlayerHealthSystem : MonoBehaviour
 			ChangeHunger(player.currentPlayerState == PlayerController.PLAYERSTATES.RUN ? -0.5f : -0.23f);
 			ChangeThirst(player.currentPlayerState == PlayerController.PLAYERSTATES.RUN ? -0.35f : -0.2f);
 
-			if (SceneManager.GetActiveScene().name != "RoomHomeScreen" && sanity > 0f)
+			if (GameSettings.Instance.ActiveScene != SCENE.ROOM && sanity > 0f)
 			{
 				sanity -= 0.2f;
 			}
@@ -244,7 +338,7 @@ public class PlayerHealthSystem : MonoBehaviour
 				hunger = 0f;
 				health -= 3f;
 			}*/
-			yield return new WaitForSecondsRealtime(2f);
+			yield return new WaitForSecondsRealtime(3f);
 		}
 	}
 
@@ -317,10 +411,7 @@ public class PlayerHealthSystem : MonoBehaviour
 		}
 	}
 
-	public void DecreaseSanity(float amount)
-	{
-		sanity -= amount;
-	}
+	
 
 	public IEnumerator RandomHeartRate()
 	{
@@ -347,6 +438,16 @@ public class PlayerHealthSystem : MonoBehaviour
 			stamina += amount;
 			yield return new WaitForSecondsRealtime(0.5f);
 		}
+	}
+	public void ChangeSanity(float amount)
+	{
+		sanity += amount;
+		sanity = Mathf.Clamp(sanity, 0f, 250f);
+	}
+	public void ChangeHealth(float amount)
+	{
+		health += amount;
+		health = Mathf.Clamp(health, 0f, 100f);
 	}
 	public void ChangeStamina(float amount)
 	{
@@ -376,7 +477,7 @@ public class PlayerHealthSystem : MonoBehaviour
 
 	public void TakeDamage(float damageSubtraction, float sanityMultipler, float heartrateIncrease)
     {
-		player.playerHealth.health -= damageSubtraction;
+		player.playerHealth.health -= damageSubtraction * armorReduction;
 		player.playerHealth.sanity *= sanityMultipler;
 		player.playerHealth.ChangeHeartRate(heartrateIncrease);
 

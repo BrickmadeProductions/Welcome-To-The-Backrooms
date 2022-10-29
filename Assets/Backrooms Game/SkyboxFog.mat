@@ -2,14 +2,15 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: SkyboxFog
-  m_Shader: {fileID: 4800000, guid: af3f75217b9093d4ca08b592894901eb, type: 3}
-  m_ShaderKeywords: 
+  m_Shader: {fileID: 103, guid: 0000000000000000f000000000000000, type: 0}
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -20,7 +21,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BackTex:
-        m_Texture: {fileID: 2800000, guid: 10f9a85f71492914db0c4c29aa247714, type: 3}
+        m_Texture: {fileID: 2800000, guid: e2354e314446e544f8158c185e6f5aef, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -48,7 +49,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _FrontTex:
-        m_Texture: {fileID: 2800000, guid: 458f8897935c42b42a564ffae4cd288e, type: 3}
+        m_Texture: {fileID: 2800000, guid: e2354e314446e544f8158c185e6f5aef, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _LeftTex:
@@ -75,10 +76,15 @@ Material:
         m_Texture: {fileID: 2800000, guid: 188763a309f7d914eaab76b0ad4ea12c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Tex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _UpTex:
         m_Texture: {fileID: 2800000, guid: fe1c1dd35749e6345b5ed492dcc22b02, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - _Blend: 24899
     - _BumpScale: 1
@@ -105,5 +111,5 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorB: {r: 0.23584908, g: 0.23584908, b: 0.23584908, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+    - _Tint: {r: 0.13207549, g: 0.13207549, b: 0.13207549, a: 1}
   m_BuildTextureStacks: []

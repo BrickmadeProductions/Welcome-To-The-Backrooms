@@ -8,6 +8,8 @@ public class LootBox : InteractableObject
 
     public List<Transform> itemSpawnLocations;
 
+    public List<ObjectSpawnData> lootBoxSpawns;
+
     public Animator anim;
 
     public float chanceForItemToBeInASlot;
@@ -46,15 +48,21 @@ public class LootBox : InteractableObject
     {
         if (!hasOpened)
         {
+           
+
             foreach (Transform itemSpawn in itemSpawnLocations)
             {
                  if (chanceForItemToBeInASlot > Random.Range(0, 0.99f))
                  {
-                    GameObject itemToSpawn = WeightedRandomSpawning.ReturnItemBySpawnChances(GameSettings.Instance.worldInstance.worldPropSpawnTable);
+                    GameObject itemToSpawn = WeightedRandomSpawning.ReturnItemBySpawnChances(lootBoxSpawns);
                     
                     if (itemToSpawn.GetComponent<HoldableObject>() != null)
+
                         if (!itemToSpawn.GetComponent<HoldableObject>().large)
-                        GameSettings.Instance.worldInstance.AddNewProp(itemSpawn.position, Quaternion.identity, itemToSpawn);
+                        {
+                            GameSettings.Instance.worldInstance.AddNewProp(itemSpawn.position, Quaternion.identity, itemToSpawn);
+                        }
+                        
                  }
 
             }

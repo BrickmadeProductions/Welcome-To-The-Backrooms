@@ -72,7 +72,7 @@ public class WTTBLightData : MonoBehaviour
                     setColor = biomeColorsDictionary[BIOME_ID.LEVEL_0_RED_ROOMS];
                     Light.color = biomeColorsDictionary[BIOME_ID.LEVEL_0_RED_ROOMS];
                     Light.intensity /= 4f;
-                    Light.range /= 3f;
+                    Light.range /= 1.5f;
                     break;
 
 
