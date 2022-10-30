@@ -9,6 +9,7 @@ public struct ObjectSpawnData
     public OBJECT_TYPE type;
     public List<BIOME_ID> biomesSpawnsIn;
     public int weight;
+
 }
 [System.Serializable]
 public struct EntitySpawnData

@@ -9,7 +9,7 @@ public class AttackableEntityLimb : MonoBehaviour
     
     public void Stabbed(Vector3 collisionPoint)
     {
-        Debug.Log("Player Attacked " + attachedEntity.gameObject.name + " " + name);
+        //Debug.Log("Player Attacked " + attachedEntity.gameObject.name + " " + name);
 
         if (!GetComponent<AudioSource>().isPlaying)
         {

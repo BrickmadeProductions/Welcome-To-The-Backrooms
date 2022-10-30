@@ -16,6 +16,9 @@ TagManager:
   - Enter0
   - Metal
   - NoClipable
+  - Kill_Instant
+  - Arm_EventTrigger
+  - DamagePlayer
   layers:
   - Default
   - TransparentFX
@@ -50,6 +53,21 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: InventoryBackground
+    uniqueID: 2058921235
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: InventoryItems
+    uniqueID: 3231422099
+    locked: 0
+  - name: ArmorUI
+    uniqueID: 1223268739
+    locked: 0
+  - name: Loading
+    uniqueID: 1455111413
+    locked: 0
+  - name: Very Top
+    uniqueID: 366336517
     locked: 0

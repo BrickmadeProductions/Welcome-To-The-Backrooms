@@ -38,6 +38,26 @@ public class BPUtil : MonoBehaviour
 		}
 		return null;
 	}
+	public static void SetMeshRenderers(Transform top, bool io)
+	{
+		if (top.gameObject.GetComponent<Renderer>())
+			top.gameObject.GetComponent<Renderer>().enabled = io;
+
+		foreach (Transform item in top)
+		{
+			if (item.childCount > 0)
+			{
+				if (item.gameObject.GetComponent<Renderer>())
+					item.gameObject.GetComponent<Renderer>().enabled = io;
+				SetMeshRenderers(item, io);
+			}
+			else
+			{
+				if (item.gameObject.GetComponent<Renderer>())
+					item.gameObject.GetComponent<Renderer>().enabled = io;
+			}
+		}
+	}
 	public static void SetAllChildrenToLayer(Transform top, int layer)
 	{
 		top.gameObject.layer = layer;
@@ -57,6 +77,8 @@ public class BPUtil : MonoBehaviour
 	public static void SetAllColliders(Transform top, bool OnOff)
 	{
 		//Destroy(top.GetComponent<Rigidbody>());
+		if (top.gameObject.GetComponent<Collider>() != null)
+			top.gameObject.GetComponent<Collider>().enabled = OnOff;
 
 		foreach (Transform item in top)
 		{
@@ -71,7 +93,8 @@ public class BPUtil : MonoBehaviour
 					}
 
 				}
-				SetAllColliders(item, OnOff);
+				if (!item.GetComponent<InteractableObject>())
+					SetAllColliders(item, OnOff);
 			}
 			else
 			{
@@ -149,55 +172,42 @@ public enum GAMEPLAY_EVENT
 	NONE,
 	LIGHTS_OUT
 }
-public class GameSettings : MonoBehaviour, ISaveable
+
+[Serializable]
+public struct CraftingPair
 {
-	[Serializable]
-	public struct SaveData
-	{
-		public SCENE lastSavedScene;
+	public List<OBJECT_TYPE> objectsRequired;
 
-		public bool bloodAndGore;
+	public OBJECT_TYPE outCome;
 
-		public bool ao;
+	public bool shouldDestroyItem1;
+	public bool shouldDestroyItem2;
 
-		public bool bloom;
+	public string craftingAnimation;
 
-		public bool antiAliasing;
-
-		public bool chrom;
-
-		public bool vsync;
-
-		public bool motionBlur;
-
-		public bool fullScreen;
-
-		public int screenResIndex;
-
-		public int fov;
-
-		public float sensitivity;
-
-		public float masterVolume;
-
-	}
+	public AudioClip craftingAudio;
+}
+public class GameSettings : MonoBehaviour
+{
+	public TextMeshProUGUI demoText;
 
 	public static List<string> cachedSaveIdentifiers;
 
 	public TextMeshProUGUI devModeInfo;
 
-	//BrickmadeProductions, king, wahoo, RJC, Constant, WoodE
-	public static readonly List<ulong> teamMemberSteamIDs = new List<ulong> { 76561199226044925, 76561198017133391, 76561198139743119, 76561198109625129, 76561198968340030, 76561198374741749 };
+	//BrickmadeProductions, king, wahoo, RJC, Constant, WoodE, SCY
+	public static readonly List<ulong> teamMemberSteamIDs = new List<ulong> { 76561199226044925, 76561198017133391, 76561198139743119, 76561198109625129, 76561198968340030, 76561198374741749, 76561199067040929 };
 
 	public BackroomsLevelWorld worldInstance = null;
 	public CutSceneHandler cutSceneHandler;
+
 
 	private List<GenericMenu> gameMenuDatabase;
 
 	[SerializeField]
 	public List<GenericMenu> GameplayMenuDataBase => gameMenuDatabase;
 
-	private SaveData runtimeSaveData;
+	public List<CraftingPair> possibleCraftingPairs;
 
 	[SerializeField]
 	private List<InteractableObject> propDatabase;
@@ -222,6 +232,14 @@ public class GameSettings : MonoBehaviour, ISaveable
 	public static volatile bool PLAYER_DATA_LOADED = false;
 
 	public static volatile bool WORLD_SAVING = false;
+
+	public static volatile bool WORLD_FINISHED_LOADING = false;
+
+	public static volatile bool SCENE_FINISHED_LOADING = false;
+
+	//keybinds
+	public Button currentlySelectedKeyBindButton = null;
+	Coroutine waitingForInputToKeyBind = null;
 
 	public string activeUser;
 
@@ -350,6 +368,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	private static GameSettings m_instance;
 
+	public static bool isLoadingScene;
+
 	private bool cutScene;
 
 	private bool pauseMenuOpen = false;
@@ -419,16 +439,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 	private void Awake()
 	{
 	
-		GameScreen();
-
-		Init();
-
-		player = null;
-
-		positionOffset = new Vector2((float)cursor.width / 2f - 40f, (float)cursor.height / 2f - 100f);
-
-		Cursor.SetCursor(cursor, positionOffset, CursorMode.Auto);
-
 		m_referenceCount++;
 
 		if (m_referenceCount > 1)
@@ -441,7 +451,15 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		DontDestroyOnLoad(gameObject);
 
-		
+		GameScreen();
+
+		Init();
+
+		player = null;
+
+		positionOffset = new Vector2((float)cursor.width / 2f - 40f, (float)cursor.height / 2f - 50f);
+
+		Cursor.SetCursor(cursor, positionOffset, CursorMode.Auto);
 
 
 	}
@@ -466,28 +484,48 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		foreach (Entity item2 in entityDatabase)
 		{
+			Debug.Log(item2.name);
 			EntityDatabase.Add(item2.type, item2);
 		}
 
+		LoadInSettingsPrefs();
+
 	}
 
-	public void OnLoad(string data)
+	public void ResetSettingsPrefs()
+    {
+
+    }
+	
+	public void LoadInSettingsPrefs()
 	{
-		StartCoroutine(OnLoadAsync(data));
+		StartCoroutine(OnLoadAsync());
 	}
 
-	private IEnumerator OnLoadAsync(string data)
+	private IEnumerator OnLoadAsync()
 	{
 		while (ActiveScene == SCENE.INTRO)
 		{
 			yield return new WaitForEndOfFrame();
 		}
 
-		runtimeSaveData = JsonConvert.DeserializeObject<SaveData>(data);
 		ConnectSettings();
-		LoadSettings(runtimeSaveData);
+
+		setAmbientOcclusion(PlayerPrefs.HasKey("AO") ? (PlayerPrefs.GetInt("AO") == 0 ? false : true) : true);
+		setAntiAliasing(PlayerPrefs.HasKey("AA") ? (PlayerPrefs.GetInt("AA") == 0 ? false : true) : true);
+		setVignette(PlayerPrefs.HasKey("VIGNETTE") ? (PlayerPrefs.GetInt("VIGNETTE") == 0 ? false : true) : true);
+		setBloom(PlayerPrefs.HasKey("BLOOM") ? (PlayerPrefs.GetInt("BLOOM") == 0 ? false : true) : true);
+		setChromatic(PlayerPrefs.HasKey("CHROM") ? (PlayerPrefs.GetInt("CHROM") == 0 ? false : true) : true);
+		setScreenRes(PlayerPrefs.HasKey("SCREEN_RES_CHOICE") ? PlayerPrefs.GetInt("SCREEN_RES_CHOICE") : 0);
+		setFullscreen(PlayerPrefs.HasKey("FULLSCREEN") ? (PlayerPrefs.GetInt("FULLSCREEN") == 0 ? false : true) : true);
+		setVSync(PlayerPrefs.HasKey("VSYNC") ? (PlayerPrefs.GetInt("VSYNC") == 0 ? false : true) : false);
+		setMotionBlur(PlayerPrefs.HasKey("MOTION_BLUR") ? (PlayerPrefs.GetInt("MOTION_BLUR") == 0 ? false : true) : false);
+		setFOV(PlayerPrefs.HasKey("FOV") ? PlayerPrefs.GetFloat("FOV") : 80f);
+		setMasterVolume(PlayerPrefs.HasKey("MASTER_VOLUME") ? PlayerPrefs.GetFloat("MASTER_VOLUME") : 1);
+		setSensitivity(PlayerPrefs.HasKey("SENSITIVITY") ? PlayerPrefs.GetFloat("SENSITIVITY") : 1.5f);
+		setBloodAndGore(PlayerPrefs.HasKey("BLOOD_AND_GORE") ? (PlayerPrefs.GetInt("BLOOD_AND_GORE") == 0 ? false : true) : true);
 		//set buttons
-	    ambientOcclusionButton.isOn = AmbientOcclusionEnabled;
+		ambientOcclusionButton.isOn = AmbientOcclusionEnabled;
 		bloomButton.isOn = BloomEnabled;
 		antiAliasingButton.isOn = AntiAliasingEnabled;
 		chromButton.isOn = ChromEnabled;
@@ -500,58 +538,17 @@ public class GameSettings : MonoBehaviour, ISaveable
 		sensitivitySlider.value = Sensitivity;
 		bloodAndGoreToggle.isOn = BloodAndGore;
 
-		LastSavedScene = runtimeSaveData.lastSavedScene;
+		LastSavedScene = PlayerPrefs.HasKey("LAST_SAVED_SCENE") ? (SCENE)PlayerPrefs.GetInt("LAST_SAVED_SCENE") : SCENE.ROOM;
 
 		setScreenRes(screenResIndex);
 		setFullscreen(fullScreenEnabled);
 	}
-
-	public void OnLoadNoData()
-	{
-		setAmbientOcclusion(true);
-		setAntiAliasing(true);
-		setVignette(true);
-		setBloom(true);
-		setChromatic(true);
-		setScreenRes(0);
-		setFullscreen(true);
-		setVSync(false);
-		setMotionBlur(false);
-		setFOV(80f);
-		setMasterVolume(1f);
-		//setSensitivity(data.sensitivity);
-	}
-
-	public string OnSave()
-	{
-		runtimeSaveData = new SaveData
-		{
-			ao = AmbientOcclusionEnabled,
-			bloom = BloomEnabled,
-			antiAliasing = AntiAliasingEnabled,
-			chrom = ChromEnabled,
-			vsync = VSyncEnabled,
-			motionBlur = MotionBlurEnabled,
-			lastSavedScene = LastSavedScene,
-			fov = FOV,
-			fullScreen = FullScreenEnabled,
-			screenResIndex = ScreenResIndex,
-			masterVolume = MasterVolume,
-			sensitivity = Sensitivity,
-			bloodAndGore = bloodandgore
-		};
-		return JsonConvert.SerializeObject(runtimeSaveData);
-	}
-
 	public void ResetGame()
     {
 		StartCoroutine(ResetGameAsync());
     }
 	public IEnumerator ResetGameAsync()
 	{
-
-		//dont wipe saveables because the main menu has savables active from this object
-
 		LastSavedScene = SCENE.ROOM;
 		LoadScene(SCENE.HOMESCREEN);
 
@@ -564,12 +561,10 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		SaveMaster.SyncSave();
 
+		PlayerPrefs.SetInt("LAST_SAVED_SCENE", (int)LastSavedScene);
+
 	}
 
-	public bool OnSaveCondition()
-	{
-		return true;
-	}
 
 	public void OpenURL(string url)
 	{
@@ -590,7 +585,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 	{
 		
 		//close menu otherwise open settings
-		if (Input.GetButtonDown("Esc") && !IsCutScene)
+		if (Input.GetButtonDown("Esc") && !IsCutScene && !isLoadingScene)
 		{
 			foreach (GenericMenu menu in GameplayMenuDataBase)
 			{
@@ -624,21 +619,6 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	}
 
-	private void LoadSettings(SaveData data)
-	{
-		setAmbientOcclusion(data.ao);
-		setAntiAliasing(data.antiAliasing);
-		setVignette(vignetteEnabled);
-		setBloom(data.bloom);
-		setChromatic(data.chrom);
-		setScreenRes(data.screenResIndex);
-		setFullscreen(data.fullScreen);
-		setVSync(data.vsync);
-		setMotionBlur(data.motionBlur);
-		setFOV(data.fov);
-		setMasterVolume(data.masterVolume);
-		setSensitivity(data.sensitivity);
-	}
 
 	private void ConnectSettings()
 	{
@@ -702,12 +682,49 @@ public class GameSettings : MonoBehaviour, ISaveable
 		settingsScreen.transform.gameObject.SetActive(false);
 		mainScreen.transform.gameObject.SetActive(false);
 	}
+	public void setKeyBind(Button button)
+    {
 
+		currentlySelectedKeyBindButton = button;
+
+		if (waitingForInputToKeyBind == null)
+		{
+			waitingForInputToKeyBind = StartCoroutine(waitForKeyBindInput());
+		}
+		else
+		{
+			StopCoroutine(waitingForInputToKeyBind);
+			waitingForInputToKeyBind = StartCoroutine(waitForKeyBindInput());
+
+		}
+		
+	}
+	private readonly Array keyCodes = Enum.GetValues(typeof(KeyCode));
+	IEnumerator waitForKeyBindInput()
+    {
+		while (true)
+        {
+			if (Input.anyKeyDown)
+			{
+				foreach (KeyCode keyCode in keyCodes)
+				{
+					if (Input.GetKey(keyCode))
+					{
+						currentlySelectedKeyBindButton.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = keyCode.ToString();
+						break;
+					}
+				}
+			}
+			
+		}
+    }
 	public void setFullscreen(bool fullscreen)
 	{
 		ConnectSettings();
 		fullScreenEnabled = fullscreen;
 		Screen.SetResolution(sX, sY, fullscreen);
+
+		PlayerPrefs.SetInt("FULLSCREEN", fullscreen ? 1 : 0);
 	}
 
 	public void setScreenRes(int res)
@@ -733,11 +750,13 @@ public class GameSettings : MonoBehaviour, ISaveable
 				break;
 			case 4:
 				sX = 640;
-				sY = 480;
+				sY = 360;
 				break;
 		}
 		screenResIndex = res;
 		Screen.SetResolution(sX, sY, fullScreenEnabled);
+
+		PlayerPrefs.SetInt("SCREEN_RES_CHOICE", res);
 	}
 
 	public void setTextureRes(int res)
@@ -750,6 +769,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 	{
 		ConnectSettings();
 		sensitivity = sens;
+
+		PlayerPrefs.SetFloat("SENSITIVITY", sens);
 	}
 
 	public void setFOV(float fov)
@@ -757,6 +778,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 		ConnectSettings();
 		this.fov = (int)fov;
 		Camera.main.fieldOfView = fov;
+
+		PlayerPrefs.SetFloat("FOV", fov);
 	}
 
 	public void setMasterVolume(float volume)
@@ -764,6 +787,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 		ConnectSettings();
 		masterVolume = volume;
 		audioHandler.master.SetFloat("MasterVolume", Mathf.Log10(masterVolume) * 20f);
+
+		PlayerPrefs.SetFloat("MASTER_VOLUME", volume);
 	}
 
 	public void setAmbientOcclusion(bool io)
@@ -771,6 +796,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 		ConnectSettings();
 		ambientOcclusion.active = io;
 		ambientOcclusionEnabled = io;
+
+		PlayerPrefs.SetInt("AO", io ? 1 : 0);
 	}
 
 	public void setMotionBlur(bool io)
@@ -778,6 +805,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 		ConnectSettings();
 		motionBlur.active = io;
 		motionBlurEnabled = io;
+
+		PlayerPrefs.SetInt("MOTION_BLUR", io ? 1 : 0);
 	}
 
 	public void setChromatic(bool io)
@@ -785,6 +814,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 		ConnectSettings();
 		chrom.active = io;
 		chromEnabled = io;
+
+		PlayerPrefs.SetInt("CHROM", io ? 1 : 0);
 	}
 
 	public void setVignette(bool io)
@@ -792,6 +823,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 		ConnectSettings();
 		vignette.active = io;
 		vignetteEnabled = io;
+
+		PlayerPrefs.SetInt("VIGNETTE", io ? 1 : 0);
 	}
 
 	public void setAntiAliasing(bool io)
@@ -812,6 +845,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 			}
 		}
 		antiAliasingEnabled = io;
+
+		PlayerPrefs.SetInt("AA", io ? 1 : 0);
 	}
 
 	public void setBloom(bool io)
@@ -819,6 +854,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 		ConnectSettings();
 		bloom.active = io;
 		bloomEnabled = io;
+
+		PlayerPrefs.SetInt("BLOOM", io ? 1 : 0);
 	}
 	public void setVSync(bool io)
 	{
@@ -836,28 +873,40 @@ public class GameSettings : MonoBehaviour, ISaveable
 			Application.targetFrameRate = Screen.currentResolution.refreshRate;
 		}
 		vSyncEnabled = io;
+
+		PlayerPrefs.SetInt("VSYNC", io ? 1 : 0);
 	}
 
 	public void setBloodAndGore(bool io)
     {
 		bloodandgore = io;
 
-		foreach (GameObject bloodAndGoreObject in worldInstance.globalBloodAndGoreObjects)
-        {
-			bloodAndGoreObject.SetActive(io);
-        }
-    }
-	public static IEnumerator SaveAllProgress()
-	{
-		Instance.Player.GetComponent<PlayerController>().distance.SetMetersTraveledStats();
-
-		Instance.saveIcon.SetBool("StopSave", false);
-
-		Instance.saveIcon.SetTrigger("Save");
-
 		if (Instance.worldInstance != null)
         {
-			Instance.worldInstance.SaveAllObjectsAndEntitiesInChunks(Instance.worldInstance.allChunks.ToArray());
+			foreach (GameObject bloodAndGoreObject in worldInstance.globalBloodAndGoreObjects)
+			{
+				bloodAndGoreObject.SetActive(io);
+
+			}
+			foreach (Weapon weapon in FindObjectsOfType<Weapon>())
+			{
+				weapon.WeaponBloodRenderer.material.SetFloat("_Wetness", io ? weapon.bloodAmount : 0);
+			}
+		}
+
+		PlayerPrefs.SetInt("BLOOD_AND_GORE", io ? 1 : 0);
+	}
+	public IEnumerator SaveAllProgress()
+	{
+		Player.GetComponent<PlayerController>().distance.SetMetersTraveledStats();
+
+		saveIcon.SetBool("StopSave", false);
+
+		saveIcon.SetTrigger("Save");
+
+		if (worldInstance != null)
+        {
+			worldInstance.SaveAllObjectsAndEntitiesInChunks(worldInstance.allChunks.ToArray());
 		}
 
 		yield return new WaitUntil(() => !WORLD_SAVING);
@@ -869,7 +918,9 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 		Debug.Log("Saved All Data!");
 
-		Instance.saveIcon.SetBool("StopSave", true);
+		saveIcon.SetBool("StopSave", true);
+
+		PlayerPrefs.SetInt("LAST_SAVED_SCENE", (int)LastSavedScene);
 
 	}
 
@@ -884,26 +935,30 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public void LoadSavedScene()
 	{
-		switch (LastSavedScene)
-		{
-			case SCENE.HOMESCREEN:
-				LoadScene(SCENE.ROOM);
-				break;
-			case SCENE.INTRO:
-				LoadScene(SCENE.ROOM);
-				break;
-			case SCENE.LOADING:
-				LoadScene(SCENE.ROOM);
-				break;
-		}
-		if (LastSavedScene != SCENE.INTRO && LastSavedScene != SCENE.HOMESCREEN && LastSavedScene != SCENE.LOADING && LastSavedScene != SCENE.ROOM)
-		{
-			LoadScene(LastSavedScene);
-		}
-        else
+		if (!isLoadingScene)
         {
-			LoadScene(SCENE.ROOM);
+			switch (LastSavedScene)
+			{
+				case SCENE.HOMESCREEN:
+					LoadScene(SCENE.ROOM);
+					break;
+				case SCENE.INTRO:
+					LoadScene(SCENE.ROOM);
+					break;
+				case SCENE.LOADING:
+					LoadScene(SCENE.ROOM);
+					break;
+			}
+			if (LastSavedScene != SCENE.INTRO && LastSavedScene != SCENE.HOMESCREEN && LastSavedScene != SCENE.LOADING && LastSavedScene != SCENE.ROOM)
+			{
+				LoadScene(LastSavedScene);
+			}
+			else
+			{
+				LoadScene(SCENE.ROOM);
+			}
 		}
+		
 	}
 
 	public void CheatMenu(bool io)
@@ -925,26 +980,36 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 	public void LoadScene(SCENE id)
 	{
-		StartCoroutine(PreLoadScene(id));
+		if (!isLoadingScene)
+			StartCoroutine(PreLoadScene(id));
 	}
 
 	public void LoadScene(int id)
 	{
-		StartCoroutine(PreLoadScene((SCENE)id));
+		if (!isLoadingScene)
+			StartCoroutine(PreLoadScene((SCENE)id));
 
 	}
 
 	private IEnumerator PreLoadScene(SCENE id)
 	{
-		
+		isLoadingScene = true;
+
 		//before loading world, save level
 		if (worldInstance != null)
         {
+
 			if (id != SCENE.HOMESCREEN)
 				worldInstance.OnMoveToNewLevel();
+            
+			//DEMO
+			/*else
+            {
+				ResetGame();
 
+			}
+			*/
 			yield return StartCoroutine(SaveAllProgress());
-
 		}
 
 		SCENE_LOADED = false;
@@ -954,6 +1019,10 @@ public class GameSettings : MonoBehaviour, ISaveable
 		SPAWN_REGION_GENERATED = false;
 
 		PLAYER_DATA_LOADED = false;
+
+		WORLD_FINISHED_LOADING = false;
+
+		SCENE_FINISHED_LOADING = false;
 
 		yield return SceneManager.LoadSceneAsync((int)id, LoadSceneMode.Single);
 
@@ -965,6 +1034,8 @@ public class GameSettings : MonoBehaviour, ISaveable
 		if (ActiveScene != 0 && player == null)
 		{
 			player = Instantiate(playerPrefab);
+
+			player.GetComponent<PlayerController>().playerCamera.enabled = false;
 		}
 
 		audioHandler.ResetSoundTrackLoopState();
@@ -976,8 +1047,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 				player.GetComponent<PlayerController>().darkShield.SetActive(false);
 
-				//player.transform.position = new Vector3(0f, 1.1f, 0.7f);
-				player.transform.position = new Vector3(0f, 2f, 0.7f);
+				player.transform.position = new Vector3(3.5f, 1f, 0.7f);
 
 				post.profile = homeScreenRoomProfile;
 
@@ -1029,7 +1099,7 @@ public class GameSettings : MonoBehaviour, ISaveable
 
 			case SCENE.LEVEL1:
 
-				player.GetComponent<PlayerController>().darkShield.SetActive(true);
+				player.GetComponent<PlayerController>().darkShield.SetActive(false);
 
 				player.transform.position = new Vector3(0f, 1.75f, 0f);
 
@@ -1090,16 +1160,18 @@ public class GameSettings : MonoBehaviour, ISaveable
 		ConnectSettings();
 
 		if (AmInSavableScene())
-		{
+        {
 			LastSavedScene = ActiveScene;
-			audioHandler.SetUpAudio(id, ActiveScene == SCENE.LEVELRUN);
 		}
+			
+		
+		audioHandler.SetUpAudio(id);
 
 		SCENE_LOADED = true;
 
 		GAME_FIRST_LOADED = false;
 
-		//SaveMaster.SyncLoad();
+		//SaveMaster.SyncSave();
 		SaveMaster.WriteActiveSaveToDisk();
 
 		Steam.UpdateRichPresence();
@@ -1110,11 +1182,40 @@ public class GameSettings : MonoBehaviour, ISaveable
 			//loading screen
 			yield return SceneManager.LoadSceneAsync(2, LoadSceneMode.Additive);
 
-			yield return new WaitUntil(() => SPAWN_REGION_GENERATED);
+			yield return new WaitUntil(() => WORLD_FINISHED_LOADING);
+
+			if (worldInstance.gameplay_events_possible.Count() > 0)
+			{
+				StartCoroutine(worldInstance.TrackEventTime());
+				StartCoroutine(worldInstance.TryStartRandomEvents());
+			}
+
+			StartCoroutine(worldInstance.SaveDataEveryXMinutes(5f));
+			StartCoroutine(worldInstance.TrySpawnEntities());
+
+			//DEMO
+			//StartCoroutine(worldInstance.TimeLimitForDemo());
+
+			yield return new WaitForSecondsRealtime(2f);
 
 			SceneManager.UnloadScene(2);
-			
+
+			//DEMO
+			//Instance.demoText.gameObject.SetActive(true);
+
 		}
+		else
+        {
+			Instance.demoText.gameObject.SetActive(false);
+		}
+
+		if (player.GetComponent<PlayerController>() != null)
+			player.GetComponent<PlayerController>().playerCamera.enabled = true;
+
+		SCENE_FINISHED_LOADING = true;
+
+		isLoadingScene = false;
+
 
 
 	}
@@ -1126,9 +1227,4 @@ public class GameSettings : MonoBehaviour, ISaveable
 		}
 		return false;
 	}
-
-	void OnApplicationQuit()
-    {
-		SaveAllProgress();
-    }
 }

@@ -11,10 +11,11 @@ public class InventorySlot : MonoBehaviour, IDropHandler
     public int weightAllowed;
 
     public List<OBJECT_TYPE> whiteList;
+    public List<OBJECT_TYPE> blackList;
 
     public Transform physicalLocation;
 
-
+    public bool shouldDisableSlotMeshRenderers;
     public int GetCurrentSlotWeight()
     {
         int currentSlotWeight = 0;
@@ -26,27 +27,44 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
         return currentSlotWeight;
     }
-    public void RemoveItemFromSlot(InventoryItem invItem, bool destroyItem)
+    public void RemoveItemFromSlot(InventoryItem invItem, bool destroyInvItemInInv)
     {
+        if (shouldDisableSlotMeshRenderers)
+        {
+
+            BPUtil.SetMeshRenderers(itemsInSlot[0].connectedObject.transform, true);
+
+        }
+
         itemsInSlot.Remove(invItem);
 
-        invItem.connectedObject.RemoveMetaData("INV_SLOT");
-
-        if (destroyItem)
+        if (destroyInvItemInInv)
             Destroy(invItem.gameObject);
     }
-    public void RemoveItemFromSlot(HoldableObject objectRemove, bool destroyItem)
+    public void RemoveItemFromSlot(HoldableObject objectRemove, bool destroyInvItemInInv)
     {
+        if (shouldDisableSlotMeshRenderers)
+        {
+
+            BPUtil.SetMeshRenderers(itemsInSlot[0].connectedObject.transform, true);
+
+        }
+
         foreach (InventoryItem invItem in itemsInSlot)
         {
             if (invItem.connectedObject == objectRemove)
             {
                 itemsInSlot.Remove(invItem);
-                objectRemove.RemoveMetaData("INV_SLOT");
 
-                if (destroyItem)
+                
 
+                if (destroyInvItemInInv)
+                {
                     Destroy(invItem.gameObject);
+                   
+                }
+
+                    
                 break;
             }
         }
@@ -55,15 +73,63 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
     public void AddItemToSlot(InventoryItem invItem)
     {
-        InventorySlot slotFrom = invItem.slotIn;
-        //exit the method and dont do anything if the slot can't hold anymore items
-        /*if (GetCurrentSlotWeight() + invItem.connectedObject.inventoryObjectData.inventoryWeight > weightAllowed)
-            return;*/
+
+        if (!GameSettings.Instance.Player.GetComponent<PlayerController>().hasGivenCraftingNotification)
+        {
+            GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("YOU CAN CRAFT ITEMS TOGETHER BY DRAGGING THEM OVER EACHOTHER IN YOUR INVENTORY, ITEMS HAVE TOOLTIPS EXPLAINING WHAT THEY CAN MAKE!");
+            GameSettings.Instance.Player.GetComponent<PlayerController>().hasGivenCraftingNotification = true;
+        }
+
+        //check if this item can fit
+        if (GetCurrentSlotWeight() + invItem.connectedObject.inventoryObjectData.inventoryWeight > weightAllowed && itemsInSlot.Count == 0)
+        {
+            return;
+        }
+        //check swap senerio
+        else if (itemsInSlot.Count > 0)
+        {
+            if (itemsInSlot[0].connectedObject.inventoryObjectData.inventoryWeight > invItem.slotIn.weightAllowed
+                    || invItem.connectedObject.inventoryObjectData.inventoryWeight > weightAllowed)
+            {
+                return;
+            }
+
+            if (invItem.slotIn.whiteList.Count > 0)
+                if (!invItem.slotIn.whiteList.Contains(itemsInSlot[0].connectedObject.type))
+                    return;
+
+            if (invItem.slotIn.blackList.Count > 0)
+                if (invItem.slotIn.blackList.Contains(itemsInSlot[0].connectedObject.type))
+                    return;
+        }
+
+            
 
         if (whiteList.Count > 0)
             if (!whiteList.Contains(invItem.connectedObject.type))
                 return;
 
+        if (blackList.Count > 0)
+            if (blackList.Contains(invItem.connectedObject.type))
+                return;
+
+        InventorySlot slotFrom = invItem.slotIn;
+        //exit the method and dont do anything if the slot can't hold anymore items
+
+
+        switch (invItem.connectedObject.objectCategory)
+        {
+            case OBJECT_CATEGORY.CONTAINER:
+
+                ((ContainerObject)invItem.connectedObject).ConnectUIToPlayer();
+                ((ContainerObject)invItem.connectedObject).UIObject.SetActive(true);
+
+                break;
+
+            case OBJECT_CATEGORY.ARMOR:
+
+                break;
+        }
 
         //remove current item we are putting into here from its original slot (do this before potential swap)
         invItem.slotIn.itemsInSlot.Remove(invItem);
@@ -71,6 +137,8 @@ public class InventorySlot : MonoBehaviour, IDropHandler
         //swap senerio
         if (itemsInSlot.Count > 0)
         {
+
+            
 
             //put the item from here into the other slot
             InventoryItem itemFromThisSlot = itemsInSlot[0];
@@ -82,10 +150,10 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
             itemFromThisSlot.connectedObject.transform.parent = invItem.slotIn.physicalLocation;
             itemFromThisSlot.connectedObject.transform.position = invItem.slotIn.physicalLocation.position;
-            itemFromThisSlot.connectedObject.transform.localRotation = invItem.slotIn.physicalLocation.localRotation;
+            itemFromThisSlot.connectedObject.transform.localRotation = Quaternion.identity;
             itemFromThisSlot.connectedObject.transform.localPosition = Vector3.zero;
 
-            itemFromThisSlot.connectedObject.rb.isKinematic = true;
+            //itemFromThisSlot.connectedObject.rb.isKinematic = true;
             BPUtil.SetAllColliders(itemFromThisSlot.connectedObject.transform, false);
 
             //itemFromThisSlot.connectedObject.SetMetaData("INV_SLOT", itemFromThisSlot.slotIn.name);
@@ -98,6 +166,17 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             itemFromThisSlot.canvasGroup.alpha = 1f;
             itemFromThisSlot.canvasGroup.blocksRaycasts = true;
 
+            if (itemFromThisSlot.slotIn.shouldDisableSlotMeshRenderers)
+            {
+
+                BPUtil.SetMeshRenderers(itemFromThisSlot.slotIn.itemsInSlot[0].connectedObject.transform, false);
+
+            }
+            else
+            {
+                BPUtil.SetMeshRenderers(itemFromThisSlot.slotIn.itemsInSlot[0].connectedObject.transform, true);
+            }
+
         }
 
 
@@ -108,9 +187,9 @@ public class InventorySlot : MonoBehaviour, IDropHandler
         invItem.connectedObject.transform.parent = physicalLocation;
         invItem.connectedObject.transform.position = physicalLocation.position;
         invItem.connectedObject.transform.localPosition = Vector3.zero;
-        invItem.connectedObject.transform.localRotation = physicalLocation.localRotation;
+        invItem.connectedObject.transform.localRotation = Quaternion.identity;
 
-        invItem.connectedObject.rb.isKinematic = true;
+        //invItem.connectedObject.rb.isKinematic = true;
         BPUtil.SetAllColliders(invItem.connectedObject.transform, false);
 
         //itemFromThisSlot.connectedObject.SetMetaData("INV_SLOT", invItem.slotIn.name);
@@ -118,30 +197,72 @@ public class InventorySlot : MonoBehaviour, IDropHandler
         //call the callback in the interactionsystem to update the physicals
         GameSettings.Instance.Player.GetComponent<InteractionSystem>().OnInventoryItemAddedToSlot_CallBack(slotFrom, this);
 
+        if (shouldDisableSlotMeshRenderers)
+        {
+
+            BPUtil.SetMeshRenderers(itemsInSlot[0].connectedObject.transform, false);
+
+        }
+        else
+        {
+            BPUtil.SetMeshRenderers(itemsInSlot[0].connectedObject.transform, true);
+        }
+
     }
     public void AddItemToSlot(HoldableObject holdableObject)
     {
-        
-        //exit the method and dont do anything if the slot can't hold anymore items
-        /*if (GetCurrentSlotWeight() + holdableObject.inventoryObjectData.inventoryWeight > weightAllowed)
-            return;*/
+        if (holdableObject.GetComponent<Rigidbody>() != null)
+        {
+            Destroy(holdableObject.GetComponent<Rigidbody>());
+            holdableObject.rb = null;
+        }
+
+        if (!GameSettings.Instance.Player.GetComponent<PlayerController>().hasGivenCraftingNotification)
+        {
+            GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("YOU CAN CRAFT ITEMS TOGETHER BY DRAGGING THEM OVER EACHOTHER IN YOUR INVENTORY, CHECK ITEM TOOLTIPS!");
+            GameSettings.Instance.Player.GetComponent<PlayerController>().hasGivenCraftingNotification = true;
+        }
+
+        if (GetCurrentSlotWeight() + holdableObject.inventoryObjectData.inventoryWeight > weightAllowed)
+        {
+            return;
+        }
+
+        if (blackList.Count > 0)
+            if (blackList.Contains(holdableObject.type))
+                return;
+
         if (itemsInSlot.Count > 0)
             return;
 
+        switch (holdableObject.objectCategory)
+        {
+            case OBJECT_CATEGORY.CONTAINER:
+
+                ((ContainerObject)holdableObject).ConnectUIToPlayer();
+                ((ContainerObject)holdableObject).UIObject.SetActive(true);
+
+                break;
+
+            case OBJECT_CATEGORY.ARMOR:
+
+                break;
+        }
+
+
         GameObject newInventoryItem = Instantiate(GameSettings.Instance.inventoryItemPrefab.gameObject, transform);
 
-        
         //set itemSlotInfo
         newInventoryItem.GetComponent<InventoryItem>().SetDetails(holdableObject.inventoryObjectData, holdableObject, this);
         itemsInSlot.Add(newInventoryItem.GetComponent<InventoryItem>());
 
-        holdableObject.rb.isKinematic = true;
+        //holdableObject.rb.isKinematic = true;
         BPUtil.SetAllColliders(holdableObject.transform, false);
 
         holdableObject.transform.parent = physicalLocation;
         holdableObject.transform.position = physicalLocation.position;
         holdableObject.transform.localPosition = Vector3.zero;
-        holdableObject.transform.localRotation = physicalLocation.localRotation;
+        holdableObject.transform.localRotation = Quaternion.identity;
 
         //holdableObject.SetMetaData("INV_SLOT", name);
 
@@ -149,19 +270,221 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
         //call the callback in the interactionsystem to update the physicals
         GameSettings.Instance.Player.GetComponent<InteractionSystem>().OnInventoryItemAddedToSlot_CallBack(null, this);
+        
+        if (shouldDisableSlotMeshRenderers)
+        {
+
+            BPUtil.SetMeshRenderers(itemsInSlot[0].connectedObject.transform, false);
+
+        }
+        else
+        {
+            BPUtil.SetMeshRenderers(itemsInSlot[0].connectedObject.transform, true);
+        }
+
     }
 
     public void OnDrop(PointerEventData data)
     {
-        if (GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected != null)
+
+        StartCoroutine(DropAction());
+    }
+
+    IEnumerator DropAction()
+    {
+        if (GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected != null && GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.slotIn != this)
         {
-            AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
+            switch (GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject.objectCategory)
+            {
+                case OBJECT_CATEGORY.AMMO:
+
+                    if (itemsInSlot.Count > 0)
+                    {
+                        if (itemsInSlot[0].connectedObject.objectCategory == OBJECT_CATEGORY.LOADABLE)
+                        {
+                            AmmoObject ammo = ((AmmoObject)GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject);
+
+                            int amountToLoad;
+
+                            if (ammo.amountLeft + itemsInSlot[0].connectedObject.GetComponent<Loadable>().amountLoaded > itemsInSlot[0].connectedObject.GetComponent<Loadable>().maxLoad)
+                            {
+                                amountToLoad = itemsInSlot[0].connectedObject.GetComponent<Loadable>().maxLoad - itemsInSlot[0].connectedObject.GetComponent<Loadable>().amountLoaded;
+                            }
+                            else
+                            {
+                                amountToLoad = ammo.maxAmount;
+                            }
+
+                            itemsInSlot[0].connectedObject.GetComponent<Loadable>().LoadObject(amountToLoad, true);
+
+                            if (ammo.shouldDestroyWhenLoaded)
+                            {
+                                string ammoToDestroy = GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject.GetWorldID();
+                                GameSettings.Instance.Player.GetComponent<InteractionSystem>().SetDrop(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.slotIn);
+                                GameSettings.Instance.worldInstance.RemoveProp(ammoToDestroy, true);
+                                GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = true;
+                            }
+                            else
+                            {
+                                ((AmmoObject)GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject).RemoveAmount(amountToLoad);
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
+
+                    }
+
+
+                    break;
+
+                case OBJECT_CATEGORY.CRAFTING_MATERIAL:
+
+                    if (itemsInSlot.Count > 0)
+                    {
+                        if (itemsInSlot[0].connectedObject.objectCategory == OBJECT_CATEGORY.WEAPON_BASE || itemsInSlot[0].connectedObject.objectCategory == OBJECT_CATEGORY.CRAFTING_MATERIAL)
+                        {
+                            bool hasCraftingPair = false;
+                            List<CraftingPair> possiblePairs = new List<CraftingPair>();
+
+                            foreach (CraftingPair pair in GameSettings.Instance.possibleCraftingPairs)
+                            {
+                                if (pair.objectsRequired[0] == GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject.type &&
+                                    pair.objectsRequired[1] == itemsInSlot[0].connectedObject.type)
+                                {
+                                    possiblePairs.Add(pair);
+
+                                }
+                            }
+
+                            if (possiblePairs.Count > 0)
+                            {
+                                //just craft
+                                if (possiblePairs.Count == 1)
+                                {
+                                    CraftItem(possiblePairs[0], GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected, itemsInSlot[0]);
+                                    
+                                }
+                                //give selections
+                                else
+                                {
+                                    CraftingPrompt craftingPrompt = Instantiate(GameSettings.Instance.Player.GetComponent<InventorySystem>().promptPrefab.gameObject, GameSettings.Instance.Player.GetComponent<InventorySystem>().menuObject.transform).GetComponent<CraftingPrompt>();
+                                    craftingPrompt.SetDetails(possiblePairs, this);
+
+                                    yield return new WaitUntil(() => !GameSettings.Instance.Player.GetComponent<InventorySystem>().isCrafting);
+
+                                    Destroy(craftingPrompt.gameObject);
+
+                                    
+                                }
+                                hasCraftingPair = true;
+                                GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = true;
+
+                            }
+                           
+
+                            if (!hasCraftingPair)
+                                AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
+                        }
+                        else
+                        {
+                            AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
+                        break;
+                    }
+                    break;
+
+                default:
+                    AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
+                    break;
+            }
 
             GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = null;
 
-            //Debug.Log("Dropping To " + name);
         }
-        
+
+        yield return null;
     }
+
+
+    //1 = item put on top, 2 = item in slot currently | 1 on top of 2
+    public void CraftItem(CraftingPair pair, InventoryItem object1, InventoryItem object2)
+    {
+
+        InteractionSystem interactionSystem = GameSettings.Instance.Player.GetComponent<InteractionSystem>();
+
+        GameSettings.Instance.Player.GetComponent<InventorySystem>().audioObject.clip = pair.craftingAudio;
+        GameSettings.Instance.Player.GetComponent<InventorySystem>().audioObject.Play();
+
+        //weapons
+        if (object2.connectedObject.GetType() == typeof(CraftedWeapon) && object1.connectedObject.GetComponent<WeaponPiece>() != null)
+        {
+            if (((CraftedWeapon)object2.connectedObject).AddPiece(object1.connectedObject.GetComponent<WeaponPiece>(), object2))
+            {
+                if (this != interactionSystem.GetComponent<InventorySystem>().rHand)
+                {
+                    interactionSystem.GetComponent<PlayerController>().bodyAnim.SetBool((object1.slotIn.itemsInSlot[0].connectedObject.CustomHoldAnimation != "") ? object1.slotIn.itemsInSlot[0].connectedObject.CustomHoldAnimation : "isHoldingSmall", value: false);
+                    interactionSystem.GetComponent<PlayerController>().bodyAnim.SetBool("isHoldingLarge", value: false);
+
+                    interactionSystem.GetComponent<PlayerController>().offHandIK.data.target = null;
+                    interactionSystem.GetComponent<PlayerController>().builder.layers[1].active = false;
+                    interactionSystem.GetComponent<PlayerController>().builder.Build();
+                }
+
+                object1.slotIn.RemoveItemFromSlot(object1.slotIn.itemsInSlot[0], true);
+
+
+            }
+        }
+
+
+        //regular item crafting
+        else if (object1.connectedObject.objectCategory != OBJECT_CATEGORY.WEAPON_BASE && object2.connectedObject.objectCategory != OBJECT_CATEGORY.WEAPON_BASE)
+        {
+            if (pair.shouldDestroyItem1)
+            {
+                interactionSystem.SetDrop(object1.connectedObject.type == pair.objectsRequired[0] ? object1.slotIn : object2.slotIn);
+                GameSettings.Instance.worldInstance.RemoveProp(object1.connectedObject.type == pair.objectsRequired[0] ? object1.connectedObject.GetWorldID() : object2.connectedObject.GetWorldID(), true);
+            }
+            else if (pair.shouldDestroyItem2)
+            {
+                interactionSystem.SetDrop(object1.connectedObject.type == pair.objectsRequired[1] ? object1.slotIn : object2.slotIn);
+                GameSettings.Instance.worldInstance.RemoveProp(object1.connectedObject.type == pair.objectsRequired[1] ? object1.connectedObject.GetWorldID() : object2.connectedObject.GetWorldID(), true);
+            }
+
+
+            InteractableObject newProp = GameSettings.Instance.worldInstance.AddNewProp(GameSettings.Instance.Player.GetComponent<PlayerController>().RHandLocation.transform.position, Quaternion.identity, GameSettings.Instance.PropDatabase[pair.outCome].gameObject);
+
+            interactionSystem.FinalizePickup(newProp, false);
+
+            interactionSystem.canCraft = true;
+
+            GameSettings.Instance.Player.GetComponent<PlayerController>().builder.layers[0].rig.weight = 1f;
+            GameSettings.Instance.Player.GetComponent<PlayerController>().builder.Build();
+
+            if (this != interactionSystem.GetComponent<InventorySystem>().rHand && pair.shouldDestroyItem1)
+            {
+                interactionSystem.GetComponent<PlayerController>().bodyAnim.SetBool((object1.slotIn.itemsInSlot[0].connectedObject.CustomHoldAnimation != "") ? object1.slotIn.itemsInSlot[0].connectedObject.CustomHoldAnimation : "isHoldingSmall", value: false);
+                interactionSystem.GetComponent<PlayerController>().bodyAnim.SetBool("isHoldingLarge", value: false);
+
+                interactionSystem.GetComponent<PlayerController>().offHandIK.data.target = null;
+                interactionSystem.GetComponent<PlayerController>().builder.layers[1].active = false;
+                interactionSystem.GetComponent<PlayerController>().builder.Build();
+            }
+        }
+
+
+
+        GameSettings.Instance.Player.GetComponent<InventorySystem>().isCrafting = false;
+
+    }
+
 }
 

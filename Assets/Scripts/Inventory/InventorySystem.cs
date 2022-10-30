@@ -27,20 +27,26 @@ public class InventorySystem : GenericMenu
 
     //each item has a specific type of way it is crafted, such as pouring bottles into eachother
 
-    public List<ContainerObject> containerObjectsHeld;
-
     //rhand, lhand, head, chest, etc. Things not contained in a container object, stored on the inventory item
     public InventorySlot rHand;
-    /*public InventorySlot lHand;*/
+    public InventorySlot lHand;
     public InventorySlot rPocket;
     public InventorySlot lPocket;
     public InventorySlot head;
     public InventorySlot chest;
+    //location to put the backpack
+    public InventorySlot backPack;
+
 
     public InventoryItem currentItemSlected;
 
-    IEnumerator UpdateAllItemsMetaData()
+    public CraftingPrompt promptPrefab;
+
+    public bool isCrafting = false;
+
+    IEnumerator UpdateAllItemsStats()
     {
+
         while (true)
         {
             foreach (InventorySlot slot in GetAllInvSlots())
@@ -48,21 +54,20 @@ public class InventorySystem : GenericMenu
                 if (slot.itemsInSlot.Count > 0)
                     foreach (InventoryItem item in slot.itemsInSlot)
                     {
-                        string[] metaDataTextArray = new string[item.connectedObject.saveableData.metaData.Count];
+                        string[] statDataArray = new string[item.connectedObject.stats.Count];
 
                         int count = 0;
-                        foreach (KeyValuePair<string, string> metaData in item.connectedObject.saveableData.metaData)
+                        foreach (KeyValuePair<string, string> statData in item.connectedObject.stats)
                         {
                            
-                            if (metaData.Key != "INV_SLOT")
-                                metaDataTextArray[count] = metaData.Key + ": " + metaData.Value + "\n";
+                            statDataArray[count] = statData.Key + ": " + statData.Value + "\n";
 
                             
                             count++;
 
                         }
 
-                        item.metaDataText.text = string.Concat(metaDataTextArray).ToUpper();
+                        item.statText.text = string.Concat(statDataArray).ToUpper();
                     }
                 
             }
@@ -83,11 +88,19 @@ public class InventorySystem : GenericMenu
         {
             if (currentPlayerInventorySave.propsInInventory.ContainsKey(slot.name))
             {
-                slot.AddItemToSlot((HoldableObject)GameSettings.Instance.worldInstance.FindPropInWorldByKey(GetComponent<InventorySystem>().currentPlayerInventorySave.propsInInventory[slot.name]));
+                //Debug.Log(currentPlayerInventorySave.propsInInventory[slot.name]);
+                if ((HoldableObject)GameSettings.Instance.worldInstance.FindPropInWorldByKey(currentPlayerInventorySave.propsInInventory[slot.name]) != null)
+                    slot.AddItemToSlot((HoldableObject)GameSettings.Instance.worldInstance.FindPropInWorldByKey(currentPlayerInventorySave.propsInInventory[slot.name]));
+                else
+                {
+                    continue;
+                }
+
                 if (slot == rHand)
                 {
                     GetComponent<PlayerController>().builder.layers[1].active = true;
-                    GetComponent<PlayerController>().offHandIK.data.target = slot.itemsInSlot[0].connectedObject.offHandIKPoint;
+                    if (GetComponent<PlayerController>().offHandIK.data.target != null)
+                        GetComponent<PlayerController>().offHandIK.data.target = slot.itemsInSlot[0].connectedObject.offHandIKPoint;
                     GetComponent<PlayerController>().builder.Build();
                 }
             }
@@ -100,8 +113,113 @@ public class InventorySystem : GenericMenu
             propsInInventory = new Dictionary<string, string>()
         };
 
-        StartCoroutine(UpdateAllItemsMetaData());
+        StartCoroutine(UpdateAllItemsStats());
+    } 
+
+    bool CanItemGoInSlot(InventorySlot slot, HoldableObject objectToAdd)
+    {
+        if (slot.blackList.Count > 0)
+            if (slot.blackList.Contains(objectToAdd.type))
+            {
+                return false;
+            }
+                
+
+        if (slot.itemsInSlot.Count == 0 && slot.GetCurrentSlotWeight() + objectToAdd.inventoryObjectData.inventoryWeight <= slot.weightAllowed)
+        {
+            if (slot.whiteList.Count > 0)
+            {
+                if (slot.whiteList.Contains(objectToAdd.type))
+                    return true;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
+
+    public InventorySlot GetNextAvailableInventorySlot(HoldableObject objectToAdd)
+    {
+        //rHand can only hold 1 item
+        if (CanItemGoInSlot(rHand, objectToAdd))
+
+            return rHand;
+
+        //rHand can only hold 1 item
+        if (CanItemGoInSlot(rPocket, objectToAdd))
+
+            return rPocket;
+
+        if (CanItemGoInSlot(lPocket, objectToAdd))
+
+            return lPocket;
+
+        if (CanItemGoInSlot(backPack, objectToAdd))
+
+            return backPack;
+
+        if (CanItemGoInSlot(head, objectToAdd))
+
+            return head;
+
+        if (GetBackPack() != null)
+
+            foreach (InventorySlot slot in GetBackPack().storageSlots)
+            {
+                if(CanItemGoInSlot(slot, objectToAdd))
+                {
+                    return slot;
+                }
+                
+            }
+        
+        GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("THERE ARE NO SLOTS AVAILABLE FOR THIS ITEM");
+        
+        return null;
+    }
+
+    public List<InventorySlot> GetAllInvSlots()
+    {
+        List<InventorySlot> slots = new List<InventorySlot>() { rHand, lHand, rPocket, lPocket, head, chest, backPack };
+
+        if (backPack.itemsInSlot.Count > 0)
+        {
+            if (backPack.itemsInSlot[0].GetType() == typeof(ContainerObject))
+            slots.AddRange((ContainerObject)backPack.itemsInSlot[0].connectedObject);
+        }
+
+        return slots;
+
+    }
+
+    public ContainerObject GetBackPack()
+    {
+        if (backPack.itemsInSlot.Count > 0)
+            if (backPack.itemsInSlot[0].connectedObject.GetType() == typeof(ContainerObject))
+                return (ContainerObject)backPack.itemsInSlot[0].connectedObject;
+            else return null;
+        else return null;
+    }
+
+    public override void Update_ExtraInputs()
+    {
+        if (Input.GetButtonDown("SwapRPocketToHand"))
+        {
+            rHand.AddItemToSlot(rPocket.itemsInSlot[0]);
+            rHand.itemsInSlot[0].transform.parent = rHand.itemsInSlot[0].slotIn.transform;
+            rHand.itemsInSlot[0].transform.position = rHand.itemsInSlot[0].slotIn.transform.position;
+        }
+        if (Input.GetButtonDown("SwapLPocketToHand"))
+        {
+            rHand.AddItemToSlot(lPocket.itemsInSlot[0]);
+            rHand.itemsInSlot[0].transform.parent = rHand.itemsInSlot[0].slotIn.transform;
+            rHand.itemsInSlot[0].transform.position = rHand.itemsInSlot[0].slotIn.transform.position;
+        }
+    }
+
     public void SetSlotSaveData(string field, string value)
     {
 
@@ -129,31 +247,11 @@ public class InventorySystem : GenericMenu
 
 
     }
-    public InventorySlot GetNextAvailableInventorySlot(HoldableObject objectToAdd)
-    {
-        //rHand can only hold 1 item
-        if (rHand.itemsInSlot.Count == 0)
-            return rHand;
-
-        if (rPocket.itemsInSlot.Count == 0)
-            return rPocket;
-
-        if (lPocket.itemsInSlot.Count == 0)
-            return lPocket;
-
-        return null;
-    }
-
-    public InventorySlot[] GetAllInvSlots()
-    {
-        return new InventorySlot[] { rHand, rPocket, lPocket, head, chest, };
-
-    }
 
 
-   
 
 
+    
 
 }
 

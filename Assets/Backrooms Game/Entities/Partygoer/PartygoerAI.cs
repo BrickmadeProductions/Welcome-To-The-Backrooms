@@ -186,10 +186,10 @@ public class PartygoerAI : Entity
                     else if (strangling)
                     {
 
-                        GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.TakeDamage(damage, sanityMultiplier, 3f);
+                        GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.TakeDamage(damage, sanityMultiplier, 1f);
 
                         //damage per second
-                        yield return new WaitForSecondsRealtime(0.5f);
+                        yield return new WaitForSecondsRealtime(0.4f);
                     }
                     else
                     {
@@ -206,12 +206,12 @@ public class PartygoerAI : Entity
                 }
                 else
                 {
-                    yield return new WaitForSecondsRealtime(1f);
+                    yield return new WaitForSecondsRealtime(0.1f);
                 }
             }
             else
             {
-                yield return new WaitForSecondsRealtime(1f);
+                yield return new WaitForSecondsRealtime(0.1f);
             }
 
         }

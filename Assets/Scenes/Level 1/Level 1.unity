@@ -15,16 +15,16 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 1
-  m_FogColor: {r: 0, g: 0, b: 0, a: 0}
-  m_FogMode: 2
+  m_FogColor: {r: 0.13333334, g: 0.13333334, b: 0.13333334, a: 0}
+  m_FogMode: 1
   m_FogDensity: 0.01
-  m_LinearFogStart: 1
-  m_LinearFogEnd: 80
+  m_LinearFogStart: 15
+  m_LinearFogEnd: 100
   m_AmbientSkyColor: {r: 0.043137256, g: 0.043137256, b: 0.043137256, a: 1}
-  m_AmbientEquatorColor: {r: 0.1764706, g: 0.1764706, b: 0.1764706, a: 1}
-  m_AmbientGroundColor: {r: 0.1509434, g: 0.14823781, b: 0.13741545, a: 1}
-  m_AmbientIntensity: 2.49
-  m_AmbientMode: 1
+  m_AmbientEquatorColor: {r: 0.09433961, g: 0.09433961, b: 0.09433961, a: 1}
+  m_AmbientGroundColor: {r: 0, g: 0, b: 0, a: 1}
+  m_AmbientIntensity: 1
+  m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.18525274, g: 0.19423246, b: 0.21698111, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: c5e16257d8f2ffe4f92db592a71ed32a, type: 2}
   m_HaloStrength: 0.191
@@ -35,10 +35,10 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 128
   m_ReflectionBounces: 3
-  m_ReflectionIntensity: 0.49
+  m_ReflectionIntensity: 0.183
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 0.49}
+  m_IndirectSpecularColor: {r: 0.0028551798, g: 0.0028551798, b: 0.0028551798, a: 0.183}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -179,14 +179,36 @@ MonoBehaviour:
   viewDistance: 3
   Tiles:
   - {fileID: 8892405685109173974, guid: bdd7dab7f277f41488b4bac91ee7da2d, type: 3}
-  - {fileID: 5267625787904721635, guid: 5ed437d60b5c44947af6e436e0485bd1, type: 3}
-  - {fileID: 3871777592979612537, guid: 06a7b2f06405af341af924a70cf9eaf4, type: 3}
   - {fileID: 5267625787904721635, guid: bc24cb1dbd2aa8c44bced7177acb0d61, type: 3}
-  worldPropSpawnTable: []
+  - {fileID: 3871777592979612537, guid: 06a7b2f06405af341af924a70cf9eaf4, type: 3}
+  - {fileID: 5267625787904721635, guid: 5ed437d60b5c44947af6e436e0485bd1, type: 3}
+  - {fileID: 6332922466361701864, guid: f56315acc8b3bd04e9d046e523fb5389, type: 3}
+  worldPropSpawnTable:
+  - type: 24
+    biomesSpawnsIn: 08000000
+    weight: 25
+  - type: 9
+    biomesSpawnsIn: 08000000
+    weight: 150
+  - type: 0
+    biomesSpawnsIn: 08000000
+    weight: 5
+  - type: 4
+    biomesSpawnsIn: 08000000
+    weight: 15
+  - type: 5
+    biomesSpawnsIn: 08000000
+    weight: 100
+  - type: 32
+    biomesSpawnsIn: 08000000
+    weight: 15
+  - type: 33
+    biomesSpawnsIn: 08000000
+    weight: 2
   worldEntitySpawnTable: []
   worldDataSeed: 0
   biomeDataSeed: 0
-  gameplay_events_possible: 01000000
+  gameplay_events_possible: 
 --- !u!4 &757962601
 Transform:
   m_ObjectHideFlags: 0

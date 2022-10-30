@@ -4,11 +4,15 @@ using UnityEngine;
 
 public abstract class GenericMenu : MonoBehaviour
 {
-    public bool menuOpen = false;
+    public bool menuOpen;
     public GameObject menuObject;
+    public AudioSource audioObject;
 
     public string menuOpenKey;
     public bool canOpen = true;
+    public AudioClip openSound;
+    public AudioClip closeSound;
+
     private void Awake()
     {
         GameSettings.Instance.GameplayMenuDataBase.Add(this);
@@ -18,9 +22,8 @@ public abstract class GenericMenu : MonoBehaviour
     public void ToggleMenu()
     {
 
-        if (canOpen && !GameSettings.Instance.IsCutScene && !GameSettings.Instance.PauseMenuOpen)
+        if (canOpen && !GameSettings.Instance.IsCutScene && !GameSettings.Instance.PauseMenuOpen && !GameSettings.isLoadingScene)
         {
-
 
             menuOpen = !menuOpen;
 
@@ -28,6 +31,13 @@ public abstract class GenericMenu : MonoBehaviour
 
             if (!menuOpen)
             {
+                if (closeSound != null)
+                {
+                    audioObject.clip = closeSound;
+                    audioObject.Play();
+                }
+                    
+
                 GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canMoveHead = true;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
@@ -39,6 +49,12 @@ public abstract class GenericMenu : MonoBehaviour
 
             else
             {
+                if (closeSound != null)
+                {
+                    audioObject.clip = openSound;
+                    audioObject.Play();
+                }
+
                 GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canMoveHead = false;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
@@ -50,7 +66,7 @@ public abstract class GenericMenu : MonoBehaviour
 
 
     }
-
+    public abstract void Update_ExtraInputs();
     void Update()
     {
         if (!GameSettings.Instance.PauseMenuOpen)
@@ -71,5 +87,7 @@ public abstract class GenericMenu : MonoBehaviour
                 
             }
         }
+
+        Update_ExtraInputs();
     }
 }

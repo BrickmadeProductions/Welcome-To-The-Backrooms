@@ -46,17 +46,23 @@ public struct PlayerSaveData
     public bool hasGivenSanityNotificationSaved;
     public bool hasGivenHeartRateNotificationSaved;
     public bool hasGivenStaminaNotificationSaved;
+    public bool hasGivenCraftingNotificationSaved;
+    public bool hasGivenItemBreakingNotificationSaved;
 }
 public class PlayerController : MonoBehaviour, ISaveable
 {
     public TwoBoneIKConstraint offHandIK;
     public RigBuilder builder;
 
+    Coroutine playerDamageOverTime = null;
+
     //notifications
     public bool hasGivenDrinkingNotification = false;
     public bool hasGivenSanityNotification = false;
     public bool hasGivenHeartRateNotification = false;
     public bool hasGivenStaminaNotification = false;
+    public bool hasGivenCraftingNotification = false;
+    public bool hasGivenItemBreakingNotification = false;
 
     PlayerSaveData playerSaveData;
     public string OnSave()
@@ -80,6 +86,8 @@ public class PlayerController : MonoBehaviour, ISaveable
         playerSaveData.hasGivenHeartRateNotificationSaved = hasGivenHeartRateNotification;
         playerSaveData.hasGivenSanityNotificationSaved = hasGivenSanityNotification;
         playerSaveData.hasGivenDrinkingNotificationSaved = hasGivenDrinkingNotification;
+        playerSaveData.hasGivenCraftingNotificationSaved = hasGivenCraftingNotification;
+        playerSaveData.hasGivenItemBreakingNotificationSaved = hasGivenItemBreakingNotification;
 
         playerSaveData.distanceTraveledSaved = distance.distanceTraveled;
 
@@ -114,6 +122,8 @@ public class PlayerController : MonoBehaviour, ISaveable
         hasGivenHeartRateNotification = playerSaveData.hasGivenHeartRateNotificationSaved;
         hasGivenSanityNotification = playerSaveData.hasGivenSanityNotificationSaved;
         hasGivenStaminaNotification = playerSaveData.hasGivenStaminaNotificationSaved;
+        hasGivenCraftingNotification = playerSaveData.hasGivenCraftingNotificationSaved;
+        hasGivenItemBreakingNotification = playerSaveData.hasGivenItemBreakingNotificationSaved;
 
         rb.velocity = Vector3.zero;
 
@@ -308,9 +318,6 @@ public class PlayerController : MonoBehaviour, ISaveable
     public float lookXLimitBottom = 90.0f;
     public float rotationX = 0.0f;
     public float rotationY = 0.0f;
-    public float headRotationXOffset = 0f;
-    public float headRotationYOffset = 0f;
-    public float headRotationZOffset = 0f;
 
     //0 = walk, 1 = run, 2 = crouch, 3 = jumping
     public enum PLAYERSTATES : int
@@ -488,7 +495,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     }
     void Update()
     {
-      
+
         if (!GameSettings.Instance.IsCutScene)
         {
             if (playerHealth.sanity <= 50f && !hasGivenSanityNotification)
@@ -517,7 +524,8 @@ public class PlayerController : MonoBehaviour, ISaveable
                 GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("KEEPING YOUR HEARTRATE AROUND 90BPM WILL KEEP YOUR BODY HEALTH, BE SURE TO WATCH YOUR BPM (HOLD [H])");
                 hasGivenHeartRateNotification = true;
             }
-                
+
+
 
             if (bufferStand & PlayerHasRoom()) { bufferStand = false; }
 
@@ -639,8 +647,6 @@ public class PlayerController : MonoBehaviour, ISaveable
 
                 rotationY = Input.GetAxisRaw("Mouse X") * GameSettings.Instance.Sensitivity;
 
-
-                //head.transform.rotation = Quaternion.Lerp(head.transform.rotation, headTarget.transform.rotation, 10f * Time.deltaTime);
             }
             else
             {
@@ -655,7 +661,18 @@ public class PlayerController : MonoBehaviour, ISaveable
     }
     void LateUpdate()
     {
-        head.transform.rotation = Quaternion.Euler(bodyAnim.GetBool("isProne") ? rotationX + headRotationXOffset : rotationX + headRotationXOffset, head.transform.rotation.eulerAngles.y + headRotationYOffset, 0 + headRotationZOffset);
+        
+        if (!GameSettings.Instance.IsCutScene)
+        {
+            //head.transform.rotation = Quaternion.Euler(bodyAnim.GetBool("isProne") ? rotationX : rotationX, head.transform.rotation.eulerAngles.y, 0);
+            head.transform.localRotation = Quaternion.Euler(bodyAnim.GetBool("isProne") ? rotationX : rotationX, 0, 0);
+        }
+            
+
+        else
+        {
+            head.transform.rotation = headTarget.transform.rotation;
+        }
         //neck.transform.rotation = Quaternion.Euler(neck.transform.rotation.eulerAngles.x, neck.transform.rotation.eulerAngles.y, (bodyAnim.GetBool("isProne") ? rotationX - 90 : rotationX - 90));
 
         head.transform.position = Vector3.Lerp(head.transform.position, headTarget.transform.position, 75f * Time.deltaTime);
@@ -701,7 +718,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             //Add jump forces
              rb.AddForce(Vector3.up * jumpForce * 1.5f);
-             rb.AddForce(-transform.forward * 1000f * rb.velocity.magnitude);
+             rb.AddForce(-rb.velocity.normalized * 1000f * rb.velocity.magnitude);
              rb.AddForce(normalVector * jumpForce * 0.1f);
 
             //rb.velocity += Vector3.up * jumpForce * 1.5f;
@@ -921,16 +938,31 @@ public class PlayerController : MonoBehaviour, ISaveable
          }*/
 
 
-
+        
         if (Input.GetButton("Watch"))
         {
+            if (GetComponent<InteractionSystem>().GetObjectInRightHand() != null)
+            {
+
+                if (GetComponent<InteractionSystem>().GetObjectInRightHand().StartUseAnimation != null) bodyAnim.SetBool(GetComponent<InteractionSystem>().GetObjectInRightHand().StartUseAnimation, false);
+                
+                if (GetComponent<InteractionSystem>().GetObjectInRightHand().UseAnimations.Count > 0) bodyAnim.SetBool(GetComponent<InteractionSystem>().GetObjectInRightHand().UseAnimations[GetComponent<InteractionSystem>().GetObjectInRightHand().currentAnimChoice], false);
+                
+                GetComponent<InteractionSystem>().GetObjectInRightHand().animationPlaying = false;
+
+                
+            }
+
             bodyAnim.SetBool("Watch", true);
+
 
         }
         if (Input.GetButtonUp("Watch"))
-        {
+        {                
             bodyAnim.SetBool("Watch", false);
         }
+        
+           
 
         //controll player stamina volume indicator
         playerNoises.volume = 0.15f + ((100 - playerHealth.stamina) / 100) / 2;
@@ -1251,7 +1283,20 @@ public class PlayerController : MonoBehaviour, ISaveable
         
         
     }
+    void OnTriggerExit(Collider col)
+    {
+        if (col.tag == "Arm_EventTrigger")
+        {
+            StartCoroutine(EnableArmsOverTime(col.transform.GetChild(0), false));
+        }
 
+        if (playerDamageOverTime != null)
+        {
+            StopCoroutine(playerDamageOverTime);
+            playerDamageOverTime = null;
+        }
+            
+    }
     void OnTriggerEnter(Collider col)
     {
         //first entrance
@@ -1259,6 +1304,7 @@ public class PlayerController : MonoBehaviour, ISaveable
         {
             float randomEntry = UnityEngine.Random.Range(0f, 1f);
             GameSettings.Instance.LoadScene(SCENE.LEVEL0);
+            //Debug.Log(col.gameObject.name);
 
             /*if (randomEntry < 0.9f)
                 GameSettings.Instance.LoadScene(SCENE.LEVEL0);
@@ -1271,7 +1317,41 @@ public class PlayerController : MonoBehaviour, ISaveable
         {
             GameSettings.Instance.LoadScene(SCENE.LEVEL1);
         }
-        
+
+        if (col.tag == "Kill_Instant")
+        {
+            GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().TakeDamage(500f, 0f, 10000f);
+        }
+
+        if (col.tag == "Arm_EventTrigger" && playerHealth.sanity < 25f)
+        {
+            StartCoroutine(EnableArmsOverTime(col.transform.GetChild(0), true));
+        }
+        if (col.tag == "DamagePlayer")
+        {
+            if (playerDamageOverTime == null)
+               playerDamageOverTime = StartCoroutine(HurtPlayerOverSeconds(col.gameObject.GetComponent<DamageCollider>()));
+        }
+
+    }
+    IEnumerator HurtPlayerOverSeconds(DamageCollider damageLocation)
+    {
+        while (true)
+        {
+            damageLocation.Damage(playerHealth);
+            yield return new WaitForSecondsRealtime(1f);
+        }
+    }
+    IEnumerator EnableArmsOverTime(Transform top, bool io)
+    {
+        top.gameObject.SetActive(io);
+
+        foreach (Transform child in top)
+        {
+            child.gameObject.SetActive(io);
+            yield return new WaitForSecondsRealtime(0.2f);
+        }
+            
     }
     IEnumerator PlayFootstep(string sound)
     {

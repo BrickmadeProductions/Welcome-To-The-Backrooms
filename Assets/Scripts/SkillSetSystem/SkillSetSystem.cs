@@ -164,6 +164,8 @@ public class SkillSetSystem : GenericMenu
         return skillDictionary[line.type].slots[skillDictionary[line.type].currentLevel];
     }
 
-
-
+    public override void Update_ExtraInputs()
+    {
+        
+    }
 }

@@ -11,8 +11,10 @@ public class SkillsHandler : MonoBehaviour
     
     void NoClipWall_Success()
     {
-        //GameSettings.Instance.cutSceneHandler.BeginCutScene(CUT_SCENE.NO_CLIP_SUCCESS_WALL_DEMO);
+
         GameSettings.Instance.cutSceneHandler.BeginCutScene(CUT_SCENE.NO_CLIP_SUCCESS_WALL);
+        //DEMO
+        //GameSettings.Instance.cutSceneHandler.BeginCutScene(CUT_SCENE.NO_CLIP_SUCCESS_WALL_DEMO);
     }
     void NoClipWall_Fail()
     {

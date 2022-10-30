@@ -16,15 +16,19 @@ public struct InventoryObjectData
 	public int inventoryWeight;
 
 	public string description;
+
 }
 public class HoldableObject : InteractableObject
 {
+	public List<OBJECT_TYPE> canBeLoadedWith;
+
 	public InventoryObjectData inventoryObjectData;
 
 	//general
 	public float durability;
 
 	public GameObject[] breakablePrefabs;
+	public Transform[] breakLocations;
 
 	public AudioClip[] hitClips;
 
@@ -39,6 +43,10 @@ public class HoldableObject : InteractableObject
 	public bool large;
 
 	public bool autoSwing;
+
+	public bool shouldDisableCrossHair;
+
+	public InventoryItem connectedInvItem;
 
 	//building system
 	public bool canPlace;
@@ -57,11 +65,12 @@ public class HoldableObject : InteractableObject
 
 	public string CustomHoldAnimation = "";
 
-	private int currentAnimChoice = 0;
+	public int currentAnimChoice = 0;
 
 	private Vector3 pushAmt;
 
 	public List<string> ItemObjectAnimations;
+
 
 	private IEnumerator waitToPlaySound()
 	{
@@ -71,7 +80,7 @@ public class HoldableObject : InteractableObject
 
 	public override void Init()
 	{
-
+		stats = new Dictionary<string, string>();
 		/*if (GetComponent<Animator>() != null)
 		{
 			StartCoroutine(playItemAnimation("Close"));
@@ -80,11 +89,12 @@ public class HoldableObject : InteractableObject
 		playSounds = false;
 		broken = false;
 		rb = GetComponent<Rigidbody>();
+		
 		StartCoroutine(waitToPlaySound());
 	}
 	public override void Drop(Vector3 force)
 	{
-	
+		rb = gameObject.AddComponent<Rigidbody>();
 		rb.velocity = force * ThrowMultiplier * ThrowMultiplier;
 		if (GetComponent<Animator>() != null)
 		{
@@ -123,6 +133,7 @@ public class HoldableObject : InteractableObject
 				yield return new WaitForSecondsRealtime(GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).length / GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).speed - 0.25f);
 
 				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(UseAnimations[currentAnimChoice], false);
+				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(StartUseAnimation, false);
 
 				animationPlaying = false;
 			}
@@ -143,6 +154,7 @@ public class HoldableObject : InteractableObject
 			yield return new WaitForSecondsRealtime(GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).length / GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).speed - 0.25f);
 
 			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.ResetTrigger(UseAnimations[currentAnimChoice]);
+			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(StartUseAnimation, false);
 
 			animationPlaying = false;
 		}
@@ -184,6 +196,8 @@ public class HoldableObject : InteractableObject
     public override void Pickup(InteractionSystem player, bool RightHand)
     {
 
+		
+
 		if (RightHand)
 
 			StartCoroutine(playItemAnimation("Open"));
@@ -221,7 +235,7 @@ public class HoldableObject : InteractableObject
 			AudioSource.PlayClipAtPoint(breakClips[UnityEngine.Random.Range(0, breakClips.Length)], transform.position);
 			for (int i = 0; i < breakablePrefabs.Length; i++)
 			{
-				GameSettings.Instance.worldInstance.AddNewProp(transform.position + new Vector3(0, 2, 0), transform.rotation, GameSettings.Instance.PropDatabase[breakablePrefabs[i].GetComponent<HoldableObject>().type].gameObject);
+				GameSettings.Instance.worldInstance.AddNewProp(breakLocations[i].position, breakLocations[i].rotation, GameSettings.Instance.PropDatabase[breakablePrefabs[i].GetComponent<HoldableObject>().type].gameObject);
 			}
 			broken = true;
 			GameSettings.Instance.worldInstance.RemoveProp(GetWorldID(), true);
@@ -235,18 +249,14 @@ public class HoldableObject : InteractableObject
 			TakeDamage(collision.relativeVelocity.magnitude);
 
 	}
-    public override void OnLoadFinished()
-    {
-       
-    }
+
     public override void OnSaveFinished()
     {
-        
+		onSave?.Invoke();
     }
-    private void FixedUpdate()
-	{
-		
-		transform.position += pushAmt;
-		pushAmt *= 0.95f;
+
+    public override void OnLoadFinished()
+    {
+		onLoad?.Invoke();
 	}
 }

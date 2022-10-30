@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.Animations.Rigging;
+
 public class InteractionSystem : MonoBehaviour
 {
 	private PlayerController player;
@@ -33,6 +33,8 @@ public class InteractionSystem : MonoBehaviour
 	public Image Cursor;
 
 	public bool canGrab = true;
+
+	public bool canCraft = true;
 
 	public float pickupTime = 0.75f;
 
@@ -132,34 +134,42 @@ public class InteractionSystem : MonoBehaviour
 		}
 	}
 
-	public HoldableObject GetObjectInHand()
+	public HoldableObject GetObjectInRightHand()
     {
 		if (inventory.rHand.itemsInSlot.Count > 0)
 			return inventory.rHand.itemsInSlot[0].connectedObject;
 
 		else return null;
 	}
-	
+
+	public HoldableObject GetObjectInLeftHand()
+	{
+		if (inventory.lHand.itemsInSlot.Count > 0)
+			return inventory.lHand.itemsInSlot[0].connectedObject;
+
+		else return null;
+	}
+
 	public void SetThrow()
 	{
 
-		BPUtil.SetAllChildrenToLayer(GetObjectInHand().transform, 9);
-		BPUtil.SetAllColliders(GetObjectInHand().transform, true);
+		BPUtil.SetAllChildrenToLayer(GetObjectInRightHand().transform, 9);
+		BPUtil.SetAllColliders(GetObjectInRightHand().transform, true);
 
-		GetObjectInHand().GetComponent<HoldableObject>().rb.isKinematic = false;
-		GetObjectInHand().transform.parent = null;
+		//GetObjectInRightHand().GetComponent<HoldableObject>().rb.isKinematic = false;
+		GetObjectInRightHand().transform.parent = null;
 		
-		player.holdLocation.GetComponent<AudioSource>().pitch = 1f + Random.Range(-0.1f, 0.1f);
+		player.holdLocation.GetComponent<AudioSource>().pitch = 1f + UnityEngine.Random.Range(-0.1f, 0.1f);
 		player.holdLocation.GetComponent<AudioSource>().Play();
 
-		SceneManager.MoveGameObjectToScene(GetObjectInHand().gameObject, SceneManager.GetActiveScene());
-		player.bodyAnim.SetBool((GetObjectInHand().CustomHoldAnimation != "") ? GetObjectInHand().CustomHoldAnimation : "isHoldingSmall", value: false);
+		SceneManager.MoveGameObjectToScene(GetObjectInRightHand().gameObject, SceneManager.GetActiveScene());
+		player.bodyAnim.SetBool((GetObjectInRightHand().CustomHoldAnimation != "") ? GetObjectInRightHand().CustomHoldAnimation : "isHoldingSmall", value: false);
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
 
-		GetObjectInHand().transform.position = player.RHandLocation.transform.position;
+		GetObjectInRightHand().transform.position = player.RHandLocation.transform.position;
 
-		GetObjectInHand().transform.rotation = Quaternion.LookRotation(player.playerCamera.transform.forward, player.playerCamera.transform.up);
-		GetObjectInHand().Drop(player.playerCamera.transform.forward.normalized * GetObjectInHand().ThrowMultiplier * ((player.GetComponent<Rigidbody>().velocity.magnitude / 10) + 1));
+		GetObjectInRightHand().transform.rotation = Quaternion.LookRotation(player.playerCamera.transform.forward, player.playerCamera.transform.up);
+		GetObjectInRightHand().Drop(player.playerCamera.transform.forward.normalized * GetObjectInRightHand().ThrowMultiplier * ((player.GetComponent<Rigidbody>().velocity.magnitude / 10) + 1));
 		
 		inventory.rHand.RemoveItemFromSlot(inventory.rHand.itemsInSlot[0].connectedObject, true);
 
@@ -184,7 +194,7 @@ public class InteractionSystem : MonoBehaviour
 
         else if (holdableObject)
         {
-			FinalizePickup(holdableObject);
+			FinalizePickup(holdableObject, true);
         }
 	}
 	public void SetOffHandIKInfo(HoldableObject objectToTest)
@@ -199,50 +209,45 @@ public class InteractionSystem : MonoBehaviour
 		}
 		else
 		{
-			GetComponent<PlayerController>().offHandIK.data.target = null;
 			GetComponent<PlayerController>().builder.layers[1].active = false;
+			GetComponent<PlayerController>().offHandIK.data.target = null;
 			GetComponent<PlayerController>().builder.Build();
 		}
 	}
 
-	public void FinalizePickup(InteractableObject holdableObject)
+	public void FinalizePickup(InteractableObject holdableObject, bool playAnimation)
 	{
 		InventorySlot slotToAddTo = player.GetComponent<InventorySystem>().GetNextAvailableInventorySlot((HoldableObject)holdableObject);
 
 
 		if (slotToAddTo != null)
         {
-			if (slotToAddTo == player.GetComponent<InventorySystem>().rHand)
+			if (playAnimation)
             {
-				canGrab = false;
-				player.bodyAnim.SetTrigger("isGrabbingRight");
-				
-			}
-				
+				if (slotToAddTo == player.GetComponent<InventorySystem>().rHand)
+				{
+					canGrab = false;
+					player.bodyAnim.SetTrigger("isGrabbingRight");
 
-			else
-			{
-				
-				player.bodyAnim.SetTrigger("isGrabbingLeft");
-			}		
-			
-			
+				}
 
-			
-			/*if ((HoldableObject)currentlyLookingAt.large == true)
-			{
-				player.playerHealth.canRun = false;
-				player.currentPlayerState = PlayerController.PLAYERSTATES.WALK;
+
+				else
+				{
+
+					player.bodyAnim.SetTrigger("isGrabbingLeft");
+				}
 			}
-			//add to inventory
-			else
-			{}*/
+
+
 			slotToAddTo.AddItemToSlot((HoldableObject)holdableObject);
-			//GetObjectInRightHand().transform.localRotation = localRotation;
 
 			holdableObject.Pickup(this, true);
+			
 		}
+
 		
+
 	}
 	public void SetDrop(InventorySlot slot)
 	{
@@ -250,10 +255,8 @@ public class InteractionSystem : MonoBehaviour
 		BPUtil.SetAllChildrenToLayer(slot.itemsInSlot[0].connectedObject.transform, 9);
 		BPUtil.SetAllColliders(slot.itemsInSlot[0].connectedObject.transform, true);
 
-		slot.itemsInSlot[0].connectedObject.rb.isKinematic = false;
 		slot.itemsInSlot[0].connectedObject.transform.parent = null;
-/*		slot.itemsInSlot[0].connectedObject.saveableData.instance = holdable;*/
-		slot.itemsInSlot[0].connectedObject.Drop(-Vector3.up);
+		slot.itemsInSlot[0].connectedObject.Drop(Vector3.zero);
 
 		SceneManager.MoveGameObjectToScene(slot.itemsInSlot[0].connectedObject.gameObject, SceneManager.GetActiveScene());
 		
@@ -280,18 +283,18 @@ public class InteractionSystem : MonoBehaviour
 	}
 	public void SetPlace(Vector3 location, Quaternion rotation)
 	{
-		BPUtil.SetAllChildrenToLayer(GetObjectInHand().transform, 9);
-		GetObjectInHand().transform.parent = null;
-		GetObjectInHand().GetComponent<HoldableObject>().saveableData.instance = GetObjectInHand().GetComponent<HoldableObject>();
+		BPUtil.SetAllChildrenToLayer(GetObjectInRightHand().transform, 9);
+		GetObjectInRightHand().transform.parent = null;
+		GetObjectInRightHand().GetComponent<HoldableObject>().saveableData.instance = GetObjectInRightHand().GetComponent<HoldableObject>();
 
-		SceneManager.MoveGameObjectToScene(GetObjectInHand().gameObject, SceneManager.GetActiveScene());
-		player.bodyAnim.SetBool((GetObjectInHand().CustomHoldAnimation != "") ? GetObjectInHand().CustomHoldAnimation : "isHoldingSmall", value: false);
+		SceneManager.MoveGameObjectToScene(GetObjectInRightHand().gameObject, SceneManager.GetActiveScene());
+		player.bodyAnim.SetBool((GetObjectInRightHand().CustomHoldAnimation != "") ? GetObjectInRightHand().CustomHoldAnimation : "isHoldingSmall", value: false);
 		player.bodyAnim.SetBool("isHoldingLarge", value: false);
-		GetObjectInHand().GetComponent<HoldableObject>().rb.isKinematic = false;
-		GetObjectInHand().transform.position = location;
-		GetObjectInHand().transform.rotation = rotation;
+		//GetObjectInRightHand().GetComponent<HoldableObject>().rb.isKinematic = false;
+		GetObjectInRightHand().transform.position = location;
+		GetObjectInRightHand().transform.rotation = rotation;
 		
-		inventory.rHand.RemoveItemFromSlot(GetObjectInHand(), true);
+		inventory.rHand.RemoveItemFromSlot(GetObjectInRightHand(), true);
 
 		if (currentPlaceItemPrefab != null)
 		{
@@ -305,7 +308,10 @@ public class InteractionSystem : MonoBehaviour
 	public void OnInventoryItemAddedToSlot_CallBack(InventorySlot slotFrom, InventorySlot slotTo)
     {
 		if (GetComponent<InventorySystem>().rHand.itemsInSlot.Count > 0)
+        {
 			SetOffHandIKInfo(GetComponent<InventorySystem>().rHand.itemsInSlot[0].connectedObject);
+		}
+			
         else
         {
 			GetComponent<PlayerController>().offHandIK.data.target = null;
@@ -320,9 +326,9 @@ public class InteractionSystem : MonoBehaviour
 
 			StartCoroutine(slotTo.itemsInSlot[0].connectedObject.playItemAnimation("Open"));
 
-			slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
-			slotTo.itemsInSlot[0].connectedObject.transform.parent = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
-			slotTo.itemsInSlot[0].connectedObject.transform.position = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			//slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
+			slotTo.itemsInSlot[0].connectedObject.transform.parent = (player.RHandLocation.transform);
+			slotTo.itemsInSlot[0].connectedObject.transform.position = (player.RHandLocation.transform.position);
 			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = Quaternion.identity;
 
 			slotTo.itemsInSlot[0].connectedObject.Pickup(this, true);
@@ -348,9 +354,9 @@ public class InteractionSystem : MonoBehaviour
 
 			StartCoroutine(slotTo.itemsInSlot[0].connectedObject.playItemAnimation("Open"));
 
-			slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
-			slotTo.itemsInSlot[0].connectedObject.transform.parent = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
-			slotTo.itemsInSlot[0].connectedObject.transform.position = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			//slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
+			slotTo.itemsInSlot[0].connectedObject.transform.parent = (player.RHandLocation.transform);
+			slotTo.itemsInSlot[0].connectedObject.transform.position = (player.RHandLocation.transform.position);
 			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = Quaternion.identity;
 
 			slotTo.itemsInSlot[0].connectedObject.Pickup(this, true);
@@ -382,9 +388,9 @@ public class InteractionSystem : MonoBehaviour
 			
 			StartCoroutine(slotTo.itemsInSlot[0].connectedObject.playItemAnimation("Open"));
 
-			slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
-			slotTo.itemsInSlot[0].connectedObject.transform.parent = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
-			slotTo.itemsInSlot[0].connectedObject.transform.position = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			//slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
+			slotTo.itemsInSlot[0].connectedObject.transform.parent = (player.RHandLocation.transform);
+			slotTo.itemsInSlot[0].connectedObject.transform.position = (player.RHandLocation.transform.position);
 			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = Quaternion.identity;
 
 			slotTo.itemsInSlot[0].connectedObject.Pickup(this, true);
@@ -405,9 +411,9 @@ public class InteractionSystem : MonoBehaviour
 
 			StartCoroutine(slotFrom.itemsInSlot[0].connectedObject.playItemAnimation("Open"));
 
-			slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
-			slotFrom.itemsInSlot[0].connectedObject.transform.parent = (slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
-			slotFrom.itemsInSlot[0].connectedObject.transform.position = (slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			//slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
+			slotFrom.itemsInSlot[0].connectedObject.transform.parent = (player.RHandLocation.transform);
+			slotFrom.itemsInSlot[0].connectedObject.transform.position = (player.RHandLocation.transform.position);
 			slotFrom.itemsInSlot[0].connectedObject.transform.localRotation = Quaternion.identity;
 
 			slotFrom.itemsInSlot[0].connectedObject.Pickup(this, true);
@@ -420,8 +426,11 @@ public class InteractionSystem : MonoBehaviour
 	void Update()
 	{
 		
-		if (GameSettings.Instance.PauseMenuOpen || GameSettings.Instance.IsCutScene || GetComponent<InventorySystem>().menuOpen)
+		if (GameSettings.Instance.PauseMenuOpen || GameSettings.Instance.IsCutScene || inventory.menuOpen || GameSettings.isLoadingScene)
 		{
+			player.bodyAnim.SetBool("isPreparingThrow", false);
+			player.bodyAnim.ResetTrigger("isThrowing");
+
 			return;
 		}
 
@@ -457,14 +466,14 @@ public class InteractionSystem : MonoBehaviour
 
 		if (raycastForPlacing.Length > 0)
 		{
-			if (GetObjectInHand() != null && buildOn)
+			if (GetObjectInRightHand() != null && buildOn)
 			{
 				//add in indicator prefab
 				if (currentPlaceItemPrefab == null)
 				{
 					InteractableObject heldObjectTemplate = null;
 
-					GameSettings.Instance.PropDatabase.TryGetValue(GetObjectInHand().type, out heldObjectTemplate);
+					GameSettings.Instance.PropDatabase.TryGetValue(GetObjectInRightHand().type, out heldObjectTemplate);
 
 					currentPlaceItemPrefab = Instantiate(heldObjectTemplate.gameObject);
 
@@ -545,7 +554,7 @@ public class InteractionSystem : MonoBehaviour
 		}
 
 		//destroy building indicator prefab
-		if (((GetObjectInHand() == null || !buildOn) && currentPlaceItemPrefab != null) || raycastForPlacing.Length == 0 && currentPlaceItemPrefab != null)
+		if (((GetObjectInRightHand() == null || !buildOn) && currentPlaceItemPrefab != null) || raycastForPlacing.Length == 0 && currentPlaceItemPrefab != null)
 		{
 			Destroy(currentPlaceItemPrefab.gameObject);
 			currentRotX = 0;
@@ -564,7 +573,13 @@ public class InteractionSystem : MonoBehaviour
 				case 9:
 
 					interact.gameObject.SetActive(true);
-					interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "";
+					interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "[F] Pickup";
+
+					if (!player.hasGivenItemBreakingNotification && currentlyLookingAt.GetComponent<HoldableObject>().type == OBJECT_TYPE.CHAIR)
+					{
+						GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("YOU CAN DESTROY CERTAIN OBJECTS AND GAIN MATERIALS (EX: CHAIRS) BY HITTING THEM OR JUMPING ON THEM");
+						player.hasGivenItemBreakingNotification = true;
+					}
 
 					break;
 
@@ -609,27 +624,36 @@ public class InteractionSystem : MonoBehaviour
 		{
 			if (currentlyLookingAt.GetComponent<HoldableObject>())
 
-				if (!currentlyLookingAt.GetComponent<HoldableObject>().large)
-
-					FinalizePickup(currentlyLookingAt.GetComponent<InteractableObject>());
+					FinalizePickup(currentlyLookingAt.GetComponent<InteractableObject>(), true);
 
 		}
-
-		if (GetObjectInHand() != null)
+		//double check
+		if (Input.GetMouseButtonUp(1))
+        {
+			//Debug.Log("Throw");
+			player.bodyAnim.SetBool("isPreparingThrow", false);
+			player.bodyAnim.SetTrigger("isThrowing");
+		}
+					
+		//throwing system
+		if (GetObjectInRightHand() != null)
 		{
 
 			//throw system, only small objects
-			if (!GetObjectInHand().large)
+			if (!GetObjectInRightHand().large)
             {
-				if (Input.GetMouseButton(1) && !player.bodyAnim.GetBool("isPreparingThrow") && (!buildOn || raycastForPlacing.Length == 0) && !inventory.menuOpen)
+			
+				if (Input.GetMouseButton(1) && !player.bodyAnim.GetBool("isPreparingThrow") && (!buildOn || raycastForPlacing.Length == 0))
 				{
 					GetComponent<PlayerController>().offHandIK.data.target = null;
 					GetComponent<PlayerController>().builder.layers[1].active = false;
+					GetComponent<PlayerController>().builder.Build();
 					player.bodyAnim.SetBool("isPreparingThrow", true);
 					player.bodyAnim.ResetTrigger("isThrowing");
 				}
 
-				else if (Input.GetMouseButtonUp(1) && !inventory.menuOpen)
+
+				else if (Input.GetMouseButtonUp(1))
 				{
 					//Debug.Log("Throw");
 					player.bodyAnim.SetBool("isPreparingThrow", false);
@@ -637,24 +661,10 @@ public class InteractionSystem : MonoBehaviour
 
 
 				}
+				
 			}
 
-			//
-			//
-			//
-			//
-			//
-			//
-			//
-			//fix
-			if (inventory.menuOpen && player.bodyAnim.GetBool("isPreparingThrow"))
-			{
-				player.bodyAnim.SetBool("isPreparingThrow", false);
-				player.bodyAnim.ResetTrigger("isThrowing");
-			}
-
-
-			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.neck.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !GetObjectInHand().GetComponent<HoldableObject>().large))
+			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.neck.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !GetObjectInRightHand().GetComponent<HoldableObject>().large))
 			{
 				SetDrop(inventory.rHand);
 			}
@@ -662,19 +672,50 @@ public class InteractionSystem : MonoBehaviour
 
 		if (currentlyLookingAt != null && (currentlyLookingAt.gameObject.layer == 25 || currentlyLookingAt.gameObject.layer == 10) && Input.GetButtonDown("Use"))
 		{
+
 			currentlyLookingAt.GetComponent<InteractableObject>().Use(this, LMB: false);
 		}
 
-
 		if (Input.GetMouseButtonDown(0))
 		{
-			if (GetObjectInHand() != null)
+			bool hasCraftingRecipe = false;
+
+			if (GetObjectInRightHand() != null)
 			{
-				GetObjectInHand().Use(this, LMB: true);
+				/*//begin crafting
+				if (GetObjectInLeftHand() != null)
+                {
+					if (canCraft)
+					{
+						
+
+						foreach (CraftingPair pair in GameSettings.Instance.possibleCraftingPairs)
+                        {
+							player.bodyAnim.ResetTrigger(pair.craftingAnimation);
+
+							if (GetObjectInLeftHand().type == pair.leftHand && GetObjectInRightHand().type == pair.rightHand)
+							{
+								StartCoroutine(GetObjectInLeftHand().playItemAnimation("Open"));
+								hasCraftingRecipe = true;
+								player.bodyAnim.SetTrigger(pair.craftingAnimation);
+								break;
+							}
+						}
+							
+							
+					}
+                }*/
+                /*if (!hasCraftingRecipe)
+                {
+					
+				}*/
+
+				GetObjectInRightHand().Use(this, LMB: true);
+
 			}
             else
             {
-				string animChoice = punchingAnimations[Random.Range(0, punchingAnimations.Count)];
+				string animChoice = punchingAnimations[UnityEngine.Random.Range(0, punchingAnimations.Count)];
 
 				bool canPunch = true;
 				//reset punching
@@ -719,3 +760,4 @@ public class InteractionSystem : MonoBehaviour
 	}
 
 }
+
