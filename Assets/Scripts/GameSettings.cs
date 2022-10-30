@@ -484,6 +484,7 @@ public class GameSettings : MonoBehaviour
 
 		foreach (Entity item2 in entityDatabase)
 		{
+			Debug.Log(item2.name);
 			EntityDatabase.Add(item2.type, item2);
 		}
 
@@ -1006,7 +1007,8 @@ public class GameSettings : MonoBehaviour
             {
 				ResetGame();
 
-			}*/
+			}
+			*/
 			yield return StartCoroutine(SaveAllProgress());
 		}
 

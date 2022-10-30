@@ -286,6 +286,12 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
     public void OnDrop(PointerEventData data)
     {
+
+        StartCoroutine(DropAction());
+    }
+
+    IEnumerator DropAction()
+    {
         if (GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected != null && GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.slotIn != this)
         {
             switch (GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject.objectCategory)
@@ -341,21 +347,43 @@ public class InventorySlot : MonoBehaviour, IDropHandler
                         if (itemsInSlot[0].connectedObject.objectCategory == OBJECT_CATEGORY.WEAPON_BASE || itemsInSlot[0].connectedObject.objectCategory == OBJECT_CATEGORY.CRAFTING_MATERIAL)
                         {
                             bool hasCraftingPair = false;
+                            List<CraftingPair> possiblePairs = new List<CraftingPair>();
 
                             foreach (CraftingPair pair in GameSettings.Instance.possibleCraftingPairs)
                             {
                                 if (pair.objectsRequired[0] == GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject.type &&
                                     pair.objectsRequired[1] == itemsInSlot[0].connectedObject.type)
                                 {
-                                    //Debug.Log("Crafting" + GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject.type.ToString() + " " + itemsInSlot[0].connectedObject.type.ToString());
-                                    CraftItem(pair, GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected, itemsInSlot[0]);
-                                    GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = true;
-                                    
-                                    hasCraftingPair = true;
-                                    break;
+                                    possiblePairs.Add(pair);
 
                                 }
                             }
+
+                            if (possiblePairs.Count > 0)
+                            {
+                                //just craft
+                                if (possiblePairs.Count == 1)
+                                {
+                                    CraftItem(possiblePairs[0], GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected, itemsInSlot[0]);
+                                    
+                                }
+                                //give selections
+                                else
+                                {
+                                    CraftingPrompt craftingPrompt = Instantiate(GameSettings.Instance.Player.GetComponent<InventorySystem>().promptPrefab.gameObject, GameSettings.Instance.Player.GetComponent<InventorySystem>().menuObject.transform).GetComponent<CraftingPrompt>();
+                                    craftingPrompt.SetDetails(possiblePairs, this);
+
+                                    yield return new WaitUntil(() => !GameSettings.Instance.Player.GetComponent<InventorySystem>().isCrafting);
+
+                                    Destroy(craftingPrompt.gameObject);
+
+                                    
+                                }
+                                hasCraftingPair = true;
+                                GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = true;
+
+                            }
+                           
 
                             if (!hasCraftingPair)
                                 AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
@@ -381,8 +409,10 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = null;
 
         }
-        
+
+        yield return null;
     }
+
 
     //1 = item put on top, 2 = item in slot currently | 1 on top of 2
     public void CraftItem(CraftingPair pair, InventoryItem object1, InventoryItem object2)
@@ -413,6 +443,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
             }
         }
+
 
         //regular item crafting
         else if (object1.connectedObject.objectCategory != OBJECT_CATEGORY.WEAPON_BASE && object2.connectedObject.objectCategory != OBJECT_CATEGORY.WEAPON_BASE)
@@ -449,13 +480,11 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             }
         }
 
-       
 
 
+        GameSettings.Instance.Player.GetComponent<InventorySystem>().isCrafting = false;
 
     }
-
-
 
 }
 

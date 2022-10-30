@@ -13697,7 +13697,7 @@ MonoBehaviour:
   - objectsRequired: 0000000017000000
     outCome: 1
     shouldDestroyItem1: 0
-    shouldDestroyItem2: 1
+    shouldDestroyItem2: 0
     craftingAnimation: 
     craftingAudio: {fileID: 8300000, guid: 263d765ccb9fc974c882637007d773d5, type: 3}
   - objectsRequired: 2100000001000000
@@ -13707,7 +13707,7 @@ MonoBehaviour:
     craftingAnimation: 
     craftingAudio: {fileID: 8300000, guid: 24cac91a1a74db44fa8b588916af322c, type: 3}
   - objectsRequired: 1e00000001000000
-    outCome: 0
+    outCome: 1
     shouldDestroyItem1: 0
     shouldDestroyItem2: 0
     craftingAnimation: 
@@ -13732,6 +13732,18 @@ MonoBehaviour:
     craftingAudio: {fileID: 8300000, guid: fe443948ff6653045bd67ea599ab9814, type: 3}
   - objectsRequired: 0800000016000000
     outCome: 30
+    shouldDestroyItem1: 0
+    shouldDestroyItem2: 1
+    craftingAnimation: 
+    craftingAudio: {fileID: 8300000, guid: 263d765ccb9fc974c882637007d773d5, type: 3}
+  - objectsRequired: 2500000001000000
+    outCome: 1
+    shouldDestroyItem1: 0
+    shouldDestroyItem2: 0
+    craftingAnimation: 
+    craftingAudio: {fileID: 8300000, guid: 263d765ccb9fc974c882637007d773d5, type: 3}
+  - objectsRequired: 0800000016000000
+    outCome: 37
     shouldDestroyItem1: 0
     shouldDestroyItem2: 1
     craftingAnimation: 
@@ -13772,6 +13784,7 @@ MonoBehaviour:
   - {fileID: 3687691000085452533, guid: 52266472dde21204c86f33914f620728, type: 3}
   - {fileID: 7666846082368521585, guid: dfdd455ea037a414089e9367966d672f, type: 3}
   - {fileID: 8304056806040484466, guid: 002315e13368eb74a9cfb3dc6d9bd4c9, type: 3}
+  - {fileID: 1560198170127152541, guid: 5358a7d5d8b00804cb4828f1374af1e0, type: 3}
   inventoryItemPrefab: {fileID: 4105468441734903545, guid: 138f1b9e745cce64691792cffcb980f8, type: 3}
   entityDatabase:
   - {fileID: 4225260656200758192, guid: f254f54165076c64ba860e8b6002ed68, type: 3}

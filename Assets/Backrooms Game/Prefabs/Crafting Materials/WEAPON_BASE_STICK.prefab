@@ -87,6 +87,7 @@ MonoBehaviour:
     description: SMOOTHED WOODEN STICK, USED TO CRAFT WEAPONS
   durability: 0
   breakablePrefabs: []
+  breakLocations: []
   hitClips: []
   breakClips: []
   rb: {fileID: 0}
@@ -104,6 +105,7 @@ MonoBehaviour:
   UseAnimations:
   - isSwingingAxe
   CustomHoldAnimation: isHoldingAxe
+  currentAnimChoice: 0
   ItemObjectAnimations: []
   Flying: 0
   rotationAmount: 3000
@@ -115,6 +117,11 @@ MonoBehaviour:
   currentFasten: {fileID: 0}
   bladeLocation: {fileID: 8194257338789051080}
   fastenLocation: {fileID: 3565166682176642405}
+  originalData:
+    image: {fileID: 0}
+    name: 
+    inventoryWeight: 0
+    description: 
 --- !u!1 &4314649160866151023
 GameObject:
   m_ObjectHideFlags: 0

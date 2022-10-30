@@ -40,6 +40,10 @@ public class InventorySystem : GenericMenu
 
     public InventoryItem currentItemSlected;
 
+    public CraftingPrompt promptPrefab;
+
+    public bool isCrafting = false;
+
     IEnumerator UpdateAllItemsStats()
     {
 
@@ -194,7 +198,7 @@ public class InventorySystem : GenericMenu
     public ContainerObject GetBackPack()
     {
         if (backPack.itemsInSlot.Count > 0)
-            if (backPack.itemsInSlot[0].GetType() == typeof(ContainerObject))
+            if (backPack.itemsInSlot[0].connectedObject.GetType() == typeof(ContainerObject))
                 return (ContainerObject)backPack.itemsInSlot[0].connectedObject;
             else return null;
         else return null;

@@ -327,8 +327,8 @@ public class InteractionSystem : MonoBehaviour
 			StartCoroutine(slotTo.itemsInSlot[0].connectedObject.playItemAnimation("Open"));
 
 			//slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
-			slotTo.itemsInSlot[0].connectedObject.transform.parent = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
-			slotTo.itemsInSlot[0].connectedObject.transform.position = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			slotTo.itemsInSlot[0].connectedObject.transform.parent = (player.RHandLocation.transform);
+			slotTo.itemsInSlot[0].connectedObject.transform.position = (player.RHandLocation.transform.position);
 			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = Quaternion.identity;
 
 			slotTo.itemsInSlot[0].connectedObject.Pickup(this, true);
@@ -355,8 +355,8 @@ public class InteractionSystem : MonoBehaviour
 			StartCoroutine(slotTo.itemsInSlot[0].connectedObject.playItemAnimation("Open"));
 
 			//slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
-			slotTo.itemsInSlot[0].connectedObject.transform.parent = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
-			slotTo.itemsInSlot[0].connectedObject.transform.position = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			slotTo.itemsInSlot[0].connectedObject.transform.parent = (player.RHandLocation.transform);
+			slotTo.itemsInSlot[0].connectedObject.transform.position = (player.RHandLocation.transform.position);
 			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = Quaternion.identity;
 
 			slotTo.itemsInSlot[0].connectedObject.Pickup(this, true);
@@ -389,8 +389,8 @@ public class InteractionSystem : MonoBehaviour
 			StartCoroutine(slotTo.itemsInSlot[0].connectedObject.playItemAnimation("Open"));
 
 			//slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
-			slotTo.itemsInSlot[0].connectedObject.transform.parent = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
-			slotTo.itemsInSlot[0].connectedObject.transform.position = (slotTo.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			slotTo.itemsInSlot[0].connectedObject.transform.parent = (player.RHandLocation.transform);
+			slotTo.itemsInSlot[0].connectedObject.transform.position = (player.RHandLocation.transform.position);
 			slotTo.itemsInSlot[0].connectedObject.transform.localRotation = Quaternion.identity;
 
 			slotTo.itemsInSlot[0].connectedObject.Pickup(this, true);
@@ -412,8 +412,8 @@ public class InteractionSystem : MonoBehaviour
 			StartCoroutine(slotFrom.itemsInSlot[0].connectedObject.playItemAnimation("Open"));
 
 			//slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().rb.isKinematic = true;
-			slotFrom.itemsInSlot[0].connectedObject.transform.parent = (slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform : player.RHandLocation.transform);
-			slotFrom.itemsInSlot[0].connectedObject.transform.position = (slotFrom.itemsInSlot[0].connectedObject.GetComponent<HoldableObject>().large ? player.holdLocation.transform.position : player.RHandLocation.transform.position);
+			slotFrom.itemsInSlot[0].connectedObject.transform.parent = (player.RHandLocation.transform);
+			slotFrom.itemsInSlot[0].connectedObject.transform.position = (player.RHandLocation.transform.position);
 			slotFrom.itemsInSlot[0].connectedObject.transform.localRotation = Quaternion.identity;
 
 			slotFrom.itemsInSlot[0].connectedObject.Pickup(this, true);
@@ -426,7 +426,7 @@ public class InteractionSystem : MonoBehaviour
 	void Update()
 	{
 		
-		if (GameSettings.Instance.PauseMenuOpen || GameSettings.Instance.IsCutScene || inventory.menuOpen)
+		if (GameSettings.Instance.PauseMenuOpen || GameSettings.Instance.IsCutScene || inventory.menuOpen || GameSettings.isLoadingScene)
 		{
 			player.bodyAnim.SetBool("isPreparingThrow", false);
 			player.bodyAnim.ResetTrigger("isThrowing");
@@ -623,8 +623,6 @@ public class InteractionSystem : MonoBehaviour
 		if (Input.GetButtonDown("Grab") && currentlyLookingAt != null && currentlyLookingAt.layer != 25 && currentlyLookingAt.layer != 20 && currentlyLookingAt.layer != 14 && canGrab)
 		{
 			if (currentlyLookingAt.GetComponent<HoldableObject>())
-
-				if (!currentlyLookingAt.GetComponent<HoldableObject>().large)
 
 					FinalizePickup(currentlyLookingAt.GetComponent<InteractableObject>(), true);
 

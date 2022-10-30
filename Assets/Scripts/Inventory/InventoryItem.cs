@@ -91,13 +91,21 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = true;
-        transform.parent = slotIn.transform;
-        transform.position = slotIn.transform.position;
+        if (!GameSettings.Instance.Player.GetComponent<InventorySystem>().isCrafting)
+        {
+            GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = null;
 
-        GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = null;
-        canvasGroup.alpha = 1f;
-        canvasGroup.blocksRaycasts = true;
+            GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = true;
+        }
+            
+            transform.parent = slotIn.transform;
+            transform.position = slotIn.transform.position;
+
+            
+            canvasGroup.alpha = 1f;
+            canvasGroup.blocksRaycasts = true;
+        
+        
     }
 
     public void OnPointerEnter(PointerEventData eventData)
