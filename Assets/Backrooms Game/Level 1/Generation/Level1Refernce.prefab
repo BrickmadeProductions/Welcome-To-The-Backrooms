@@ -31164,10 +31164,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: -1
+  biomeID: 0
   tilePos: {x: 0, y: 0}
   entitySpawnLocations:
   - {fileID: 745554504979370809}
   - {fileID: 7109059069257783609}
+  itemSpawnLocations: []
+  SpawnWeight: 0
 --- !u!4 &7109059069257783609 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3587648586798804006, guid: f847fba7bfcc6734bb93e73226710d77, type: 3}

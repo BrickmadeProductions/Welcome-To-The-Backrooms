@@ -20,7 +20,7 @@ public struct SerealizedChunk
 }
 public class Chunk : MonoBehaviour
 {
-	private BackroomsLevelWorld parentGenerator;
+	public BackroomsLevelWorld parentGenerator;
 
 	public SerealizedChunk saveableData;
 
@@ -46,6 +46,7 @@ public class Chunk : MonoBehaviour
 	public bool ALL_TILES_GENERATED = false;
 
 	public bool ALL_OBJECTS_AND_ENTITES_LOADED = false;
+
 
 	public void CreateChunk(int posX, int posY, int posZ, BackroomsLevelWorld parentGenerator, bool shouldGenerateInstantly, List<int> tile_grid)
 	{
@@ -267,7 +268,9 @@ public class Chunk : MonoBehaviour
 
 		//Debug.Log(GameSettings.Instance.ActiveScene);
 
-		
+
+		bool shouldSendBiomeEdgeInvoke = false;
+
 		switch (GameSettings.Instance.ActiveScene)
         {
 
@@ -294,7 +297,8 @@ public class Chunk : MonoBehaviour
 					}
 					else if (biomePerlinID >= 0.8f && biomePerlinID < 0.9f)
 					{
-						biomeID = BIOME_ID.LEVEL_0_PILLAR_ROOMS;
+
+						biomeID = BIOME_ID.LEVEL_0_TALL_ROOMS;
 					}
 					else if (biomePerlinID >= 0.9f && biomePerlinID < 1.01f)
 					{
@@ -371,8 +375,14 @@ public class Chunk : MonoBehaviour
 			tileToSpawn = GameSettings.Instance.worldInstance.RegTiles[0];
         }*/
 
-		tileToSpawn = parentGenerator.tileDataList[tile_id].prefab.gameObject;
+		if (parentGenerator.tileDataList.ContainsKey(tile_id))
 
+			tileToSpawn = parentGenerator.tileDataList[tile_id].prefab.gameObject;
+
+        else
+        {
+			tileToSpawn = parentGenerator.tileDataList[0].prefab.gameObject;
+		}
 
 
 		GameObject createdTile = null;

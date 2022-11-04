@@ -21,7 +21,7 @@ public class ItemSpawner : MonoBehaviour
             StartCoroutine(SpawnWhenInValidChunk());
     }*/
 
-    public void SpawnItem()
+    public InteractableObject SpawnItem()
     {
         List<ObjectSpawnData> itemsThatCanSpawnHere = new List<ObjectSpawnData>();
 
@@ -45,13 +45,13 @@ public class ItemSpawner : MonoBehaviour
                 if (!GameSettings.Instance.worldInstance.allChunks.ContainsKey(spawnLocationKey.x + "," + spawnLocationKey.y + "," + spawnLocationKey.z) && UnityEngine.Random.Range(0f, 1f) < randomSpawnChance)
                 {
                     
-                    GameSettings.Instance.worldInstance.AddNewProp(transform.position, new Quaternion(objectToSpawn.transform.rotation.x, UnityEngine.Random.Range(transform.localRotation.y - 15f, transform.localRotation.y + 15f), objectToSpawn.transform.rotation.z, 1), objectToSpawn);
+                    return GameSettings.Instance.worldInstance.AddNewProp(transform.position, new Quaternion(objectToSpawn.transform.rotation.x, UnityEngine.Random.Range(transform.localRotation.y - 15f, transform.localRotation.y + 15f), objectToSpawn.transform.rotation.z, 1), objectToSpawn);
                 }
             }
 
             else if (UnityEngine.Random.Range(0f, 1f) < randomSpawnChance)
             {
-                GameSettings.Instance.worldInstance.AddNewProp(transform.position, new Quaternion(objectToSpawn.transform.rotation.x, UnityEngine.Random.Range(transform.localRotation.y - 15f, transform.localRotation.y + 15f), objectToSpawn.transform.rotation.z, 1), objectToSpawn);
+                return GameSettings.Instance.worldInstance.AddNewProp(transform.position, new Quaternion(objectToSpawn.transform.rotation.x, UnityEngine.Random.Range(transform.localRotation.y - 15f, transform.localRotation.y + 15f), objectToSpawn.transform.rotation.z, 1), objectToSpawn);
             }
         }
         //typeToSpawn preset
@@ -61,15 +61,17 @@ public class ItemSpawner : MonoBehaviour
             {
                 if (!GameSettings.Instance.worldInstance.allChunks.ContainsKey(spawnLocationKey.x + "," + spawnLocationKey.y + "," + spawnLocationKey.z))
                 {
-                    
-                    GameSettings.Instance.worldInstance.AddNewProp(transform.position, transform.localRotation, objectToSpawn);
+
+                    return GameSettings.Instance.worldInstance.AddNewProp(transform.position, transform.localRotation, objectToSpawn);
                 }
             }
             else
             {
-                GameSettings.Instance.worldInstance.AddNewProp(transform.position, transform.localRotation, objectToSpawn);
+                return GameSettings.Instance.worldInstance.AddNewProp(transform.position, transform.localRotation, objectToSpawn);
             }
         }
+
+        return null;
     }
 
 /*    public IEnumerator SpawnWhenInValidChunk()

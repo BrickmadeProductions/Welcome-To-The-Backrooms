@@ -313,7 +313,7 @@ public abstract class Entity : MonoBehaviour
 					}
 				}
 				//it can always know its there if its close enough
-				else if (Vector3.Distance(eyes.transform.position, currentTarget.position) < (GameSettings.Instance.Player.GetComponent<PlayerController>().currentPlayerState == PlayerController.PLAYERSTATES.RUN ? 70f : 10f))
+				else if (Vector3.Distance(eyes.transform.position, currentTarget.position) < (GameSettings.Instance.Player.GetComponent<PlayerController>().currentPlayerState == PlayerController.PLAYERSTATES.RUN ? 70f : 5f))
 					canSeeTarget = true;
 		}
 		

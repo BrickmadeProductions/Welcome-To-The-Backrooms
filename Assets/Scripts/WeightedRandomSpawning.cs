@@ -30,9 +30,22 @@ public class WeightedRandomSpawning
         {
             weights[i] = tiles[i].SpawnWeight;
         }
+
         int random = Random.Range(0, weights.Sum());
 
         Tile tileToSpawn = tiles.First(i => (random -= i.SpawnWeight) < 0);
+
+        if (tileToSpawn.GetComponent<StoryTile>() != null)
+        {
+            if (GameSettings.Instance.worldInstance.storyTilesFoundInThisWorld[tileToSpawn.GetComponent<StoryTile>().type] == true)
+            {
+                tiles.Remove(tileToSpawn);
+
+                tileToSpawn = tiles.First(i => (random -= i.SpawnWeight) < 0);
+
+                return tileToSpawn.id;
+            }
+        }
 
         return tileToSpawn.id;
 

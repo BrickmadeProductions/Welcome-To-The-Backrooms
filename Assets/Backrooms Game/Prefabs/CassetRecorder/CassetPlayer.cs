@@ -1,16 +1,41 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class CassetPlayer : HoldableObject
 {
-    public List<AudioClip> savedClips;
+    public List<AudioClipData> savedClips;
 
     public AudioClip currentClipProcessing;
     bool finishedAddingToList = false;
-    private void Start()
+
+    Coroutine playingClip = null;
+
+    public override void OnLoadFinished()
     {
-        savedClips = new List<AudioClip>();
+        if (GetMetaData("STORY_OBJECT") == "JAS")
+        {
+            savedClips.Add(GameSettings.Instance.JASAudioData);
+            SetStat("Clip", "Jeremiah and Seth");
+        }
+
+        
+    }
+    public override void Drop(Vector3 force)
+    {
+        //Debug.Log("DROPED");
+        base.Drop(force);
+        GetComponent<AudioSource>().clip = null;
+        GetComponent<AudioSource>().Stop();
+
+        if (playingClip != null)
+        {
+            StopCoroutine(playingClip);
+            playingClip = null;
+        }
+        
     }
 
     public override void Use(InteractionSystem player, bool LMB)
@@ -22,7 +47,12 @@ public class CassetPlayer : HoldableObject
 
     }
     void ProcessClip()
-    {
+
+    {   if (currentClipProcessing == null)
+        {
+            return;
+        }
+
         if (currentClipProcessing.length < 1f)
         {
             finishedAddingToList = true;
@@ -30,17 +60,17 @@ public class CassetPlayer : HoldableObject
         }
         //Capture the current clip data
         var position = Microphone.GetPosition(GameSettings.Instance.audioHandler.microphone);
-        
+
         var soundData = new float[currentClipProcessing.samples * currentClipProcessing.channels];
         currentClipProcessing.GetData(soundData, 0);
 
         //Create shortened array for the data that was used for recording
         var newData = new float[position * currentClipProcessing.channels];
 
-        
+
         GameSettings.Instance.audioHandler.StopRecording();
 
-       
+
 
         //Copy the used samples to a new array
         for (int i = 0; i < newData.Length; i++)
@@ -50,14 +80,27 @@ public class CassetPlayer : HoldableObject
 
         //One does not simply shorten an AudioClip,
         //    so we make a new one with the appropriate length
-        var newClip = AudioClip.Create(currentClipProcessing.name,
+        AudioClipData newClip = new AudioClipData
+        {
+
+            clip = AudioClip.Create(currentClipProcessing.name,
                                         position,
                                         currentClipProcessing.channels,
                                         currentClipProcessing.frequency,
-                                        false);
-        newClip.name = "Tape";
+                                        false),
 
-        newClip.SetData(newData, 0);        //Give it the data from the old clip
+            subtitles = new List<SubtitleSection>()
+        };
+
+        newClip.clip.name = "Tape";
+
+        newClip.clip.SetData(newData, 0);        //Give it the data from the old clip
+
+        newClip.subtitles.Add(new SubtitleSection()
+        {
+            description = "...",
+            timeStampEnd = newClip.clip.length
+        });
 
         //Replace the old clip
         savedClips.Add(newClip);
@@ -72,20 +115,54 @@ public class CassetPlayer : HoldableObject
 
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        if (Input.GetMouseButtonUp(0) && !finishedAddingToList && !animationPlaying)
+        if (GameSettings.Instance.Player.GetComponent<InventorySystem>().rHand.itemsInSlot.Count > 0)
         {
-            ProcessClip();
+            if (GameSettings.Instance.Player.GetComponent<InventorySystem>().rHand.itemsInSlot[0].connectedObject == this)
+            {
+                if (Input.GetMouseButtonUp(0) && !finishedAddingToList && !animationPlaying)
+                {
+                    ProcessClip();
+                }
+                else if (finishedAddingToList)
+                {
+                    finishedAddingToList = false;
+                }
+                if (Input.GetButtonDown("Replay_Casset") && !GetComponent<AudioSource>().isPlaying && playingClip == null)
+                {
+                    playingClip = StartCoroutine(PlayClip(0));
+                }
+            }
+            
+
         }
-        else if (finishedAddingToList)
+      
+    }
+
+    IEnumerator PlayClip(int selection)
+    {
+        GetComponent<AudioSource>().clip = savedClips[selection].clip;
+        GetComponent<AudioSource>().Play();
+
+        int subtitleSection = 0;
+
+        if (savedClips[selection].subtitles.Count > 0)
         {
-            finishedAddingToList = false;
+            while (GetComponent<AudioSource>().isPlaying)
+            {
+                GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification(savedClips[selection].subtitles[subtitleSection].description);
+
+                yield return new WaitForSecondsRealtime(savedClips[selection].subtitles[subtitleSection].timeStampEnd);
+
+                subtitleSection++;
+            }
         }
-        if (Input.GetButtonDown("Replay_Casset") && !GetComponent<AudioSource>().isPlaying)
+        else
         {
-            GetComponent<AudioSource>().clip = savedClips[0];
-            GetComponent<AudioSource>().Play();
+            yield return new WaitUntil(() => GetComponent<AudioSource>().isPlaying);
         }
+
+       
     }
 }

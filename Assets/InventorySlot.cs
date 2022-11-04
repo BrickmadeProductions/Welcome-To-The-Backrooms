@@ -154,7 +154,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             itemFromThisSlot.connectedObject.transform.localPosition = Vector3.zero;
 
             //itemFromThisSlot.connectedObject.rb.isKinematic = true;
-            BPUtil.SetAllColliders(itemFromThisSlot.connectedObject.transform, false);
+            //BPUtil.SetAllColliders(itemFromThisSlot.connectedObject.transform, false);
 
             //itemFromThisSlot.connectedObject.SetMetaData("INV_SLOT", itemFromThisSlot.slotIn.name);
             //GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().SetSaveData(itemFromThisSlot.slotIn.name, itemFromThisSlot.connectedObject.GetWorldID());
@@ -190,7 +190,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
         invItem.connectedObject.transform.localRotation = Quaternion.identity;
 
         //invItem.connectedObject.rb.isKinematic = true;
-        BPUtil.SetAllColliders(invItem.connectedObject.transform, false);
+       // BPUtil.SetAllColliders(invItem.connectedObject.transform, false);
 
         //itemFromThisSlot.connectedObject.SetMetaData("INV_SLOT", invItem.slotIn.name);
         //GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().SetSaveData(name, invItem.connectedObject.GetWorldID());
@@ -257,7 +257,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
         itemsInSlot.Add(newInventoryItem.GetComponent<InventoryItem>());
 
         //holdableObject.rb.isKinematic = true;
-        BPUtil.SetAllColliders(holdableObject.transform, false);
+        //BPUtil.SetAllColliders(holdableObject.transform, false);
 
         holdableObject.transform.parent = physicalLocation;
         holdableObject.transform.position = physicalLocation.position;

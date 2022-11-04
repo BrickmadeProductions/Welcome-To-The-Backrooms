@@ -52,6 +52,7 @@ public class InventorySystem : GenericMenu
             foreach (InventorySlot slot in GetAllInvSlots())
             {
                 if (slot.itemsInSlot.Count > 0)
+
                     foreach (InventoryItem item in slot.itemsInSlot)
                     {
                         string[] statDataArray = new string[item.connectedObject.stats.Count];

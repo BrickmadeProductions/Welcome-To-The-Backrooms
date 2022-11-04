@@ -193,7 +193,7 @@ public class AudioHandler : MonoBehaviour
     }
     IEnumerator SoundTrackLoop(SceneMusicData data, bool playInstantly)
     {
-        GetComponent<AudioSource>().volume = 0.09f;
+        GetComponent<AudioSource>().volume = 0.14f;
         GetComponent<AudioSource>().loop = false;
 
         if (!playInstantly)
@@ -203,23 +203,42 @@ public class AudioHandler : MonoBehaviour
         {
             GetComponent<AudioSource>().Stop();
 
-            if (data.soundTracks.Length > 0)
+            if (GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().sanity > 50f)
             {
-                GetComponent<AudioSource>().clip = data.soundTracks[Random.Range(0, data.soundTracks.Length)];
-                GetComponent<AudioSource>().Play();
-            }
-            else
-            {
-                GetComponent<AudioSource>().clip = sound0Track;
-                GetComponent<AudioSource>().Play();
+                if (data.soundTracks.Length > 0)
+                {
+                    GetComponent<AudioSource>().clip = data.soundTracks[Random.Range(0, data.soundTracks.Length)];
+                    GetComponent<AudioSource>().Play();
+                }
+                else
+                {
+                    GetComponent<AudioSource>().clip = sound0Track;
+                    GetComponent<AudioSource>().Play();
+                }
+
+                yield return new WaitForSecondsRealtime(Random.Range(900, 3600));
+
             }
 
-            yield return new WaitForSecondsRealtime(Random.Range(900, 3600));
+            yield return new WaitForSecondsRealtime(5f);
+           
         }
        
     }
     public IEnumerator StartEventTrack(GAMEPLAY_EVENT gameplay_event, float timeIntoEventInSeconds, float totalEventTimeInSeconds)
     {
+        SceneMusicData data = sceneMusicDictionary[GameSettings.Instance.ActiveScene];
+
+        if (data.ambience != null)
+        {
+            GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.GetChild(2).GetComponent<AudioSource>().Stop();
+        }
+        else
+        {
+            GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.GetChild(2).GetComponent<AudioSource>().Stop();
+
+        }
+
         GetComponent<AudioSource>().volume = 0.75f;
 
         GetComponent<AudioSource>().loop = false;
@@ -273,12 +292,7 @@ public class AudioHandler : MonoBehaviour
     {
         GetComponent<AudioSource>().Stop();
 
-        SceneMusicData data = sceneMusicDictionary[SCENE.LEVEL0];
-
-        if (sceneMusicDictionary.ContainsKey(scene))
-        {
-            data = sceneMusicDictionary[scene];
-        }
+        SceneMusicData data = sceneMusicDictionary[GameSettings.Instance.ActiveScene];
 
         if (data.ambience != null)
         {
@@ -290,6 +304,11 @@ public class AudioHandler : MonoBehaviour
             GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.GetChild(2).GetComponent<AudioSource>().clip = ambience0Track;
             GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.GetChild(2).GetComponent<AudioSource>().Play();
 
+        }
+
+        if (sceneMusicDictionary.ContainsKey(scene))
+        {
+            data = sceneMusicDictionary[scene];
         }
 
         playingSoundTrackLoop = StartCoroutine(SoundTrackLoop(data, playInstantly));
@@ -366,14 +385,17 @@ public class AudioHandler : MonoBehaviour
 
 
             }
+
+
         GameSettings.Instance.setMasterVolume(PlayerPrefs.GetFloat("MASTER_VOLUME"));
         //starts soundtrack for first time after world load -> BackroomsLevelWorld.cs
     }
 
     public void SceneSoundTrackStart(SCENE scene, bool playInstantly)
     {
-         ResetSoundTrackLoopState();
-         StartSoundTrack(scene, playInstantly);
+
+        ResetSoundTrackLoopState();
+        StartSoundTrack(scene, playInstantly);
     }
 
     public void EventSoundTrackStart(GAMEPLAY_EVENT gameplay_event, float timeIntoEvent, float howLongItLastsInSeconds)

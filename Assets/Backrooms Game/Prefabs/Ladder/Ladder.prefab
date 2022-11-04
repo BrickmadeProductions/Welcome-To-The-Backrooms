@@ -75,28 +75,36 @@ MonoBehaviour:
     parentName: 
     type: 13
     instance: {fileID: 3742688161633100252}
+  objectCategory: 0
   type: 13
   playSounds: 0
   runTimeID: 457
+  canBeLoadedWith: 
   inventoryObjectData:
     image: {fileID: 0}
-    name: 
-    inventoryWeight: 0
-    description: 
+    name: Metal Ladder
+    inventoryWeight: 150
+    description: A METAL LADDER, CAN BE USED TO GET TO HARD TO REACH PLACES
   durability: 0
   breakablePrefabs: []
+  breakLocations: []
   hitClips: []
   breakClips: []
   rb: {fileID: 0}
   ThrowMultiplier: 0
   large: 1
   autoSwing: 0
+  shouldDisableCrossHair: 0
+  connectedInvItem: {fileID: 0}
   canPlace: 1
   isPlaced: 0
+  canBeUsed: 1
   animationPlaying: 0
+  offHandIKPoint: {fileID: 0}
   StartUseAnimation: 
   UseAnimations: []
-  CustomHoldAnimation: 
+  CustomHoldAnimation: isHoldingChair
+  currentAnimChoice: 0
   ItemObjectAnimations: []
 --- !u!1 &4945531799288313688
 GameObject:

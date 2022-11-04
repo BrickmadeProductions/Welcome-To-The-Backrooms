@@ -524,7 +524,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 24300002, guid: 20bfa29a2ece3284f935fedf32737170, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.3
+  m_Volume: 0.1
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -3482,7 +3482,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '[F] OPEN'
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8e0571339cec67e47a2a8df974fd4564, type: 2}
   m_sharedMaterial: {fileID: 3643627527849109867, guid: 8e0571339cec67e47a2a8df974fd4564, type: 2}
@@ -5154,6 +5154,7 @@ MonoBehaviour:
   hasGivenStaminaNotification: 0
   hasGivenCraftingNotification: 0
   hasGivenItemBreakingNotification: 0
+  hasGivenChairCraftingNotification: 0
   rb: {fileID: 0}
   probe: {fileID: 0}
   darkShield: {fileID: 4909333951710274672}
@@ -5163,7 +5164,7 @@ MonoBehaviour:
   playerHealth: {fileID: 6386412001995166182}
   distance: {fileID: 7430639733698625145}
   skillSetSystem: {fileID: 4314181498464157679}
-  moveSpeed: 15000
+  moveSpeed: 12000
   WalkmaxSpeed: 5
   Crouchmaxspeed: 2
   SprintmaxSpeed: 10
@@ -5281,7 +5282,6 @@ MonoBehaviour:
   buildOn: 0
   currentlyLookingAt: {fileID: 0}
   currentPlaceItemPrefab: {fileID: 0}
-  dropLocation: {fileID: 5350283138236619638}
   interact: {fileID: 2945835553110084477}
   Cursor: {fileID: 1282540002552614841}
   canGrab: 1
@@ -5435,8 +5435,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50f23c2dac6d8b54c8ca7bb76bd5e9a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  walkingBobbingSpeed: 16
-  runningBobbingSpeed: 23
+  walkingBobbingSpeed: 12
+  runningBobbingSpeed: 21
   bobbingAmount: 0.03
   horizontalBobbingAmount: 0.06
   rotationAmount: 0
@@ -5763,6 +5763,7 @@ GameObject:
   - component: {fileID: 6386412003751089106}
   - component: {fileID: 6386412003751089107}
   - component: {fileID: 1544813727833745236}
+  - component: {fileID: 298112651938377708}
   m_Layer: 11
   m_Name: World Camera
   m_TagString: MainCamera
@@ -5945,6 +5946,14 @@ MonoBehaviour:
   amount: 0.31
   maxAmount: 0.66
   smoothingAmount: 7
+--- !u!124 &298112651938377708
+Behaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6386412003751089109}
+  m_Enabled: 1
 --- !u!1 &6386412003759671744
 GameObject:
   m_ObjectHideFlags: 0

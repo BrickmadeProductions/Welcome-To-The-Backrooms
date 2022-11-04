@@ -36,7 +36,7 @@ public class NotificationSystem : MonoBehaviour
             Notification newNotif = Instantiate(notificationPrefab, notificationLocation).GetComponent<Notification>();
 
            
-            newNotif.SetDesc(desc);
+            newNotif.SetDesc(desc.ToUpper());
 
             newNotif.transform.position = new Vector3(notificationLocation.position.x, notificationLocation.position.y - (125 * notifQueue.Count), notificationLocation.position.z);
 

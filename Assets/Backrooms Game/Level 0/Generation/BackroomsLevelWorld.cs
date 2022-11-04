@@ -113,9 +113,13 @@ public struct WorldSaveData
 
 	public Dictionary<string, SerealizedChunk> savedChunks;
 
+	public Dictionary<STORY_TILE, bool> foundStoryTiles;
+
 	public float timeInSecondsSinceLastEventSaved;
 
 	public float timeIntoCurrentEventSaved;
+
+	public float timeInSecondsSinceWorldFirstLoaded;
 }
 
 
@@ -144,7 +148,9 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public float timeInSecondsSinceLastEvent;
 	public float timeIntoCurrentEvent;
-	
+
+	public float timeInSecondsSinceWorldFirstLoaded;
+
 	[HideInInspector]
 	public List<GameObject> globalBloodAndGoreObjects;
 
@@ -184,6 +190,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public volatile Dictionary<string, SavedContainerInventoryData> containersInWorld;
 
+	public Dictionary<STORY_TILE, bool> storyTilesFoundInThisWorld;
+
 	[Range(1f, 5f)]
 	public int viewDistance;
 
@@ -209,22 +217,21 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public GAMEPLAY_EVENT[] gameplay_events_possible;
 
-	public BIOME_ID GetBiomeCurrentPlayerIsIn()
+	public BIOME_ID GetCurrentBiomeAtChunkPosition(Vector3 position)
     {
-		Chunk chunk = GetLoadedChunkAtPlayerLocation();
 
 		float worldPrelinID =
 			Mathf.PerlinNoise(
-				((float)(chunk.chunkPosX) / chunk.magnification) + ((float)worldDataSeed / 10000f) + 0.01f,
-				((float)(chunk.chunkPosZ) / chunk.magnification) + ((float)worldDataSeed / 10000f) + 0.01f) * 1.4f;
+				((float)((int)position.x) / level_chunkGenerator.GetComponent<Chunk>().magnification) + ((float)worldDataSeed / 10000f) + 0.01f,
+				((float)((int)position.z) / level_chunkGenerator.GetComponent<Chunk>().magnification) + ((float)worldDataSeed / 10000f) + 0.01f) * 1.4f;
 
 		float biomePerlinID =
 			Mathf.PerlinNoise(
-				((float)(chunk.chunkPosX) / chunk.magnification) + ((float)biomeDataSeed / 10000f) + 0.01f,
-				((float)(chunk.chunkPosZ) / chunk.magnification) + ((float)biomeDataSeed / 10000f) + 0.01f) * 1.1f;
+				((float)((int)position.x) / level_chunkGenerator.GetComponent<Chunk>().magnification) + ((float)biomeDataSeed / 10000f) + 0.01f,
+				((float)((int)position.z) / level_chunkGenerator.GetComponent<Chunk>().magnification) + ((float)biomeDataSeed / 10000f) + 0.01f) * 1.1f;
 		
 		biomePerlinID = Mathf.Clamp01(biomePerlinID);
-
+		worldPrelinID = Mathf.Clamp01(worldPrelinID);
 
 		//GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
@@ -237,33 +244,76 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		BIOME_ID biomeID = BIOME_ID.LEVEL_0_YELLOW_ROOMS;
 
-		if (worldPrelinID >= 0.3f && worldPrelinID < 1.01)
+		switch (GameSettings.Instance.ActiveScene)
 		{
-			biomeID = BIOME_ID.LEVEL_0_YELLOW_ROOMS;
 
-		}
-		else if (worldPrelinID < 0.3f)
-		{
-			if (biomePerlinID >= 0f && biomePerlinID < 0.3f)
-			{
-				biomeID = BIOME_ID.LEVEL_0_RED_ROOMS;
-			}
-			else if (biomePerlinID >= 0.4f && biomePerlinID < 0.6f)
-			{
-				biomeID = BIOME_ID.LEVEL_0_OVERGROWN;
-			}
-			else if (biomePerlinID >= 0.6f && biomePerlinID < 0.8f)
-			{
-				biomeID = BIOME_ID.LEVEL_0_PILLAR_ROOMS;
-			}
-			else if (biomePerlinID >= 0.8f && biomePerlinID < 0.9f)
-			{
-				biomeID = BIOME_ID.LEVEL_0_PILLAR_ROOMS;
-			}
-			else if (biomePerlinID >= 0.9f && biomePerlinID < 1.01f)
-			{
-				biomeID = BIOME_ID.LEVEL_0_RED_ROOMS;
-			}
+			case (SCENE.LEVEL0):
+
+				if (worldPrelinID >= 0.3f && worldPrelinID <= 1.01)
+				{
+					biomeID = BIOME_ID.LEVEL_0_YELLOW_ROOMS;
+
+				}
+				else if (worldPrelinID >= 0f && worldPrelinID < 0.3f)
+				{
+					if (biomePerlinID >= 0f && biomePerlinID < 0.3f)
+					{
+						biomeID = BIOME_ID.LEVEL_0_RED_ROOMS;
+					}
+					else if (biomePerlinID >= 0.3f && biomePerlinID < 0.6f)
+					{
+						biomeID = BIOME_ID.LEVEL_0_OVERGROWN;
+					}
+					else if (biomePerlinID >= 0.6f && biomePerlinID < 0.8f)
+					{
+						biomeID = BIOME_ID.LEVEL_0_PILLAR_ROOMS;
+					}
+					else if (biomePerlinID >= 0.8f && biomePerlinID < 0.9f)
+					{
+
+						biomeID = BIOME_ID.LEVEL_0_TALL_ROOMS;
+					}
+					else if (biomePerlinID >= 0.9f && biomePerlinID < 1.01f)
+					{
+						biomeID = BIOME_ID.LEVEL_0_RED_ROOMS;
+					}
+
+				}
+
+				break;
+
+			case (SCENE.LEVEL1):
+
+				Debug.Log(worldPrelinID + " " + biomePerlinID);
+
+				if ((Mathf.Abs((int)position.z) % 15) == 0 && (int)position.z != 0)
+				{
+					biomeID = BIOME_ID.LEVEL_1_VOID_CUTS;
+					break;
+				}
+
+				if (worldPrelinID >= 0.5f && worldPrelinID < 1.01)
+				{
+					biomeID = BIOME_ID.LEVEL_1_PARKING_GARAGE;
+
+				}
+				else if (worldPrelinID >= 0f && worldPrelinID < 0.5f)
+				{
+					if (biomePerlinID >= 0f && biomePerlinID < 0.5f)
+					{
+						biomeID = BIOME_ID.LEVEL_1_PARKING_GARAGE;
+					}
+					else if (biomePerlinID >= 0.5f && biomePerlinID <= 1.01f)
+					{
+						biomeID = BIOME_ID.LEVEL_1_MAZE;
+					}
+
+
+				}
+
+
+
+				break;
 
 		}
 
@@ -282,7 +332,6 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	private void Awake()
 	{
-		
 		CreateTileset(Tiles);
 
 		GameSettings.Instance.worldInstance = this;
@@ -349,14 +398,14 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
         {
 			currentWorldEvent = gameplay_event;
 			StartCoroutine(GameSettings.Instance.SaveAllProgress());
-			GameSettings.Instance.audioHandler.EventSoundTrackStart(currentWorldEvent, 0f, 10f * 60f);
+			GameSettings.Instance.audioHandler.EventSoundTrackStart(currentWorldEvent, 0f, 5f * 60f);
 			
 		}
 		
 		
 	}
 
-	public IEnumerator TrackEventTime()
+	public IEnumerator TrackTime()
     {
 		while (true)
         {
@@ -374,12 +423,18 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 
 			}
+
+			timeInSecondsSinceWorldFirstLoaded += 1f;
 		}
 		
     }
 
 	public void OnEvenStart()
     {
+		RenderSettings.ambientIntensity = 0.17f;
+		RenderSettings.reflectionIntensity = 0.17f;
+		DynamicGI.UpdateEnvironment();
+
 		foreach (Entity entity in FindObjectsOfType<Entity>())
 		{
 			if (entity != null)
@@ -418,6 +473,10 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public void OnEventEnd()
     {
+		RenderSettings.ambientIntensity = 0.7f;
+		RenderSettings.reflectionIntensity = 0.7f;
+		DynamicGI.UpdateEnvironment();
+
 		foreach (Entity entity in FindObjectsOfType<Entity>())
 		{
 			if (entity != null)
@@ -453,61 +512,67 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 	}
 	public IEnumerator TrySpawnEntities()
 	{
-		while (GameSettings.Instance.ActiveScene != SCENE.INTRO && GameSettings.Instance.ActiveScene != SCENE.HOMESCREEN && spawnEntities && worldEntitySpawnTable.Count > 0)
-		{
-			yield return new WaitForSecondsRealtime(0.1f);
-
-			GameObject entity = WeightedRandomSpawning.ReturnEntityBySpawnChances(worldEntitySpawnTable);
-
-			float spawnChanceCap = UnityEngine.Random.Range(0, currentWorldEvent == GAMEPLAY_EVENT.NONE ? 0.99f : 0.49f);
-
-			switch (GetBiomeCurrentPlayerIsIn())
-            {
-				case BIOME_ID.LEVEL_0_YELLOW_ROOMS:
-					spawnChanceCap *= 1f;
-					break;
-				case BIOME_ID.LEVEL_0_GOO_ROOMS:
-					spawnChanceCap *= 0.5f;
-					break;
-				case BIOME_ID.LEVEL_0_OVERGROWN:
-					spawnChanceCap *= 0.9f;
-					break;
-				case BIOME_ID.LEVEL_0_PITFALLS:
-					spawnChanceCap *= 1.2f;
-					break;
-				case BIOME_ID.LEVEL_0_SWAMP:
-					spawnChanceCap *= 0.9f;
-					break;
-				case BIOME_ID.LEVEL_0_RED_ROOMS:
-					spawnChanceCap *= 0.25f;
-					break;
-			}
-
-			if (entity.GetComponent<Entity>().spawnChance > spawnChanceCap)
+		if (worldEntitySpawnTable.Count > 0)
+        {
+			while (GameSettings.Instance.ActiveScene != SCENE.INTRO && GameSettings.Instance.ActiveScene != SCENE.HOMESCREEN && spawnEntities && worldEntitySpawnTable.Count > 0)
 			{
-				Chunk chunk = loadedChunks.ElementAt(UnityEngine.Random.Range(0, loadedChunks.Count)).Value;
+				yield return new WaitForSecondsRealtime(0.1f);
 
-				string key = chunk.chunkPosX + "," + chunk.chunkPosY + "," + chunk.chunkPosZ;
+				GameObject entity = WeightedRandomSpawning.ReturnEntityBySpawnChances(worldEntitySpawnTable);
 
-				int tileToSpawnIn = UnityEngine.Random.Range(0, chunk.tile_grid.Count - 1);
+				float spawnChanceCap = UnityEngine.Random.Range(0, currentWorldEvent == GAMEPLAY_EVENT.NONE ? 0.99f : 0.49f);
 
-				Tile tile = chunk.tile_grid[tileToSpawnIn];
-
-				yield return new WaitUntil(() => chunk.ALL_TILES_GENERATED);
-
-				if (tile.entitySpawnLocations.Count > 0)
+				switch (GetCurrentBiomeAtChunkPosition(GameSettings.Instance.Player.transform.position))
 				{
-					AddNewEntity(tile.entitySpawnLocations[UnityEngine.Random.Range(0, tile.entitySpawnLocations.Count)].position, entity.gameObject);
+					case BIOME_ID.LEVEL_0_YELLOW_ROOMS:
+						spawnChanceCap *= 1f;
+						break;
+					case BIOME_ID.LEVEL_0_GOO_ROOMS:
+						spawnChanceCap *= 0.5f;
+						break;
+					case BIOME_ID.LEVEL_0_OVERGROWN:
+						spawnChanceCap *= 0.9f;
+						break;
+					case BIOME_ID.LEVEL_0_PITFALLS:
+						spawnChanceCap *= 1.2f;
+						break;
+					case BIOME_ID.LEVEL_0_SWAMP:
+						spawnChanceCap *= 0.9f;
+						break;
+					case BIOME_ID.LEVEL_0_RED_ROOMS:
+						spawnChanceCap *= 0.25f;
+						break;
 				}
-				else
+
+				if (entity.GetComponent<Entity>().spawnChance > spawnChanceCap)
 				{
-					AddNewEntity(new Vector3((float)tile.tilePos.x * chunk.tileWidth + (float)(chunk.chunkPosX * chunk_width) * chunk.tileWidth, 0f, (float)tile.tilePos.y * chunk.tileWidth + (float)(chunk.chunkPosZ * chunk_width) * chunk.tileWidth), entity);
+					Chunk chunk = loadedChunks.ElementAt(UnityEngine.Random.Range(0, loadedChunks.Count)).Value;
+
+					string key = chunk.chunkPosX + "," + chunk.chunkPosY + "," + chunk.chunkPosZ;
+
+					int tileToSpawnIn = UnityEngine.Random.Range(0, chunk.tile_grid.Count - 1);
+
+					Tile tile = chunk.tile_grid[tileToSpawnIn];
+
+					yield return new WaitUntil(() => chunk.ALL_TILES_GENERATED);
+
+					if (tile.entitySpawnLocations.Count > 0)
+					{
+						AddNewEntity(tile.entitySpawnLocations[UnityEngine.Random.Range(0, tile.entitySpawnLocations.Count)].position, entity.gameObject);
+					}
+					else
+					{
+						AddNewEntity(new Vector3((float)tile.tilePos.x * chunk.tileWidth + (float)(chunk.chunkPosX * chunk_width) * chunk.tileWidth, 0f, (float)tile.tilePos.y * chunk.tileWidth + (float)(chunk.chunkPosZ * chunk_width) * chunk.tileWidth), entity);
+					}
+
+					allChunks[key] = chunk.saveableData;
+
 				}
-
-				allChunks[key] = chunk.saveableData;
-
 			}
 		}
+
+		yield return null;
+		
 	}
 	public SCENE ReturnNextRandomLevel()
     {
@@ -532,6 +597,19 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		loadedChunks = new Dictionary<string, Chunk>();
 		allChunks = new Dictionary<string, SerealizedChunk>();
 		containersInWorld = new Dictionary<string, SavedContainerInventoryData>();
+		storyTilesFoundInThisWorld = new Dictionary<STORY_TILE, bool>();
+
+		List<STORY_TILE> st = Enum.GetValues(typeof(STORY_TILE))
+		.Cast<STORY_TILE>()
+		.Select(v => v)
+		.ToList();
+
+		foreach (STORY_TILE tile in st)
+		{
+			storyTilesFoundInThisWorld.Add(tile, false);
+
+		}
+
 
 		currentRoomNumber = 0;
 		currentChunkNumber = 0;
@@ -717,7 +795,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			savedChunks = allChunks,
 			savedContainers = containersInWorld,
 			timeInSecondsSinceLastEventSaved = timeInSecondsSinceLastEvent,
-			timeIntoCurrentEventSaved = timeIntoCurrentEvent
+			timeIntoCurrentEventSaved = timeIntoCurrentEvent,
+			foundStoryTiles = storyTilesFoundInThisWorld
 		};
 		return JsonConvert.SerializeObject(worldSaveData);
 	}
@@ -768,6 +847,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		playerLocationData = saveData.playerData;
 
+		storyTilesFoundInThisWorld = saveData.foundStoryTiles;
 
 		if (saveData.savedChunks != null)
 		{
@@ -1234,7 +1314,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public float ChunkSize()
 	{
-		return level_chunkGenerator.GetComponent<Chunk>().tileWidth * (float)chunk_width;
+		return RoomSize() * (float)chunk_width;
 	}
 
 	public float ChunkHeight()
@@ -1256,12 +1336,12 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		return new Vector3Int(Mathf.FloorToInt((worldPos.x + RoomSize() / 2f) / ChunkSize()), y, Mathf.FloorToInt((worldPos.z + RoomSize() / 2f) / ChunkSize()));
 	}
 
-	public Chunk GetLoadedChunkAtPlayerLocation()
+	public Chunk GetLoadedChunkAtPosition(Vector3 position)
 	{
 		foreach (KeyValuePair<string, Chunk> loadedChunk in loadedChunks)
 		{
 			Chunk value = loadedChunk.Value;
-			Vector3Int chunkPos = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
+			Vector3Int chunkPos = GetChunkKeyAtWorldLocation(position);
 
 			string chunkPosKey = chunkPos.x + "," + chunkPos.y + "," + chunkPos.z;
 
