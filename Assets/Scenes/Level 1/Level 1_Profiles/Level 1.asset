@@ -1,5 +1,39 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6570111657982384595
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b77c5407dc277943b591ade9e6b18c5, type: 3}
+  m_Name: LensDistortion
+  m_EditorClassIdentifier: 
+  active: 1
+  enabled:
+    overrideState: 1
+    value: 1
+  intensity:
+    overrideState: 1
+    value: -10.4
+  intensityX:
+    overrideState: 0
+    value: 1
+  intensityY:
+    overrideState: 0
+    value: 1
+  centerX:
+    overrideState: 0
+    value: 0
+  centerY:
+    overrideState: 0
+    value: 0
+  scale:
+    overrideState: 0
+    value: 1
 --- !u!114 &-6086108271011315648
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -22,7 +56,7 @@ MonoBehaviour:
     defaultState: 1
   intensity:
     overrideState: 1
-    value: 0.08
+    value: 0.081000015
   fastMode:
     overrideState: 0
     value: 1
@@ -56,7 +90,7 @@ MonoBehaviour:
     value: 8
   maximumMarchDistance:
     overrideState: 1
-    value: 68.9
+    value: 70
   distanceFade:
     overrideState: 1
     value: 0.765
@@ -84,7 +118,7 @@ MonoBehaviour:
     value: 0
   intensity:
     overrideState: 1
-    value: 2.18
+    value: 0.6
   color:
     overrideState: 1
     value: {r: 0.20247418, g: 0.22082083, b: 0.24528301, a: 1}
@@ -133,6 +167,7 @@ MonoBehaviour:
   - {fileID: 803239355021030078}
   - {fileID: 8795616618507292558}
   - {fileID: -2345092922534385188}
+  - {fileID: -6570111657982384595}
 --- !u!114 &803239355021030078
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -198,16 +233,16 @@ MonoBehaviour:
     value: 0
   saturation:
     overrideState: 1
-    value: 14.1
+    value: 0
   brightness:
     overrideState: 0
     value: 0
   postExposure:
     overrideState: 1
-    value: 1.62
+    value: 2.35
   contrast:
     overrideState: 1
-    value: 2.1
+    value: -6.4
   mixerRedOutRedIn:
     overrideState: 0
     value: 100
@@ -1454,7 +1489,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d65e486e4de6e5448a8fbb43dc8756a0, type: 3}
-  m_Name: Grain
+  m_Name: Grain(Clone)
   m_EditorClassIdentifier: 
   active: 1
   enabled:
@@ -1465,13 +1500,13 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 0.377
+    value: 0.39
   size:
     overrideState: 1
-    value: 0.99
+    value: 0.94
   lumContrib:
     overrideState: 1
-    value: 0.28
+    value: 0.443
 --- !u!114 &4452754792260203483
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -1490,13 +1525,13 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 0.09
+    value: 0.29
   threshold:
     overrideState: 1
-    value: 0.09
+    value: 2.21
   softKnee:
     overrideState: 1
-    value: 0.414
+    value: 0.248
   clamp:
     overrideState: 0
     value: 65472
@@ -1505,7 +1540,7 @@ MonoBehaviour:
     value: 8.09
   anamorphicRatio:
     overrideState: 1
-    value: -0.534
+    value: 0.212
   color:
     overrideState: 1
     value: {r: 1.5203207, g: 1.5498939, b: 1.498718, a: 1}
@@ -1546,7 +1581,7 @@ MonoBehaviour:
     value: {x: 0.5, y: 0.5}
   intensity:
     overrideState: 1
-    value: 0.23
+    value: 0.39199996
   smoothness:
     overrideState: 1
     value: 0.37

@@ -26,8 +26,6 @@ public class InteractionSystem : MonoBehaviour
 	float currentRotZ = 0;
 	float currentRotX = 0;
 
-	public Transform dropLocation;
-
 	public Image interact;
 
 	public Image Cursor;
@@ -266,9 +264,6 @@ public class InteractionSystem : MonoBehaviour
 			player.bodyAnim.SetBool((slot.itemsInSlot[0].connectedObject.CustomHoldAnimation != "") ? slot.itemsInSlot[0].connectedObject.CustomHoldAnimation : "isHoldingSmall", value: false);
 			player.bodyAnim.SetBool("isHoldingLarge", value: false);
 		}
-		
-
-		slot.itemsInSlot[0].connectedObject.transform.position = dropLocation.position;
 
 		slot.RemoveItemFromSlot(slot.itemsInSlot[0].connectedObject, true);
 
@@ -663,8 +658,7 @@ public class InteractionSystem : MonoBehaviour
 				}
 				
 			}
-
-			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.neck.transform.localRotation.x * Mathf.Rad2Deg) < 20f || !GetObjectInRightHand().GetComponent<HoldableObject>().large))
+			if (Input.GetButtonDown("Drop") && (Mathf.Abs(player.head.transform.rotation.eulerAngles.x) < 30f || !GetObjectInRightHand().GetComponent<HoldableObject>().large))
 			{
 				SetDrop(inventory.rHand);
 			}

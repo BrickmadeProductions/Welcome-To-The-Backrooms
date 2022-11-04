@@ -194,9 +194,10 @@ MonoBehaviour:
     name: Boxcutter
     inventoryWeight: 5
     description: A handheld melee weapon. Best used at short range. CAN BE USED TO
-      SHAVE WOOD
+      SHAVE WOOD (DRAG OVER WOOD IN INVENTORY)
   durability: 0
   breakablePrefabs: []
+  breakLocations: []
   hitClips: []
   breakClips: []
   rb: {fileID: 0}
@@ -214,6 +215,7 @@ MonoBehaviour:
   UseAnimations:
   - SliceVar1
   CustomHoldAnimation: 
+  currentAnimChoice: 0
   ItemObjectAnimations: []
   Flying: 0
   rotationAmount: 0
@@ -224,6 +226,11 @@ MonoBehaviour:
   currentFasten: {fileID: 0}
   bladeLocation: {fileID: 0}
   fastenLocation: {fileID: 0}
+  originalData:
+    image: {fileID: 0}
+    name: 
+    inventoryWeight: 0
+    description: 
 --- !u!1 &7298040221084833643
 GameObject:
   m_ObjectHideFlags: 0

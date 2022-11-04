@@ -514,7 +514,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8285124627138148562}
   m_LocalRotation: {x: -0.70566845, y: -0.04507825, z: 0.045078225, w: 0.70566845}
-  m_LocalPosition: {x: -0.70000005, y: 6.3, z: 3.6537484e-10}
+  m_LocalPosition: {x: -0.666, y: 6.304, z: 0}
   m_LocalScale: {x: 0.4, y: 0.39999998, z: 0.6305046}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -741,6 +741,18 @@ PrefabInstance:
     - target: {fileID: 1734275747206335198, guid: 1524594750d88a6488b6305b104387ef, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8493413208097835615, guid: 1524594750d88a6488b6305b104387ef, type: 3}
+      propertyPath: m_Cookie
+      value: 
+      objectReference: {fileID: 2800000, guid: 6ddd8c0e897aae54cb17d970213d41b9, type: 3}
+    - target: {fileID: 8493413208097835615, guid: 1524594750d88a6488b6305b104387ef, type: 3}
+      propertyPath: m_ColorTemperature
+      value: 4878
+      objectReference: {fileID: 0}
+    - target: {fileID: 8493413208097835615, guid: 1524594750d88a6488b6305b104387ef, type: 3}
+      propertyPath: m_UseColorTemperature
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8522527428311772356, guid: 1524594750d88a6488b6305b104387ef, type: 3}
       propertyPath: m_Name

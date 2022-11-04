@@ -189,14 +189,19 @@ public struct CraftingPair
 }
 public class GameSettings : MonoBehaviour
 {
+	//story stuff
+	public AudioClipData JASAudioData;
+
+	//
+
 	public TextMeshProUGUI demoText;
 
 	public static List<string> cachedSaveIdentifiers;
 
 	public TextMeshProUGUI devModeInfo;
 
-	//BrickmadeProductions, king, wahoo, RJC, Constant, WoodE, SCY
-	public static readonly List<ulong> teamMemberSteamIDs = new List<ulong> { 76561199226044925, 76561198017133391, 76561198139743119, 76561198109625129, 76561198968340030, 76561198374741749, 76561199067040929 };
+	//BrickmadeProductions, king, wahoo, RJC, Constant, WoodE, SCY, LeepMeep
+	public static readonly List<ulong> teamMemberSteamIDs = new List<ulong> { 76561199226044925, 76561198017133391, 76561198139743119, 76561198109625129, 76561198968340030, 76561198374741749, 76561199067040929, 76561198970004846 };
 
 	public BackroomsLevelWorld worldInstance = null;
 	public CutSceneHandler cutSceneHandler;
@@ -491,8 +496,7 @@ public class GameSettings : MonoBehaviour
 		LoadInSettingsPrefs();
 
 	}
-
-	public void ResetSettingsPrefs()
+    public void ResetSettingsPrefs()
     {
 
     }
@@ -547,6 +551,12 @@ public class GameSettings : MonoBehaviour
     {
 		StartCoroutine(ResetGameAsync());
     }
+	public void DestroySaveFile()
+    {
+		SaveMaster.DeleteSave(0);
+
+		PlayerPrefs.SetInt("LAST_SAVED_SCENE", (int)SCENE.ROOM);
+	}
 	public IEnumerator ResetGameAsync()
 	{
 		LastSavedScene = SCENE.ROOM;
@@ -555,13 +565,10 @@ public class GameSettings : MonoBehaviour
 		yield return new WaitUntil(() => ActiveScene == SCENE.HOMESCREEN);
 
 		SaveMaster.DeleteSave(0);
+		SaveMaster.SetSlot(0, true);
 
-		SaveFileUtility.LoadSave(0, true);
-		SaveMaster.SetSlot(0, false);
-
-		SaveMaster.SyncSave();
-
-		PlayerPrefs.SetInt("LAST_SAVED_SCENE", (int)LastSavedScene);
+		SaveMaster.SyncLoad();
+		PlayerPrefs.SetInt("LAST_SAVED_SCENE", (int)SCENE.ROOM);
 
 	}
 
@@ -578,6 +585,8 @@ public class GameSettings : MonoBehaviour
 
 	public void setPauseMenuOpen(bool tf)
 	{
+		Time.timeScale = tf ? 0f : 1f;
+
 		pauseMenuOpen = tf;
 	}
 
@@ -1186,7 +1195,7 @@ public class GameSettings : MonoBehaviour
 
 			if (worldInstance.gameplay_events_possible.Count() > 0)
 			{
-				StartCoroutine(worldInstance.TrackEventTime());
+				StartCoroutine(worldInstance.TrackTime());
 				StartCoroutine(worldInstance.TryStartRandomEvents());
 			}
 
@@ -1226,5 +1235,11 @@ public class GameSettings : MonoBehaviour
 			return true;
 		}
 		return false;
+	}
+
+    private void OnApplicationQuit()
+    {
+		//DEMO
+		//ResetGameIMMIDIATE();
 	}
 }

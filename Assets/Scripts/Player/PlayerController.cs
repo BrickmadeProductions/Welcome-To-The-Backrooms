@@ -48,6 +48,8 @@ public struct PlayerSaveData
     public bool hasGivenStaminaNotificationSaved;
     public bool hasGivenCraftingNotificationSaved;
     public bool hasGivenItemBreakingNotificationSaved;
+
+    public bool hasGivenChairCraftingNotificationSaved;
 }
 public class PlayerController : MonoBehaviour, ISaveable
 {
@@ -63,6 +65,8 @@ public class PlayerController : MonoBehaviour, ISaveable
     public bool hasGivenStaminaNotification = false;
     public bool hasGivenCraftingNotification = false;
     public bool hasGivenItemBreakingNotification = false;
+
+    public bool hasGivenChairCraftingNotification = false;
 
     PlayerSaveData playerSaveData;
     public string OnSave()
@@ -88,6 +92,8 @@ public class PlayerController : MonoBehaviour, ISaveable
         playerSaveData.hasGivenDrinkingNotificationSaved = hasGivenDrinkingNotification;
         playerSaveData.hasGivenCraftingNotificationSaved = hasGivenCraftingNotification;
         playerSaveData.hasGivenItemBreakingNotificationSaved = hasGivenItemBreakingNotification;
+
+        playerSaveData.hasGivenChairCraftingNotificationSaved = hasGivenChairCraftingNotification;
 
         playerSaveData.distanceTraveledSaved = distance.distanceTraveled;
 
@@ -124,6 +130,8 @@ public class PlayerController : MonoBehaviour, ISaveable
         hasGivenStaminaNotification = playerSaveData.hasGivenStaminaNotificationSaved;
         hasGivenCraftingNotification = playerSaveData.hasGivenCraftingNotificationSaved;
         hasGivenItemBreakingNotification = playerSaveData.hasGivenItemBreakingNotificationSaved;
+
+        hasGivenChairCraftingNotification = playerSaveData.hasGivenChairCraftingNotificationSaved;
 
         rb.velocity = Vector3.zero;
 
@@ -496,7 +504,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     void Update()
     {
 
-        if (!GameSettings.Instance.IsCutScene)
+        if (!GameSettings.Instance.IsCutScene && !dead)
         {
             if (playerHealth.sanity <= 50f && !hasGivenSanityNotification)
             {
@@ -521,9 +529,17 @@ public class PlayerController : MonoBehaviour, ISaveable
             
             if (playerHealth.heartRate >= 105f && !hasGivenHeartRateNotification)
             {
-                GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("KEEPING YOUR HEARTRATE AROUND 90BPM WILL KEEP YOUR BODY HEALTH, BE SURE TO WATCH YOUR BPM (HOLD [H])");
+                GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("KEEPING YOUR HEARTRATE AROUND 90BPM WILL KEEP YOUR SANITY LOW, BE SURE TO WATCH YOUR BPM (HOLD [H])");
                 hasGivenHeartRateNotification = true;
             }
+
+            if (GameSettings.Instance.worldInstance != null)
+
+                if (GameSettings.Instance.worldInstance.timeInSecondsSinceWorldFirstLoaded >= 300 && GameSettings.Instance.ActiveScene == SCENE.LEVEL0 && !hasGivenChairCraftingNotification)
+                {
+                    GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("MAYBE I SHOULD LOOK FOR SOMETHING SHARP TO CUT THESE CHAIR LEGS WITH AND CRAFT SOME WEAPONS, WHO KNOWS WHATS LURKING OUT THERE...");
+                    hasGivenChairCraftingNotification = true;
+                }
 
 
 
@@ -550,6 +566,13 @@ public class PlayerController : MonoBehaviour, ISaveable
             //Some movement multipliers
             float multiplier = 1f, multiplierV = 1f;
 
+            // Movement while sliding
+            if (currentPlayerState == PLAYERSTATES.SLIDE)
+            {
+                multiplier = 2f;
+                multiplierV = 2f;
+            }
+
             // Movement in air
             if (!isGrounded)
             {
@@ -557,12 +580,13 @@ public class PlayerController : MonoBehaviour, ISaveable
                 multiplierV = 0.25f;
             }
 
-            // Movement while sliding
-            if (currentPlayerState == PLAYERSTATES.SLIDE)
+
+            if (GetComponent<InteractionSystem>().GetObjectInRightHand() != null)
             {
-                multiplier = 2f;
-                multiplierV = 2f;
+                multiplier *= GetComponent<InteractionSystem>().GetObjectInRightHand().large ? 0.80f : 1f;
+                multiplier *= GetComponent<InteractionSystem>().GetObjectInRightHand().large ? 0.80f : 1f;
             }
+
 
             Vector3 walkXForce = transform.forward * curSpeedY * moveSpeed * Time.deltaTime * multiplier * multiplierV;
             Vector3 walkYForce = transform.right * curSpeedX * moveSpeed * Time.deltaTime * multiplier;
@@ -574,7 +598,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             if (Mathf.Abs(Input.GetAxisRaw("Horizontal")) < 0.25f && Mathf.Abs(Input.GetAxisRaw("Vertical")) < 0.25f && isGrounded && currentPlayerState != PLAYERSTATES.SLIDE && !Input.GetButton("Jump"))
             {
-                rb.drag = 1000f;
+                rb.drag = 100f;
             }
             else if (isGrounded)
             {
@@ -797,14 +821,29 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             if (Input.GetButton("Run") && playerHealth.canRun && !bodyAnim.GetBool("Prone") && !GetComponent<InventorySystem>().menuOpen && isGrounded)
             {
-                bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
-                bodyAnim.SetBool("isCrouching", false);
-                bodyAnim.SetBool("isWalking", false);
-                bodyAnim.SetBool("isRunning", true);
+                bool shouldRun = true;
 
-                maxSpeed = SprintmaxSpeed;
 
-                currentPlayerState = PLAYERSTATES.RUN;
+                if (GetComponent<InteractionSystem>().GetObjectInRightHand() != null)
+                {
+                    if (GetComponent<InteractionSystem>().GetObjectInRightHand().large)
+
+                        shouldRun = false;
+                }
+
+                if (shouldRun)
+                {
+                    bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
+                    bodyAnim.SetBool("isCrouching", false);
+                    bodyAnim.SetBool("isWalking", false);
+                    bodyAnim.SetBool("isRunning", true);
+
+                    maxSpeed = SprintmaxSpeed;
+
+                    currentPlayerState = PLAYERSTATES.RUN;
+                }
+
+               
 
             }
 
@@ -941,8 +980,12 @@ public class PlayerController : MonoBehaviour, ISaveable
         
         if (Input.GetButton("Watch"))
         {
+            bool canOpenWatch = true;
+
             if (GetComponent<InteractionSystem>().GetObjectInRightHand() != null)
             {
+                if (GetComponent<InteractionSystem>().GetObjectInRightHand().large)
+                    canOpenWatch = false;
 
                 if (GetComponent<InteractionSystem>().GetObjectInRightHand().StartUseAnimation != null) bodyAnim.SetBool(GetComponent<InteractionSystem>().GetObjectInRightHand().StartUseAnimation, false);
                 
@@ -953,7 +996,7 @@ public class PlayerController : MonoBehaviour, ISaveable
                 
             }
 
-            bodyAnim.SetBool("Watch", true);
+            bodyAnim.SetBool("Watch", canOpenWatch);
 
 
         }
@@ -965,7 +1008,7 @@ public class PlayerController : MonoBehaviour, ISaveable
            
 
         //controll player stamina volume indicator
-        playerNoises.volume = 0.15f + ((100 - playerHealth.stamina) / 100) / 2;
+        playerNoises.volume = 0.08f + ((100 - playerHealth.stamina) / 100) / 2;
 
         switch (currentPlayerState)
         {
@@ -1332,6 +1375,10 @@ public class PlayerController : MonoBehaviour, ISaveable
             if (playerDamageOverTime == null)
                playerDamageOverTime = StartCoroutine(HurtPlayerOverSeconds(col.gameObject.GetComponent<DamageCollider>()));
         }
+        if (col.tag == "JAS_Tile")
+        {
+            GameSettings.Instance.worldInstance.storyTilesFoundInThisWorld[STORY_TILE.JAS] = true;
+        }
 
     }
     IEnumerator HurtPlayerOverSeconds(DamageCollider damageLocation)
@@ -1360,17 +1407,17 @@ public class PlayerController : MonoBehaviour, ISaveable
         {
             case PLAYERSTATES.CROUCH:
                 yield return new WaitForSecondsRealtime(1f);
-                feetSource.volume = UnityEngine.Random.Range(0.04f, 0.06f);
+                feetSource.volume = UnityEngine.Random.Range(0.01f, 0.03f);
                 break;
 
             case PLAYERSTATES.WALK:
                 yield return new WaitForSecondsRealtime(0.4f);
-                feetSource.volume = UnityEngine.Random.Range(0.06f, 0.11f);
+                feetSource.volume = UnityEngine.Random.Range(0.04f, 0.09f);
                 break;
 
             case PLAYERSTATES.RUN:
                 yield return new WaitForSecondsRealtime(0.28f);
-                feetSource.volume = UnityEngine.Random.Range(0.11f, 0.24f);
+                feetSource.volume = UnityEngine.Random.Range(0.09f, 0.17f);
                 break;
             case PLAYERSTATES.JUMP:
                 feetSource.Stop();

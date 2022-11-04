@@ -4951,7 +4951,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6219837297577571078}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: -0.0692, z: 0}
+  m_LocalPosition: {x: 0, y: -0.0552, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4969,9 +4969,9 @@ Light:
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 0.9150943, g: 0.8992672, b: 0.77265036, a: 1}
-  m_Intensity: 3
-  m_Range: 16
+  m_Color: {r: 0.9245283, g: 0.8587398, b: 0.78061587, a: 0}
+  m_Intensity: 4.97
+  m_Range: 13
   m_SpotAngle: 137.28346
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -5003,7 +5003,7 @@ Light:
     m_UseCullingMatrixOverride: 0
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
-  m_Flare: {fileID: 0}
+  m_Flare: {fileID: 12100000, guid: c84837e2c52a28b4ba668faea8643460, type: 2}
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
@@ -5012,9 +5012,9 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
-  m_BounceIntensity: 0
-  m_ColorTemperature: 6570
-  m_UseColorTemperature: 0
+  m_BounceIntensity: 1.97
+  m_ColorTemperature: 5483
+  m_UseColorTemperature: 1
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
@@ -5044,7 +5044,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6606544625273764221}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.0013, z: 0}
+  m_LocalPosition: {x: 0, y: 0.0015, z: 0}
   m_LocalScale: {x: 0.49, y: 1, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5122,7 +5122,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 24300002, guid: 20bfa29a2ece3284f935fedf32737170, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.05
+  m_Volume: 0.04
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -5266,7 +5266,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7746416667810060853}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.1, y: -0.078, z: 0}
+  m_LocalPosition: {x: 0.1, y: -0.071, z: 0}
   m_LocalScale: {x: 17.38, y: 10, z: 14.72}
   m_ConstrainProportionsScale: 0
   m_Children:
