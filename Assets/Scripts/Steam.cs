@@ -10,7 +10,34 @@ public class Steam : MonoBehaviour
     void Start()
     {
         GetSteamDevAccessData();
+        StartCoroutine(ScanAcheivments());
 
+    }
+
+    IEnumerator ScanAcheivments()
+    {
+        while (true)
+        {
+            //world 
+            if (GameSettings.Instance.worldInstance != null)
+            {
+                if (GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().sanity <= 60f)
+                {
+                    AddAchievment("SANITY_SIXTY");
+                }
+                if (GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().sanity <= 35f)
+                {
+                    AddAchievment("SANITY_THIRTY_FIVE");
+                }
+                if (GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().sanity <= 0f)
+                {
+                    AddAchievment("SANITY_ZERO");
+                }
+            }
+
+            yield return new WaitForEndOfFrame();
+        }
+       
     }
 
     public static void UpdateRichPresence()
@@ -82,6 +109,21 @@ public class Steam : MonoBehaviour
         SteamUserStats.GetStat(statName, out currentStat);
         SteamUserStats.SetStat(statName, currentStat + amount);
         SteamUserStats.StoreStats();
+    }
+    public static void SetStat(string statName, int amount)
+    {
+        SteamUserStats.RequestCurrentStats();
+        SteamUserStats.SetStat(statName, amount);
+        SteamUserStats.StoreStats();
+    }
+    public static int GetStat(string statName)
+    {
+        int intStat = 0;
+        SteamUserStats.RequestCurrentStats();
+        SteamUserStats.GetStat(statName, out intStat);
+        SteamUserStats.StoreStats();
+
+        return intStat;
     }
     public static void DecrementStat(string statName, float amount)
     {

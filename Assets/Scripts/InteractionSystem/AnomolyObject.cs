@@ -28,7 +28,7 @@ public class AnomolyObject : InteractableObject
 
     public override void Use(InteractionSystem player, bool LMB)
     {
-        if (!GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.isCurrentlyUpgrading)
+        if (!GameSettings.GetLocalPlayer().skillSetSystem.isCurrentlyUpgrading)
         {
             
             if (currentPointsPulled < maxPointsThatCanBeObtained)
@@ -37,10 +37,10 @@ public class AnomolyObject : InteractableObject
 
                 SetMetaData("currentPointsPulled", currentPointsPulled.ToString());
 
-                GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.ProgressSkill(SKILL_TYPE.NO_CLIP, GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.ProgressByDeminsingSkillPoints());
+                GameSettings.GetLocalPlayer().skillSetSystem.ProgressSkill(SKILL_TYPE.NO_CLIP, GameSettings.GetLocalPlayer().skillSetSystem.ProgressByDeminsingSkillPoints());
                 GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("YOU HAVE INSPECTED AN ANOMALY AND GAINED 1 SKILL POINT, USE [J] TO OPEN SKILL MENU");
             
-                if (currentPointsPulled >= maxPointsThatCanBeObtained) StartCoroutine(WaitToDestroy(!GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.isCurrentlyUpgrading));
+                if (currentPointsPulled >= maxPointsThatCanBeObtained) StartCoroutine(WaitToDestroy(!GameSettings.GetLocalPlayer().skillSetSystem.isCurrentlyUpgrading));
             }
         }
        

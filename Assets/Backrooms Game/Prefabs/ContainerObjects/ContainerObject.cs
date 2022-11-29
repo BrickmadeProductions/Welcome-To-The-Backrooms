@@ -116,7 +116,7 @@ public class ContainerObject : HoldableObject, IEnumerable<InventorySlot>
     public void ConnectUIToPlayer()
     {
         UIObject.SetActive(true);
-        UIObject.gameObject.GetComponent<RectTransform>().SetParent(GameSettings.Instance.Player.GetComponent<InventorySystem>().menuObject.transform);
+        UIObject.gameObject.GetComponent<RectTransform>().SetParent(GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().menuObject.transform);
         UIObject.gameObject.GetComponent<RectTransform>().anchoredPosition3D = ogUIPos;
         UIObject.gameObject.GetComponent<RectTransform>().localScale = ogUIScale;
         UIObject.gameObject.GetComponent<RectTransform>().rotation = ogUIRotation;

@@ -261,10 +261,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 28
-  connetedObject: {fileID: 0}
+  connectedObject: {fileID: 0}
   WeaponBloodRenderer: {fileID: 5577791559151240060}
   bloodAmount: 0
   onlyHitOneLimb: 1
+  hasHit: 0
 --- !u!65 &2154084144631046751
 BoxCollider:
   m_ObjectHideFlags: 0

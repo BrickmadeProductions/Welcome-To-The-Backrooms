@@ -82,6 +82,9 @@ public class InventorySystem : GenericMenu
         currentPlayerInventorySave = data.savedPlayerInventory;
        
     }
+
+
+
     public void PutSavedItemsInInventory()
     {
         //players inventory data has been loaded this runs after spawn chunks have generated, just add items to it

@@ -17,7 +17,7 @@ public class ArmorObject : HoldableObject
     public override void Drop(Vector3 force)
     {
         base.Drop(force);
-        GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().armorReduction -= armorAmount;
+        GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().armorReduction -= armorAmount;
         screenIcon.SetActive(false);
     }
 }

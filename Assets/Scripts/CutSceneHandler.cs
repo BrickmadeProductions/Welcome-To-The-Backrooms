@@ -1,17 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 using UnityEngine.Video;
 using static CUT_SCENE;
 
 public enum CUT_SCENE
 {
     NO_CLIP_SUCCESS_WALL_DEMO,
-    NO_CLIP_SUCCESS_WALL,
+    NO_CLIP_SUCCESS,
     NO_CLIP_FAIL_WALL,
     LIGHTS_OUT,
     WAKE_UP,
     GO_TO_SLEEP,
+    KNOCKED_OUT_PARTYGOER
 }
 
 public class CutSceneHandler : MonoBehaviour
@@ -65,7 +67,7 @@ public class CutSceneHandler : MonoBehaviour
     public IEnumerator BeginCutSceneAsync(CUT_SCENE cutsceneIndex)
     {
 
-        GameSettings.Instance.Player.GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(false);
+        GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(false);
 
         foreach (GenericMenu menu in GameSettings.Instance.GameplayMenuDataBase)
         {
@@ -85,26 +87,29 @@ public class CutSceneHandler : MonoBehaviour
 
             case NO_CLIP_SUCCESS_WALL_DEMO:
 
-                GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("NoClip_Success", true);
+                
+                GameSettings.GetLocalPlayer().bodyAnim.SetBool("NoClip_Success", true);
 
-                GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().earStatusAudio.clip = noClipSuccessAudio;
-                GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().earStatusAudio.Play();
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().earStatusAudio.clip = noClipSuccessAudio;
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().earStatusAudio.Play();
 
                 yield return new WaitForSecondsRealtime(0.05f);
 
-                GameSettings.Instance.Player.GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
+                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
 
-                GameSettings.Instance.Player.GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
+                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
 
                 yield return new WaitForSecondsRealtime(2f);
 
-                GameSettings.Instance.Player.GetComponent<Blinking>().eyeLids.SetActive(false);
+                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.SetActive(false);
 
-                Destroy(GameSettings.Instance.Player.gameObject);
+                Destroy(GameSettings.GetLocalPlayer().gameObject);
 
                 demoHandler.PlayDemoEnd();
 
                 yield return new WaitForSecondsRealtime(6.5f);
+
+
 
                 GameSettings.Instance.ResetGame();
 
@@ -112,71 +117,119 @@ public class CutSceneHandler : MonoBehaviour
 
                 break;
 
-            case NO_CLIP_SUCCESS_WALL:
+            case NO_CLIP_SUCCESS:
+
+                GameSettings.GetLocalPlayer().builder.layers[0].active = false;
+                GameSettings.GetLocalPlayer().builder.layers[1].active = false;
+                GameSettings.GetLocalPlayer().builder.layers[2].active = false;
 
                 StartCoroutine(CloseOutSound());
 
-                GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().health -= 10f;
-                GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().ChangeHeartRate(15f);
-                GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().sanity -= 15f;
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().ChangeHeartRate(15f);
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().sanity -= 15f;
 
-                GameSettings.Instance.Player.GetComponent<PlayerController>().rb.AddForce(GameSettings.Instance.Player.transform.forward * 5f);
+                GameSettings.GetLocalPlayer().rb.AddForce(GameSettings.GetLocalPlayer().transform.forward * 5f);
 
                 GameSettings.Instance.audioHandler.ResetSoundTrackLoopState();
 
-                GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("NoClip_Success", true);
+                GameSettings.GetLocalPlayer().bodyAnim.SetBool("NoClip_Success", true);
 
-                GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().earStatusAudio.clip = noClipSuccessAudio;
-                GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().earStatusAudio.Play();
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().earStatusAudio.clip = noClipSuccessAudio;
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().earStatusAudio.Play();
 
                 yield return new WaitForSecondsRealtime(0.05f);
 
-                GameSettings.Instance.Player.GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
+                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
 
                 yield return new WaitForSecondsRealtime(3f);
 
-                GameSettings.Instance.Player.GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
+                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
 
-                GameSettings.Instance.LoadScene(GameSettings.Instance.worldInstance.ReturnNextRandomLevel());
+                GameSettings.Instance.LoadScene(GameSettings.ReturnNextRandomLevel());
+
+                yield return new WaitForSecondsRealtime(3f);
+
+                GameSettings.GetLocalPlayer().bodyAnim.SetBool("NoClip_Success", false);
+
+                GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(true);
+
+                GameSettings.GetLocalPlayer().builder.layers[0].active = true;
+                GameSettings.GetLocalPlayer().builder.layers[1].active = true;
+                GameSettings.GetLocalPlayer().builder.layers[2].active = true;
+
+                break;
+
+            case KNOCKED_OUT_PARTYGOER:
+
+                GameSettings.GetLocalPlayer().builder.layers[0].active = false;
+                GameSettings.GetLocalPlayer().builder.layers[1].active = false;
+                GameSettings.GetLocalPlayer().builder.layers[2].active = false;
+
+                StartCoroutine(CloseOutSound());
+
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().ChangeHeartRate(15f);
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().sanity -= 15f;
+
+                GameSettings.GetLocalPlayer().rb.AddForce(GameSettings.GetLocalPlayer().transform.forward * 5f);
+
+                GameSettings.Instance.audioHandler.ResetSoundTrackLoopState();
+
+                GameSettings.GetLocalPlayer().bodyAnim.SetBool("NoClip_Success", true);
+
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().earStatusAudio.clip = noClipSuccessAudio;
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().earStatusAudio.Play();
+
+                yield return new WaitForSecondsRealtime(0.05f);
+
+                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
 
                 yield return new WaitForSecondsRealtime(3f);
 
-                GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("NoClip_Success", false);
+                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
 
-                GameSettings.Instance.Player.GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(true);
+                GameSettings.Instance.LoadScene(SCENE.LEVELFUN);
 
                 yield return new WaitForSecondsRealtime(3f);
+
+                GameSettings.GetLocalPlayer().bodyAnim.SetBool("NoClip_Success", false);
+
+                GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(true);
+
+                GameSettings.GetLocalPlayer().builder.layers[0].active = true;
+                GameSettings.GetLocalPlayer().builder.layers[1].active = true;
+                GameSettings.GetLocalPlayer().builder.layers[2].active = true;
 
                 break;
 
             case NO_CLIP_FAIL_WALL:
 
-                GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().health -= 5f;
-                GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().sanity -= 2f;
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().health -= 5f;
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().sanity -= 2f;
 
-                GameSettings.Instance.Player.GetComponent<PlayerController>().rb.AddForce(-GameSettings.Instance.Player.transform.forward * 100f);
+                GameSettings.GetLocalPlayer().rb.AddForce(-GameSettings.GetLocalPlayer().transform.forward * 100f);
 
-                GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("NoClip_Fail", true);
+                GameSettings.GetLocalPlayer().bodyAnim.SetBool("NoClip_Fail", true);
 
-                GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().earStatusAudio.clip = noClipFailAudio;
-                GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().earStatusAudio.Play();
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().earStatusAudio.clip = noClipFailAudio;
+                GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().earStatusAudio.Play();
 
                 yield return new WaitForSecondsRealtime(0.05f);
 
-                GameSettings.Instance.Player.GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
+                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
 
 
                 yield return new WaitForSecondsRealtime(0.5f);
 
-                GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("NoClip_Fail", false);
+                GameSettings.GetLocalPlayer().bodyAnim.SetBool("NoClip_Fail", false);
 
                 yield return new WaitForSecondsRealtime(0.5f);
 
-                GameSettings.Instance.Player.GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
+                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
 
-                GameSettings.Instance.Player.GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(true);
+                GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(true);
                 break;
         }
+
 
 
         GameSettings.Instance.setCutScene(false);

@@ -7,11 +7,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
-public enum DEATH_CASE
+public enum DAMAGE_TYPE
 {
+    ENTITY,
     UNKNOWN,
     PLAYER,
-    ENTITY,
     FALL_DAMAGE
 }
 [Serializable]
@@ -71,6 +71,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     PlayerSaveData playerSaveData;
     public string OnSave()
     {
+
         //save skill data
         playerSaveData.skillLineSavedData = skillSetSystem.skillDictionary;
         playerSaveData.healthSaved = playerHealth.health;
@@ -154,14 +155,15 @@ public class PlayerController : MonoBehaviour, ISaveable
     public GameObject darkShield;
     public GameObject headTarget;
 
-    public DEATH_CASE currentPotentialDeathCase;
+    public bool isNoClipping = false;
+
 
     public IEnumerator LoadInWorldPlayerData()
     {
 
         if (GameSettings.Instance.worldInstance != null)
         {
-            DistanceChecker.SHOULD_READ_STEPS = false;
+            
 
             yield return new WaitUntil(() => GameSettings.Instance.AmInSavableScene());
 
@@ -178,7 +180,6 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             distance.lastPosition = transform.position;
 
-            DistanceChecker.SHOULD_READ_STEPS = true;
 
 
         }
@@ -204,6 +205,21 @@ public class PlayerController : MonoBehaviour, ISaveable
 
         rotationX = world.playerLocationData.savedRotationX;
         rotationY = world.playerLocationData.savedRotationY;
+
+        if (!PlayerHasRoom())
+        {
+            GetComponent<CapsuleCollider>().center = new Vector3(0f, 1.19f, 0f);
+            GetComponent<CapsuleCollider>().height = 2.41f;
+
+            maxSpeed = Crouchmaxspeed;
+
+            bodyAnim.SetBool("isCrouching", true);
+            bodyAnim.SetBool("isRunning", false);
+            bodyAnim.SetBool("isWalking", false);
+
+            currentPlayerState = PLAYERSTATES.CROUCH;
+            bufferStand = true;
+        }
 
 
 
@@ -238,16 +254,21 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     public float counterMovement = 0.175f;
     float threshold = 0.01f;
-    public float maxSlopeAngle = 60f;
+    public float maxSlopeAngle;
     float stepSmooth = 2f;
 
     public LayerMask whatIsGround;
 
     //Crouch & Slide
+    [SerializeField]
     bool bufferStand;
     public float slideForce = 400;
     public float slideCounterMovement = 0.2f;
     public bool sliding;
+
+    //used to adjust collider
+    float OGcapsuleHight;
+    Vector3 OGcapsuleCenter;
 
     //Jumping
     private bool readyToJump = true;
@@ -255,7 +276,14 @@ public class PlayerController : MonoBehaviour, ISaveable
     public float jumpForce = 550f;
     public float AirmaxSpeed = 20;
 
-    //Sliding
+    //Movement
+    Vector3 groundNormal = Vector3.up;
+    Vector3 currentMoveDirection = Vector3.zero;
+    Vector3 slopeMoveDirection = Vector3.zero;
+
+    Vector3 walkForceX = Vector3.zero;
+    Vector3 walkForceZ = Vector3.zero;
+
     private Vector3 normalVector = Vector3.up;
     private Vector3 wallNormalVector;
 
@@ -370,6 +398,9 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     void Awake()
     {
+        OGcapsuleHight = GetComponent<CapsuleCollider>().height;
+        OGcapsuleCenter = GetComponent<CapsuleCollider>().center;
+
         playerHealth = GetComponent<PlayerHealthSystem>();
         rb = GetComponent<Rigidbody>();
         maxSpeed = WalkmaxSpeed;
@@ -477,14 +508,17 @@ public class PlayerController : MonoBehaviour, ISaveable
         //Iterate through every collision in a physics update
         for (int i = 0; i < other.contactCount; i++)
         {
-            Vector3 normal = other.contacts[i].normal;
+            groundNormal = other.contacts[i].normal;
             //FLOOR
-            if (IsFloor(normal))
+            if (IsFloor(groundNormal))
             {
                 isGrounded = true;
                 cancellingGrounded = false;
-                normalVector = normal;
+                normalVector = groundNormal;
                 CancelInvoke(nameof(StopGrounded));
+
+                break;               
+                
             }
         }
 
@@ -501,8 +535,24 @@ public class PlayerController : MonoBehaviour, ISaveable
     {
         isGrounded = false;
     }
+
+    bool isSlope()
+    {
+        if (groundNormal != Vector3.up)
+        {
+            return true;
+
+            
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     void Update()
     {
+        bool isCurrentlyClimbing = GetComponent<InteractionSystem>().currentClimbable != null;
 
         if (!GameSettings.Instance.IsCutScene && !dead)
         {
@@ -535,99 +585,105 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             if (GameSettings.Instance.worldInstance != null)
 
-                if (GameSettings.Instance.worldInstance.timeInSecondsSinceWorldFirstLoaded >= 300 && GameSettings.Instance.ActiveScene == SCENE.LEVEL0 && !hasGivenChairCraftingNotification)
+                if (GameSettings.Instance.worldInstance.timeInSecondsSinceWorldFirstLoaded >= 150 && GameSettings.Instance.ActiveScene == SCENE.LEVEL0 && !hasGivenChairCraftingNotification)
                 {
                     GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("MAYBE I SHOULD LOOK FOR SOMETHING SHARP TO CUT THESE CHAIR LEGS WITH AND CRAFT SOME WEAPONS, WHO KNOWS WHATS LURKING OUT THERE...");
                     hasGivenChairCraftingNotification = true;
                 }
 
 
-
-            if (bufferStand & PlayerHasRoom()) { bufferStand = false; }
-
-            //base magnitude off of direction faced
-            Vector2 mag = FindVelRelativeToLook();
-            float xMag = mag.x, yMag = mag.y;
-
-            float curSpeedX = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxisRaw("Horizontal") / 1.25f * adrenalineSpeedMultiplier : 0;
-            float curSpeedY = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxisRaw("Vertical") * adrenalineSpeedMultiplier : 0;
-
-            //CounterMovement(curSpeedX, curSpeedY, mag);
-
-            //Set max speed
-            float maxSpeed = this.maxSpeed;
-
-            //If speed is larger than maxspeed, cancel out the input so you don't go over max speed
-            if (curSpeedX > 0 && xMag > maxSpeed) curSpeedX = 0;
-            if (curSpeedX < 0 && xMag < -maxSpeed) curSpeedX = 0;
-            if (curSpeedY > 0 && yMag > maxSpeed) curSpeedY = 0;
-            if (curSpeedY < 0 && yMag < -maxSpeed) curSpeedY = 0;
-
-            //Some movement multipliers
-            float multiplier = 1f, multiplierV = 1f;
-
-            // Movement while sliding
-            if (currentPlayerState == PLAYERSTATES.SLIDE)
+            if (!isCurrentlyClimbing)
             {
-                multiplier = 2f;
-                multiplierV = 2f;
+                if (PlayerHasRoom() && bufferStand) {
+                    
+                    GetComponent<CapsuleCollider>().center = OGcapsuleCenter;
+                    GetComponent<CapsuleCollider>().height = OGcapsuleHight;
+
+                    bodyAnim.SetBool("isCrouching", false);
+
+                    bufferStand = false;
+                }
+
+                //base magnitude off of direction faced
+                Vector2 mag = FindVelRelativeToLook();
+                float xMag = mag.x, yMag = mag.y;
+
+                currentMoveDirection.x = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxisRaw("Horizontal") * adrenalineSpeedMultiplier : 0;
+                currentMoveDirection.y = currentPlayerState != PLAYERSTATES.IMMOBILE ? (currentPlayerState == PLAYERSTATES.RUN ? runningSpeed : walkingSpeed) * Input.GetAxisRaw("Vertical") * adrenalineSpeedMultiplier : 0;
+
+                //CounterMovement(curSpeedX, curSpeedY, mag);
+
+                //Set max speed
+                float maxSpeed = this.maxSpeed;
+
+                //If speed is larger than maxspeed, cancel out the input so you don't go over max speed
+                if (currentMoveDirection.x > 0 && xMag > maxSpeed) currentMoveDirection.x = 0;
+                if (currentMoveDirection.x < 0 && xMag < -maxSpeed) currentMoveDirection.x = 0;
+                if (currentMoveDirection.y > 0 && yMag > maxSpeed) currentMoveDirection.y = 0;
+                if (currentMoveDirection.y < 0 && yMag < -maxSpeed) currentMoveDirection.y = 0;
+
+                //Some movement multipliers
+                float multiplier = 1f, multiplierV = 1f;
+
+                // Movement while sliding
+                if (currentPlayerState == PLAYERSTATES.SLIDE)
+                {
+                    multiplier = 2f;
+                    multiplierV = 2f;
+                }
+
+                // Movement in air
+                if (!isGrounded)
+                {
+                    multiplier = 0.25f;
+                    multiplierV = 0.25f;
+                }
+
+
+                if (GetComponent<InteractionSystem>().GetObjectInRightHand() != null)
+                {
+                    multiplier *= GetComponent<InteractionSystem>().GetObjectInRightHand().large ? 0.80f : 1f;
+                    multiplier *= GetComponent<InteractionSystem>().GetObjectInRightHand().large ? 0.80f : 1f;
+                }
+
+                Debug.Log("INPUT");
+                walkForceX = transform.forward * currentMoveDirection.y * moveSpeed * Time.deltaTime * multiplier * multiplierV;
+                walkForceZ = transform.right * currentMoveDirection.x * moveSpeed * Time.deltaTime * multiplier;
+
+
+                float rbVelX = transform.InverseTransformDirection(rb.velocity).z;
+                float rbVelY = transform.InverseTransformDirection(rb.velocity).x;
+
+                bodyAnim.SetFloat("xWalk", rbVelX);
+                bodyAnim.SetFloat("yWalk", rbVelY);
+
+
+                rb.AddForce(walkForceX);
+                rb.AddForce(walkForceZ);
+
+                rb.AddForce(-transform.up * Time.deltaTime * gravity);
+
+                if (Mathf.Abs(Input.GetAxisRaw("Horizontal")) < 0.25f && Mathf.Abs(Input.GetAxisRaw("Vertical")) < 0.25f && isGrounded && currentPlayerState != PLAYERSTATES.SLIDE && !Input.GetButton("Jump"))
+                {
+                    rb.drag = 100f;
+                }
+                else if (isGrounded)
+                {
+                    rb.drag = 2f;
+                }
+                else
+                {
+                    rb.drag = 0f;
+                }
+
+                //If holding jump && ready to jump, then jump
+                if (Input.GetButtonDown("Jump") && isGrounded && playerHealth.canJump) Jump();
+                //Debug.Log(headTarget.transform.position);
+
+                /*if (holding != null)
+                Debug.Log(holding.animationPlaying);*/
             }
 
-            // Movement in air
-            if (!isGrounded)
-            {
-                multiplier = 0.25f;
-                multiplierV = 0.25f;
-            }
-
-
-            if (GetComponent<InteractionSystem>().GetObjectInRightHand() != null)
-            {
-                multiplier *= GetComponent<InteractionSystem>().GetObjectInRightHand().large ? 0.80f : 1f;
-                multiplier *= GetComponent<InteractionSystem>().GetObjectInRightHand().large ? 0.80f : 1f;
-            }
-
-
-            Vector3 walkXForce = transform.forward * curSpeedY * moveSpeed * Time.deltaTime * multiplier * multiplierV;
-            Vector3 walkYForce = transform.right * curSpeedX * moveSpeed * Time.deltaTime * multiplier;
-
-            //Apply forces to move player
-            rb.AddForce(walkXForce);
-            rb.AddForce(walkYForce);
-            rb.AddForce(-transform.up * Time.deltaTime * gravity);
-
-            if (Mathf.Abs(Input.GetAxisRaw("Horizontal")) < 0.25f && Mathf.Abs(Input.GetAxisRaw("Vertical")) < 0.25f && isGrounded && currentPlayerState != PLAYERSTATES.SLIDE && !Input.GetButton("Jump"))
-            {
-                rb.drag = 100f;
-            }
-            else if (isGrounded)
-            {
-                rb.drag = 2f;
-            }
-            else
-            {
-                rb.drag = 0f;
-            }
-
-            float rbVelX = transform.InverseTransformDirection(rb.velocity).z;
-            float rbVelY = transform.InverseTransformDirection(rb.velocity).x;
-
-            bodyAnim.SetFloat("xWalk", rbVelX);
-            bodyAnim.SetFloat("yWalk", rbVelY);
-
-
-            //If holding jump && ready to jump, then jump
-            if (Input.GetButtonDown("Jump") && isGrounded && playerHealth.canJump) Jump();
-            //Debug.Log(headTarget.transform.position);
-
-            /*if (holding != null)
-            Debug.Log(holding.animationPlaying);*/
-
-            if (!dead && playerHealth.health <= 0.0f)
-            {
-                StartCoroutine(Die(currentPotentialDeathCase));
-
-            }
 
             // Player and Camera rotation
             if (!dead)
@@ -682,6 +738,22 @@ public class PlayerController : MonoBehaviour, ISaveable
         }
         
 
+    }
+
+    void FixedUpdate()
+    {
+        //apply slope velocity in fixed
+        if (!GameSettings.Instance.IsCutScene && !dead)
+        {
+            //Apply forces to move player
+            if (isSlope() && isGrounded)
+            {
+                slopeMoveDirection = Vector3.ProjectOnPlane(currentMoveDirection, groundNormal);
+                Debug.Log(slopeMoveDirection);
+                rb.AddForce(slopeMoveDirection * 100f, ForceMode.Force);
+
+            }
+        }
     }
     void LateUpdate()
     {
@@ -744,6 +816,8 @@ public class PlayerController : MonoBehaviour, ISaveable
              rb.AddForce(Vector3.up * jumpForce * 1.5f);
              rb.AddForce(-rb.velocity.normalized * 1000f * rb.velocity.magnitude);
              rb.AddForce(normalVector * jumpForce * 0.1f);
+
+            currentPlayerState = PLAYERSTATES.JUMP;
 
             //rb.velocity += Vector3.up * jumpForce * 1.5f;
 
@@ -816,10 +890,11 @@ public class PlayerController : MonoBehaviour, ISaveable
 
     private void HandlePlayerStates()
     {
+
         if (isGrounded && Mathf.Abs(rb.velocity.magnitude) >= 0.1f)
         {
 
-            if (Input.GetButton("Run") && playerHealth.canRun && !bodyAnim.GetBool("Prone") && !GetComponent<InventorySystem>().menuOpen && isGrounded)
+            if (!bufferStand && Input.GetButton("Run") && playerHealth.canRun && !bodyAnim.GetBool("Prone") && !GetComponent<InventorySystem>().menuOpen && isGrounded)
             {
                 bool shouldRun = true;
 
@@ -833,7 +908,11 @@ public class PlayerController : MonoBehaviour, ISaveable
 
                 if (shouldRun)
                 {
-                    bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
+                    if (!Input.GetMouseButton(0))
+                        bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
+                    else
+                        bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 1, Time.deltaTime * 10));
+                    
                     bodyAnim.SetBool("isCrouching", false);
                     bodyAnim.SetBool("isWalking", false);
                     bodyAnim.SetBool("isRunning", true);
@@ -843,11 +922,12 @@ public class PlayerController : MonoBehaviour, ISaveable
                     currentPlayerState = PLAYERSTATES.RUN;
                 }
 
+
                
 
             }
 
-            else if (playerHealth.canWalk && isGrounded)
+            else if (!bufferStand && playerHealth.canWalk && isGrounded)
             {
                 bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 1, Time.deltaTime * 10));
                 bodyAnim.SetBool("isWalking", true);
@@ -865,7 +945,7 @@ public class PlayerController : MonoBehaviour, ISaveable
                 bodyAnim.SetBool("isWalking", false);
             }
 
-            if (Input.GetButtonDown("Crouch") && currentPlayerState != PLAYERSTATES.JUMP && isGrounded)
+            /*if (Input.GetButtonDown("Crouch") && currentPlayerState != PLAYERSTATES.JUMP && isGrounded)
             {
                 //slide
 
@@ -884,17 +964,17 @@ public class PlayerController : MonoBehaviour, ISaveable
 
                 }
 
-            }
+            }*/
 
         }
         //idle
-        else
+        else if (!bufferStand)
         {
-
             bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 1, Time.deltaTime * 10));
-            bodyAnim.SetBool("isCrouching", false);
+               
             bodyAnim.SetBool("isRunning", false);
             bodyAnim.SetBool("isWalking", false);
+
 
 
 
@@ -902,29 +982,31 @@ public class PlayerController : MonoBehaviour, ISaveable
 
         }
 
-        if (Input.GetButton("Crouch") && currentPlayerState != PLAYERSTATES.JUMP && currentPlayerState != PLAYERSTATES.SLIDE && playerHealth.canWalk)
+        if (!bufferStand && Input.GetButton("Crouch") && currentPlayerState != PLAYERSTATES.JUMP && currentPlayerState != PLAYERSTATES.SLIDE && playerHealth.canWalk)
         {
             
-            if (PlayerHasRoom())
-            {
+            
+            GetComponent<CapsuleCollider>().center = new Vector3(0f, 1.19f, 0f);
+            GetComponent<CapsuleCollider>().height = 2.41f;
 
-                maxSpeed = Crouchmaxspeed;
+            bodyAnim.SetBool("isCrouching", true);
+            bodyAnim.SetBool("isRunning", false);
+            bodyAnim.SetBool("isWalking", false);
 
-                bodyAnim.SetBool("isCrouching", true);
-                bodyAnim.SetBool("isRunning", false);
-                bodyAnim.SetBool("isWalking", false);
-
-                currentPlayerState = PLAYERSTATES.CROUCH;
+            currentPlayerState = PLAYERSTATES.CROUCH;
 
 
-            }
+            
 
         }
 
-        else if (Input.GetButtonUp("Crouch"))
+        if (Input.GetButtonUp("Crouch"))
         {
             if (PlayerHasRoom())
             {
+                GetComponent<CapsuleCollider>().center = OGcapsuleCenter;
+                GetComponent<CapsuleCollider>().height = OGcapsuleHight;
+
                 bodyAnim.SetBool("isCrouching", false);
             }
             else { bufferStand = true; }
@@ -933,7 +1015,7 @@ public class PlayerController : MonoBehaviour, ISaveable
         }
 
 
-        if (Input.GetButtonDown("Jump") && currentPlayerState != PLAYERSTATES.CROUCH && currentPlayerState != PLAYERSTATES.PRONE && isGrounded && playerHealth.canJump)
+        if (!bufferStand && Input.GetButtonDown("Jump") && currentPlayerState != PLAYERSTATES.CROUCH && currentPlayerState != PLAYERSTATES.PRONE && isGrounded && playerHealth.canJump)
         {
 
             if (CanVault())
@@ -948,7 +1030,6 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             bodyAnim.SetBool("isRunning", false);
             bodyAnim.SetBool("isWalking", false);
-            bodyAnim.SetBool("isCrouching", false);
 
             currentPlayerState = PLAYERSTATES.JUMP;
 
@@ -965,7 +1046,7 @@ public class PlayerController : MonoBehaviour, ISaveable
              {
                  bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
                  bodyAnim.SetBool("isProne", true);
-                 bodyAnim.SetBool("isCrouching", false);
+                 ///bodyAnim.SetBool("isCrouching", false);
                  bodyAnim.SetBool("isWalking", false);
                  bodyAnim.SetBool("isRunning", false);
              }
@@ -1008,7 +1089,7 @@ public class PlayerController : MonoBehaviour, ISaveable
            
 
         //controll player stamina volume indicator
-        playerNoises.volume = 0.08f + ((100 - playerHealth.stamina) / 100) / 2;
+        playerNoises.volume = 0.025f + ((100 - playerHealth.stamina) / 100) / 2;
 
         switch (currentPlayerState)
         {
@@ -1105,6 +1186,8 @@ public class PlayerController : MonoBehaviour, ISaveable
 
             case PLAYERSTATES.CROUCH:
 
+                maxSpeed = Input.GetButton("Run") ? WalkmaxSpeed : Crouchmaxspeed;
+
                 if (run != null)
                     StopCoroutine(run);
 
@@ -1142,12 +1225,17 @@ public class PlayerController : MonoBehaviour, ISaveable
     {
         
         RaycastHit SneakRayHit;
-        Debug.DrawRay(transform.position + Vector3.up * (GetComponent<CapsuleCollider>().radius + 0.01f), Vector3.up, Color.cyan, 3, false);
-        if (!Physics.SphereCast(transform.position + Vector3.up * (GetComponent<CapsuleCollider>().radius + 0.01f), GetComponent<CapsuleCollider>().radius - 0.01f, Vector3.up, out SneakRayHit, GetComponent<CapsuleCollider>().height - (GetComponent<CapsuleCollider>().radius * 2) - 0.01f, whatIsGround))
+        
+/*      Debug.DrawRay(transform.position + Vector3.up * (OGcapsuleHight + 0.01f), Vector3.up / 4f, Color.cyan, 3, false);*/
+
+
+
+        if (!Physics.SphereCast(transform.position, GetComponent<CapsuleCollider>().radius - 0.01f, Vector3.up, out SneakRayHit, (OGcapsuleHight - 0.01f) - GetComponent<CapsuleCollider>().radius - 0.01f, whatIsGround))
         {
+            Debug.Log("Player Has room");
             return true;
         }
-        else { return false; }
+        else { Debug.Log(SneakRayHit.transform.gameObject.name);  return false; }
     }
     private void HandleHealthSystem()
     {
@@ -1282,12 +1370,8 @@ public class PlayerController : MonoBehaviour, ISaveable
     }
 
 
-    public IEnumerator Die(DEATH_CASE deathCase)
+    public IEnumerator Die()
     {
-        if (deathCase == DEATH_CASE.ENTITY)
-        {
-            Steam.AddAchievment("MEAT_CRAYON");
-        }
 
         dead = true;
         playerSkin.enabled = false;
@@ -1338,36 +1422,50 @@ public class PlayerController : MonoBehaviour, ISaveable
             StopCoroutine(playerDamageOverTime);
             playerDamageOverTime = null;
         }
-            
+
+       /* if (col.tag == "NoClip")
+        {
+            isNoClipping = false;
+        }*/
     }
+
     void OnTriggerEnter(Collider col)
     {
         //first entrance
-        if (col.tag == "Enter0")
+        if (col.tag == "NoClip" && !isNoClipping)
         {
-            float randomEntry = UnityEngine.Random.Range(0f, 1f);
-            GameSettings.Instance.LoadScene(SCENE.LEVEL0);
+            isNoClipping = true;
+
+            //push the player back out of it when they return
+            if (col.gameObject.transform.childCount > 0)
+            { 
+                GameSettings.Instance.worldInstance.playerLocationData.savedPosition = new float[] { col.gameObject.transform.GetChild(0).transform.position.x, col.gameObject.transform.GetChild(0).transform.position.y, col.gameObject.transform.GetChild(0).transform.position.z};
+            }
+                
+
+
+            GameSettings.Instance.cutSceneHandler.BeginCutScene(CUT_SCENE.NO_CLIP_SUCCESS);
+
+            
+
             //Debug.Log(col.gameObject.name);
 
             /*if (randomEntry < 0.9f)
                 GameSettings.Instance.LoadScene(SCENE.LEVEL0);
             else if (randomEntry >= 0.9f)
                 GameSettings.Instance.LoadScene(SCENE.LEVEL1);*/
-           /* else if (randomEntry >= 0.95f)
-                GameSettings.Instance.LoadScene(SCENE.LEVEL2);*/
-        }
-        if (col.tag == "Enter1")
-        {
-            GameSettings.Instance.LoadScene(SCENE.LEVEL1);
+            /* else if (randomEntry >= 0.95f)
+                 GameSettings.Instance.LoadScene(SCENE.LEVEL2);*/
         }
 
         if (col.tag == "Kill_Instant")
         {
-            GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().TakeDamage(500f, 0f, 10000f);
+            GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().TakeDamage(500f, 0f, 10000f, false, DAMAGE_TYPE.UNKNOWN);
         }
 
         if (col.tag == "Arm_EventTrigger" && playerHealth.sanity < 25f)
         {
+            Steam.AddAchievment("HALLUCINATION");
             StartCoroutine(EnableArmsOverTime(col.transform.GetChild(0), true));
         }
         if (col.tag == "DamagePlayer")
@@ -1407,7 +1505,7 @@ public class PlayerController : MonoBehaviour, ISaveable
         {
             case PLAYERSTATES.CROUCH:
                 yield return new WaitForSecondsRealtime(1f);
-                feetSource.volume = UnityEngine.Random.Range(0.01f, 0.03f);
+                feetSource.volume = UnityEngine.Random.Range(0.03f, 0.07f);
                 break;
 
             case PLAYERSTATES.WALK:

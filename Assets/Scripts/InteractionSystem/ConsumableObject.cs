@@ -62,10 +62,10 @@ public class ConsumableObject : HoldableObject
     {
         if (currentUsesLeft > 0)
         {
-            GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().ChangeThirst(thirstQuenchPerDrink);
-            GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().ChangeSanity(sanityQuenchPerDrink);
-            GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().ChangeHealth(healthQuenchPerDrink);
-            GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().ChangeHunger(hungerQueenchPerConsume);
+            GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().ChangeThirst(thirstQuenchPerDrink);
+            GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().ChangeSanity(sanityQuenchPerDrink);
+            GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().ChangeHealth(healthQuenchPerDrink);
+            GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().ChangeHunger(hungerQueenchPerConsume);
 
             currentUsesLeft -= maxUsesInternal / maxUsesTotal;
 
@@ -79,7 +79,7 @@ public class ConsumableObject : HoldableObject
             SetStat("Current Uses Left", GetConsumableUsesLeft().ToString());
 
             /*if (type == OBJECT_TYPE.ALMOND_WATER)
-                StartCoroutine(GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.ChangeStaminaOverTime(50f));*/
+                StartCoroutine(GameSettings.GetLocalPlayer().playerHealth.ChangeStaminaOverTime(50f));*/
 
             if (currentUsesLeft <= 0)
             {
@@ -101,7 +101,7 @@ public class ConsumableObject : HoldableObject
     IEnumerator WaitToDestroy()
     {
         yield return new WaitUntil(() => !animationPlaying);
-        GameSettings.Instance.Player.GetComponent<InteractionSystem>().SetDrop(GameSettings.Instance.Player.GetComponent<InventorySystem>().rHand);
+        GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().SetDrop(GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().rHand);
         GameSettings.Instance.worldInstance.RemoveProp(GetWorldID(), true);
     }
 

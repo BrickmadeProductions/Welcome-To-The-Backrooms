@@ -9,9 +9,11 @@ public class DamageCollider : MonoBehaviour
     public int thirstAmount;
     public int hungerAmount;
 
+    DAMAGE_TYPE damageType;
+
     public void Damage(PlayerHealthSystem player)
     {
-        player.TakeDamage(damageAmount, sanityMultiplier, 5f);
+        player.TakeDamage(damageAmount, sanityMultiplier, 5f, false, damageType);
         player.ChangeThirst(-thirstAmount);
         player.ChangeHunger(-hungerAmount);
     }

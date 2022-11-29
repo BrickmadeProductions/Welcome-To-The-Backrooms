@@ -74,10 +74,10 @@ public class InventorySlot : MonoBehaviour, IDropHandler
     public void AddItemToSlot(InventoryItem invItem)
     {
 
-        if (!GameSettings.Instance.Player.GetComponent<PlayerController>().hasGivenCraftingNotification)
+        if (!GameSettings.GetLocalPlayer().hasGivenCraftingNotification)
         {
             GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("YOU CAN CRAFT ITEMS TOGETHER BY DRAGGING THEM OVER EACHOTHER IN YOUR INVENTORY, ITEMS HAVE TOOLTIPS EXPLAINING WHAT THEY CAN MAKE!");
-            GameSettings.Instance.Player.GetComponent<PlayerController>().hasGivenCraftingNotification = true;
+            GameSettings.GetLocalPlayer().hasGivenCraftingNotification = true;
         }
 
         //check if this item can fit
@@ -157,12 +157,12 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             //BPUtil.SetAllColliders(itemFromThisSlot.connectedObject.transform, false);
 
             //itemFromThisSlot.connectedObject.SetMetaData("INV_SLOT", itemFromThisSlot.slotIn.name);
-            //GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().SetSaveData(itemFromThisSlot.slotIn.name, itemFromThisSlot.connectedObject.GetWorldID());
+            //GameSettings.GetLocalPlayer().GetComponent<InventoryMenuSystem>().SetSaveData(itemFromThisSlot.slotIn.name, itemFromThisSlot.connectedObject.GetWorldID());
 
             itemFromThisSlot.transform.parent = itemFromThisSlot.slotIn.transform;
             itemFromThisSlot.transform.position = itemFromThisSlot.slotIn.transform.position;
 
-            GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = null;
+            GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected = null;
             itemFromThisSlot.canvasGroup.alpha = 1f;
             itemFromThisSlot.canvasGroup.blocksRaycasts = true;
 
@@ -193,9 +193,9 @@ public class InventorySlot : MonoBehaviour, IDropHandler
        // BPUtil.SetAllColliders(invItem.connectedObject.transform, false);
 
         //itemFromThisSlot.connectedObject.SetMetaData("INV_SLOT", invItem.slotIn.name);
-        //GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().SetSaveData(name, invItem.connectedObject.GetWorldID());
+        //GameSettings.GetLocalPlayer().GetComponent<InventoryMenuSystem>().SetSaveData(name, invItem.connectedObject.GetWorldID());
         //call the callback in the interactionsystem to update the physicals
-        GameSettings.Instance.Player.GetComponent<InteractionSystem>().OnInventoryItemAddedToSlot_CallBack(slotFrom, this);
+        GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().OnInventoryItemAddedToSlot_CallBack(slotFrom, this);
 
         if (shouldDisableSlotMeshRenderers)
         {
@@ -217,10 +217,10 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             holdableObject.rb = null;
         }
 
-        if (!GameSettings.Instance.Player.GetComponent<PlayerController>().hasGivenCraftingNotification)
+        if (!GameSettings.GetLocalPlayer().hasGivenCraftingNotification)
         {
             GameSettings.Instance.GetComponent<NotificationSystem>().QueueNotification("YOU CAN CRAFT ITEMS TOGETHER BY DRAGGING THEM OVER EACHOTHER IN YOUR INVENTORY, CHECK ITEM TOOLTIPS!");
-            GameSettings.Instance.Player.GetComponent<PlayerController>().hasGivenCraftingNotification = true;
+            GameSettings.GetLocalPlayer().hasGivenCraftingNotification = true;
         }
 
         if (GetCurrentSlotWeight() + holdableObject.inventoryObjectData.inventoryWeight > weightAllowed)
@@ -266,10 +266,10 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
         //holdableObject.SetMetaData("INV_SLOT", name);
 
-        //GameSettings.Instance.Player.GetComponent<InventoryMenuSystem>().SetSaveData(name, holdableObject.GetWorldID());
+        //GameSettings.GetLocalPlayer().GetComponent<InventoryMenuSystem>().SetSaveData(name, holdableObject.GetWorldID());
 
         //call the callback in the interactionsystem to update the physicals
-        GameSettings.Instance.Player.GetComponent<InteractionSystem>().OnInventoryItemAddedToSlot_CallBack(null, this);
+        GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().OnInventoryItemAddedToSlot_CallBack(null, this);
         
         if (shouldDisableSlotMeshRenderers)
         {
@@ -292,9 +292,9 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
     IEnumerator DropAction()
     {
-        if (GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected != null && GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.slotIn != this)
+        if (GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected != null && GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected.slotIn != this)
         {
-            switch (GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject.objectCategory)
+            switch (GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected.connectedObject.objectCategory)
             {
                 case OBJECT_CATEGORY.AMMO:
 
@@ -302,7 +302,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
                     {
                         if (itemsInSlot[0].connectedObject.objectCategory == OBJECT_CATEGORY.LOADABLE)
                         {
-                            AmmoObject ammo = ((AmmoObject)GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject);
+                            AmmoObject ammo = ((AmmoObject)GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected.connectedObject);
 
                             int amountToLoad;
 
@@ -319,21 +319,21 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
                             if (ammo.shouldDestroyWhenLoaded)
                             {
-                                string ammoToDestroy = GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject.GetWorldID();
-                                GameSettings.Instance.Player.GetComponent<InteractionSystem>().SetDrop(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.slotIn);
+                                string ammoToDestroy = GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected.connectedObject.GetWorldID();
+                                GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().SetDrop(GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected.slotIn);
                                 GameSettings.Instance.worldInstance.RemoveProp(ammoToDestroy, true);
-                                GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = true;
+                                GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().canOpen = true;
                             }
                             else
                             {
-                                ((AmmoObject)GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject).RemoveAmount(amountToLoad);
+                                ((AmmoObject)GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected.connectedObject).RemoveAmount(amountToLoad);
                             }
 
                         }
                     }
                     else
                     {
-                        AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
+                        AddItemToSlot(GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected);
 
                     }
 
@@ -351,7 +351,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
                             foreach (CraftingPair pair in GameSettings.Instance.possibleCraftingPairs)
                             {
-                                if (pair.objectsRequired[0] == GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.connectedObject.type &&
+                                if (pair.objectsRequired[0] == GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected.connectedObject.type &&
                                     pair.objectsRequired[1] == itemsInSlot[0].connectedObject.type)
                                 {
                                     possiblePairs.Add(pair);
@@ -364,49 +364,49 @@ public class InventorySlot : MonoBehaviour, IDropHandler
                                 //just craft
                                 if (possiblePairs.Count == 1)
                                 {
-                                    CraftItem(possiblePairs[0], GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected, itemsInSlot[0]);
+                                    CraftItem(possiblePairs[0], GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected, itemsInSlot[0]);
                                     
                                 }
                                 //give selections
                                 else
                                 {
-                                    CraftingPrompt craftingPrompt = Instantiate(GameSettings.Instance.Player.GetComponent<InventorySystem>().promptPrefab.gameObject, GameSettings.Instance.Player.GetComponent<InventorySystem>().menuObject.transform).GetComponent<CraftingPrompt>();
+                                    CraftingPrompt craftingPrompt = Instantiate(GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().promptPrefab.gameObject, GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().menuObject.transform).GetComponent<CraftingPrompt>();
                                     craftingPrompt.SetDetails(possiblePairs, this);
 
-                                    yield return new WaitUntil(() => !GameSettings.Instance.Player.GetComponent<InventorySystem>().isCrafting);
+                                    yield return new WaitUntil(() => !GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().isCrafting);
 
                                     Destroy(craftingPrompt.gameObject);
 
                                     
                                 }
                                 hasCraftingPair = true;
-                                GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = true;
+                                GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().canOpen = true;
 
                             }
                            
 
                             if (!hasCraftingPair)
-                                AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
+                                AddItemToSlot(GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected);
                         }
                         else
                         {
-                            AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
+                            AddItemToSlot(GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected);
                             break;
                         }
                     }
                     else
                     {
-                        AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
+                        AddItemToSlot(GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected);
                         break;
                     }
                     break;
 
                 default:
-                    AddItemToSlot(GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected);
+                    AddItemToSlot(GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected);
                     break;
             }
 
-            GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = null;
+            GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected = null;
 
         }
 
@@ -418,10 +418,10 @@ public class InventorySlot : MonoBehaviour, IDropHandler
     public void CraftItem(CraftingPair pair, InventoryItem object1, InventoryItem object2)
     {
 
-        InteractionSystem interactionSystem = GameSettings.Instance.Player.GetComponent<InteractionSystem>();
+        InteractionSystem interactionSystem = GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>();
 
-        GameSettings.Instance.Player.GetComponent<InventorySystem>().audioObject.clip = pair.craftingAudio;
-        GameSettings.Instance.Player.GetComponent<InventorySystem>().audioObject.Play();
+        GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().audioObject.clip = pair.craftingAudio;
+        GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().audioObject.Play();
 
         //weapons
         if (object2.connectedObject.GetType() == typeof(CraftedWeapon) && object1.connectedObject.GetComponent<WeaponPiece>() != null)
@@ -460,14 +460,14 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             }
 
 
-            InteractableObject newProp = GameSettings.Instance.worldInstance.AddNewProp(GameSettings.Instance.Player.GetComponent<PlayerController>().RHandLocation.transform.position, Quaternion.identity, GameSettings.Instance.PropDatabase[pair.outCome].gameObject);
+            InteractableObject newProp = GameSettings.Instance.worldInstance.AddNewProp(GameSettings.GetLocalPlayer().RHandLocation.transform.position, Quaternion.identity, GameSettings.Instance.PropDatabase[pair.outCome].gameObject);
 
             interactionSystem.FinalizePickup(newProp, false);
 
             interactionSystem.canCraft = true;
 
-            GameSettings.Instance.Player.GetComponent<PlayerController>().builder.layers[0].rig.weight = 1f;
-            GameSettings.Instance.Player.GetComponent<PlayerController>().builder.Build();
+            GameSettings.GetLocalPlayer().builder.layers[0].rig.weight = 1f;
+            GameSettings.GetLocalPlayer().builder.Build();
 
             if (this != interactionSystem.GetComponent<InventorySystem>().rHand && pair.shouldDestroyItem1)
             {
@@ -482,7 +482,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
 
 
-        GameSettings.Instance.Player.GetComponent<InventorySystem>().isCrafting = false;
+        GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().isCrafting = false;
 
     }
 

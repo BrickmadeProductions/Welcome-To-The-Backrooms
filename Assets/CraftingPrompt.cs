@@ -19,7 +19,7 @@ public class CraftingPrompt : MonoBehaviour
 
     public void SetDetails(List<CraftingPair> pairs, InventorySlot slot)
     {
-        GameSettings.Instance.Player.GetComponent<InventorySystem>().isCrafting = true;
+        GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().isCrafting = true;
         possiblePairs = pairs;
         currentSlot = slot;
         currentSelectedImage.texture = ((HoldableObject)GameSettings.Instance.PropDatabase[possiblePairs[0].outCome]).inventoryObjectData.image;
@@ -28,7 +28,7 @@ public class CraftingPrompt : MonoBehaviour
     }
     public void Craft()
     {
-        currentSlot.CraftItem(possiblePairs[currentSelected], GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected, currentSlot.itemsInSlot[0]);
+        currentSlot.CraftItem(possiblePairs[currentSelected], GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected, currentSlot.itemsInSlot[0]);
     }
 
     public void SwitchPair(bool right)

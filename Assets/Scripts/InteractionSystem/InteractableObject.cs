@@ -162,34 +162,35 @@ public abstract class InteractableObject : MonoBehaviour
 	{
 		saveableData = objectData;
 
-		
-		if (saveableData.metaData.Count > 0)
-		{
-			activeMetaData = saveableData.metaData;
-
-			foreach (KeyValuePair<string, string> data in activeMetaData)
+		if (saveableData.metaData != null)
+			
+			if (saveableData.metaData.Count > 0)
 			{
+				activeMetaData = saveableData.metaData;
 
-				FieldInfo metaDataVariable = GetType().GetField(data.Key);
-
-				if (metaDataVariable != null)
+				foreach (KeyValuePair<string, string> data in activeMetaData)
 				{
-					Type t = Nullable.GetUnderlyingType(metaDataVariable.FieldType) ?? metaDataVariable.FieldType;
-					object safeValue = (data.Value == null) ? null : Convert.ChangeType(data.Value, t);
-					metaDataVariable.SetValue(this, safeValue);
 
-					//metaDataVariable.SetValue(this, Convert.ChangeType(data.Value, metaDataVariable.PropertyType), null);
+					FieldInfo metaDataVariable = GetType().GetField(data.Key);
+
+					if (metaDataVariable != null)
+					{
+						Type t = Nullable.GetUnderlyingType(metaDataVariable.FieldType) ?? metaDataVariable.FieldType;
+						object safeValue = (data.Value == null) ? null : Convert.ChangeType(data.Value, t);
+						metaDataVariable.SetValue(this, safeValue);
+
+						//metaDataVariable.SetValue(this, Convert.ChangeType(data.Value, metaDataVariable.PropertyType), null);
+
+
+					}
+					else
+					{
+						//Debug.LogWarning(data.Key + " WAS NOT FOUND AS A TYPE");
+					}
 
 
 				}
-				else
-				{
-					//Debug.LogWarning(data.Key + " WAS NOT FOUND AS A TYPE");
-				}
-
-
 			}
-		}
 
 		type = saveableData.type;
 		runTimeID = saveableData.runTimeID;
@@ -211,7 +212,7 @@ public abstract class InteractableObject : MonoBehaviour
 
 				if (transform.parent.name == "RHandLocation")
 				{
-					GameSettings.Instance.Player.GetComponent<InteractionSystem>().FinalizePickup((HoldableObject)this);
+					GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().FinalizePickup((HoldableObject)this);
 				}
 
 			}
@@ -355,6 +356,7 @@ public enum OBJECT_TYPE
 	HAMMER_HEAD_WOOD,
 	NAILS,
 	FUN_CHAIR,
+	GRENADE
 
 }
 

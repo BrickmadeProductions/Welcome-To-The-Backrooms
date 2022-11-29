@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Reflection;
 
 [Serializable]
 public struct SaveableEntity
@@ -15,6 +16,8 @@ public struct SaveableEntity
 	public float[] rotationEuler;
 
 	public ENTITY_TYPE type;
+
+	public Dictionary<string, string> metaData;
 
 	[JsonIgnore]
 	public Entity instance;
@@ -36,9 +39,37 @@ public struct EntityDrop
 
 }
 
+[Serializable]
+public struct EnityActionWithWeight
+{
+	public int Weight;
+	public ENTITY_ACTION Action;
+}
+
+public enum ENTITY_ACTION
+{
+	AMB_IDLE,
+	AMB_WANDERING,
+	ATK_PUNCHING,
+	ATK_HOLDING,
+	ATK_SHOVING,
+	MOV_CORNER_PLAYER,
+	MOV_SURROUND_PLAYER,
+	MOV_MOVE_TOWARD_TARGET,
+	MOV_MOVE_TOWARD_TARGET_STRAFE,
+	MOV_HOLD_DISTANCE_FROM_TARGET
+
+}
+
 public abstract class Entity : MonoBehaviour
 {
+
+
+	public Transform entityViewDetectionPoint;
+
 	public SaveableEntity saveableData;
+
+	Coroutine updateSanity = null;
 
 	public float maxHealth;
 
@@ -98,7 +129,7 @@ public abstract class Entity : MonoBehaviour
 
 	public SkinnedMeshRenderer entitySkin;
 
-	private bool isDespawned;
+	public bool isDespawned = false;
 
 	public string runTimeID;
 
@@ -106,28 +137,87 @@ public abstract class Entity : MonoBehaviour
 
 	public Transform currentTarget;
 
-	List<EntityAudioAttractor> currentPossibleTargets;
+	public Transform tempTarget;
+
+	List<EntityAttractor> currentPossibleTargets;
 
 	public List<EntityDrop> drops;
 
 	public List<InteractableObject> activeDropsHeld;
 
+	//metadata is saved on save with the object data
+	public Dictionary<string, string> activeMetaData;
+
+	//acheivment
+	bool testingRemainCalm = false;
+
+
+	/// <summary>
+	/// Calls when all variables have been pulled from this object
+	/// </summary>
+	public abstract void OnSaveFinished();
+
+	/// <summary>
+	/// Calls when all variables have been loaded to this object
+	/// </summary>
+	public abstract void OnLoadFinished();
+
+	public string GetMetaData(string field)
+	{
+
+		if (activeMetaData.ContainsKey(field))
+		{
+
+			return activeMetaData[field];
+		}
+		else
+		{
+			return null;
+		}
+
+
+	}
+	public void SetMetaData(string field, string value)
+	{
+
+		if (activeMetaData.ContainsKey(field))
+		{
+
+			activeMetaData[field] = value;
+		}
+		else
+		{
+			activeMetaData.Add(field, value);
+		}
+
+
+	}
+
+	public void RemoveMetaData(string field)
+	{
+		if (activeMetaData.ContainsKey(field))
+		{
+
+			activeMetaData.Remove(field);
+		}
+	}
+
 	public abstract void OnEventStart();
 	public abstract void OnEventEnd();
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.collider.GetComponent<EntityAudioAttractor>())
+        if (other.GetComponent<EntityAttractor>())
         {
-			currentPossibleTargets.Add(collision.collider.GetComponent<EntityAudioAttractor>());
+			currentPossibleTargets.Add(other.GetComponent<EntityAttractor>());
 
 		}
     }
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider other)
     {
-		if (collision.collider.GetComponent<EntityAudioAttractor>())
+		if (other.GetComponent<EntityAttractor>())
 		{
-			currentPossibleTargets.Remove(collision.collider.GetComponent<EntityAudioAttractor>());
+			currentPossibleTargets.Remove(other.GetComponent<EntityAttractor>());
 
 		}
 	}
@@ -136,20 +226,28 @@ public abstract class Entity : MonoBehaviour
     {
 		Transform best = null;
 
-		for (int i = 1; i < currentPossibleTargets.Count + 1; i++)
+		if (currentPossibleTargets.Count > 1)
         {
-			if (currentPossibleTargets[i].priority > currentPossibleTargets[i - 1].priority)
-            {
-				best = currentPossibleTargets[i].target;
+			for (int i = 1; i < currentPossibleTargets.Count + 1; i++)
+			{
+				if (currentPossibleTargets[i].priority > currentPossibleTargets[i - 1].priority)
+				{
+					best = currentPossibleTargets[i].target;
 
+				}
 			}
-        }
+		}
+		else if (currentPossibleTargets.Count == 1)
+        {
+			best = currentPossibleTargets[0].target;
+		}
+		
 
 		currentTarget = best;
 
 		if (currentPossibleTargets.Count == 0)
 		{
-			currentTarget = GameSettings.Instance.Player.transform;
+			currentTarget = GameSettings.GetLocalPlayer().playerCamera.transform;
 		}
 
 	}
@@ -177,13 +275,49 @@ public abstract class Entity : MonoBehaviour
 
 	public void Load(SaveableEntity entityData)
 	{
+		
 		saveableData = entityData;
 		type = saveableData.type;
 		runTimeID = saveableData.runTimeID;
-		transform.position = new Vector3(saveableData.location[0], saveableData.location[1], saveableData.location[2]);
-		transform.rotation = Quaternion.Euler(saveableData.rotationEuler[0], saveableData.rotationEuler[1], saveableData.rotationEuler[2]);
+
+		if (saveableData.location.Length > 0)
+			transform.position = new Vector3(saveableData.location[0], saveableData.location[1], saveableData.location[2]);
+		
+		if (saveableData.rotationEuler.Length > 0)
+			transform.rotation = Quaternion.Euler(saveableData.rotationEuler[0], saveableData.rotationEuler[1], saveableData.rotationEuler[2]);
+
 		gameObject.name = type.ToString() + "-" + runTimeID;
 		saveableData.instance = this;
+
+		if (saveableData.metaData != null)
+			if (saveableData.metaData.Count > 0)
+			{
+				activeMetaData = saveableData.metaData;
+
+				foreach (KeyValuePair<string, string> data in activeMetaData)
+				{
+
+					FieldInfo metaDataVariable = GetType().GetField(data.Key);
+
+					if (metaDataVariable != null)
+					{
+						Type t = Nullable.GetUnderlyingType(metaDataVariable.FieldType) ?? metaDataVariable.FieldType;
+						object safeValue = ((data.Value == null) ? null : Convert.ChangeType(data.Value, t));
+						metaDataVariable.SetValue(this, safeValue);
+
+						//metaDataVariable.SetValue(this, Convert.ChangeType(data.Value, metaDataVariable.PropertyType), null);
+
+
+					}
+					else
+					{
+						//Debug.LogWarning(data.Key + " WAS NOT FOUND AS A TYPE");
+					}
+
+
+				}
+			}
+		OnLoadFinished();
 	}
 
 	public SaveableEntity Save()
@@ -204,20 +338,22 @@ public abstract class Entity : MonoBehaviour
 				transform.rotation.eulerAngles.z
 			},
 			type = type,
-			instance = this
+			instance = this,
+			metaData = activeMetaData
 		};
-
+		OnSaveFinished();
 		return saveableData;
 	}
 
 	private void Awake()
 	{
-
-		currentPossibleTargets = new List<EntityAudioAttractor>();
+		activeMetaData = new Dictionary<string, string>();
+		currentPossibleTargets = new List<EntityAttractor>();
 
 		hurtNoisesSource.outputAudioMixerGroup = GameSettings.Instance.audioHandler.master.FindMatchingGroups("Master")[0];
 		attackNoiseSource.outputAudioMixerGroup = GameSettings.Instance.audioHandler.master.FindMatchingGroups("Master")[0];
 		movementNoiseSource.outputAudioMixerGroup = GameSettings.Instance.audioHandler.master.FindMatchingGroups("Master")[0];
+		
 		Init();
 	}
 
@@ -255,22 +391,56 @@ public abstract class Entity : MonoBehaviour
 		yield return new WaitForSecondsRealtime(memoryOfTargetLocationInSeconds);
 		canSeeTarget = false;
 		rememberTargetLocation = null;
-		attackNoiseSource.Stop();
 	}
 
 	private void Update()
 	{
 		SetCurrentTarget();
 		UpdateEntity();
+		
+		
+		RaycastHit[] hits = Physics.RaycastAll(eyes.transform.position, currentTarget.position - eyes.transform.position, Vector3.Distance(currentTarget.position, eyes.transform.position), sightMask);
 
-		if ((Vector3.Distance(GameSettings.Instance.Player.transform.position, transform.position) > despawnDistance && !isDespawned))
+		//Debug.Log(hits.Length);
+		//Debug.DrawRay(eyes.transform.position, eyes.transform.forward.normalized * Vector3.Distance(currentTarget.position, eyes.transform.position), Color.blue);
+
+		//only can see the target
+		if (hits.Length == 1 && isVisible(GameSettings.GetLocalPlayer().playerCamera, entityViewDetectionPoint))
+		{
+			
+
+			if (updateSanity == null)
+			{
+				playerCanSee = true;
+				updateSanity = StartCoroutine(PlayerCanSee());
+
+			}
+		}
+		else
+		{
+			if (updateSanity != null)
+			{
+				StopCoroutine(updateSanity);
+				updateSanity = null;
+				playerCanSee = false;
+			}
+
+		}
+
+		
+        
+
+		if ((Vector3.Distance(GameSettings.GetLocalPlayer().transform.position, transform.position) > despawnDistance && !isDespawned))
 		{
 			isDespawned = true;
 			Despawn();
 			return;
 		}
+
+		//was stabbed by someone
 		if (health <= 0)
-        {
+		{
+
 			if (activeDropsHeld.Count > 0)
 			{
 				foreach (InteractableObject spawnedObject in activeDropsHeld)
@@ -290,31 +460,35 @@ public abstract class Entity : MonoBehaviour
 			return;
 		}
 
-		
+
 		if (currentTarget != null)
         {
-			float angle = Vector3.SignedAngle(currentTarget.position - eyes.transform.position, transform.forward, transform.up);
+			float angle = Vector3.SignedAngle(currentTarget.position - eyes.transform.position, eyes.transform.forward, transform.up);
+			
+			//Debug.Log(hits.Length);
+			//Debug.DrawRay(eyes.transform.position, eyes.transform.forward.normalized * Vector3.Distance(currentTarget.position, eyes.transform.position), Color.blue);
 
-			if (Physics.Raycast(eyes.transform.position, currentTarget.position - eyes.transform.position, out var hitInfo, despawnDistance, sightMask))
-
+			//only can see the target
+			if (hits.Length == 1 && hits[0].transform.gameObject.GetComponent<EntityAttractor>() != null)
+            {
 				//Debug.Log((Vector3.Distance(eyes.transform.position, currentTarget.position) < 6f));
 				//determines if it can see the target
 				if (Vector3.Distance(eyes.transform.position, currentTarget.position) < entityViewDistance
 				&&
 				(angle < 50 && angle > -50))
 				{
-					if (hitInfo.collider.gameObject.layer == 11)
-					{
-						canSeeTarget = true;
-					}
-					else if (rememberTargetLocation == null)
+					canSeeTarget = true;
+
+					if (rememberTargetLocation == null)
 					{
 						rememberTargetLocation = StartCoroutine(RememberTargetLocation());
 					}
 				}
-				//it can always know its there if its close enough
-				else if (Vector3.Distance(eyes.transform.position, currentTarget.position) < (GameSettings.Instance.Player.GetComponent<PlayerController>().currentPlayerState == PlayerController.PLAYERSTATES.RUN ? 70f : 5f))
-					canSeeTarget = true;
+				
+				
+				
+			}
+				
 		}
 		
 		
@@ -329,24 +503,20 @@ public abstract class Entity : MonoBehaviour
 		stunned = false;
 	}
 
-	private void OnBecameVisible()
-	{
-		playerCanSee = true;
-		StartCoroutine(UpdatePlayerSanity());
-	}
 
-	private void OnBecameInvisible()
-	{
-		playerCanSee = false;
-	}
-
-	public IEnumerator UpdatePlayerSanity()
+	public IEnumerator PlayerCanSee()
     {
+		float totalTimeCanSee = 0f;
+
 		while (playerCanSee)
         {
 			yield return new WaitForSecondsRealtime(5f);
-			GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().ChangeSanity(-UnityEngine.Random.Range(canSeeTarget ? 5f : 2f, canSeeTarget ? 15f : 8f) * (health / 100));
-
+			totalTimeCanSee += 5f;
+			GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().ChangeSanity(GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().sanity * sanityMultiplier);
+			if (totalTimeCanSee >= 10f && !canSeeTarget)
+            {
+				Steam.AddAchievment("REMAIN_CALM");
+            }
 		}
 		
     }
@@ -363,6 +533,19 @@ public abstract class Entity : MonoBehaviour
 
 		//GameSettings.Instance.worldInstance.RemoveEntity(type.ToString() + "-" + runTimeID);
 
+	}
+
+	bool isVisible(Camera c, Transform go)
+	{
+		var planes = GeometryUtility.CalculateFrustumPlanes(c);
+		var point = go.position;
+
+		foreach (var plane in planes)
+		{
+			if (plane.GetDistanceToPoint(point) < 0)
+				return false;
+		}
+		return true;
 	}
 }
 

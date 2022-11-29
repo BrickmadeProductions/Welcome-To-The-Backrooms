@@ -38,12 +38,12 @@ public abstract class GenericMenu : MonoBehaviour
                 }
                     
 
-                GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canMoveHead = true;
+                GameSettings.GetLocalPlayer().playerHealth.canMoveHead = true;
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 menuObject.SetActive(false);
 
-                GameSettings.Instance.Player.GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(true);
+                GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(true);
 
             }
 
@@ -55,11 +55,11 @@ public abstract class GenericMenu : MonoBehaviour
                     audioObject.Play();
                 }
 
-                GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canMoveHead = false;
+                GameSettings.GetLocalPlayer().playerHealth.canMoveHead = false;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 menuObject.SetActive(true);
-                GameSettings.Instance.Player.GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(false);
+                GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(false);
             }
         }
         

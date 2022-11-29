@@ -115,7 +115,7 @@ public class FlashLight : HoldableObject
     {
         if (on)
         {
-            if (GameSettings.Instance.worldInstance.GetCurrentBiomeAtChunkPosition(GameSettings.Instance.Player.transform.position / GameSettings.Instance.worldInstance.ChunkSize()) == BIOME_ID.LEVEL_0_RED_ROOMS)
+            if (GameSettings.Instance.worldInstance.GetCurrentBiomeAtChunkPosition(GameSettings.GetLocalPlayer().transform.position / GameSettings.Instance.worldInstance.ChunkSize()) == BIOME_ID.LEVEL_0_RED_ROOMS)
             {
                 lightAudio.pitch = UnityEngine.Random.Range(0.6f, 1.3f);
                 lightAudio.PlayOneShot(lightAudio.clip);
@@ -142,7 +142,7 @@ public class FlashLight : HoldableObject
         lightAudio.pitch = UnityEngine.Random.Range(0.6f, 1.3f);
         lightAudio.PlayOneShot(lightAudio.clip);
 
-        if (LMB && GameSettings.Instance.worldInstance.GetCurrentBiomeAtChunkPosition(GameSettings.Instance.Player.transform.position) != BIOME_ID.LEVEL_0_RED_ROOMS && canTurnOn)
+        if (LMB && GameSettings.Instance.worldInstance.GetCurrentBiomeAtChunkPosition(GameSettings.GetLocalPlayer().transform.position) != BIOME_ID.LEVEL_0_RED_ROOMS && canTurnOn)
         {
             on = !on;
 

@@ -465,6 +465,7 @@ MonoBehaviour:
       SHAVE WOOD
   durability: 0
   breakablePrefabs: []
+  breakLocations: []
   hitClips: []
   breakClips: []
   rb: {fileID: 5174651668802718680}
@@ -472,6 +473,7 @@ MonoBehaviour:
   large: 0
   autoSwing: 1
   shouldDisableCrossHair: 0
+  connectedInvItem: {fileID: 0}
   canPlace: 0
   isPlaced: 0
   canBeUsed: 1
@@ -482,15 +484,22 @@ MonoBehaviour:
   - SliceVar1
   - SliceVar2
   CustomHoldAnimation: 
+  currentAnimChoice: 0
   ItemObjectAnimations: []
   Flying: 0
   rotationAmount: 0
   stuckInWall: 0
   stuckSounds: []
+  ObjectConnectionJoint: {fileID: 0}
   currentBlade: {fileID: 0}
   currentFasten: {fileID: 0}
   bladeLocation: {fileID: 3453204332779128588}
   fastenLocation: {fileID: 2402291300905290889}
+  originalData:
+    image: {fileID: 0}
+    name: 
+    inventoryWeight: 0
+    description: 
 --- !u!95 &4703391106281597620
 Animator:
   serializedVersion: 4
@@ -569,8 +578,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03be77203f75e634e86866193396b769, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 15
-  connetedObject: {fileID: 8642348890757596964}
+  damage: 12
+  connectedObject: {fileID: 0}
   WeaponBloodRenderer: {fileID: 2147181769708924259}
   bloodAmount: 0
   onlyHitOneLimb: 1
+  hasHit: 0

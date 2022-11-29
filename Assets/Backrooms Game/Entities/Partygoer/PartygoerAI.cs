@@ -4,17 +4,53 @@ using UnityEngine;
 
 public class PartygoerAI : Entity
 {
+    //0 agressive
+    //1 deceiving
+    public int partyGoerType;
+
     // Angular speed in radians per sec.
 
     bool strangling = false;
     public GameObject grabLocation;
     public GameObject ragDoll;
-    int currentWalkPhase = 1;
 
     [ColorUsage(true, true)]
     public Color emissionColor;
     public Material emission;
     public Renderer partyGoerRenderer;
+
+    public GameObject partygoerBalloon;
+
+    private float originalSpeed;
+
+
+    void ResetFloorVector()
+    {
+        gameObject.transform.rotation = new Quaternion(0, gameObject.transform.rotation.y, 0, gameObject.transform.rotation.w);
+        //correct floating
+        RaycastHit[] hits;
+        float distance = 10f;
+
+        hits = Physics.RaycastAll(transform.position + new Vector3(0, 2f, 0), Vector3.down, distance, sightMask);
+
+        if (hits.Length > 0)
+        {
+            foreach (RaycastHit hit in hits)
+            {
+                //only if floor
+                if (hit.transform.gameObject.layer == 19)
+                {
+                    transform.position = hit.point;
+                    continue;
+                }
+
+
+            }
+
+        }
+
+    }
+
     public override void OnEventStart()
     {
         emission.EnableKeyword("_EMISSION");
@@ -31,7 +67,28 @@ public class PartygoerAI : Entity
 
     public override void Init()
     {
+        ResetFloorVector();
+
+        originalSpeed = speed;
+
         emission = partyGoerRenderer.material;
+
+        partyGoerType = GameSettings.Instance.ActiveScene != SCENE.LEVELFUN ? Random.Range(0, 2) : 0;
+
+        SetMetaData("partyGoerType", ((int)partyGoerType).ToString());
+
+        switch (partyGoerType)
+        {
+            case 0:
+                partygoerBalloon.SetActive(false);
+               
+                break;
+
+            case 1:
+                partygoerBalloon.SetActive(true);
+                
+                break;
+        }
 
         if (GameSettings.Instance.worldInstance.currentWorldEvent == GAMEPLAY_EVENT.LIGHTS_OUT)
         {
@@ -56,172 +113,332 @@ public class PartygoerAI : Entity
             {
                 if (currentTarget != null)
                 {
-                    Vector3 targetDirection = currentTarget.position - transform.position;
-
-                    float singleStep = speed * Time.deltaTime;
-
-                    Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetDirection, singleStep, 0.0f);
-
-                    int twitchNoise = Random.Range(0, movementNoises.Length);
-
-                    //only twitch towards target if farther than 4 units
-
-                
-                    if (Vector3.Distance(currentTarget.position, transform.position) > 2 && !strangling && !stunned)
+                    switch (partyGoerType)
                     {
-                        entityAnimator.SetBool("Attack", false);
-                        entityAnimator.SetBool("Idle", false);
+                        case 0:
 
-                        if (canSeeTarget)
-                        {
-                            //attack start
-                            if (!attackNoiseSource.isPlaying)
+                            Vector3 targetDirection = tempTarget != null ? tempTarget.position - transform.position : currentTarget.position - transform.position;
+
+                            Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetDirection, speed, 0.0f);
+
+                            int twitchNoise = Random.Range(0, movementNoises.Length);
+
+                            //only twitch towards target if farther than 4 units
+
+
+                            if (Vector3.Distance(currentTarget.position, transform.position) > 4 && !strangling && !stunned && speed > 1f)
                             {
-                                attackNoiseSource.pitch = Random.Range(0.9f, 1.1f);
-                                attackNoiseSource.Play();
+                                entityAnimator.SetBool("Idle", false);
+                                entityAnimator.SetBool("Grab", false);
 
-                            }
-                            //ambience stop
-                            if (GetComponent<AudioSource>().isPlaying)
-                                GetComponent<AudioSource>().Stop();
-
-                            float step = speed * Time.deltaTime;
-                            transform.position = Vector3.MoveTowards(transform.position, GameSettings.Instance.Player.transform.position + new Vector3(Random.Range(-2f, 2f), 0, Random.Range(-2f, 2f)), step);
-
-                            //correct floating
-                            RaycastHit[] hits;
-                            float distance = 10f;
-
-                            hits = Physics.RaycastAll(transform.position + new Vector3(0, 2f, 0), Vector3.down, distance, sightMask);
-
-                            if (hits.Length > 0)
-                            {
-                                foreach (RaycastHit hit in hits)
+                                if (canSeeTarget)
                                 {
-                                    //only if floor
-                                    if (hit.transform.gameObject.layer == 19)
+                                    //attack start
+                                    if (!attackNoiseSource.isPlaying)
                                     {
-                                        transform.position = hit.point;
-                                        continue;
+                                        attackNoiseSource.pitch = Random.Range(0.9f, 1.1f);
+                                        attackNoiseSource.Play();
+
                                     }
+                                    //ambience stop
+                                    if (GetComponent<AudioSource>().isPlaying)
+                                        GetComponent<AudioSource>().Stop();
+
+                                    //hit wall
+                                    if (Physics.SphereCast(eyes.transform.position, 0.25f, gameObject.transform.forward, out var move_to_hit, 3f, sightMask, QueryTriggerInteraction.Ignore) && move_to_hit.collider.gameObject.layer != 11)
+                                    {                                            
+
+                                        float rightHitDistance = entityViewDistance - 5f;
+                                        float leftHitDistance = entityViewDistance - 5f;
+
+                                        tempTarget = Instantiate(new GameObject()).transform;
+
+                                        //right hit
+                                        if (Physics.SphereCast(gameObject.transform.position + (Vector3.up * 2), 0.05f, gameObject.transform.right, out var rightHit, entityViewDistance - 5f, sightMask, QueryTriggerInteraction.Ignore))
+                                        {
+                                            rightHitDistance = rightHit.distance;
+
+                                            tempTarget.transform.position = rightHit.point;
+
+                                        }
+
+                                        //left hit
+                                        if (Physics.SphereCast(gameObject.transform.position + (Vector3.up * 2), 0.05f, -gameObject.transform.right, out var leftHit, entityViewDistance - 5f, sightMask, QueryTriggerInteraction.Ignore))
+                                        {
+                                            leftHitDistance = leftHit.distance;
+
+                                            tempTarget.transform.position = leftHit.point;
+
+                                            
+                                        }
+
+                                        if (leftHit.distance > rightHit.distance)
+
+                                            tempTarget = leftHit.transform;
+
+                                        else
+
+                                            tempTarget = rightHit.transform;
+                                    }
+
+                                    //move towards target
+                                    transform.position = Vector3.MoveTowards(transform.position, tempTarget == null ? currentTarget.position + new Vector3(Random.Range(-2f, 2f), 0, Random.Range(-2f, 2f)) : tempTarget.position, speed);
                                     
-                                
+                                    transform.rotation = Quaternion.LookRotation(newDirection);
+
+                                    ResetFloorVector();
+
+                                    movementNoiseSource.clip = movementNoises[twitchNoise];
+                                    movementNoiseSource.pitch = Random.Range(0.9f, 1.1f);
+                                    movementNoiseSource.Play();
+
+                                    entityAnimator.SetBool("Grab", false);
+                                    entityAnimator.SetBool("RunAttack", true);
+
+                                    yield return new WaitForSeconds(0.25f);
+
+                                    //ambient
+                                    GetComponent<AudioSource>().pitch = Random.Range(0.5f, 1.2f);
+
+                                    //simulate getting tired
+                                    speed -= 0.0015f;
+
+                                    
+
+                                   
                                 }
-                           
+                                //idle
+                                else 
+                                {
+                                    //ambience
+                                    if (!GetComponent<AudioSource>().isPlaying)
+                                        GetComponent<AudioSource>().Play();
+
+                                    if (attackNoiseSource.isPlaying)
+                                        attackNoiseSource.Stop();
+
+                                    entityAnimator.SetBool("Grab", false);
+                                    entityAnimator.SetBool("RunAttack", false);
+                                    entityAnimator.ResetTrigger("Attack");
+                                    entityAnimator.SetBool("Idle", true);
+
+                                    yield return new WaitForSecondsRealtime(0.25f);
+                                    speed += 0.007f;
+                                    speed = Mathf.Clamp(speed, 1f, originalSpeed);
+                                }
                             }
-                        
-
-                            transform.rotation = Quaternion.LookRotation(newDirection);
-
-                            transform.rotation = new Quaternion(0, transform.rotation.y, 0, transform.rotation.w);
-                            movementNoiseSource.clip = movementNoises[twitchNoise];
-                            movementNoiseSource.pitch = Random.Range(0.9f, 1.1f);
-                            movementNoiseSource.Play();
-
-                            if (currentWalkPhase == 1)
+                            //attack
+                            else if (!stunned && !strangling)
                             {
-                                entityAnimator.SetBool("Twitch" + 3, true);
-                                currentWalkPhase = 3;
+                                transform.LookAt(currentTarget.transform.position, Vector3.up);
+
+                                ResetFloorVector();
+
+                                entityAnimator.SetBool("Grab", false);
+                                entityAnimator.SetBool("Idle", false);
+                                entityAnimator.SetBool("RunAttack", false);
+                                entityAnimator.SetTrigger("Attack");
+
+                                yield return new WaitForSeconds(0.7f);
+
+                                if (Vector3.Distance(currentTarget.position, transform.position) >= 4 || !entityAnimator.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
+                                    continue;
+
+                                GameSettings.GetLocalPlayer().playerHealth.TakeDamage(damage, sanityMultiplier, 1f, true, DAMAGE_TYPE.ENTITY);
+                                
+
+                                transform.LookAt(currentTarget.transform.position, Vector3.up);
+
+                                ResetFloorVector();
+
+                                //damage per second
+                                yield return new WaitForSeconds(0.4f);
+
+                                if (Vector3.Distance(currentTarget.position, transform.position) >= 4 || !entityAnimator.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
+                                    continue;
+
+                                GameSettings.GetLocalPlayer().playerHealth.TakeDamage(damage, sanityMultiplier, 1f, true, DAMAGE_TYPE.ENTITY);
+                                ;
+                                yield return new WaitForSeconds(0.3f);
+
                             }
                             
-                            else
-                            {
-                                entityAnimator.SetBool("Twitch" + 1, true);
-                                currentWalkPhase = 1;
-                            }
-
-                            yield return new WaitForSecondsRealtime(Random.Range(0.15f, 0.5f));
-
                             //ambient
                             GetComponent<AudioSource>().pitch = Random.Range(0.5f, 1.2f);
 
-                            if (entityAnimator.GetBool("Twitch" + 1))
-                                entityAnimator.SetBool("Twitch" + 1, false);
+                            break;
+
+                        case 1:
+
+                            
+                            if (playerCanSee && Vector3.Distance(currentTarget.position, transform.position) > 4 && !strangling && !stunned)
+                            {
+                                entityAnimator.SetBool("Idle", false);
+                                entityAnimator.SetBool("Waving", true);
+                                entityAnimator.SetBool("Grab", false);
+                                transform.LookAt(currentTarget.transform.position, Vector3.up);
+                                ResetFloorVector();
+                            }
+
                             else
                             {
-                                entityAnimator.SetBool("Twitch" + 3, false);
+                                entityAnimator.SetBool("Idle", false);
+                                entityAnimator.SetBool("Waving", false);
+                                entityAnimator.SetBool("Grab", false);
+
+                                //attack
+                                if (!strangling && !stunned && Vector3.Distance(currentTarget.position, transform.position) < 4)
+                                {
+
+                                    if (GetComponent<AudioSource>().isPlaying)
+                                        GetComponent<AudioSource>().Stop();
+
+                                    //attack start
+                                    if (!attackNoiseSource.isPlaying)
+                                    {
+                                        attackNoiseSource.pitch = Random.Range(0.9f, 1.1f);
+                                        attackNoiseSource.Play();
+
+                                    }
+
+                                    strangling = true;
+
+                                    entityAnimator.SetBool("Grab", true);
+
+                                    entityAnimator.SetBool("Waving", false);
+                                    
+                                    entityAnimator.SetBool("RunAttack", false);
+
+                                    entityAnimator.ResetTrigger("Attack");
+
+                                    entityAnimator.SetBool("Idle", false);
+
+                                    yield return new WaitForSeconds(1.5f);
+
+                                    if (Vector3.Distance(currentTarget.position, transform.position) > 4 && !strangling)
+                                    {
+                                        entityAnimator.SetBool("Knockout", false);
+                                        entityAnimator.SetBool("Grab", false);
+                                        continue;
+                                    }
+                                        
+
+                                    entityAnimator.SetBool("Grab", false);
+
+                                    entityAnimator.SetBool("Knockout", true);
+
+                                    yield return new WaitForSeconds(1f);
+
+                                    if (Vector3.Distance(currentTarget.position, transform.position) > 4 && !strangling)
+                                    {
+                                        entityAnimator.SetBool("Knockout", false);
+                                        entityAnimator.SetBool("Grab", false);
+                                        continue;
+                                    }
+                                       
+
+                                    if (entityAnimator.GetCurrentAnimatorStateInfo(0).IsName("Knockout") && strangling)
+                                        GameSettings.Instance.cutSceneHandler.BeginCutScene(CUT_SCENE.KNOCKED_OUT_PARTYGOER);
+                                   
+                                    entityAnimator.SetBool("Knockout", false);
+
+                                }
+
+                                else if (strangling)
+                                {
+
+                                    GameSettings.GetLocalPlayer().playerHealth.TakeDamage(damage, sanityMultiplier, 1f, false, DAMAGE_TYPE.ENTITY);
+
+                                    //damage per second
+                                    yield return new WaitForSeconds(0.4f);
+                                }
+                                //idle
+                                else
+                                {
+                                    if (attackNoiseSource.isPlaying)
+                                        attackNoiseSource.Stop();
+
+                                    entityAnimator.SetBool("RunAttack", false);
+
+                                    entityAnimator.ResetTrigger("Attack");
+
+                                    entityAnimator.SetBool("Idle", true);
+                                    entityAnimator.SetBool("Grab", false);
+                                    entityAnimator.SetBool("Waving", false);
+
+                                    yield return new WaitForSecondsRealtime(0.5f);
+
+                                    speed += 0.05f;
+                                    speed = Mathf.Clamp(speed, 1f, originalSpeed);
+                                }
                             }
-                        }
-                        else
-                        {
-                            //ambience
-                            if (!GetComponent<AudioSource>().isPlaying)
-                                GetComponent<AudioSource>().Play();
 
-                            /*if (attackNoiseSource.isPlaying)
-                                attackNoiseSource.Stop();*/
+                            yield return new WaitForSeconds(0.25f);
 
-                            yield return new WaitForSecondsRealtime(1f);
-                        }
+                            break;
                     }
-                    //attack
-                    else if (!strangling && !stunned)
-                    {
 
-                        if (GetComponent<AudioSource>().isPlaying)
-                            GetComponent<AudioSource>().Stop();
-
-                        //attack start
-                        if (!attackNoiseSource.isPlaying)
-                        {
-                            attackNoiseSource.pitch = Random.Range(0.9f, 1.1f);
-                            attackNoiseSource.Play();
-
-                        }
-
-                        strangling = true;
-
-                        entityAnimator.SetBool("Twitch1", false);
-                        entityAnimator.SetBool("Twitch2", false);
-                        entityAnimator.SetBool("Twitch3", false);
-
-                        entityAnimator.SetBool("Attack", true);
                     
 
-                        yield return new WaitForSecondsRealtime(1f);
-
-
-                    }
-
-                    else if (strangling)
-                    {
-
-                        GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.TakeDamage(damage, sanityMultiplier, 1f);
-
-                        //damage per second
-                        yield return new WaitForSecondsRealtime(0.4f);
-                    }
-                    else
-                    {
-                        strangling = false;
-                        entityAnimator.SetBool("Attack", false);
-                        entityAnimator.SetBool("Idle", true);
-
-                        yield return new WaitForSecondsRealtime(3);
-                    }
-
-                    //ambient
-                    GetComponent<AudioSource>().pitch = Random.Range(0.5f, 1.2f);
-
                 }
+                //idle
                 else
                 {
+                    
+                    entityAnimator.SetBool("RunAttack", false);
+                    entityAnimator.ResetTrigger("Attack");
+                    entityAnimator.SetBool("Idle", true);
+                    entityAnimator.SetBool("Grab", false);
+
                     yield return new WaitForSecondsRealtime(0.1f);
+
+                    speed += 0.05f;
+                    speed = Mathf.Clamp(speed, 1f, originalSpeed);
                 }
             }
+            //idle
             else
             {
-                yield return new WaitForSecondsRealtime(0.1f);
+                
+
+                entityAnimator.SetBool("RunAttack", false);
+                entityAnimator.ResetTrigger("Attack");
+                entityAnimator.SetBool("Idle", true);
+                entityAnimator.SetBool("Grab", false);
+
+                yield return new WaitForSecondsRealtime(0.5f);
+
+                speed += 0.05f;
+                speed = Mathf.Clamp(speed, 1f, originalSpeed);
             }
+
+            if (stunned)
+            {
+                entityAnimator.SetBool("RunAttack", false);
+
+                entityAnimator.ResetTrigger("Attack");
+
+                entityAnimator.SetBool("Idle", false);
+                entityAnimator.SetBool("Grab", false);
+                entityAnimator.SetBool("Waving", false);
+
+                entityAnimator.SetTrigger("Stunned");
+
+                yield return new WaitUntil(() => !stunned);
+            }
+            
 
         }
     }
     public override void Despawn()
     {
-        GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Choking", false);
-        GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canRun = true;
-        GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = true;
-        GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canWalk = true;
+        partygoerBalloon.transform.parent = null;
+        partygoerBalloon.transform.Find("StringArmature").Find("Bone.007").gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+
+        GameSettings.GetLocalPlayer().bodyAnim.SetBool("Choking", false);
+        GameSettings.GetLocalPlayer().playerHealth.canRun = true;
+        GameSettings.GetLocalPlayer().playerHealth.canJump = true;
+        GameSettings.GetLocalPlayer().playerHealth.canWalk = true;
 
         //Debug.Log("Despawned " + type.ToString() + "-" + runTimeID);
         GameObject ragDollInstance = Instantiate(ragDoll);
@@ -235,43 +452,74 @@ public class PartygoerAI : Entity
 
     public override void UpdateEntity()
     {
+        if (tempTarget != null && currentTarget != null)
+        {
+            //can see target again
+            if (Physics.Raycast(eyes.transform.position, currentTarget.position - eyes.transform.position, out var hitInfo, despawnDistance, sightMask))
+            {
+                tempTarget = null;
+            }
+        }
 
         if (stunned)
         {
             strangling = false;
+
+        }
+        else
+        {
+            entityAnimator.ResetTrigger("Stunned");
         }
 
-        if (!GameSettings.Instance.Player.GetComponent<PlayerController>().dead)
+        if (!GameSettings.GetLocalPlayer().dead)
         {
             if (strangling)
             {
-                GameSettings.Instance.Player.GetComponent<PlayerController>().currentPotentialDeathCase = DEATH_CASE.ENTITY;
 
-                Vector3 targetDirection = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.transform.position - eyes.transform.position;
+                Vector3 targetDirection = GameSettings.GetLocalPlayer().head.transform.transform.position - eyes.transform.position;
 
-                GameSettings.Instance.Player.GetComponent<PlayerController>().transform.position = grabLocation.transform.position - new Vector3(0f, 2.3f, 0f);
-                GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canRun = false;
-                GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = false;
-                GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canWalk = false;
+                GameSettings.GetLocalPlayer().transform.position = grabLocation.transform.position - new Vector3(0f, 2.3f, 0f);
+                GameSettings.GetLocalPlayer().playerHealth.canRun = false;
+                GameSettings.GetLocalPlayer().playerHealth.canJump = false;
+                GameSettings.GetLocalPlayer().playerHealth.canWalk = false;
 
                 Vector3 attackDirection = Vector3.RotateTowards(transform.forward, targetDirection, 1f, 1f);
                 eyes.transform.rotation = Quaternion.LookRotation(attackDirection);
 
-                GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Choking", true);
+                GameSettings.GetLocalPlayer().bodyAnim.SetBool("Choking", true);
 
 
             }
             else if (!strangling)
             {
-                GameSettings.Instance.Player.GetComponent<PlayerController>().currentPotentialDeathCase = DEATH_CASE.UNKNOWN;
-
-                GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canJump = true;
-                GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canWalk = true;
-                GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool("Choking", false);
+                GameSettings.GetLocalPlayer().playerHealth.canJump = true;
+                GameSettings.GetLocalPlayer().playerHealth.canWalk = true;
+                GameSettings.GetLocalPlayer().bodyAnim.SetBool("Choking", false);
             }
         }
        
 
 
+    }
+
+    public override void OnSaveFinished()
+    {
+        
+    }
+
+    public override void OnLoadFinished()
+    {
+        switch (partyGoerType)
+        {
+            case 0:
+                partygoerBalloon.SetActive(false);
+
+                break;
+
+            case 1:
+                partygoerBalloon.SetActive(true);
+
+                break;
+        }
     }
 }

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9075736198273990985}
   - component: {fileID: 7340305521680105861}
   - component: {fileID: 7065750352517365241}
-  m_Layer: 2
+  m_Layer: 12
   m_Name: SmilerData
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7527896785735740941}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.227, z: 0}
+  m_LocalPosition: {x: 0, y: 2.88, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -54,7 +54,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 5d2e402b5ba1c9c4280189e8b118ea47, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -76,7 +76,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 3d3e6a77a2a05464e9e49fe0fc126078, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.65882355}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -214,7 +214,8 @@ GameObject:
   - component: {fileID: 7706871903603223783}
   - component: {fileID: 3512871350104039503}
   - component: {fileID: 8296166339906779880}
-  m_Layer: 0
+  - component: {fileID: 8890614584466385894}
+  m_Layer: 12
   m_Name: Smiler
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -249,6 +250,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d685d7ca68b373a45bb94d7704186899, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  entityViewDetectionPoint: {fileID: 6733642710144589965}
   saveableData:
     runTimeID: 4638
     location:
@@ -269,31 +271,33 @@ MonoBehaviour:
   canAttack: 1
   entityAnimator: {fileID: 7340305521680105861}
   movementNoises: []
-  movementNoiseSource: {fileID: 0}
+  movementNoiseSource: {fileID: 7065750352517365241}
   attackNoises: []
   attackNoiseSource: {fileID: 7065750352517365241}
   hurtNoises: []
   hurtNoisesSource: {fileID: 7065750352517365241}
-  damage: 15
+  damage: 1000
   sanityMultiplier: 0
   maxAllowed: 4
   despawnDistance: 500
-  entityViewDistance: 500
-  memoryOfTargetLocationInSeconds: 0
+  entityViewDistance: 750
+  memoryOfTargetLocationInSeconds: 3
   sightMask:
     serializedVersion: 2
     m_Bits: 65531
   canSeeTarget: 0
   playerCanSee: 0
-  spawnChance: 0.1
-  speed: 2
+  spawnChance: 0.001
+  speed: 11
   stunned: 0
   stunTime: 0
   eyes: {fileID: 2550196510949771386}
   entitySkin: {fileID: 0}
-  runTimeID: 4638
+  isDespawned: 0
+  runTimeID: 
   bloodPrefab: {fileID: 0}
   currentTarget: {fileID: 0}
+  tempTarget: {fileID: 0}
   drops: []
   activeDropsHeld: []
   explosionEffect: {fileID: 3925061542897833910, guid: 6a2e518db0b05a74a97784bb5b449817, type: 3}
@@ -347,8 +351,24 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8810439832747604879}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.7158055, y: 1.8276613, z: 1}
-  m_Center: {x: 0.0017732382, y: 1.7977611, z: 1.20599156e-11}
+  m_Size: {x: 1.7158055, y: 2.9480658, z: 1.6738437}
+  m_Center: {x: 0.0017732375, y: 2.3579376, z: -0.09144962}
+--- !u!54 &8890614584466385894
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8810439832747604879}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
