@@ -274,11 +274,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03be77203f75e634e86866193396b769, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 20
-  connetedObject: {fileID: 0}
+  damage: 7
+  connectedObject: {fileID: 0}
   WeaponBloodRenderer: {fileID: 0}
   bloodAmount: 0
   onlyHitOneLimb: 1
+  hasHit: 0
 --- !u!65 &2604335153639674887
 BoxCollider:
   m_ObjectHideFlags: 0

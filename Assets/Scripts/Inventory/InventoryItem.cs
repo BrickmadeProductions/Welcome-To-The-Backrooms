@@ -76,26 +76,26 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             canvas.worldCamera,
             out position);
 
-        GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected.transform.position = canvas.transform.TransformPoint(new Vector3(position.x, position.y, -1));
+        GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected.transform.position = canvas.transform.TransformPoint(new Vector3(position.x, position.y, -1));
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
 
-        GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = false;
+        GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().canOpen = false;
         canvasGroup.alpha = 0.6f;
         canvasGroup.blocksRaycasts = false;
-        GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = this;
+        GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected = this;
         description.SetActive(false);
         //Debug.Log("Picking Up From " + slotIn.name);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (!GameSettings.Instance.Player.GetComponent<InventorySystem>().isCrafting)
+        if (!GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().isCrafting)
         {
-            GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected = null;
+            GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected = null;
 
-            GameSettings.Instance.Player.GetComponent<InventorySystem>().canOpen = true;
+            GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().canOpen = true;
         }
             
             transform.parent = slotIn.transform;
@@ -110,7 +110,7 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (GameSettings.Instance.Player.GetComponent<InventorySystem>().currentItemSlected == null)
+        if (GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentItemSlected == null)
             description.SetActive(true);
     }
 
@@ -124,7 +124,7 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            GameSettings.Instance.Player.GetComponent<InteractionSystem>().SetDrop(slotIn);
+            GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().SetDrop(slotIn);
         }
         
     }

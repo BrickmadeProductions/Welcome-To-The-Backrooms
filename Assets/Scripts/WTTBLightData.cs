@@ -27,10 +27,11 @@ public class WTTBLightData : MonoBehaviour
     [ColorUsage(true, true)]
     Color setColor;
 
-    float defaultIntensity;
+    public float defaultIntensity;
 
     bool on = true;
-    public bool broken;
+    bool broken;
+    public bool canBeBroken = false;
 
     public bool hasPower;
 
@@ -44,7 +45,8 @@ public class WTTBLightData : MonoBehaviour
             biomeColorsDictionary.Add(color.biomeID, color.emissionColor);
         }
 
-        assossiatedBiome = GetComponentInParent<Tile>().biomeID;
+        if (GetComponentInParent<Tile>() != null)
+            assossiatedBiome = GetComponentInParent<Tile>().biomeID;
 
         //color data
         defaultIntensity = Light.intensity;
@@ -54,6 +56,7 @@ public class WTTBLightData : MonoBehaviour
         setColor = emissionMat.GetColor("_EmissionColor");
 
         //is it broken?
+        if (canBeBroken)
         broken = Random.Range(0f, 1f) < 0.07f ? true : false;
 
         if (biomeColorsDictionary.Count > 0)
@@ -92,10 +95,14 @@ public class WTTBLightData : MonoBehaviour
             if (GameSettings.Instance.worldInstance != null)
             {
                 if (GameSettings.Instance.worldInstance.currentWorldEvent != GAMEPLAY_EVENT.LIGHTS_OUT)
+                {
                     hasPower = true;
+                }
+                    
                 else
                 {
-                    transform.parent.GetComponentInChildren<ParticleSystem>().gameObject.SetActive(false);
+                    foreach (Transform child in Light.transform)
+                        child.gameObject.SetActive(false);
                     hasPower = false;
                 }
             }
@@ -119,10 +126,6 @@ public class WTTBLightData : MonoBehaviour
             Light.intensity = 2f;
             Light.intensity += Random.Range(-1.5f, 2.5f);
 
-        }
-        else
-        {
-            SetState(true);
         }
 
         
@@ -170,10 +173,15 @@ public class WTTBLightData : MonoBehaviour
 
     public void SetState(bool on)
     {
+        
         if (hasPower)
         {
             if (on)
             {
+                foreach (Transform child in Light.transform)
+                    child.gameObject.SetActive(true);
+
+                GetComponent<AudioSource>().Play();
                 Light.enabled = true;
 
                 emissionMat.EnableKeyword("_EMISSION");
@@ -186,6 +194,10 @@ public class WTTBLightData : MonoBehaviour
             }
             else
             {
+                foreach (Transform child in Light.transform)
+                    child.gameObject.SetActive(false);
+
+                GetComponent<AudioSource>().Play();
                 Light.enabled = false;
 
                 emissionMat.DisableKeyword("_EMISSION");
@@ -198,6 +210,10 @@ public class WTTBLightData : MonoBehaviour
         }
         else
         {
+            foreach (Transform child in Light.transform)
+                child.gameObject.SetActive(false);
+
+            GetComponent<AudioSource>().Play();
             Light.enabled = false;
 
             emissionMat.DisableKeyword("_EMISSION");
@@ -205,7 +221,6 @@ public class WTTBLightData : MonoBehaviour
             emissionMat.SetColor("_EmissionColor", Color.black);
 
             Light.intensity = defaultIntensity;
-            Light.intensity += Random.Range(-1.5f, 2f);
         }
         
        

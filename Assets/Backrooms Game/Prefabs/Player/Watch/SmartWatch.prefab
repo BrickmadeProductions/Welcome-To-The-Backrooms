@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9159752304311674691}
   - component: {fileID: 3951625545956787202}
   m_Layer: 13
-  m_Name: SanityText
+  m_Name: HungerText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26,7 +26,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 516901740667687305}
   m_LocalRotation: {x: 0.70710677, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: -0.00192}
+  m_LocalPosition: {x: 0, y: 0, z: -0.0020300006}
   m_LocalScale: {x: 0.6, y: 0.6000001, z: 0.6000001}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -35,7 +35,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.00201, y: 0.00052}
+  m_AnchoredPosition: {x: 0.00201, y: 0.0005200013}
   m_SizeDelta: {x: 0.01, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9159752304311674691
@@ -75,8 +75,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 2181038224
-  m_fontColor: {r: 0.5660378, g: 0, b: 0, a: 0.50980395}
+    rgba: 2181074656
+  m_fontColor: {r: 0.8773585, g: 0.5587388, b: 0, a: 0.50980395}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1815,7 +1815,7 @@ GameObject:
   - component: {fileID: 8116480119631103550}
   - component: {fileID: 2403684232189588322}
   m_Layer: 13
-  m_Name: SanityImage
+  m_Name: HungerImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1829,7 +1829,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8257134670903609416}
   m_LocalRotation: {x: 0.70710677, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: -0.00185}
+  m_LocalPosition: {x: 0, y: 0, z: -0.00196}
   m_LocalScale: {x: 0.6, y: 0.6000001, z: 0.6000001}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1869,7 +1869,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: c76e86bcf35658a4ca20877090447cb0, type: 3}
+  m_Texture: {fileID: 2800000, guid: eadbbd8ab16c83d4cadaa41e37e8174a, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0

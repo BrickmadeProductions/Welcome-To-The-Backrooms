@@ -96,6 +96,34 @@ public class Chunk : MonoBehaviour
 
 	}
 
+	//used for singular static worlds
+	public void CreateStaticChunk(int posX, int posY, int posZ, BackroomsLevelWorld parentGenerator)
+	{
+		ALL_TILES_GENERATED = true;
+
+		saveableData = new SerealizedChunk
+		{
+			entityData = new EntityCluster
+			{
+				entityClusterData = new Dictionary<string, SaveableEntity>()
+			},
+			propData = new PropCluster
+			{
+				propClusterData = new Dictionary<string, SaveableProp>()
+			},
+			instance = this
+		};
+
+		this.parentGenerator = parentGenerator;
+
+		chunkPosX = posX;
+		chunkPosY = posY;
+		chunkPosZ = posZ;
+
+		StartCoroutine(LoadInObjectsAndEntities());
+
+	}
+
 	public IEnumerator LoadInObjectsAndEntities()
 	{
 		List<ContainerObject> containersInThisChunk = new List<ContainerObject>();
@@ -153,8 +181,7 @@ public class Chunk : MonoBehaviour
 
 	private void Awake()
 	{
-		
-		tile_grid = new List<Tile>();
+
 	}
 
 	public void SaveChunkTileGrid()
@@ -268,9 +295,6 @@ public class Chunk : MonoBehaviour
 
 		//Debug.Log(GameSettings.Instance.ActiveScene);
 
-
-		bool shouldSendBiomeEdgeInvoke = false;
-
 		switch (GameSettings.Instance.ActiveScene)
         {
 
@@ -297,13 +321,17 @@ public class Chunk : MonoBehaviour
 					}
 					else if (biomePerlinID >= 0.8f && biomePerlinID < 0.9f)
 					{
-
 						biomeID = BIOME_ID.LEVEL_0_TALL_ROOMS;
 					}
 					else if (biomePerlinID >= 0.9f && biomePerlinID < 1.01f)
 					{
 						biomeID = BIOME_ID.LEVEL_0_RED_ROOMS;
 					}
+					if (biomePerlinID > 0.59f && biomePerlinID < 0.60f && chunkPosX > 50 && chunkPosZ > 50)
+                    {
+						biomeID = BIOME_ID.LEVEL_0_EXIT_TILES;
+                    }
+
 
 				}
 
@@ -311,7 +339,7 @@ public class Chunk : MonoBehaviour
 
 			case (SCENE.LEVEL1):
 
-				Debug.Log(worldPrelinID + " " + biomePerlinID);
+				//Debug.Log(worldPrelinID + " " + biomePerlinID);
 
 				if ((Mathf.Abs(chunkPosZ) % 15) == 0 && chunkPosZ != 0)
 				{

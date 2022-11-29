@@ -7,7 +7,6 @@ using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 
 
-
 public class PlayerHealthSystem : MonoBehaviour
 {
 	
@@ -28,8 +27,6 @@ public class PlayerHealthSystem : MonoBehaviour
 	public float stamina = 100f;
 
 	public float sanity = 100f;
-
-	public TextMeshProUGUI sanityText;
 
 	public int heartRate = 90;
 
@@ -173,7 +170,7 @@ public class PlayerHealthSystem : MonoBehaviour
 		int num = heartRate;
 		textMeshProUGUI.text = num.ToString() ?? "";
 		thirstText.text = ((int)thirst).ToString() ?? "";
-		sanityText.text = ((int)sanity).ToString() ?? "";
+		hungerText.text = ((int)hunger).ToString() ?? "";
 		heartBeatSource.pitch = (float)heartRate / 90f;
 		heartBeatSource.volume = (float)heartRate / 100f - 1f;
 
@@ -314,7 +311,7 @@ public class PlayerHealthSystem : MonoBehaviour
 	{
 		while (true)
 		{
-			ChangeHunger(player.currentPlayerState == PlayerController.PLAYERSTATES.RUN ? -0.5f : -0.23f);
+			ChangeHunger(player.currentPlayerState == PlayerController.PLAYERSTATES.RUN ? -0.08f : -0.03f);
 			ChangeThirst(player.currentPlayerState == PlayerController.PLAYERSTATES.RUN ? -0.35f : -0.2f);
 
 			if (GameSettings.Instance.ActiveScene != SCENE.ROOM && sanity > 0f)
@@ -324,20 +321,20 @@ public class PlayerHealthSystem : MonoBehaviour
 			if (sanity <= 0f)
 			{
 				sanity = 0f;
-				TakeDamage(5f, 0f, 2f);
+				TakeDamage(5f, 0f, 2f, false, DAMAGE_TYPE.UNKNOWN);
 			}
 			if (thirst <= 0f)
 			{
-				TakeDamage(2f, 0f, 2f);
+				TakeDamage(2f, 0f, 2f, false, DAMAGE_TYPE.UNKNOWN);
 				canRun = false;
 			}
 			else if (thirst > 0)
 				canRun = true;
-			/*if (hunger <= 0f)
+			if (hunger <= 0f)
 			{
 				hunger = 0f;
-				health -= 3f;
-			}*/
+				TakeDamage(0.5f, 0f, 1f, false, DAMAGE_TYPE.UNKNOWN);
+			}
 			yield return new WaitForSecondsRealtime(3f);
 		}
 	}
@@ -349,7 +346,9 @@ public class PlayerHealthSystem : MonoBehaviour
 			ChangeHeartRate(1f);
 			yield return new WaitForSecondsRealtime(UnityEngine.Random.Range(1, 3));
 		}
+
 	}
+
 
 	public IEnumerator ActivateAdrenaline()
 	{
@@ -475,11 +474,37 @@ public class PlayerHealthSystem : MonoBehaviour
 		heartRate = Mathf.Clamp(heartRate, 0, 200);
 	}
 
-	public void TakeDamage(float damageSubtraction, float sanityMultipler, float heartrateIncrease)
+	public void TakeDamage(float damageSubtraction, float sanityMultipler, float heartrateIncrease, bool knockBack, DAMAGE_TYPE damageType)
     {
-		player.playerHealth.health -= damageSubtraction * armorReduction;
-		player.playerHealth.sanity *= sanityMultipler;
-		player.playerHealth.ChangeHeartRate(heartrateIncrease);
+		if (GameSettings.Instance.cheatSheet.invincible)
+			return;
+
+		if (knockBack)
+        {
+			GameSettings.GetLocalPlayer().rb.drag = 0f;
+			GameSettings.GetLocalPlayer().rb.AddForce(Vector3.up * 15000f);
+			GameSettings.GetLocalPlayer().rb.AddForce(-GameSettings.GetLocalPlayer().rb.velocity.normalized * 1000f * GameSettings.GetLocalPlayer().rb.velocity.magnitude);
+			GameSettings.GetLocalPlayer().rb.AddForce(GameSettings.GetLocalPlayer().transform.forward * -15000f);
+
+		}
+
+		health -= damageSubtraction * armorReduction;
+		sanity *= sanityMultipler;
+		ChangeHeartRate(heartrateIncrease);
+
+		if (!player.dead && health <= 0.0f)
+        {
+			
+			StartCoroutine(player.Die());
+
+			
+
+			if (damageType == DAMAGE_TYPE.ENTITY)
+			{
+				Steam.AddAchievment("MEAT_CRAYON");
+			}
+
+		}
 
 		attackIndicator.ResetTrigger("Hit");
 
@@ -496,7 +521,6 @@ public class PlayerHealthSystem : MonoBehaviour
 		isBeingDamaged = true;
 
 		isJustDamaged = true;
-
 
 		while (isBeingDamaged)
         {

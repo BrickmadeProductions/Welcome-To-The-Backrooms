@@ -43,6 +43,10 @@ public class InteractionSystem : MonoBehaviour
 
 	public List<Weapon> fists;
 
+	public bool isOnLadder = false;
+
+	public ClimbableObject currentClimbable = null;
+
 	private void Awake()
 	{
 		buildOn = false;
@@ -587,7 +591,7 @@ public class InteractionSystem : MonoBehaviour
 
 				case 20:
 
-					if (GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP) > 0)
+					if (GameSettings.GetLocalPlayer().skillSetSystem.GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP) > 0)
 					{
 						interact.gameObject.SetActive(true);
 						interact.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = "[E] Attempt No-Clip";
@@ -668,11 +672,33 @@ public class InteractionSystem : MonoBehaviour
 		{
 
 			currentlyLookingAt.GetComponent<InteractableObject>().Use(this, LMB: false);
+
+			//ladder
+			if (currentlyLookingAt.GetComponent<InteractableObject>().GetType() == typeof(ClimbableObject))
+			{
+				isOnLadder = true;
+			}
 		}
+
+		if (currentClimbable != null)
+        {
+			transform.position = currentClimbable.climbSnapLocation.position;
+
+			player.bodyAnim.SetBool("isClimbing", true);
+			player.playerHealth.canMoveHead = false;
+
+
+		}
+        else
+        {
+			player.bodyAnim.SetBool("isClimbing", false);
+			player.playerHealth.canMoveHead = true;
+		}
+			
+
 
 		if (Input.GetMouseButtonDown(0))
 		{
-			bool hasCraftingRecipe = false;
 
 			if (GetObjectInRightHand() != null)
 			{

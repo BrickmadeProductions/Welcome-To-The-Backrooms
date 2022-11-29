@@ -13,7 +13,9 @@ public class DistanceChecker : MonoBehaviour
 
     public float distanceTraveled = 0f;
 
-    float metersTraveledBeforeStatChange = 0;
+    int oldDistanceTravled;
+    int newDistanceTravled;
+
     public TextMeshProUGUI metersTraveledText;
 
     float timePassed = 0f;
@@ -21,36 +23,29 @@ public class DistanceChecker : MonoBehaviour
     public Transform tx;
     public Vector3 lastPosition;
 
-   
+
     void FixedUpdate()
     {
-        
+
         if (GameSettings.PLAYER_DATA_LOADED && GameSettings.SCENE_LOADED && SHOULD_READ_STEPS)
         {
-            //Debug.Log((lastPosition - tx.position).magnitude);
-            float increasedDistance = (lastPosition - tx.position).magnitude;
+            oldDistanceTravled = (int)(distanceTraveled / 3f);
 
-            distanceTraveled += increasedDistance;
+            distanceTraveled += (lastPosition - tx.position).magnitude;
+
+            newDistanceTravled = (int)(distanceTraveled / 3f);
+
+            metersTraveledText.text = (int)(distanceTraveled / 3f) + " M";
+
             timePassed += Time.deltaTime;
             lastPosition = tx.position;
 
-            metersTraveledBeforeStatChange += increasedDistance / 3;
-
-            metersTraveledText.text = (int)(distanceTraveled / 3) + " M";
+            if (oldDistanceTravled < newDistanceTravled)
+            {
+                Steam.IncrementStat("DISTANCE_TRAVELED_METERS", newDistanceTravled - oldDistanceTravled);
+            }
+            
         }
-        
-    }
-
-    public float SetMetersTraveledStats()
-    {
-        float traveled = metersTraveledBeforeStatChange;
-
-        Steam.IncrementStat("DISTANCE_TRAVELED_METERS", traveled);
-        Steam.IncrementStat("GLOBAL_DISTANCE_TRAVELED_METERS", traveled);
-
-        metersTraveledBeforeStatChange = 0;
-
-        return traveled;
     }
 
     public void LoadInData(PlayerSaveData saveData)

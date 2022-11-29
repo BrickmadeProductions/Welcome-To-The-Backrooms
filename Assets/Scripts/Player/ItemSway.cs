@@ -23,10 +23,10 @@ public class ItemSway : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (SceneManager.GetActiveScene().name != "HomeScreen" && GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.canMoveHead)
+        if (SceneManager.GetActiveScene().name != "HomeScreen" && GameSettings.GetLocalPlayer().playerHealth.canMoveHead)
 
-            if (GameSettings.Instance.Player.GetComponent<PlayerController>().currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE 
-                && GameSettings.Instance.Player.GetComponent<InteractionSystem>().GetObjectInRightHand() != null)
+            if (GameSettings.GetLocalPlayer().currentPlayerState != PlayerController.PLAYERSTATES.IMMOBILE 
+                && GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().GetObjectInRightHand() != null)
             {
                 float movementX = -Input.GetAxis("Mouse X") / 4 * amount;
                 float movementY = -Input.GetAxis("Mouse Y") / 4 * amount;

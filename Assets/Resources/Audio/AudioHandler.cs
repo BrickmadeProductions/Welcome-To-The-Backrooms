@@ -135,7 +135,7 @@ public class AudioHandler : MonoBehaviour
         level0Mixer = Resources.Load<AudioMixer>("Audio/Level0").FindMatchingGroups("Master")[0];
         level1Mixer = Resources.Load<AudioMixer>("Audio/Level1").FindMatchingGroups("Master")[0];
         level2Mixer = Resources.Load<AudioMixer>("Audio/Level2").FindMatchingGroups("Master")[0];
-        levelFUNMixer = Resources.Load<AudioMixer>("Audio/LevelFUN").FindMatchingGroups("Master")[0];
+        levelFUNMixer = Resources.Load<AudioMixer>("Audio/Level0").FindMatchingGroups("Master")[0];
         levelRUNMixer = Resources.Load<AudioMixer>("Audio/LevelRUN").FindMatchingGroups("Master")[0];
         clippingZoneMixer = Resources.Load<AudioMixer>("Audio/ClippingZone").FindMatchingGroups("Master")[0];
 
@@ -203,7 +203,7 @@ public class AudioHandler : MonoBehaviour
         {
             GetComponent<AudioSource>().Stop();
 
-            if (GameSettings.Instance.Player.GetComponent<PlayerHealthSystem>().sanity > 50f)
+            if (GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().sanity > 50f)
             {
                 if (data.soundTracks.Length > 0)
                 {
@@ -231,11 +231,11 @@ public class AudioHandler : MonoBehaviour
 
         if (data.ambience != null)
         {
-            GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.GetChild(2).GetComponent<AudioSource>().Stop();
+            GameSettings.GetLocalPlayer().head.transform.GetChild(2).GetComponent<AudioSource>().Stop();
         }
         else
         {
-            GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.GetChild(2).GetComponent<AudioSource>().Stop();
+            GameSettings.GetLocalPlayer().head.transform.GetChild(2).GetComponent<AudioSource>().Stop();
 
         }
 
@@ -296,13 +296,13 @@ public class AudioHandler : MonoBehaviour
 
         if (data.ambience != null)
         {
-            GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.GetChild(2).GetComponent<AudioSource>().clip = data.ambience;
-            GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.GetChild(2).GetComponent<AudioSource>().Play();
+            GameSettings.GetLocalPlayer().head.transform.GetChild(2).GetComponent<AudioSource>().clip = data.ambience;
+            GameSettings.GetLocalPlayer().head.transform.GetChild(2).GetComponent<AudioSource>().Play();
         }
         else
         {
-            GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.GetChild(2).GetComponent<AudioSource>().clip = ambience0Track;
-            GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.GetChild(2).GetComponent<AudioSource>().Play();
+            GameSettings.GetLocalPlayer().head.transform.GetChild(2).GetComponent<AudioSource>().clip = ambience0Track;
+            GameSettings.GetLocalPlayer().head.transform.GetChild(2).GetComponent<AudioSource>().Play();
 
         }
 
@@ -366,25 +366,32 @@ public class AudioHandler : MonoBehaviour
             }
 
         }
-        if (GameSettings.Instance.Player.GetComponent<InventorySystem>() != null)
-            foreach (InventorySlot invSlot in GameSettings.Instance.Player.GetComponent<InventorySystem>().GetAllInvSlots())
-            {
-                if (invSlot.itemsInSlot.Count > 0)
+
+        if (GameSettings.GetLocalPlayer() != null)
+        {
+            if (GameSettings.GetLocalPlayer().GetComponent<InventorySystem>() != null)
+
+                foreach (InventorySlot invSlot in GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().GetAllInvSlots())
                 {
-                    if (GetComponent<AudioSource>() != null)
-
-                        GetComponent<AudioSource>().outputAudioMixerGroup = GameSettings.Instance.audioHandler.master.outputAudioMixerGroup;
-
-                    foreach (AudioSource audioSource in invSlot.itemsInSlot[0].connectedObject.GetComponentsInChildren<AudioSource>())
+                    if (invSlot.itemsInSlot.Count > 0)
                     {
-                        audioSource.outputAudioMixerGroup = sceneMusicDictionary[scene].levelMixer;
+                        if (GetComponent<AudioSource>() != null)
+
+                            GetComponent<AudioSource>().outputAudioMixerGroup = GameSettings.Instance.audioHandler.master.outputAudioMixerGroup;
+
+                        foreach (AudioSource audioSource in invSlot.itemsInSlot[0].connectedObject.GetComponentsInChildren<AudioSource>())
+                        {
+                            audioSource.outputAudioMixerGroup = sceneMusicDictionary[scene].levelMixer;
+                        }
+
+
                     }
 
-                
+
                 }
+        }
 
-
-            }
+       
 
 
         GameSettings.Instance.setMasterVolume(PlayerPrefs.GetFloat("MASTER_VOLUME"));

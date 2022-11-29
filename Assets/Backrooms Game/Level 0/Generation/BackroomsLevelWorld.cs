@@ -66,11 +66,16 @@ public enum BIOME_ID
 	LEVEL_0_PITFALLS,
 	LEVEL_0_OVERGROWN,
 	LEVEL_0_SWAMP,
+	LEVEL_0_EXIT_TILES,
 
 	//level 1
 	LEVEL_1_PARKING_GARAGE,
 	LEVEL_1_MAZE,
-	LEVEL_1_VOID_CUTS
+	LEVEL_1_VOID_CUTS,
+	LEVEL_1_EXIT_TILES,
+
+	//level =)
+	LEVEL_FUN
 }
 
 
@@ -142,6 +147,17 @@ public struct PlayerLocationData
 
 public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 {
+	public enum WORLD_TYPE
+    {
+		PERLIN2D,
+		PERLIN1D,
+		PERLIN3D,
+		STATIC
+    }
+
+
+	public WORLD_TYPE worldType;
+
 	public PlayerLocationData playerLocationData;
 
 	public GAMEPLAY_EVENT currentWorldEvent;
@@ -219,6 +235,14 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public BIOME_ID GetCurrentBiomeAtChunkPosition(Vector3 position)
     {
+		if (worldType == WORLD_TYPE.STATIC)
+        {
+			switch (GameSettings.Instance.ActiveScene)
+            {
+				case SCENE.LEVELFUN:
+					return BIOME_ID.LEVEL_FUN;
+			}
+        }
 
 		float worldPrelinID =
 			Mathf.PerlinNoise(
@@ -243,6 +267,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		//Debug.Log("Biome Perlin: " + biomePerlinID);
 
 		BIOME_ID biomeID = BIOME_ID.LEVEL_0_YELLOW_ROOMS;
+
+		if (worldType == WORLD_TYPE.STATIC)
+        {
+			return level_chunkGenerator.GetComponent<Chunk>().tile_grid[0].biomeID;
+		}
 
 		switch (GameSettings.Instance.ActiveScene)
 		{
@@ -284,7 +313,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 			case (SCENE.LEVEL1):
 
-				Debug.Log(worldPrelinID + " " + biomePerlinID);
+				//Debug.Log(worldPrelinID + " " + biomePerlinID);
 
 				if ((Mathf.Abs((int)position.z) % 15) == 0 && (int)position.z != 0)
 				{
@@ -332,7 +361,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	private void Awake()
 	{
-		CreateTileset(Tiles);
+		if (worldType != WORLD_TYPE.STATIC)
+			CreateTileset(Tiles);
 
 		GameSettings.Instance.worldInstance = this;
 
@@ -412,19 +442,26 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			if (currentWorldEvent == GAMEPLAY_EVENT.NONE)
 			{
 				yield return new WaitForSecondsRealtime(1f);
+				timeInSecondsSinceWorldFirstLoaded += 1f;
 				timeIntoCurrentEvent = 0;
 				timeInSecondsSinceLastEvent += 1f;
 			}
             else
             {
 				yield return new WaitForSecondsRealtime(1f);
+				timeInSecondsSinceWorldFirstLoaded += 1f;
 				timeIntoCurrentEvent += 1f;
 				timeInSecondsSinceLastEvent = 0;
 
 
 			}
 
-			timeInSecondsSinceWorldFirstLoaded += 1f;
+			if (timeInSecondsSinceWorldFirstLoaded / 60f == 1)
+            {
+				Steam.IncrementStat("TIME_MINUTES_" + GameSettings.Instance.ActiveScene.ToString(), 1);
+            }
+
+			
 		}
 		
     }
@@ -522,8 +559,11 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 				float spawnChanceCap = UnityEngine.Random.Range(0, currentWorldEvent == GAMEPLAY_EVENT.NONE ? 0.99f : 0.49f);
 
-				switch (GetCurrentBiomeAtChunkPosition(GameSettings.Instance.Player.transform.position))
+				switch (GetCurrentBiomeAtChunkPosition(GameSettings.GetLocalPlayer().transform.position))
 				{
+					case BIOME_ID.LEVEL_FUN:
+						spawnChanceCap *= 0.001f;
+						break;
 					case BIOME_ID.LEVEL_0_YELLOW_ROOMS:
 						spawnChanceCap *= 1f;
 						break;
@@ -558,11 +598,12 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 					if (tile.entitySpawnLocations.Count > 0)
 					{
-						AddNewEntity(tile.entitySpawnLocations[UnityEngine.Random.Range(0, tile.entitySpawnLocations.Count)].position, entity.gameObject);
+						Transform spawnLocation = tile.entitySpawnLocations[UnityEngine.Random.Range(0, tile.entitySpawnLocations.Count)];
+						AddNewEntity(spawnLocation.position, spawnLocation.rotation, entity.gameObject);
 					}
 					else
 					{
-						AddNewEntity(new Vector3((float)tile.tilePos.x * chunk.tileWidth + (float)(chunk.chunkPosX * chunk_width) * chunk.tileWidth, 0f, (float)tile.tilePos.y * chunk.tileWidth + (float)(chunk.chunkPosZ * chunk_width) * chunk.tileWidth), entity);
+						AddNewEntity(new Vector3((float)tile.tilePos.x * chunk.tileWidth + (float)(chunk.chunkPosX * chunk_width) * chunk.tileWidth, 0f, (float)tile.tilePos.y * chunk.tileWidth + (float)(chunk.chunkPosZ * chunk_width) * chunk.tileWidth), Quaternion.identity, entity);
 					}
 
 					allChunks[key] = chunk.saveableData;
@@ -574,18 +615,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		yield return null;
 		
 	}
-	public SCENE ReturnNextRandomLevel()
-    {
-		switch (GameSettings.Instance.ActiveScene)
-        {
-			case SCENE.LEVEL0:
-            
-				return SCENE.LEVEL1;
-            
-        }
-
-		return SCENE.LEVEL0;
-	}
+	
 
 	public void Pre_Init()
 	{
@@ -630,48 +660,90 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 		Debug.Log("Level save loaded");
 
-		StartCoroutine(GameSettings.Instance.Player.GetComponent<PlayerController>().LoadInWorldPlayerData());
+		StartCoroutine(GameSettings.GetLocalPlayer().LoadInWorldPlayerData());
 
 		yield return new WaitUntil(() => GameSettings.PLAYER_DATA_LOADED);
 
-		newPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
+		newPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.GetLocalPlayer().transform.position);
 
 		Debug.Log("Player Data save loaded");
 
-		for (int x = newPlayerChunkLocation.x - viewDistance; x < newPlayerChunkLocation.x + viewDistance; x++)
-		{
-			//Debug.Log(newPlayerChunkLocation + " " + viewDistance);
-			for (int z = newPlayerChunkLocation.z - viewDistance; z < newPlayerChunkLocation.z + viewDistance; z++)
-			{
-				for (int y = (ThreeDimensional ? (newPlayerChunkLocation.y - layerDistance) : 0); y < ((!ThreeDimensional) ? 1 : (newPlayerChunkLocation.y + layerDistance)); y++)
+		switch (worldType)
+        {
+			case WORLD_TYPE.STATIC:
+
+				Chunk chunkSTATIC = LoadInChunk(0, 0, 0, shouldGenInstantly: true);
+
+				yield return new WaitUntil(() => chunkSTATIC.GetComponent<Chunk>().ALL_TILES_GENERATED);
+				yield return new WaitUntil(() => chunkSTATIC.GetComponent<Chunk>().ALL_OBJECTS_AND_ENTITES_LOADED);
+
+				currentChunkNumber++;
+
+				break;
+
+			case WORLD_TYPE.PERLIN2D:
+
+				for (int x = newPlayerChunkLocation.x - viewDistance; x < newPlayerChunkLocation.x + viewDistance; x++)
 				{
-					Chunk chunk = LoadInChunk(x, y, z, shouldGenInstantly: true);
-
-					if (chunk != null)
+					//Debug.Log(newPlayerChunkLocation + " " + viewDistance);
+					for (int z = newPlayerChunkLocation.z - viewDistance; z < newPlayerChunkLocation.z + viewDistance; z++)
 					{
-						if (chunk.GetComponent<Chunk>() != null)
-                        {
-							yield return new WaitUntil(() => chunk.GetComponent<Chunk>().ALL_TILES_GENERATED);
-							yield return new WaitUntil(() => chunk.GetComponent<Chunk>().ALL_OBJECTS_AND_ENTITES_LOADED);
-						}
-						
+						for (int y = (ThreeDimensional ? (newPlayerChunkLocation.y - layerDistance) : 0); y < ((!ThreeDimensional) ? 1 : (newPlayerChunkLocation.y + layerDistance)); y++)
+						{
+							Chunk chunkPERLIN2D = LoadInChunk(x, y, z, shouldGenInstantly: true);
 
-						currentChunkNumber++;
+							if (chunkPERLIN2D != null)
+							{
+								if (chunkPERLIN2D.GetComponent<Chunk>() != null)
+								{
+									yield return new WaitUntil(() => chunkPERLIN2D.GetComponent<Chunk>().ALL_TILES_GENERATED);
+									yield return new WaitUntil(() => chunkPERLIN2D.GetComponent<Chunk>().ALL_OBJECTS_AND_ENTITES_LOADED);
+								}
+
+
+								currentChunkNumber++;
+							}
+						}
 					}
 				}
-			}
+
+
+				break;
+
+			case WORLD_TYPE.PERLIN1D:
+
+				for (int x = newPlayerChunkLocation.x - viewDistance; x < newPlayerChunkLocation.x + viewDistance; x++)
+				{	
+					Chunk chunkPERLIN2D = LoadInChunk(x, 0, 0, shouldGenInstantly: true);
+
+					if (chunkPERLIN2D != null)
+					{
+						if (chunkPERLIN2D.GetComponent<Chunk>() != null)
+						{
+							yield return new WaitUntil(() => chunkPERLIN2D.GetComponent<Chunk>().ALL_TILES_GENERATED);
+							yield return new WaitUntil(() => chunkPERLIN2D.GetComponent<Chunk>().ALL_OBJECTS_AND_ENTITES_LOADED);
+						}
+
+						currentChunkNumber++;
+					}	
+					
+				}
+
+
+				break;
 		}
 
+		
 		GameSettings.SPAWN_REGION_GENERATED = true;
 
 		///load over objects from other scenes that havent been registered to this world yet from the players inventory
-		foreach (InventorySlot invSlot in GameSettings.Instance.Player.GetComponent<InventorySystem>().GetAllInvSlots())
+		foreach (InventorySlot invSlot in GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().GetAllInvSlots())
 		{
 			if (invSlot.itemsInSlot.Count > 0)
 			{
 				if (!CheckWorldForPropKey(invSlot.itemsInSlot[0].connectedObject.GetWorldID()))
 				{
-					Vector3 position = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
+					Vector3 position = GetChunkKeyAtWorldLocation(GameSettings.GetLocalPlayer().transform.position);
 
 					string key = position.x + "," + position.y + "," + position.z;
 
@@ -681,7 +753,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 						invSlot.itemsInSlot[0].connectedObject.GenerateID();
 						invSlot.itemsInSlot[0].connectedObject.ConnectIDToWorld(this);
 
-						GameSettings.Instance.Player.GetComponent<InventorySystem>().currentPlayerInventorySave.propsInInventory[invSlot.name] = invSlot.itemsInSlot[0].connectedObject.GetWorldID();
+						GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().currentPlayerInventorySave.propsInInventory[invSlot.name] = invSlot.itemsInSlot[0].connectedObject.GetWorldID();
 
 					}
 
@@ -706,7 +778,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 				{
 					if (!CheckWorldForPropKey(invSlot.itemsInSlot[0].connectedObject.GetWorldID()))
 					{
-						Vector3 position = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
+						Vector3 position = GetChunkKeyAtWorldLocation(GameSettings.GetLocalPlayer().transform.position);
 
 						string key = position.x + "," + position.y + "," + position.z;
 
@@ -735,7 +807,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 
 		//players inventory data has been loaded this runs after spawn chunks have generated, just add items to it
-		GameSettings.Instance.Player.GetComponent<InventorySystem>().PutSavedItemsInInventory();
+		GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().PutSavedItemsInInventory();
 
 		Debug.Log("Done With Spawn Region");
 
@@ -748,7 +820,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		if (GameSettings.Instance != null)
 		if (GameSettings.Instance.Player != null)
         {
-			PlayerController player = GameSettings.Instance.Player.GetComponent<PlayerController>();
+			PlayerController player = GameSettings.GetLocalPlayer();
 
 			float[] savedPosition = new float[3]
 			{
@@ -795,6 +867,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			savedChunks = allChunks,
 			savedContainers = containersInWorld,
 			timeInSecondsSinceLastEventSaved = timeInSecondsSinceLastEvent,
+			timeInSecondsSinceWorldFirstLoaded = timeInSecondsSinceWorldFirstLoaded,
 			timeIntoCurrentEventSaved = timeIntoCurrentEvent,
 			foundStoryTiles = storyTilesFoundInThisWorld
 		};
@@ -836,6 +909,8 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		timeInSecondsSinceLastEvent = saveData.timeInSecondsSinceLastEventSaved;
 
 		timeIntoCurrentEvent = saveData.timeIntoCurrentEventSaved;
+
+		timeInSecondsSinceWorldFirstLoaded = saveData.timeInSecondsSinceWorldFirstLoaded;
 
 		worldDataSeed = saveData.savedWorldDataSeed;
 
@@ -889,32 +964,60 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	private void UpdateChunks()
 	{
-		newPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
+		newPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.GetLocalPlayer().transform.position);
 
 		if (newPlayerChunkLocation != oldPlayerChunkLocation && !isLoadingChunks)
 		{
 			isLoadingChunks = true;
 
-			for (int x = newPlayerChunkLocation.x - viewDistance; x < newPlayerChunkLocation.x + viewDistance; x++)
+			switch (worldType)
 			{
-				for (int z = newPlayerChunkLocation.z - viewDistance; z < newPlayerChunkLocation.z + viewDistance; z++)
-				{
-					for (int y = (ThreeDimensional ? (newPlayerChunkLocation.y - layerDistance) : 0); y < ((!ThreeDimensional) ? 1 : (newPlayerChunkLocation.y + layerDistance)); y++)
+
+				case WORLD_TYPE.PERLIN2D:
+
+					for (int x = newPlayerChunkLocation.x - viewDistance; x < newPlayerChunkLocation.x + viewDistance; x++)
 					{
-						Chunk chunk = LoadInChunk(x, y, z, shouldGenInstantly: false);
+						for (int z = newPlayerChunkLocation.z - viewDistance; z < newPlayerChunkLocation.z + viewDistance; z++)
+						{
+							for (int y = (ThreeDimensional ? (newPlayerChunkLocation.y - layerDistance) : 0); y < ((!ThreeDimensional) ? 1 : (newPlayerChunkLocation.y + layerDistance)); y++)
+							{
+								Chunk chunk = LoadInChunk(x, y, z, shouldGenInstantly: false);
+								//Debug.Log(GetBiomeCurrentPlayerIsIn());
+								if (chunk != null)
+								{
+									currentChunkNumber++;
+								}
+							}
+						}
+					}
+
+
+					break;
+
+				case WORLD_TYPE.PERLIN1D:
+
+					for (int x = newPlayerChunkLocation.x - viewDistance; x < newPlayerChunkLocation.x + viewDistance; x++)
+					{
+						
+						Chunk chunk = LoadInChunk(x, 0, 0, shouldGenInstantly: false);
 						//Debug.Log(GetBiomeCurrentPlayerIsIn());
 						if (chunk != null)
 						{
 							currentChunkNumber++;
 						}
+						
 					}
-				}
+
+
+					break;
 			}
+
+			
 			UnloadChunks();
 			isLoadingChunks = false;
 		}
 
-		oldPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position);
+		oldPlayerChunkLocation = GetChunkKeyAtWorldLocation(GameSettings.GetLocalPlayer().transform.position);
 	}
 
 	public void UnloadChunks()
@@ -924,7 +1027,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		{
 			Chunk chunk = loadedChunk.Value;
 
-			if (Vector3.Distance(new Vector3(chunk.chunkPosX, chunk.chunkPosY, chunk.chunkPosZ), GetChunkKeyAtWorldLocation(GameSettings.Instance.Player.transform.position)) > viewDistance)
+			if (Vector3.Distance(new Vector3(chunk.chunkPosX, chunk.chunkPosY, chunk.chunkPosZ), GetChunkKeyAtWorldLocation(GameSettings.GetLocalPlayer().transform.position)) > viewDistance)
 			{
 				foreach (KeyValuePair<string, SaveableProp> prop in chunk.saveableData.propData.propClusterData.ToArray())
 				{
@@ -960,30 +1063,51 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	private Chunk LoadInChunk(int chunkX, int chunkY, int chunkZ, bool shouldGenInstantly)
 	{
-		if (!ChunkLocationLoaded(chunkX, chunkY, chunkZ))
-		{
-			Chunk chunk = Instantiate(level_chunkGenerator).GetComponent<Chunk>();
+		
+		if (worldType != WORLD_TYPE.STATIC)
+        {
+			if (!ChunkLocationLoaded(chunkX, chunkY, chunkZ))
+			{
+				Chunk chunk = Instantiate(level_chunkGenerator).GetComponent<Chunk>();
+
+				chunk.name = chunkX + "," + chunkY + "," + chunkZ;
+
+				if (!allChunks.ContainsKey(chunk.name))
+				{
+					chunk.CreateChunk(chunkX, chunkY, chunkZ, this, shouldGenInstantly, new List<int>(0));
+
+				}
+				else
+				{
+
+					chunk.CreateChunk(chunkX, chunkY, chunkZ, this, shouldGenInstantly, allChunks[chunk.name].tile_gridData);
+				}
+
+
+				chunk.transform.position = new Vector3(chunkX * ChunkSize(), chunkY * ChunkHeight(), chunkZ * ChunkSize());
+
+				loadedChunks.Add(chunk.name, chunk);
+
+				return chunk;
+			}
+		}
+        else
+        {
+
+
+			Chunk chunk = level_chunkGenerator.GetComponent<Chunk>();
 
 			chunk.name = chunkX + "," + chunkY + "," + chunkZ;
 
-			if (!allChunks.ContainsKey(chunk.name))
-            {
-				chunk.GetComponent<Chunk>().CreateChunk(chunkX, chunkY, chunkZ, this, shouldGenInstantly, new List<int>(0));
-			
-			}
-            else
-            {
+			chunk.CreateStaticChunk(chunkX, chunkY, chunkZ, this);
 
-				chunk.GetComponent<Chunk>().CreateChunk(chunkX, chunkY, chunkZ, this, shouldGenInstantly, allChunks[chunk.name].tile_gridData);
-			}
-
-
-			chunk.transform.position = new Vector3(chunkX * ChunkSize(), chunkY * ChunkHeight(), chunkZ * ChunkSize());
-
-			loadedChunks.Add(chunk.name, chunk);
+		    loadedChunks.Add(chunk.name, chunk.GetComponent<Chunk>());
 
 			return chunk;
+
 		}
+
+		
 		return null;
 	}
 
@@ -1005,7 +1129,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 		return false;
 	}
 
-	public Entity AddNewEntity(Vector3 position, GameObject entity)
+	public Entity AddNewEntity(Vector3 position, Quaternion rotation, GameObject entity)
 	{
 		int entityCount = 0;
 		int totalEntities = 0;
@@ -1029,6 +1153,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			spawnedEntity.GenerateID(this);
 
 			spawnedEntity.gameObject.transform.position = position;
+			spawnedEntity.gameObject.transform.rotation = rotation;
 
 			//automatically detect which chunk this entity is in
 			Vector3 chunkVector = GameSettings.Instance.worldInstance.GetChunkKeyAtWorldLocation(spawnedEntity.transform.position);
@@ -1364,7 +1489,7 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 			{
 				Debug.Log("Waiting For Level To Load");
 			}
-			else if (gen_enabled && GameSettings.SPAWN_REGION_GENERATED)
+			else if (gen_enabled && GameSettings.SPAWN_REGION_GENERATED && worldType != WORLD_TYPE.STATIC)
 			{
 				UpdateChunks();
 			}
@@ -1377,24 +1502,24 @@ public class BackroomsLevelWorld : MonoBehaviour, ISaveable
 
 	public void OnMoveToNewLevel()
 	{
-		foreach (InventorySlot invSlot in GameSettings.Instance.Player.GetComponent<InventorySystem>().GetAllInvSlots())
+		foreach (InventorySlot invSlot in GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().GetAllInvSlots())
 		{
 			if (invSlot.itemsInSlot.Count > 0)
 				RemoveProp(invSlot.itemsInSlot[0].connectedObject.GetWorldID(), false);
 		}
 
-		if (GameSettings.Instance.Player.GetComponent<InventorySystem>().backPack.itemsInSlot.Count > 0)
+		if (GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().backPack.itemsInSlot.Count > 0)
 		{
-			if (containersInWorld.ContainsKey(GameSettings.Instance.Player.GetComponent<InventorySystem>().backPack.itemsInSlot[0].connectedObject.GetWorldID()))
+			if (containersInWorld.ContainsKey(GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().backPack.itemsInSlot[0].connectedObject.GetWorldID()))
 			{
-				foreach (InventorySlot invSlot in ((ContainerObject)GameSettings.Instance.Player.GetComponent<InventorySystem>().backPack.itemsInSlot[0].connectedObject).storageSlots)
+				foreach (InventorySlot invSlot in ((ContainerObject)GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().backPack.itemsInSlot[0].connectedObject).storageSlots)
 				{
 					if (invSlot.itemsInSlot.Count > 0)
 						RemoveProp(invSlot.itemsInSlot[0].connectedObject.GetWorldID(), false);
 				}
-				RemoveProp(((ContainerObject)GameSettings.Instance.Player.GetComponent<InventorySystem>().backPack.itemsInSlot[0].connectedObject).GetWorldID(), false);
+				RemoveProp(((ContainerObject)GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().backPack.itemsInSlot[0].connectedObject).GetWorldID(), false);
 
-				containersInWorld.Remove(GameSettings.Instance.Player.GetComponent<InventorySystem>().backPack.itemsInSlot[0].connectedObject.GetWorldID());
+				containersInWorld.Remove(GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().backPack.itemsInSlot[0].connectedObject.GetWorldID());
 			}
 		}
 

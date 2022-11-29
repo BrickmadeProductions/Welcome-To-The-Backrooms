@@ -17,6 +17,9 @@ public class BloodSurfaceCollision : MonoBehaviour
     // Start is called before the first frame update
     public void OnParticleCollision(GameObject other)
     {
+        if (other.gameObject.tag == "NoDecal")
+            return;
+
         //Debug.Log("BloodFLoor");
         int collCount = bloodShoot.GetSafeCollisionEventSize();
 

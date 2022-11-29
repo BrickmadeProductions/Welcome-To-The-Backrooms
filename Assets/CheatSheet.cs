@@ -168,7 +168,7 @@ public class CheatSheet : MonoBehaviour
     }
     public void Take5Damage()
     {
-        GameSettings.Instance.Player.GetComponent<PlayerController>().playerHealth.TakeDamage(5f, 1f, 0f);
+        GameSettings.GetLocalPlayer().playerHealth.TakeDamage(5f, 1f, 0f, false, DAMAGE_TYPE.UNKNOWN);
     }
     public void EntityAI(bool io)
     {
@@ -179,16 +179,16 @@ public class CheatSheet : MonoBehaviour
 
     public void SpawnCheatedItem()
     {
-        Vector3 spawnLocation = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.position + GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.forward * 5;
+        Vector3 spawnLocation = GameSettings.GetLocalPlayer().head.transform.position + GameSettings.GetLocalPlayer().head.transform.forward * 5;
 
-        spawnLocation.y = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.position.y;
+        spawnLocation.y = GameSettings.GetLocalPlayer().head.transform.position.y;
 
         GameObject objectToSpawn = GameSettings.Instance.PropDatabase[currentObjectTypeChoice].gameObject;
         
 
         GameSettings.Instance.worldInstance.AddNewProp(
         spawnLocation,
-        GameSettings.Instance.Player.transform.rotation,
+        GameSettings.GetLocalPlayer().transform.rotation,
         objectToSpawn);
 
         Debug.Log("| CHEATSHEET | Successfully Spawned: " + objectToSpawn.GetComponent<InteractableObject>().type);
@@ -196,9 +196,9 @@ public class CheatSheet : MonoBehaviour
 
     public void SpawnCheatedEntity()
     {
-        Vector3 spawnLocation = GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.position + GameSettings.Instance.Player.GetComponent<PlayerController>().head.transform.forward * 5;
+        Vector3 spawnLocation = GameSettings.GetLocalPlayer().head.transform.position + GameSettings.GetLocalPlayer().head.transform.forward * 5;
 
-        spawnLocation.y = GameSettings.Instance.Player.GetComponent<PlayerController>().transform.position.y;
+        spawnLocation.y = GameSettings.GetLocalPlayer().transform.position.y;
 
         GameObject entityToSpawn = GameSettings.Instance.EntityDatabase[currentEntityTypeChoice].gameObject;
 
@@ -206,6 +206,7 @@ public class CheatSheet : MonoBehaviour
 
         GameSettings.Instance.worldInstance.AddNewEntity(
         spawnLocation,
+        Quaternion.identity,
         entityToSpawn);
 
         Debug.Log("| CHEATSHEET | Successfully Spawned: " + entityToSpawn.GetComponent<Entity>().type);

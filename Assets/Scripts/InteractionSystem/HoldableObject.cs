@@ -110,30 +110,30 @@ public class HoldableObject : InteractableObject
 		//starting animation when using
 		if (StartUseAnimation != "")
         {
-			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetTrigger(StartUseAnimation);
+			GameSettings.GetLocalPlayer().bodyAnim.SetTrigger(StartUseAnimation);
 
-			yield return new WaitUntil(() => GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(StartUseAnimation));
+			yield return new WaitUntil(() => GameSettings.GetLocalPlayer().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(StartUseAnimation));
 
 		}
 
 		if (autoSwing)
         {
-			//GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.ResetTrigger(StartUseAnimation);
+			//GameSettings.GetLocalPlayer().bodyAnim.ResetTrigger(StartUseAnimation);
 
 			while (Input.GetMouseButton(0))
 			{
 				currentAnimChoice = UnityEngine.Random.Range(0, UseAnimations.Count);
 
-				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(UseAnimations[currentAnimChoice], true);
+				GameSettings.GetLocalPlayer().bodyAnim.SetBool(UseAnimations[currentAnimChoice], true);
 
 				animationPlaying = true;
 
-				yield return new WaitUntil(() => GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(UseAnimations[currentAnimChoice]));
+				yield return new WaitUntil(() => GameSettings.GetLocalPlayer().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(UseAnimations[currentAnimChoice]));
 
-				yield return new WaitForSecondsRealtime(GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).length / GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).speed - 0.25f);
+				yield return new WaitForSecondsRealtime(GameSettings.GetLocalPlayer().bodyAnim.GetCurrentAnimatorStateInfo(1).length / GameSettings.GetLocalPlayer().bodyAnim.GetCurrentAnimatorStateInfo(1).speed - 0.25f);
 
-				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(UseAnimations[currentAnimChoice], false);
-				GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(StartUseAnimation, false);
+				GameSettings.GetLocalPlayer().bodyAnim.SetBool(UseAnimations[currentAnimChoice], false);
+				GameSettings.GetLocalPlayer().bodyAnim.SetBool(StartUseAnimation, false);
 
 				animationPlaying = false;
 			}
@@ -145,21 +145,21 @@ public class HoldableObject : InteractableObject
         {
 			currentAnimChoice = UnityEngine.Random.Range(0, UseAnimations.Count);
 
-			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetTrigger(UseAnimations[currentAnimChoice]);
+			GameSettings.GetLocalPlayer().bodyAnim.SetTrigger(UseAnimations[currentAnimChoice]);
 
 			animationPlaying = true;
 
-			yield return new WaitUntil(() => GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(UseAnimations[currentAnimChoice]));
+			yield return new WaitUntil(() => GameSettings.GetLocalPlayer().bodyAnim.GetCurrentAnimatorStateInfo(1).IsName(UseAnimations[currentAnimChoice]));
 
-			yield return new WaitForSecondsRealtime(GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).length / GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetCurrentAnimatorStateInfo(1).speed - 0.25f);
+			yield return new WaitForSecondsRealtime(GameSettings.GetLocalPlayer().bodyAnim.GetCurrentAnimatorStateInfo(1).length / GameSettings.GetLocalPlayer().bodyAnim.GetCurrentAnimatorStateInfo(1).speed - 0.25f);
 
-			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.ResetTrigger(UseAnimations[currentAnimChoice]);
-			GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.SetBool(StartUseAnimation, false);
+			GameSettings.GetLocalPlayer().bodyAnim.ResetTrigger(UseAnimations[currentAnimChoice]);
+			GameSettings.GetLocalPlayer().bodyAnim.SetBool(StartUseAnimation, false);
 
 			animationPlaying = false;
 		}
 
-		GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.ResetTrigger(StartUseAnimation);
+		GameSettings.GetLocalPlayer().bodyAnim.ResetTrigger(StartUseAnimation);
 	}
 
 	public IEnumerator playItemAnimation(string animation)
@@ -232,6 +232,9 @@ public class HoldableObject : InteractableObject
 
 		if (durability < 0f && !broken)
 		{
+			if (type == OBJECT_TYPE.CHAIR)
+				Steam.IncrementStat("CHAIRS_BROKEN", 1);
+
 			AudioSource.PlayClipAtPoint(breakClips[UnityEngine.Random.Range(0, breakClips.Length)], transform.position);
 			for (int i = 0; i < breakablePrefabs.Length; i++)
 			{

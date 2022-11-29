@@ -81,7 +81,7 @@ public class CraftedWeapon : HoldableObject
 
             case WEAPON_PIECE_TYPE.BLADE:
 
-                breakPiece.GetComponentInChildren<Weapon>().connetedObject = null;
+                breakPiece.GetComponentInChildren<Weapon>().connectedObject = null;
 
                 currentBlade = null;
 
@@ -158,7 +158,7 @@ public class CraftedWeapon : HoldableObject
 
                 SetStat("Blade Durability", part.durabilityLeft.ToString());
 
-                part.GetComponentInChildren<Weapon>().connetedObject = this;
+                part.GetComponentInChildren<Weapon>().connectedObject = this;
 
                 part.gameObject.transform.parent = bladeLocation;
                 part.transform.position = bladeLocation.position;
@@ -270,6 +270,7 @@ public class CraftedWeapon : HoldableObject
 
     public override void Pickup(InteractionSystem player, bool RightHand)
     {
+
         base.Pickup(player, RightHand);
 
         if (currentBlade != null)

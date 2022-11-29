@@ -358,11 +358,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03be77203f75e634e86866193396b769, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 15
-  connetedObject: {fileID: 0}
+  damage: 16
+  connectedObject: {fileID: 0}
   WeaponBloodRenderer: {fileID: 8386945167208058222}
   bloodAmount: 0
   onlyHitOneLimb: 1
+  hasHit: 0
 --- !u!1 &6599724689376018562
 GameObject:
   m_ObjectHideFlags: 0

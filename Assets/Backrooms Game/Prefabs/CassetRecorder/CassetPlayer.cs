@@ -117,9 +117,9 @@ public class CassetPlayer : HoldableObject
 
     private void FixedUpdate()
     {
-        if (GameSettings.Instance.Player.GetComponent<InventorySystem>().rHand.itemsInSlot.Count > 0)
+        if (GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().rHand.itemsInSlot.Count > 0)
         {
-            if (GameSettings.Instance.Player.GetComponent<InventorySystem>().rHand.itemsInSlot[0].connectedObject == this)
+            if (GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().rHand.itemsInSlot[0].connectedObject == this)
             {
                 if (Input.GetMouseButtonUp(0) && !finishedAddingToList && !animationPlaying)
                 {

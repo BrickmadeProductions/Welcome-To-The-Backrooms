@@ -51,7 +51,7 @@ public class NotificationSystem : MonoBehaviour
     {
         isNotifRunning = true;     
 
-        yield return new WaitForSecondsRealtime(5f);
+        yield return new WaitForSecondsRealtime(10f);
 
         Notification notif = notifQueue.Dequeue();
 

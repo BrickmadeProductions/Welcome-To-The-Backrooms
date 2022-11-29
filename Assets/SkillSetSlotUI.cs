@@ -48,13 +48,13 @@ public class SkillSetSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.SetDescriptionInformation(skillDetails);
-        GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.DescriptionObject.SetActive(true);
+        GameSettings.GetLocalPlayer().skillSetSystem.SetDescriptionInformation(skillDetails);
+        GameSettings.GetLocalPlayer().skillSetSystem.DescriptionObject.SetActive(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.DescriptionObject.SetActive(false);
+        GameSettings.GetLocalPlayer().skillSetSystem.DescriptionObject.SetActive(false);
     }
 
     public void OnPointerMove(PointerEventData eventData)

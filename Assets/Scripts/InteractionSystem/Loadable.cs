@@ -29,8 +29,8 @@ public class Loadable : MonoBehaviour
 
         if (playSound)
         {
-            GameSettings.Instance.Player.GetComponent<InventorySystem>().audioObject.clip = loadNoise;
-            GameSettings.Instance.Player.GetComponent<InventorySystem>().audioObject.Play();
+            GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().audioObject.clip = loadNoise;
+            GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().audioObject.Play();
         }
         
 
@@ -44,8 +44,8 @@ public class Loadable : MonoBehaviour
 
         if (playSound)
         {
-            GameSettings.Instance.Player.GetComponent<InventorySystem>().audioObject.clip = unloadNoise;
-            GameSettings.Instance.Player.GetComponent<InventorySystem>().audioObject.Play();
+            GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().audioObject.clip = unloadNoise;
+            GameSettings.GetLocalPlayer().GetComponent<InventorySystem>().audioObject.Play();
         }
         amountLoaded -= amount;
         connectedObject.SetStat(stat_ammoName, amountLoaded.ToString());

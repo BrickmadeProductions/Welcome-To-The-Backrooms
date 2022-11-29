@@ -12,7 +12,7 @@ public class SkillsHandler : MonoBehaviour
     void NoClipWall_Success()
     {
 
-        GameSettings.Instance.cutSceneHandler.BeginCutScene(CUT_SCENE.NO_CLIP_SUCCESS_WALL);
+        GameSettings.Instance.cutSceneHandler.BeginCutScene(CUT_SCENE.NO_CLIP_SUCCESS);
         //DEMO
         //GameSettings.Instance.cutSceneHandler.BeginCutScene(CUT_SCENE.NO_CLIP_SUCCESS_WALL_DEMO);
     }
@@ -26,16 +26,16 @@ public class SkillsHandler : MonoBehaviour
         //noclip handler
         if (
             Input.GetButtonDown("Use") 
-            && GameSettings.Instance.Player.GetComponent<InteractionSystem>().currentlyLookingAt != null 
-            && GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP) > 0
-            && GameSettings.Instance.Player.GetComponent<InteractionSystem>().currentlyLookingAt.tag == "NoClipable"
+            && GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().currentlyLookingAt != null 
+            && GameSettings.GetLocalPlayer().skillSetSystem.GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP) > 0
+            && GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().currentlyLookingAt.tag == "NoClipable"
             )
         {
-            if (GameSettings.Instance.Player.GetComponent<PlayerController>().bodyAnim.GetFloat("xWalk") > 8)
+            if (GameSettings.GetLocalPlayer().bodyAnim.GetFloat("xWalk") > 8)
             {
                 bool success = false;
 
-                switch (GameSettings.Instance.Player.GetComponent<PlayerController>().skillSetSystem.GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP))
+                switch (GameSettings.GetLocalPlayer().skillSetSystem.GetCurrentLevelOfSkillType(SKILL_TYPE.NO_CLIP))
                 {
                     case 0:
 

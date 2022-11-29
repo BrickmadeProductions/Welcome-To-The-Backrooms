@@ -16,6 +16,8 @@ using Lowscope.Saving.Core;
 using Lowscope.Saving.Data;
 using System.Linq;
 
+
+
 public class BPUtil : MonoBehaviour
 {
 	/// <summary>
@@ -189,6 +191,11 @@ public struct CraftingPair
 }
 public class GameSettings : MonoBehaviour
 {
+	public static PlayerController GetLocalPlayer()
+	{
+		return Instance.Player.GetComponent<PlayerController>();
+	}
+
 	//story stuff
 	public AudioClipData JASAudioData;
 
@@ -200,8 +207,8 @@ public class GameSettings : MonoBehaviour
 
 	public TextMeshProUGUI devModeInfo;
 
-	//BrickmadeProductions, king, wahoo, RJC, Constant, WoodE, SCY, LeepMeep
-	public static readonly List<ulong> teamMemberSteamIDs = new List<ulong> { 76561199226044925, 76561198017133391, 76561198139743119, 76561198109625129, 76561198968340030, 76561198374741749, 76561199067040929, 76561198970004846 };
+	//BrickmadeProductions, king, wahoo, RJC, Constant, WoodE, SCY, LeepMeep, EyesYT
+	public static readonly List<ulong> teamMemberSteamIDs = new List<ulong> { 76561199226044925, 76561198017133391, 76561198139743119, 76561198109625129, 76561198968340030, 76561198374741749, 76561199067040929, 76561198970004846, 76561199033708483 };
 
 	public BackroomsLevelWorld worldInstance = null;
 	public CutSceneHandler cutSceneHandler;
@@ -557,6 +564,41 @@ public class GameSettings : MonoBehaviour
 
 		PlayerPrefs.SetInt("LAST_SAVED_SCENE", (int)SCENE.ROOM);
 	}
+	public static SCENE ReturnNextRandomLevel()
+	{
+		float random = UnityEngine.Random.Range(0f, 1f);
+
+		switch (Instance.ActiveScene)
+		{
+			case SCENE.ROOM:
+
+				return SCENE.LEVEL0;
+
+			case SCENE.LEVEL0:
+
+				return SCENE.LEVEL1;
+
+			case SCENE.LEVELFUN:
+
+				if (random >= 0f && random <= 0.5f)
+                {
+					return SCENE.LEVEL0;
+                }
+				else if (random > 0.5f && random <= 0.98f)
+                {
+					return SCENE.LEVEL1;
+                }
+				else if(random > 0.98f)
+                {
+					return SCENE.LEVELRUN;
+                }
+
+				return SCENE.LEVELFUN;
+
+		}
+
+		return SCENE.LEVEL0;
+	}
 	public IEnumerator ResetGameAsync()
 	{
 		LastSavedScene = SCENE.ROOM;
@@ -744,26 +786,32 @@ public class GameSettings : MonoBehaviour
 			case 0:
 				sX = 3840;
 				sY = 2160;
+				textureRes = 1;
 				break;
 			case 1:
 				sX = 2560;
 				sY = 1440;
+				textureRes = 1;
 				break;
 			case 2:
 				sX = 1920;
 				sY = 1080;
+				textureRes = 1;
 				break;
 			case 3:
 				sX = 1280;
 				sY = 720;
+				textureRes = 3;
 				break;
 			case 4:
 				sX = 640;
 				sY = 360;
+				textureRes = 5;
 				break;
 		}
 		screenResIndex = res;
 		Screen.SetResolution(sX, sY, fullScreenEnabled);
+		setTextureRes(textureRes);
 
 		PlayerPrefs.SetInt("SCREEN_RES_CHOICE", res);
 	}
@@ -771,7 +819,7 @@ public class GameSettings : MonoBehaviour
 	public void setTextureRes(int res)
 	{
 		ConnectSettings();
-		QualitySettings.masterTextureLimit = textureRes;
+		QualitySettings.masterTextureLimit = res;
 	}
 
 	public void setSensitivity(float sens)
@@ -907,7 +955,7 @@ public class GameSettings : MonoBehaviour
 	}
 	public IEnumerator SaveAllProgress()
 	{
-		Player.GetComponent<PlayerController>().distance.SetMetersTraveledStats();
+		
 
 		saveIcon.SetBool("StopSave", false);
 
@@ -1007,7 +1055,7 @@ public class GameSettings : MonoBehaviour
 		//before loading world, save level
 		if (worldInstance != null)
         {
-
+			
 			if (id != SCENE.HOMESCREEN)
 				worldInstance.OnMoveToNewLevel();
             
@@ -1020,6 +1068,36 @@ public class GameSettings : MonoBehaviour
 			*/
 			yield return StartCoroutine(SaveAllProgress());
 		}
+		else if (ActiveScene == SCENE.ROOM)
+        {
+			bool hasAnyItems = false;
+			bool hasAllItems = false;
+
+			foreach (InventorySlot slot in Player.GetComponent<InventorySystem>().GetAllInvSlots())
+            {
+				if (slot.itemsInSlot.Count > 0)
+                {
+					hasAnyItems = true;
+					break;
+                }
+			}
+
+			if (Player.GetComponent<InventorySystem>().rHand.itemsInSlot.Count > 0
+				&& Player.GetComponent<InventorySystem>().lHand.itemsInSlot.Count > 0
+				&& Player.GetComponent<InventorySystem>().lPocket.itemsInSlot.Count > 0
+				&& Player.GetComponent<InventorySystem>().rPocket.itemsInSlot.Count > 0)
+
+				hasAllItems = true;
+
+			if (!hasAnyItems)
+            {
+				Steam.AddAchievment("BRAVE");
+			}
+			if (hasAllItems)
+            {
+				Steam.AddAchievment("PREPARED");
+			}
+        }
 
 		SCENE_LOADED = false;
 
@@ -1034,6 +1112,8 @@ public class GameSettings : MonoBehaviour
 		SCENE_FINISHED_LOADING = false;
 
 		yield return SceneManager.LoadSceneAsync((int)id, LoadSceneMode.Single);
+
+		GameSettings.Instance.GetComponent<CheatSheet>().AIEnabled = false;
 
 		ActiveScene = id;
 
@@ -1211,11 +1291,14 @@ public class GameSettings : MonoBehaviour
 
 			//DEMO
 			//Instance.demoText.gameObject.SetActive(true);
+			DistanceChecker.SHOULD_READ_STEPS = true;
 
 		}
 		else
-        {
-			Instance.demoText.gameObject.SetActive(false);
+		{	//DEMO
+			//Instance.demoText.gameObject.SetActive(false);
+
+			DistanceChecker.SHOULD_READ_STEPS = false;
 		}
 
 		if (player.GetComponent<PlayerController>() != null)
@@ -1225,6 +1308,14 @@ public class GameSettings : MonoBehaviour
 
 		isLoadingScene = false;
 
+		if (GetLocalPlayer() != null)
+        {
+			GetLocalPlayer().isNoClipping = false;
+			//GetLocalPlayer().bodyAnim.SetBool();
+		}
+			
+
+		Instance.GetComponent<CheatSheet>().AIEnabled = true;
 
 
 	}

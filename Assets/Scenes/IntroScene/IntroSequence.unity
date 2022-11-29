@@ -10289,7 +10289,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1005928952}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &733565078
 GameObject:
@@ -13703,7 +13703,7 @@ MonoBehaviour:
   - objectsRequired: 0000000017000000
     outCome: 1
     shouldDestroyItem1: 0
-    shouldDestroyItem2: 0
+    shouldDestroyItem2: 1
     craftingAnimation: 
     craftingAudio: {fileID: 8300000, guid: 263d765ccb9fc974c882637007d773d5, type: 3}
   - objectsRequired: 2100000001000000
@@ -13754,6 +13754,12 @@ MonoBehaviour:
     shouldDestroyItem2: 1
     craftingAnimation: 
     craftingAudio: {fileID: 8300000, guid: 263d765ccb9fc974c882637007d773d5, type: 3}
+  - objectsRequired: 0000000016000000
+    outCome: 37
+    shouldDestroyItem1: 0
+    shouldDestroyItem2: 1
+    craftingAnimation: 
+    craftingAudio: {fileID: 8300000, guid: 263d765ccb9fc974c882637007d773d5, type: 3}
   propDatabase:
   - {fileID: 2391920567668754710, guid: b95df38760cc2404ab6833f6a42b6266, type: 3}
   - {fileID: 3693248661749687413, guid: a6d82421082750949b31f75449e3460d, type: 3}
@@ -13791,6 +13797,8 @@ MonoBehaviour:
   - {fileID: 7666846082368521585, guid: dfdd455ea037a414089e9367966d672f, type: 3}
   - {fileID: 8304056806040484466, guid: 002315e13368eb74a9cfb3dc6d9bd4c9, type: 3}
   - {fileID: 1560198170127152541, guid: 5358a7d5d8b00804cb4828f1374af1e0, type: 3}
+  - {fileID: 2561986121078709591, guid: 13fcb95e3bf6fd748884d929ced9e711, type: 3}
+  - {fileID: 1947968361194126077, guid: 4091a8322b593d545b79dfeaac565681, type: 3}
   inventoryItemPrefab: {fileID: 4105468441734903545, guid: 138f1b9e745cce64691792cffcb980f8, type: 3}
   entityDatabase:
   - {fileID: 4225260656200758192, guid: f254f54165076c64ba860e8b6002ed68, type: 3}
@@ -13864,9 +13872,9 @@ Transform:
   - {fileID: 856389604}
   - {fileID: 644323677}
   - {fileID: 45368667}
-  - {fileID: 2048413171}
   - {fileID: 725349007}
   - {fileID: 1823318254}
+  - {fileID: 2048413171}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -14952,7 +14960,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: EARLY ACCESS v1.0.28
+  m_text: EARLY ACCESS v1.0.3
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -22880,7 +22888,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1005928952}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -26385,7 +26393,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1005928952}
-  m_RootOrder: 6
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &2048413172
 AudioSource:
@@ -26405,7 +26413,7 @@ AudioSource:
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 123
+  Priority: 1
   DopplerLevel: 1
   MinDistance: 1
   MaxDistance: 500
@@ -26504,8 +26512,8 @@ MonoBehaviour:
   ambience1Track: {fileID: 8300000, guid: 73e92bc23089631448df5d7590aee216, type: 3}
   sound1Track: {fileID: 8300000, guid: 3622ef36f6fdf154d8e682a13097043f, type: 3}
   ambience2Track: {fileID: 0}
-  sound2Track: {fileID: 0}
-  ambienceFUNTrack: {fileID: 0}
+  sound2Track: {fileID: 8300000, guid: 162c4652a147567498feb55eef567f9e, type: 3}
+  ambienceFUNTrack: {fileID: 8300000, guid: 0e90f398706995547ad3e495e21120b2, type: 3}
   soundFUNTrack: {fileID: 0}
   ambienceRUNTrack: {fileID: 0}
   soundRUNTrack: {fileID: 8300000, guid: 4a433294bb87adf44aa3832242420ad0, type: 3}
