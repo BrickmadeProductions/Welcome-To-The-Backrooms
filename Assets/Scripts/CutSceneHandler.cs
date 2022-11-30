@@ -148,13 +148,15 @@ public class CutSceneHandler : MonoBehaviour
 
                 GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
 
-                yield return new WaitForSecondsRealtime(3f);
+                yield return new WaitForSecondsRealtime(1f);
 
                 GameSettings.Instance.LoadScene(GameSettings.ReturnNextRandomLevel());
 
-                yield return new WaitForSecondsRealtime(3f);
+                yield return new WaitForSecondsRealtime(1f);
 
                 GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
+                
+                yield return new WaitForSecondsRealtime(3f);
 
                 GameSettings.GetLocalPlayer().bodyAnim.SetBool("NoClip_Success", false);
 
@@ -197,11 +199,11 @@ public class CutSceneHandler : MonoBehaviour
 
                 GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
 
-                yield return new WaitForSecondsRealtime(3f);
+                yield return new WaitForSecondsRealtime(1f);
 
                 GameSettings.Instance.LoadScene(SCENE.LEVELFUN);
 
-                yield return new WaitForSecondsRealtime(3f);
+                yield return new WaitForSecondsRealtime(2f);
 
                 GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
 
