@@ -228,13 +228,19 @@ public abstract class Entity : MonoBehaviour
 
 		if (currentPossibleTargets.Count > 1)
         {
-			for (int i = 1; i < currentPossibleTargets.Count + 1; i++)
+			for (int i = 0; i < currentPossibleTargets.Count; i++)
 			{
-				if (currentPossibleTargets[i].priority > currentPossibleTargets[i - 1].priority)
-				{
-					best = currentPossibleTargets[i].target;
+				if (i > 1)
+                {
+					if (currentPossibleTargets[i].priority > currentPossibleTargets[i - 1].priority)
+					{
+						best = currentPossibleTargets[i].target;
 
-				}
+					}
+                }
+				else best = currentPossibleTargets[0].target;
+
+
 			}
 		}
 		else if (currentPossibleTargets.Count == 1)

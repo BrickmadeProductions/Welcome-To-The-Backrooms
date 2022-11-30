@@ -29,7 +29,7 @@ public class PartygoerAI : Entity
         gameObject.transform.rotation = new Quaternion(0, gameObject.transform.rotation.y, 0, gameObject.transform.rotation.w);
         //correct floating
         RaycastHit[] hits;
-        float distance = 10f;
+        float distance = 25f;
 
         hits = Physics.RaycastAll(transform.position + new Vector3(0, 2f, 0), Vector3.down, distance, sightMask);
 
@@ -41,7 +41,7 @@ public class PartygoerAI : Entity
                 if (hit.transform.gameObject.layer == 19)
                 {
                     transform.position = hit.point;
-                    continue;
+                    break;
                 }
 
 
@@ -145,7 +145,7 @@ public class PartygoerAI : Entity
                                         GetComponent<AudioSource>().Stop();
 
                                     //hit wall
-                                    if (Physics.SphereCast(eyes.transform.position, 0.25f, gameObject.transform.forward, out var move_to_hit, 3f, sightMask, QueryTriggerInteraction.Ignore) && move_to_hit.collider.gameObject.layer != 11)
+                                    if (Physics.SphereCast(eyes.transform.position, 0.25f, gameObject.transform.forward, out var rayWallHit, 3f, sightMask, QueryTriggerInteraction.Ignore) && rayWallHit.collider.gameObject.layer != 11)
                                     {                                            
 
                                         float rightHitDistance = entityViewDistance - 5f;
@@ -154,7 +154,7 @@ public class PartygoerAI : Entity
                                         tempTarget = Instantiate(new GameObject()).transform;
 
                                         //right hit
-                                        if (Physics.SphereCast(gameObject.transform.position + (Vector3.up * 2), 0.05f, gameObject.transform.right, out var rightHit, entityViewDistance - 5f, sightMask, QueryTriggerInteraction.Ignore))
+                                        if (Physics.SphereCast(gameObject.transform.position + (Vector3.up * 2), 0.05f, rayWallHit.transform.right, out var rightHit, entityViewDistance - 5f, sightMask, QueryTriggerInteraction.Ignore))
                                         {
                                             rightHitDistance = rightHit.distance;
 
@@ -163,7 +163,7 @@ public class PartygoerAI : Entity
                                         }
 
                                         //left hit
-                                        if (Physics.SphereCast(gameObject.transform.position + (Vector3.up * 2), 0.05f, -gameObject.transform.right, out var leftHit, entityViewDistance - 5f, sightMask, QueryTriggerInteraction.Ignore))
+                                        if (Physics.SphereCast(gameObject.transform.position + (Vector3.up * 2), 0.05f, -rayWallHit.transform.right, out var leftHit, entityViewDistance - 5f, sightMask, QueryTriggerInteraction.Ignore))
                                         {
                                             leftHitDistance = leftHit.distance;
 
