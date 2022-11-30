@@ -593,6 +593,8 @@ public class GameSettings : MonoBehaviour
 					return SCENE.LEVELRUN;
                 }
 
+				
+
 				return SCENE.LEVELFUN;
 
 		}
@@ -1311,7 +1313,8 @@ public class GameSettings : MonoBehaviour
 		if (GetLocalPlayer() != null)
         {
 			GetLocalPlayer().isNoClipping = false;
-			//GetLocalPlayer().bodyAnim.SetBool();
+			GetLocalPlayer().hasStartingNoClipping = false;
+			Debug.Log("RESET NOCLIP STATUS");
 		}
 			
 

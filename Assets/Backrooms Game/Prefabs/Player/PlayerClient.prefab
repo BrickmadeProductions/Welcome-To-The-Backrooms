@@ -5299,6 +5299,7 @@ MonoBehaviour:
   darkShield: {fileID: 4909333951710274672}
   headTarget: {fileID: 8687691270804494107}
   isNoClipping: 0
+  hasStartingNoClipping: 0
   playerRagDoll: {fileID: 6044195352179981997, guid: 5ef264e80da5f8647aebdbc39d7088af, type: 3}
   playerHealth: {fileID: 6386412001995166182}
   distance: {fileID: 7430639733698625145}
@@ -5541,7 +5542,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 6386412003751089104}
-  priority: 0
+  priority: 100
 --- !u!1 &6386412002142241375
 GameObject:
   m_ObjectHideFlags: 0
@@ -5957,7 +5958,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 50274231
+    m_Bits: 452927415
   m_RenderingPath: 3
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0

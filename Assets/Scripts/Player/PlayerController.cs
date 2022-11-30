@@ -156,6 +156,7 @@ public class PlayerController : MonoBehaviour, ISaveable
     public GameObject headTarget;
 
     public bool isNoClipping = false;
+    public bool hasStartingNoClipping = false;
 
 
     public IEnumerator LoadInWorldPlayerData()
@@ -749,7 +750,6 @@ public class PlayerController : MonoBehaviour, ISaveable
             if (isSlope() && isGrounded)
             {
                 slopeMoveDirection = Vector3.ProjectOnPlane(currentMoveDirection, groundNormal);
-                Debug.Log(slopeMoveDirection);
                 rb.AddForce(slopeMoveDirection * 100f, ForceMode.Force);
 
             }
@@ -908,7 +908,7 @@ public class PlayerController : MonoBehaviour, ISaveable
 
                 if (shouldRun)
                 {
-                    if (!Input.GetMouseButton(0))
+                    if (!Input.GetMouseButton(0) && GetComponent<InteractionSystem>().GetObjectInRightHand() == null)
                         bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 0, Time.deltaTime * 10));
                     else
                         bodyAnim.SetLayerWeight(1, Mathf.Lerp(bodyAnim.GetLayerWeight(1), 1, Time.deltaTime * 10));
@@ -1423,39 +1423,35 @@ public class PlayerController : MonoBehaviour, ISaveable
             playerDamageOverTime = null;
         }
 
-       /* if (col.tag == "NoClip")
-        {
-            isNoClipping = false;
-        }*/
     }
 
     void OnTriggerEnter(Collider col)
     {
-        //first entrance
-        if (col.tag == "NoClip" && !isNoClipping)
+        
+        if (col.tag == "NoClip")
         {
-            isNoClipping = true;
+            if (!hasStartingNoClipping)
+            {
+                if (!isNoClipping)
+                {
+                    GameSettings.Instance.cutSceneHandler.BeginCutScene(CUT_SCENE.NO_CLIP_SUCCESS);
 
-            //push the player back out of it when they return
-            if (col.gameObject.transform.childCount > 0)
-            { 
-                GameSettings.Instance.worldInstance.playerLocationData.savedPosition = new float[] { col.gameObject.transform.GetChild(0).transform.position.x, col.gameObject.transform.GetChild(0).transform.position.y, col.gameObject.transform.GetChild(0).transform.position.z};
+                }
             }
-                
-
-
-            GameSettings.Instance.cutSceneHandler.BeginCutScene(CUT_SCENE.NO_CLIP_SUCCESS);
-
             
+            //just entered into the level, return to the safe exit zone
+            else if (isNoClipping && hasStartingNoClipping)
+            {
 
-            //Debug.Log(col.gameObject.name);
-
-            /*if (randomEntry < 0.9f)
-                GameSettings.Instance.LoadScene(SCENE.LEVEL0);
-            else if (randomEntry >= 0.9f)
-                GameSettings.Instance.LoadScene(SCENE.LEVEL1);*/
-            /* else if (randomEntry >= 0.95f)
-                 GameSettings.Instance.LoadScene(SCENE.LEVEL2);*/
+                GameSettings.GetLocalPlayer().transform.position = col.transform.childCount == 1 ? col.transform.GetChild(0).position : new Vector3(0f, 1f, 0f);
+                hasStartingNoClipping = false;
+                isNoClipping = false;
+            }
+            else
+            {
+                return;
+            }
+            
         }
 
         if (col.tag == "Kill_Instant")

@@ -90,6 +90,8 @@ public class CutSceneHandler : MonoBehaviour
                 
                 GameSettings.GetLocalPlayer().bodyAnim.SetBool("NoClip_Success", true);
 
+                
+
                 GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().earStatusAudio.clip = noClipSuccessAudio;
                 GameSettings.GetLocalPlayer().GetComponent<PlayerHealthSystem>().earStatusAudio.Play();
 
@@ -119,6 +121,11 @@ public class CutSceneHandler : MonoBehaviour
 
             case NO_CLIP_SUCCESS:
 
+                GameSettings.GetLocalPlayer().hasStartingNoClipping = true;
+                GameSettings.GetLocalPlayer().isNoClipping = true;
+
+                GameSettings.GetLocalPlayer().playerSkin.enabled = false;
+
                 GameSettings.GetLocalPlayer().builder.layers[0].active = false;
                 GameSettings.GetLocalPlayer().builder.layers[1].active = false;
                 GameSettings.GetLocalPlayer().builder.layers[2].active = false;
@@ -142,13 +149,13 @@ public class CutSceneHandler : MonoBehaviour
                 GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", true);
 
                 yield return new WaitForSecondsRealtime(3f);
-
-                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
 
                 GameSettings.Instance.LoadScene(GameSettings.ReturnNextRandomLevel());
 
                 yield return new WaitForSecondsRealtime(3f);
 
+                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
+
                 GameSettings.GetLocalPlayer().bodyAnim.SetBool("NoClip_Success", false);
 
                 GameSettings.GetLocalPlayer().GetComponent<InteractionSystem>().Cursor.gameObject.SetActive(true);
@@ -157,9 +164,16 @@ public class CutSceneHandler : MonoBehaviour
                 GameSettings.GetLocalPlayer().builder.layers[1].active = true;
                 GameSettings.GetLocalPlayer().builder.layers[2].active = true;
 
+                GameSettings.GetLocalPlayer().playerSkin.enabled = true;
+
                 break;
 
             case KNOCKED_OUT_PARTYGOER:
+
+                GameSettings.GetLocalPlayer().hasStartingNoClipping = true;
+                GameSettings.GetLocalPlayer().isNoClipping = true;
+
+                GameSettings.GetLocalPlayer().playerSkin.enabled = false;
 
                 GameSettings.GetLocalPlayer().builder.layers[0].active = false;
                 GameSettings.GetLocalPlayer().builder.layers[1].active = false;
@@ -185,11 +199,11 @@ public class CutSceneHandler : MonoBehaviour
 
                 yield return new WaitForSecondsRealtime(3f);
 
-                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
-
                 GameSettings.Instance.LoadScene(SCENE.LEVELFUN);
 
                 yield return new WaitForSecondsRealtime(3f);
+
+                GameSettings.GetLocalPlayer().GetComponent<Blinking>().eyeLids.GetComponent<Animator>().SetBool("eyesClosed", false);
 
                 GameSettings.GetLocalPlayer().bodyAnim.SetBool("NoClip_Success", false);
 
@@ -198,6 +212,8 @@ public class CutSceneHandler : MonoBehaviour
                 GameSettings.GetLocalPlayer().builder.layers[0].active = true;
                 GameSettings.GetLocalPlayer().builder.layers[1].active = true;
                 GameSettings.GetLocalPlayer().builder.layers[2].active = true;
+
+                GameSettings.GetLocalPlayer().playerSkin.enabled = true;
 
                 break;
 
